@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
+import Link from 'next/link';
 import { collection, getDocs } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 
@@ -12,6 +13,7 @@ interface Vendor {
   price?: string;
   rating?: string | number;
   imageUrl?: string;
+  description?: string;
 }
 
 export default function HomePage() {
@@ -28,7 +30,7 @@ export default function HomePage() {
         });
         setVendors(vendorData);
       } catch (error) {
-        console.error('Firebase veri çekme hatası:', error);
+        console.error('Firmalar çekilirken hata oluştu:', error);
       } finally {
         setLoading(false);
       }
@@ -40,99 +42,151 @@ export default function HomePage() {
   return (
     <div className="min-h-screen bg-[#FDFBFD] text-slate-800">
       {/* Navbar */}
-      <nav className="flex items-center justify-between px-8 py-4 bg-white border-b border-purple-100 shadow-sm">
-        <div className="text-2xl font-bold text-[#4A154B]">
+      <nav className="flex items-center justify-between px-6 md:px-12 py-4 bg-white border-b border-purple-100 shadow-sm sticky top-0 z-50">
+        <Link href="/" className="text-2xl font-bold text-[#4A154B]">
           Wedy<span className="text-[#E6007E]">Plan</span>
+        </Link>
+        <div className="flex items-center gap-4 md:gap-6">
+          <Link
+            href="/arama"
+            className="text-xs md:text-sm font-semibold text-slate-600 hover:text-[#E6007E] transition"
+          >
+            Firma Ara
+          </Link>
+          <Link
+            href="/butce-hesaplayici"
+            className="text-xs md:text-sm font-bold text-[#E6007E] bg-pink-50 hover:bg-pink-100 px-3 py-1.5 rounded-full transition flex items-center gap-1"
+          >
+            <span>💍</span> Bütçe Hesaplayıcı
+          </Link>
+          <Link
+            href="/admin"
+            className="text-xs font-semibold bg-[#4A154B] text-white px-3 md:px-4 py-2 rounded-xl hover:bg-purple-900 transition"
+          >
+            Yönetim Paneli
+          </Link>
         </div>
-        <div className="hidden md:flex gap-6 text-sm font-medium text-slate-600">
-          <a href="#" className="hover:text-[#E6007E]">Mekanlar</a>
-          <a href="#" className="hover:text-[#E6007E]">Fotoğrafçılar</a>
-          <a href="#" className="hover:text-[#E6007E]">Gelinlik</a>
-        </div>
-        <button className="bg-[#E6007E] text-white px-5 py-2 rounded-full font-semibold hover:bg-pink-700 transition">
-          Firma Girişi
-        </button>
       </nav>
 
-      {/* Hero Section */}
-      <section className="text-center py-16 px-4 bg-gradient-to-b from-purple-50 to-[#FDFBFD]">
-        <h1 className="text-4xl md:text-5xl font-extrabold text-[#4A154B] mb-4">
-          Hayalindeki Düğünü Planla
-        </h1>
-        <p className="text-lg text-slate-600 max-w-2xl mx-auto mb-8">
-          En iyi düğün mekanları, fotoğrafçılar ve organizasyon firmaları WedyPlan'da seni bekliyor.
-        </p>
+      {/* Hero Alanı */}
+      <section className="relative bg-gradient-to-br from-[#4A154B] to-purple-900 text-white py-16 md:py-24 px-6 text-center">
+        <div className="max-w-3xl mx-auto space-y-4">
+          <span className="bg-white/10 text-pink-300 text-xs font-semibold px-3.5 py-1.5 rounded-full border border-white/20">
+            Hayalinizdeki Düğün İçin Tek Adres
+          </span>
+          <h1 className="text-3xl md:text-5xl font-extrabold leading-tight">
+            En İyi Düğün Mekanları & Hizmetleri WedyPlan'da
+          </h1>
+          <p className="text-purple-100 text-sm md:text-base max-w-xl mx-auto opacity-90">
+            Mekanlardan fotoğrafçılara, gelinlikten organizasyona aradığınız tüm profesyonelleri keşfedin, ücretsiz fiyat teklifi alın.
+          </p>
 
-        {/* Search Box */}
-        <div className="max-w-3xl mx-auto bg-white p-4 rounded-2xl shadow-lg border border-purple-100 flex flex-col md:flex-row gap-4">
-          <select className="flex-1 p-3 border border-slate-200 rounded-xl text-slate-700 focus:outline-none focus:border-[#E6007E]">
-            <option value="">Kategori Seç (Tümü)</option>
-            <option value="Düğün Mekanı">Düğün Mekanı</option>
-            <option value="Fotoğrafçı">Fotoğrafçı</option>
-          </select>
-          <select className="flex-1 p-3 border border-slate-200 rounded-xl text-slate-700 focus:outline-none focus:border-[#E6007E]">
-            <option value="">Şehir Seç (Tümü)</option>
-            <option value="İstanbul">İstanbul</option>
-            <option value="İzmir">İzmir</option>
-            <option value="Ankara">Ankara</option>
-          </select>
-          <button className="bg-[#E6007E] text-white px-8 py-3 rounded-xl font-bold hover:bg-pink-700 transition">
-            Mekan Bul
-          </button>
+          <div className="pt-4 flex flex-wrap justify-center gap-4">
+            <Link
+              href="/arama"
+              className="bg-[#E6007E] hover:bg-pink-700 text-white text-sm font-bold px-6 py-3 rounded-xl transition shadow-lg"
+            >
+              Firmaları İncele →
+            </Link>
+            <Link
+              href="/butce-hesaplayici"
+              className="bg-white/10 hover:bg-white/20 text-white text-sm font-bold px-6 py-3 rounded-xl border border-white/20 transition"
+            >
+              💍 Bütçe Hesapla
+            </Link>
+          </div>
         </div>
       </section>
 
-      {/* Dynamic Vendors Section */}
-      <section className="max-w-6xl mx-auto px-4 py-12">
-        <h2 className="text-2xl font-bold text-[#4A154B] mb-6">
-          Öne Çıkan Firmalar
-        </h2>
+      {/* Akıllı Araç Tanıtım Banner'ı */}
+      <section className="max-w-6xl mx-auto px-6 -mt-8 relative z-10">
+        <div className="bg-white p-6 rounded-3xl border border-purple-100 shadow-xl flex flex-col md:flex-row items-center justify-between gap-6">
+          <div className="space-y-1 text-center md:text-left">
+            <div className="flex items-center gap-2 justify-center md:justify-start">
+              <span className="text-xl">💰</span>
+              <h3 className="text-base font-bold text-[#4A154B]">Düğün Bütçenizi Planladınız mı?</h3>
+            </div>
+            <p className="text-xs text-slate-500">
+              Ücretsiz bütçe hesaplayıcımız ile tüm harcamalarınızı kategorilere ayırıp bütçe limitinizi koruyun.
+            </p>
+          </div>
+          <Link
+            href="/butce-hesaplayici"
+            className="bg-[#4A154B] text-white text-xs font-bold px-5 py-3 rounded-xl hover:bg-purple-900 transition whitespace-nowrap"
+          >
+            Bütçe Aracını Aç →
+          </Link>
+        </div>
+      </section>
+
+      {/* Öne Çıkan Firmalar */}
+      <section className="max-w-6xl mx-auto px-6 py-16 space-y-8">
+        <div className="flex justify-between items-end border-b border-purple-100 pb-4">
+          <div>
+            <h2 className="text-2xl font-bold text-[#4A154B]">Öne Çıkan Firmalar</h2>
+            <p className="text-xs text-slate-500 mt-1">En çok tercih edilen düğün profesyonelleri</p>
+          </div>
+          <Link href="/arama" className="text-xs font-bold text-[#E6007E] hover:underline">
+            Tümünü Gör →
+          </Link>
+        </div>
 
         {loading ? (
-          <p className="text-slate-500 font-medium">Firebase veritabanından firmalar yükleniyor...</p>
+          <p className="text-center text-slate-500 text-sm py-12">Firmalar yükleniyor...</p>
         ) : vendors.length === 0 ? (
-          <p className="text-slate-500">Henüz kayıtlı firma bulunamadı. Firebase Console üzerinden 'vendors' koleksiyonuna veri ekleyebilirsiniz.</p>
+          <div className="bg-white p-12 text-center rounded-2xl border border-purple-100 text-slate-500">
+            Henüz eklenmiş firma bulunmuyor. Admin panelinden ilk firmayı ekleyebilirsiniz!
+          </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {vendors.map((vendor) => (
-              <div key={vendor.id} className="bg-white rounded-2xl overflow-hidden shadow-md border border-purple-50 hover:shadow-xl transition">
-               <img
-  src={vendor.imageUrl && vendor.imageUrl.trim() !== '' ? vendor.imageUrl : 'https://images.unsplash.com/photo-1519167758481-83f550bb49b3?w=800'}
-  alt={vendor.name || 'Firma'}
-  className="w-full h-48 object-cover bg-slate-100"
-  onError={(e) => {
-    // Resim yüklenemezse yedek düğün resmi göster
-    (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1519167758481-83f550bb49b3?w=800';
-  }}
-/>
-                <div className="p-5">
-                  <div className="flex justify-between items-start mb-2">
-                    <span className="text-xs font-semibold px-2.5 py-1 bg-pink-100 text-[#E6007E] rounded-md">
-                      {vendor.category || 'Kategori'}
-                    </span>
-                    <span className="text-sm font-bold text-amber-500">
-                      ★ {vendor.rating || '4.9'}
+              <div
+                key={vendor.id}
+                className="bg-white rounded-2xl border border-purple-100 shadow-sm overflow-hidden hover:shadow-md transition flex flex-col justify-between"
+              >
+                <div>
+                  <div className="relative h-48 w-full bg-slate-100">
+                    <img
+                      src={vendor.imageUrl || 'https://images.unsplash.com/photo-1519167758481-83f550bb49b3?w=800'}
+                      alt={vendor.name}
+                      className="w-full h-full object-cover"
+                    />
+                    <span className="absolute top-3 left-3 bg-[#4A154B] text-white text-[10px] font-bold px-2.5 py-1 rounded-md uppercase">
+                      {vendor.category}
                     </span>
                   </div>
-                  <h3 className="text-xl font-bold text-[#4A154B] mb-1">
-                    {vendor.name || 'Firma Adı'}
-                  </h3>
-                  <p className="text-sm text-slate-500 mb-4">{vendor.city || 'Şehir'}</p>
-                  <div className="flex justify-between items-center pt-3 border-t border-slate-100">
-                    <span className="text-sm text-slate-600 font-medium">{vendor.price || 'Fiyat Alınız'}</span>
-                    <a 
-  href={`/firma/${vendor.id}`} 
-  className="bg-[#4A154B] text-white text-xs px-4 py-2 rounded-lg font-semibold hover:bg-purple-900 transition text-center inline-block"
->
-  Teklif Al
-</a>
+
+                  <div className="p-5 space-y-2">
+                    <div className="flex justify-between items-start">
+                      <h3 className="text-base font-bold text-[#4A154B] line-clamp-1">{vendor.name}</h3>
+                      <span className="text-xs font-bold text-amber-500 bg-amber-50 px-2 py-0.5 rounded-md">
+                        ★ {vendor.rating || '4.8'}
+                      </span>
+                    </div>
+                    <p className="text-xs text-slate-500">📍 {vendor.city}</p>
+                    <p className="text-xs text-slate-600 line-clamp-2 mt-2">{vendor.description}</p>
                   </div>
+                </div>
+
+                <div className="p-5 pt-0 border-t border-slate-50 flex items-center justify-between mt-4">
+                  <span className="text-xs font-bold text-[#E6007E]">{vendor.price || 'Fiyat Alınız'}</span>
+                  <Link
+                    href={`/firma/${vendor.id}`}
+                    className="bg-[#4A154B] text-white text-xs px-4 py-2 rounded-lg font-semibold hover:bg-purple-900 transition"
+                  >
+                    Teklif Al
+                  </Link>
                 </div>
               </div>
             ))}
           </div>
         )}
       </section>
+
+      {/* Footer */}
+      <footer className="bg-white border-t border-purple-100 py-8 px-6 text-center text-xs text-slate-500">
+        <p>© 2026 WedyPlan - Düğün Pazaryeri Platformu. Tüm hakları saklıdır.</p>
+      </footer>
     </div>
   );
 }
