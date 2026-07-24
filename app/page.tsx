@@ -46,12 +46,20 @@ export default function HomePage() {
         <Link href="/" className="text-2xl font-bold text-[#4A154B]">
           Wedy<span className="text-[#E6007E]">Plan</span>
         </Link>
+        
+        {/* Navbar Menü Linkleri */}
         <div className="flex items-center gap-4 md:gap-6">
           <Link
             href="/arama"
-            className="text-xs md:text-sm font-semibold text-slate-600 hover:text-[#E6007E] transition"
+            className="text-xs md:text-sm font-semibold text-slate-600 hover:text-[#E6007E] transition hidden md:block"
           >
             Firma Ara
+          </Link>
+          <Link
+            href="/kontrol-listesi"
+            className="text-xs md:text-sm font-semibold text-slate-600 hover:text-[#E6007E] transition hidden md:block"
+          >
+            ⏳ Planlama Listesi
           </Link>
           <Link
             href="/butce-hesaplayici"
@@ -89,32 +97,52 @@ export default function HomePage() {
               Firmaları İncele →
             </Link>
             <Link
-              href="/butce-hesaplayici"
+              href="/kontrol-listesi"
               className="bg-white/10 hover:bg-white/20 text-white text-sm font-bold px-6 py-3 rounded-xl border border-white/20 transition"
             >
-              💍 Bütçe Hesapla
+              ⏳ Geri Sayımı Başlat
             </Link>
           </div>
         </div>
       </section>
 
-      {/* Akıllı Araç Tanıtım Banner'ı */}
-      <section className="max-w-6xl mx-auto px-6 -mt-8 relative z-10">
-        <div className="bg-white p-6 rounded-3xl border border-purple-100 shadow-xl flex flex-col md:flex-row items-center justify-between gap-6">
-          <div className="space-y-1 text-center md:text-left">
-            <div className="flex items-center gap-2 justify-center md:justify-start">
+      {/* Akıllı Araç Tanıtım Banner Alanı */}
+      <section className="max-w-6xl mx-auto px-6 -mt-8 relative z-10 grid grid-cols-1 md:grid-cols-2 gap-4">
+        {/* Banner 1: Bütçe Hesaplayıcı */}
+        <div className="bg-white p-6 rounded-3xl border border-purple-100 shadow-xl flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div className="space-y-1 text-center sm:text-left">
+            <div className="flex items-center gap-2 justify-center sm:justify-start">
               <span className="text-xl">💰</span>
-              <h3 className="text-base font-bold text-[#4A154B]">Düğün Bütçenizi Planladınız mı?</h3>
+              <h3 className="text-sm font-bold text-[#4A154B]">Düğün Bütçenizi Planlayın</h3>
             </div>
-            <p className="text-xs text-slate-500">
-              Ücretsiz bütçe hesaplayıcımız ile tüm harcamalarınızı kategorilere ayırıp bütçe limitinizi koruyun.
+            <p className="text-[11px] text-slate-500">
+              Ücretsiz hesaplayıcımız ile bütçenizi kontrol altında tutun.
             </p>
           </div>
           <Link
             href="/butce-hesaplayici"
-            className="bg-[#4A154B] text-white text-xs font-bold px-5 py-3 rounded-xl hover:bg-purple-900 transition whitespace-nowrap"
+            className="bg-[#4A154B] text-white text-[11px] font-bold px-4 py-2.5 rounded-xl hover:bg-purple-900 transition whitespace-nowrap"
           >
-            Bütçe Aracını Aç →
+            Aracı Aç →
+          </Link>
+        </div>
+
+        {/* Banner 2: Düğün Sayacı & Checklist */}
+        <div className="bg-white p-6 rounded-3xl border border-pink-100 shadow-xl flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div className="space-y-1 text-center sm:text-left">
+            <div className="flex items-center gap-2 justify-center sm:justify-start">
+              <span className="text-xl">⏳</span>
+              <h3 className="text-sm font-bold text-[#E6007E]">Büyük Güne Ne Kadar Kaldı?</h3>
+            </div>
+            <p className="text-[11px] text-slate-500">
+              Sayacı başlatın, hazırlık adımlarını eksiksiz tamamlayın.
+            </p>
+          </div>
+          <Link
+            href="/kontrol-listesi"
+            className="bg-[#E6007E] text-white text-[11px] font-bold px-4 py-2.5 rounded-xl hover:bg-pink-700 transition whitespace-nowrap"
+          >
+            Sayacı Başlat →
           </Link>
         </div>
       </section>
