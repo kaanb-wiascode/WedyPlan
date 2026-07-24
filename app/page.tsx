@@ -2,8 +2,10 @@
 
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { collection, getDocs } from 'firebase/firestore';
-import { db } from '../lib/firebase';
+import { onAuthStateChanged, signOut, User } from 'firebase/auth';
+import { db, auth } from '../lib/firebase';
 
 interface Vendor {
   id: string;
@@ -19,7 +21,19 @@ interface Vendor {
 export default function HomePage() {
   const [vendors, setVendors] = useState<Vendor[]>([]);
   const [loading, setLoading] = useState(true);
+  const [user, setUser] = useState<User | null>(null);
+  const [showUserMenu, setShowUserMenu] = useState(false);
+  const router = useRouter();
 
+  // 1. Firebase Authentication Dinleyicisi
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+      setUser(currentUser);
+    });
+    return () => unsubscribe();
+  }, []);
+
+  // 2. Firmaları Çekme
   useEffect(() => {
     async function fetchVendors() {
       try {
@@ -35,9 +49,19 @@ export default function HomePage() {
         setLoading(false);
       }
     }
-
     fetchVendors();
   }, []);
+
+  // 3. Çıkış Yapma İşlemi
+  const handleLogout = async () => {
+    try {
+      await signOut(auth);
+      setShowUserMenu(false);
+      router.push('/');
+    } catch (error) {
+      console.error('Çıkış yapılırken hata:', error);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-[#FDFBFD] text-slate-800">
@@ -47,8 +71,8 @@ export default function HomePage() {
           Wedy<span className="text-[#E6007E]">Plan</span>
         </Link>
         
-        {/* Navbar Menü Linkleri */}
-        <div className="flex items-center gap-4 md:gap-6">
+        {/* Navbar Menü Linkleri ve Kullanıcı Paneli */}
+        <div className="flex items-center gap-4 md:gap-6 relative">
           <Link
             href="/arama"
             className="text-xs md:text-sm font-semibold text-slate-600 hover:text-[#E6007E] transition hidden md:block"
@@ -63,16 +87,73 @@ export default function HomePage() {
           </Link>
           <Link
             href="/butce-hesaplayici"
-            className="text-xs md:text-sm font-bold text-[#E6007E] bg-pink-50 hover:bg-pink-100 px-3 py-1.5 rounded-full transition flex items-center gap-1"
+            className="text-xs md:text-sm font-bold text-[#E6007E] bg-pink-50 hover:bg-pink-100 px-3 py-1.5 rounded-full transition flex items-center gap-1 hidden md:flex"
           >
-            <span>💍</span> Bütçe Hesaplayıcı
+            <span>💍</span> Bütçe
           </Link>
           <Link
             href="/admin"
-            className="text-xs font-semibold bg-[#4A154B] text-white px-3 md:px-4 py-2 rounded-xl hover:bg-purple-900 transition"
+            className="text-xs font-semibold text-[#4A154B] border border-purple-200 px-3 py-1.5 rounded-xl hover:bg-purple-50 transition hidden md:block"
           >
-            Yönetim Paneli
+            Admin
           </Link>
+
+          {/* Kullanıcı Giriş Yapmışsa / Yapmamışsa */}
+          {user ? (
+            <div className="relative">
+              <button
+                onClick={() => setShowUserMenu(!showUserMenu)}
+                className="flex items-center gap-2 bg-slate-50 hover:bg-slate-100 p-1.5 pr-4 rounded-full border border-slate-200 transition"
+              >
+                <img
+                  src={user.photoURL || `https://ui-avatars.com/api/?name=${user.displayName || user.email}&background=E6007E&color=fff`}
+                  alt="Profil"
+                  className="w-7 h-7 rounded-full object-cover bg-white"
+                />
+                <span className="text-xs font-bold text-slate-700 hidden sm:block">
+                  {user.displayName?.split(' ')[0] || 'Hesabım'}
+                </span>
+                <span className="text-[10px] text-slate-400">▼</span>
+              </button>
+
+              {/* Kullanıcı Açılır Menüsü */}
+              {showUserMenu && (
+                <div className="absolute right-0 mt-2 w-48 bg-white border border-purple-100 rounded-2xl shadow-xl py-2 z-50">
+                  <div className="px-4 py-2 border-b border-slate-50 mb-1">
+                    <p className="text-[11px] text-slate-400 font-semibold">Hoş Geldiniz,</p>
+                    <p className="text-xs font-bold text-[#4A154B] truncate">
+                      {user.displayName || user.email}
+                    </p>
+                  </div>
+                  <Link
+                    href="/arama"
+                    className="block px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-purple-50 hover:text-[#E6007E] transition"
+                  >
+                    ❤️ Favori Firmalarım
+                  </Link>
+                  <Link
+                    href="/kontrol-listesi"
+                    className="block px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-purple-50 hover:text-[#E6007E] transition"
+                  >
+                    ⏳ Düğün Sayacım
+                  </Link>
+                  <button
+                    onClick={handleLogout}
+                    className="w-full text-left px-4 py-2 text-xs font-bold text-red-500 hover:bg-red-50 transition mt-1 border-t border-slate-50"
+                  >
+                    Çıkış Yap
+                  </button>
+                </div>
+              )}
+            </div>
+          ) : (
+            <Link
+              href="/login"
+              className="text-xs font-bold bg-[#E6007E] text-white px-5 py-2.5 rounded-xl hover:bg-pink-700 transition shadow-md whitespace-nowrap"
+            >
+              Giriş Yap / Üye Ol
+            </Link>
+          )}
         </div>
       </nav>
 
