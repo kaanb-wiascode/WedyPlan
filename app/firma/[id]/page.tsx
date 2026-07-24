@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
+import Link from 'next/link';
 import {
   doc,
   getDoc,
@@ -10,7 +11,6 @@ import {
   getDocs,
   query,
   where,
-  orderBy,
   serverTimestamp,
 } from 'firebase/firestore';
 import { db } from '../../../lib/firebase';
@@ -23,6 +23,7 @@ interface Vendor {
   price?: string;
   rating?: string | number;
   imageUrl?: string;
+  images?: string[];
   description?: string;
 }
 
@@ -34,6 +35,13 @@ interface Review {
   createdAt?: any;
 }
 
+const DEFAULT_GALLERY = [
+  'https://images.unsplash.com/photo-1519167758481-83f550bb49b3?w=1200',
+  'https://images.unsplash.com/photo-1511285560929-80b456fea0bc?w=1200',
+  'https://images.unsplash.com/photo-1519225421980-715cb0215aed?w=1200',
+  'https://images.unsplash.com/photo-1465495976277-4387d4b0b4c6?w=1200',
+];
+
 export default function VendorDetailPage() {
   const params = useParams();
   const vendorId = params?.id as string;
@@ -41,6 +49,9 @@ export default function VendorDetailPage() {
   const [vendor, setVendor] = useState<Vendor | null>(null);
   const [reviews, setReviews] = useState<Review[]>([]);
   const [loading, setLoading] = useState(true);
+
+  // Slider State'i
+  const [currentSlide, setCurrentSlide] = useState(0);
 
   // Teklif Formu State'leri
   const [isSubmittingOffer, setIsSubmittingOffer] = useState(false);
@@ -62,12 +73,11 @@ export default function VendorDetailPage() {
   const [isSubmittingReview, setIsSubmittingReview] = useState(false);
   const [reviewSubmitted, setReviewSubmitted] = useState(false);
 
-  // Verileri Çek (Firma + Yorumlar)
+  // Verileri Çek
   useEffect(() => {
     async function fetchData() {
       if (!vendorId) return;
       try {
-        // 1. Firma Detayını Çek
         const docRef = doc(db, 'vendors', vendorId);
         const docSnap = await getDoc(docRef);
 
@@ -75,7 +85,6 @@ export default function VendorDetailPage() {
           setVendor({ id: docSnap.id, ...docSnap.data() } as Vendor);
         }
 
-        // 2. Firmaya Ait Yorumları Çek
         const reviewsQuery = query(
           collection(db, 'reviews'),
           where('vendorId', '==', vendorId)
@@ -95,6 +104,22 @@ export default function VendorDetailPage() {
 
     fetchData();
   }, [vendorId]);
+
+  // Galeri fotoğraflarını hazırla
+  const galleryImages =
+    vendor?.images && vendor.images.length > 0
+      ? vendor.images
+      : vendor?.imageUrl
+      ? [vendor.imageUrl, ...DEFAULT_GALLERY.slice(1)]
+      : DEFAULT_GALLERY;
+
+  const nextSlide = () => {
+    setCurrentSlide((prev) => (prev + 1) % galleryImages.length);
+  };
+
+  const prevSlide = () => {
+    setCurrentSlide((prev) => (prev - 1 + galleryImages.length) % galleryImages.length);
+  };
 
   // Teklif Gönder
   const handleSubmitOffer = async (e: React.FormEvent) => {
@@ -166,9 +191,9 @@ export default function VendorDetailPage() {
     return (
       <div className="min-h-screen bg-[#FDFBFD] flex flex-col items-center justify-center p-4">
         <h2 className="text-2xl font-bold text-[#4A154B] mb-2">Firma Bulunamadı</h2>
-        <a href="/" className="bg-[#E6007E] text-white px-6 py-2.5 rounded-xl font-semibold">
+        <Link href="/" className="bg-[#E6007E] text-white px-6 py-2.5 rounded-xl font-semibold">
           Ana Sayfaya Dön
-        </a>
+        </Link>
       </div>
     );
   }
@@ -177,47 +202,95 @@ export default function VendorDetailPage() {
     <div className="min-h-screen bg-[#FDFBFD] text-slate-800">
       {/* Navbar */}
       <nav className="flex items-center justify-between px-8 py-4 bg-white border-b border-purple-100 shadow-sm">
-        <a href="/" className="text-2xl font-bold text-[#4A154B]">
+        <Link href="/" className="text-2xl font-bold text-[#4A154B]">
           Wedy<span className="text-[#E6007E]">Plan</span>
-        </a>
-        <a href="/arama" className="text-sm font-semibold text-[#4A154B] hover:text-[#E6007E]">
+        </Link>
+        <Link href="/arama" className="text-xs font-semibold text-[#4A154B] hover:text-[#E6007E]">
           ← Arama Listesine Dön
-        </a>
+        </Link>
       </nav>
 
       <div className="max-w-6xl mx-auto px-4 py-8">
-        {/* Banner */}
-        <div className="relative w-full h-80 rounded-3xl overflow-hidden mb-8 shadow-lg">
+        {/* İnteraktif Fotoğraf Galerisi (Slider) */}
+        <div className="relative w-full h-[380px] md:h-[480px] rounded-3xl overflow-hidden mb-8 shadow-xl bg-slate-900 group">
           <img
-            src={vendor.imageUrl || 'https://images.unsplash.com/photo-1519167758481-83f550bb49b3?w=800'}
-            alt={vendor.name}
-            className="w-full h-full object-cover"
-            onError={(e) => {
-              (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1519167758481-83f550bb49b3?w=800';
-            }}
+            src={galleryImages[currentSlide]}
+            alt={`${vendor.name} - Fotoğraf ${currentSlide + 1}`}
+            className="w-full h-full object-cover transition-all duration-500 ease-out"
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent flex items-end p-8">
-            <div className="text-white">
-              <span className="bg-[#E6007E] text-xs font-bold px-3 py-1 rounded-full uppercase">
+
+          {/* Karartma Gradient */}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent flex items-end p-6 md:p-8">
+            <div className="text-white z-10">
+              <span className="bg-[#E6007E] text-[10px] md:text-xs font-bold px-3 py-1 rounded-full uppercase">
                 {vendor.category || 'Kategori'}
               </span>
-              <h1 className="text-3xl md:text-4xl font-extrabold mt-2">{vendor.name}</h1>
-              <p className="text-slate-200 mt-1 flex items-center gap-4 text-sm">
+              <h1 className="text-2xl md:text-4xl font-extrabold mt-2">{vendor.name}</h1>
+              <p className="text-slate-200 mt-1 flex flex-wrap items-center gap-4 text-xs md:text-sm">
                 <span>📍 {vendor.city}</span>
                 <span>★ {vendor.rating || '4.9'} Puan</span>
                 <span>💬 {reviews.length} Yorum</span>
               </p>
             </div>
           </div>
+
+          {/* Sol Ok Butonu */}
+          <button
+            onClick={prevSlide}
+            className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/20 hover:bg-white/40 backdrop-blur-md text-white p-3 rounded-full transition opacity-80 group-hover:opacity-100"
+            aria-label="Önceki Fotoğraf"
+          >
+            ❮
+          </button>
+
+          {/* Sağ Ok Butonu */}
+          <button
+            onClick={nextSlide}
+            className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/20 hover:bg-white/40 backdrop-blur-md text-white p-3 rounded-full transition opacity-80 group-hover:opacity-100"
+            aria-label="Sonraki Fotoğraf"
+          >
+            ❯
+          </button>
+
+          {/* Fotoğraf Sayacı ve Gösterge Noktaları */}
+          <div className="absolute top-4 right-4 bg-black/60 backdrop-blur-md text-white text-xs font-bold px-3 py-1.5 rounded-full">
+            {currentSlide + 1} / {galleryImages.length}
+          </div>
+
+          <div className="absolute bottom-4 right-6 flex gap-1.5 z-10">
+            {galleryImages.map((_, idx) => (
+              <button
+                key={idx}
+                onClick={() => setCurrentSlide(idx)}
+                className={`h-2 rounded-full transition-all ${
+                  currentSlide === idx ? 'w-6 bg-[#E6007E]' : 'w-2 bg-white/50'
+                }`}
+              />
+            ))}
+          </div>
+        </div>
+
+        {/* Küçük Resim (Thumbnail) Çubuğu */}
+        <div className="grid grid-cols-4 gap-3 mb-8">
+          {galleryImages.map((img, idx) => (
+            <button
+              key={idx}
+              onClick={() => setCurrentSlide(idx)}
+              className={`relative h-20 rounded-xl overflow-hidden border-2 transition ${
+                currentSlide === idx ? 'border-[#E6007E] scale-[0.98]' : 'border-transparent opacity-60 hover:opacity-100'
+              }`}
+            >
+              <img src={img} alt="Thumbnail" className="w-full h-full object-cover" />
+            </button>
+          ))}
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Sol Kolon: Hakkında ve Yorumlar */}
           <div className="lg:col-span-2 space-y-8">
-            {/* Hakkında */}
             <div className="bg-white p-6 rounded-2xl border border-purple-100 shadow-sm">
               <h2 className="text-xl font-bold text-[#4A154B] mb-4">Hakkında</h2>
-              <p className="text-slate-600 leading-relaxed">
+              <p className="text-slate-600 leading-relaxed text-sm">
                 {vendor.description || `${vendor.name}, ${vendor.city} şehrinde hayalinizdeki düğün organizasyonunu gerçeğe dönüştürmek için profesyonel ekibiyle hizmet vermektedir.`}
               </p>
             </div>
@@ -230,9 +303,9 @@ export default function VendorDetailPage() {
                 </h2>
               </div>
 
-              {/* Yorum Yap Formu */}
+              {/* Yorum Formu */}
               <div className="bg-purple-50/50 p-5 rounded-2xl border border-purple-100">
-                <h3 className="text-sm font-bold text-[#4A154B] mb-3">Siz de Deneyiminizi Paylaşın</h3>
+                <h3 className="text-xs font-bold text-[#4A154B] mb-3 uppercase">Siz de Deneyiminizi Paylaşın</h3>
                 {reviewSubmitted ? (
                   <div className="p-3 bg-green-100 text-green-800 rounded-xl text-xs font-semibold text-center">
                     🎉 Yorumunuz başarıyla yayınlandı! Teşekkür ederiz.
@@ -279,7 +352,7 @@ export default function VendorDetailPage() {
                 )}
               </div>
 
-              {/* Var Olan Yorumlar Listesi */}
+              {/* Yorumlar Listesi */}
               <div className="space-y-4">
                 {reviews.length === 0 ? (
                   <p className="text-xs text-slate-400 italic">Henüz yorum yapılmamış. İlk yorumu siz yapın!</p>
@@ -287,7 +360,7 @@ export default function VendorDetailPage() {
                   reviews.map((rev) => (
                     <div key={rev.id} className="p-4 rounded-xl border border-slate-100 bg-slate-50/50 space-y-1">
                       <div className="flex justify-between items-center">
-                        <span className="text-sm font-bold text-[#4A154B]">{rev.authorName}</span>
+                        <span className="text-xs font-bold text-[#4A154B]">{rev.authorName}</span>
                         <span className="text-xs font-bold text-amber-500">
                           {'★'.repeat(rev.rating)}{'☆'.repeat(5 - rev.rating)}
                         </span>
@@ -303,15 +376,15 @@ export default function VendorDetailPage() {
           {/* Sağ Kolon: Teklif Formu */}
           <div className="lg:col-span-1">
             <div className="bg-white p-6 rounded-2xl border border-purple-100 shadow-md sticky top-6">
-              <h3 className="text-lg font-bold text-[#4A154B] mb-2">Ücretsiz Fiyat Teklifi Al</h3>
+              <h3 className="text-base font-bold text-[#4A154B] mb-2">Ücretsiz Fiyat Teklifi Al</h3>
               
               {offerSubmitted ? (
                 <div className="bg-green-50 border border-green-200 text-green-800 p-4 rounded-xl text-center">
-                  <p className="font-bold text-sm mb-1">Teklif Talebiniz İletildi! 🎉</p>
-                  <p className="text-xs">{vendor.name} yetkilileri sizinle iletişime geçecektir.</p>
+                  <p className="font-bold text-xs mb-1">Teklif Talebiniz İletildi! 🎉</p>
+                  <p className="text-[11px]">{vendor.name} yetkilileri sizinle iletişime geçecektir.</p>
                 </div>
               ) : (
-                <form onSubmit={handleSubmitOffer} className="space-y-4">
+                <form onSubmit={handleSubmitOffer} className="space-y-3">
                   <div>
                     <label className="block text-xs font-semibold text-slate-600 mb-1">Adınız Soyadınız</label>
                     <input
@@ -320,7 +393,7 @@ export default function VendorDetailPage() {
                       placeholder="Ahmet Yılmaz"
                       value={offerData.fullName}
                       onChange={(e) => setOfferData({ ...offerData, fullName: e.target.value })}
-                      className="w-full p-2.5 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-[#E6007E]"
+                      className="w-full p-2.5 border border-slate-200 rounded-xl text-xs focus:outline-none focus:border-[#E6007E]"
                     />
                   </div>
                   <div>
@@ -331,7 +404,7 @@ export default function VendorDetailPage() {
                       placeholder="05XX XXX XX XX"
                       value={offerData.phone}
                       onChange={(e) => setOfferData({ ...offerData, phone: e.target.value })}
-                      className="w-full p-2.5 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-[#E6007E]"
+                      className="w-full p-2.5 border border-slate-200 rounded-xl text-xs focus:outline-none focus:border-[#E6007E]"
                     />
                   </div>
                   <div>
@@ -340,13 +413,13 @@ export default function VendorDetailPage() {
                       type="date"
                       value={offerData.weddingDate}
                       onChange={(e) => setOfferData({ ...offerData, weddingDate: e.target.value })}
-                      className="w-full p-2.5 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-[#E6007E]"
+                      className="w-full p-2.5 border border-slate-200 rounded-xl text-xs focus:outline-none focus:border-[#E6007E]"
                     />
                   </div>
                   <button
                     type="submit"
                     disabled={isSubmittingOffer}
-                    className="w-full bg-[#E6007E] text-white py-3 rounded-xl font-bold hover:bg-pink-700 transition shadow-md disabled:opacity-50"
+                    className="w-full bg-[#E6007E] text-white py-3 rounded-xl font-bold text-xs hover:bg-pink-700 transition shadow-md disabled:opacity-50 mt-2"
                   >
                     {isSubmittingOffer ? 'Gönderiliyor...' : 'Fiyat Teklifi Gönder'}
                   </button>
