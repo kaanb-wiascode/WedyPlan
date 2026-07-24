@@ -23,9 +23,10 @@ export default function HomePage() {
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState<User | null>(null);
   const [showUserMenu, setShowUserMenu] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const router = useRouter();
 
-  // 1. Firebase Authentication Dinleyicisi
+  // Oturum Durumunu Dinle
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       setUser(currentUser);
@@ -33,7 +34,7 @@ export default function HomePage() {
     return () => unsubscribe();
   }, []);
 
-  // 2. Firmaları Çekme
+  // Firmaları Çek
   useEffect(() => {
     async function fetchVendors() {
       try {
@@ -52,14 +53,15 @@ export default function HomePage() {
     fetchVendors();
   }, []);
 
-  // 3. Çıkış Yapma İşlemi
+  // Çıkış Yap
   const handleLogout = async () => {
     try {
       await signOut(auth);
       setShowUserMenu(false);
+      setMobileMenuOpen(false);
       router.push('/');
     } catch (error) {
-      console.error('Çıkış yapılırken hata:', error);
+      console.error('Çıkış hatası:', error);
     }
   };
 
@@ -71,34 +73,34 @@ export default function HomePage() {
           Wedy<span className="text-[#E6007E]">Plan</span>
         </Link>
         
-        {/* Navbar Menü Linkleri ve Kullanıcı Paneli */}
-        <div className="flex items-center gap-4 md:gap-6 relative">
+        {/* Masaüstü Menü Linkleri */}
+        <div className="hidden md:flex items-center gap-6">
           <Link
             href="/arama"
-            className="text-xs md:text-sm font-semibold text-slate-600 hover:text-[#E6007E] transition hidden md:block"
+            className="text-sm font-semibold text-slate-600 hover:text-[#E6007E] transition"
           >
             Firma Ara
           </Link>
           <Link
             href="/kontrol-listesi"
-            className="text-xs md:text-sm font-semibold text-slate-600 hover:text-[#E6007E] transition hidden md:block"
+            className="text-sm font-semibold text-slate-600 hover:text-[#E6007E] transition"
           >
             ⏳ Planlama Listesi
           </Link>
           <Link
             href="/butce-hesaplayici"
-            className="text-xs md:text-sm font-bold text-[#E6007E] bg-pink-50 hover:bg-pink-100 px-3 py-1.5 rounded-full transition flex items-center gap-1 hidden md:flex"
+            className="text-sm font-bold text-[#E6007E] bg-pink-50 hover:bg-pink-100 px-3 py-1.5 rounded-full transition flex items-center gap-1"
           >
             <span>💍</span> Bütçe
           </Link>
           <Link
             href="/admin"
-            className="text-xs font-semibold text-[#4A154B] border border-purple-200 px-3 py-1.5 rounded-xl hover:bg-purple-50 transition hidden md:block"
+            className="text-xs font-semibold text-[#4A154B] border border-purple-200 px-3 py-1.5 rounded-xl hover:bg-purple-50 transition"
           >
             Admin
           </Link>
 
-          {/* Kullanıcı Giriş Yapmışsa / Yapmamışsa */}
+          {/* Masaüstü Profil Menüsü */}
           {user ? (
             <div className="relative">
               <button
@@ -108,15 +110,14 @@ export default function HomePage() {
                 <img
                   src={user.photoURL || `https://ui-avatars.com/api/?name=${user.displayName || user.email}&background=E6007E&color=fff`}
                   alt="Profil"
-                  className="w-7 h-7 rounded-full object-cover bg-white"
+                  className="w-7 h-7 rounded-full object-cover"
                 />
-                <span className="text-xs font-bold text-slate-700 hidden sm:block">
+                <span className="text-xs font-bold text-slate-700">
                   {user.displayName?.split(' ')[0] || 'Hesabım'}
                 </span>
                 <span className="text-[10px] text-slate-400">▼</span>
               </button>
 
-              {/* Kullanıcı Açılır Menüsü */}
               {showUserMenu && (
                 <div className="absolute right-0 mt-2 w-48 bg-white border border-purple-100 rounded-2xl shadow-xl py-2 z-50">
                   <div className="px-4 py-2 border-b border-slate-50 mb-1">
@@ -155,7 +156,93 @@ export default function HomePage() {
             </Link>
           )}
         </div>
+
+        {/* Mobil Hamburger Butonu */}
+        <div className="flex md:hidden items-center gap-3">
+          {user && (
+            <img
+              src={user.photoURL || `https://ui-avatars.com/api/?name=${user.displayName || user.email}&background=E6007E&color=fff`}
+              alt="Profil"
+              className="w-8 h-8 rounded-full object-cover border border-purple-200"
+            />
+          )}
+          <button
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            className="text-slate-700 hover:text-[#E6007E] focus:outline-none p-1 text-2xl font-bold"
+            aria-label="Menüyü Aç"
+          >
+            {mobileMenuOpen ? '✕' : '☰'}
+          </button>
+        </div>
       </nav>
+
+      {/* Mobil Açılır Menü Overlay */}
+      {mobileMenuOpen && (
+        <div className="md:hidden bg-white border-b border-purple-100 shadow-xl px-6 py-6 space-y-4 animate-in slide-in-from-top duration-300">
+          <div className="flex flex-col space-y-3">
+            <Link
+              href="/arama"
+              onClick={() => setMobileMenuOpen(false)}
+              className="flex items-center gap-3 p-3 rounded-xl bg-purple-50/50 text-xs font-bold text-[#4A154B]"
+            >
+              🔍 Firma & Mekan Ara
+            </Link>
+            <Link
+              href="/kontrol-listesi"
+              onClick={() => setMobileMenuOpen(false)}
+              className="flex items-center gap-3 p-3 rounded-xl bg-purple-50/50 text-xs font-bold text-[#4A154B]"
+            >
+              ⏳ Düğün Geri Sayımı & Checklist
+            </Link>
+            <Link
+              href="/butce-hesaplayici"
+              onClick={() => setMobileMenuOpen(false)}
+              className="flex items-center gap-3 p-3 rounded-xl bg-pink-50 text-xs font-bold text-[#E6007E]"
+            >
+              💍 Düğün Bütçesi Hesaplayıcı
+            </Link>
+            <Link
+              href="/admin"
+              onClick={() => setMobileMenuOpen(false)}
+              className="flex items-center gap-3 p-3 rounded-xl bg-slate-100 text-xs font-bold text-slate-700"
+            >
+              🛠️ Yönetim Paneli
+            </Link>
+          </div>
+
+          <div className="pt-3 border-t border-slate-100">
+            {user ? (
+              <div className="space-y-3">
+                <div className="flex items-center gap-3">
+                  <img
+                    src={user.photoURL || `https://ui-avatars.com/api/?name=${user.displayName || user.email}&background=E6007E&color=fff`}
+                    alt="Profil"
+                    className="w-9 h-9 rounded-full object-cover"
+                  />
+                  <div>
+                    <p className="text-xs font-bold text-slate-800">{user.displayName || 'Kullanıcı'}</p>
+                    <p className="text-[10px] text-slate-400 truncate max-w-[180px]">{user.email}</p>
+                  </div>
+                </div>
+                <button
+                  onClick={handleLogout}
+                  className="w-full bg-red-50 text-red-500 py-2.5 rounded-xl text-xs font-bold hover:bg-red-100 transition"
+                >
+                  Çıkış Yap
+                </button>
+              </div>
+            ) : (
+              <Link
+                href="/login"
+                onClick={() => setMobileMenuOpen(false)}
+                className="block text-center w-full bg-[#E6007E] text-white py-3 rounded-xl text-xs font-bold shadow-md hover:bg-pink-700 transition"
+              >
+                Giriş Yap / Üye Ol
+              </Link>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* Hero Alanı */}
       <section className="relative bg-gradient-to-br from-[#4A154B] to-purple-900 text-white py-16 md:py-24 px-6 text-center">
