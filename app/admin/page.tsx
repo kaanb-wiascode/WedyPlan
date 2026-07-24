@@ -1,13 +1,30 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { onAuthStateChanged, signOut } from 'firebase/auth';
-import { collection, getDocs, addDoc, serverTimestamp } from 'firebase/firestore';
-import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
-import { db, storage, auth } from '../../lib/firebase';
+import Link from 'next/link';
+import {
+  collection,
+  addDoc,
+  getDocs,
+  deleteDoc,
+  doc,
+  serverTimestamp,
+} from 'firebase/firestore';
+import { db } from '../../lib/firebase';
 
-interface RequestItem {
+interface Vendor {
+  id: string;
+  name?: string;
+  category?: string;
+  city?: string;
+  price?: string;
+  rating?: string | number;
+  imageUrl?: string;
+  images?: string[];
+  description?: string;
+}
+
+interface Request {
   id: string;
   vendorName?: string;
   fullName?: string;
@@ -18,313 +35,347 @@ interface RequestItem {
   createdAt?: any;
 }
 
-export default function AdminPanelPage() {
-  const router = useRouter();
-  const [userLoading, setUserLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<'requests' | 'addVendor'>('requests');
-
-  // Gelen Teklifler State'i
-  const [requests, setRequests] = useState<RequestItem[]>([]);
-  const [loadingRequests, setLoadingRequests] = useState(true);
+export default function AdminPage() {
+  const [vendors, setVendors] = useState<Vendor[]>([]);
+  const [requests, setRequests] = useState<Request[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState<'vendors' | 'requests'>('vendors');
 
   // Yeni Firma Form State'leri
-  const [vendorForm, setVendorForm] = useState({
+  const [formData, setFormData] = useState({
     name: '',
-    category: 'Düğün Mekanı',
+    category: 'Düğün Salonu',
     city: 'İstanbul',
-    price: '',
+    price: '100.000 TL - 150.000 TL',
     rating: '4.8',
     description: '',
+    coverImage: '',
+    image2: '',
+    image3: '',
+    image4: '',
   });
-  const [imageFile, setImageFile] = useState<File | null>(null);
-  const [addingVendor, setAddingVendor] = useState(false);
-  const [vendorSuccess, setVendorSuccess] = useState(false);
 
-  // Oturum Kontrolü (Giriş yapılmadıysa /login'e at)
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-      if (!currentUser) {
-        router.push('/login');
-      } else {
-        setUserLoading(false);
-      }
-    });
+  const [isAdding, setIsAdding] = useState(false);
 
-    return () => unsubscribe();
-  }, [router]);
+  // Verileri Getir
+  const fetchData = async () => {
+    setLoading(true);
+    try {
+      // Firmaları Çek
+      const vendorsSnap = await getDocs(collection(db, 'vendors'));
+      const vendorList: Vendor[] = [];
+      vendorsSnap.forEach((d) => vendorList.push({ id: d.id, ...d.data() } as Vendor));
+      setVendors(vendorList);
 
-  // Gelen Teklif Taleplerini Çek
-  useEffect(() => {
-    async function fetchRequests() {
-      try {
-        const querySnapshot = await getDocs(collection(db, 'requests'));
-        const requestData: RequestItem[] = [];
-        querySnapshot.forEach((doc) => {
-          requestData.push({ id: doc.id, ...doc.data() } as RequestItem);
-        });
-        setRequests(requestData);
-      } catch (error) {
-        console.error('Talepler çekilirken hata oluştu:', error);
-      } finally {
-        setLoadingRequests(false);
-      }
+      // Teklif Taleplerini Çek
+      const requestsSnap = await getDocs(collection(db, 'requests'));
+      const requestList: Request[] = [];
+      requestsSnap.forEach((d) => requestList.push({ id: d.id, ...d.data() } as Request));
+      setRequests(requestList);
+    } catch (error) {
+      console.error('Veri çekme hatası:', error);
+    } finally {
+      setLoading(false);
     }
-
-    if (!userLoading) {
-      fetchRequests();
-    }
-  }, [userLoading]);
-
-  // Çıkış Yapma Fonksiyonu
-  const handleLogout = async () => {
-    await signOut(auth);
-    router.push('/login');
   };
 
-  // Yeni Firma Kaydetme & Resim Yükleme Fonksiyonu
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  // Firma Ekleme
   const handleAddVendor = async (e: React.FormEvent) => {
     e.preventDefault();
-    setAddingVendor(true);
-    setVendorSuccess(false);
+    if (!formData.name.trim()) return;
+
+    setIsAdding(true);
+
+    // Doldurulmuş tüm resim URL'lerini diziye topla
+    const imageList = [
+      formData.coverImage,
+      formData.image2,
+      formData.image3,
+      formData.image4,
+    ].filter((url) => url.trim() !== '');
 
     try {
-      let finalImageUrl = 'https://images.unsplash.com/photo-1519167758481-83f550bb49b3?w=800';
-
-      if (imageFile) {
-        const storageRef = ref(storage, `vendors/${Date.now()}_${imageFile.name}`);
-        const uploadResult = await uploadBytes(storageRef, imageFile);
-        finalImageUrl = await getDownloadURL(uploadResult.ref);
-      }
-
       await addDoc(collection(db, 'vendors'), {
-        ...vendorForm,
-        imageUrl: finalImageUrl,
+        name: formData.name,
+        category: formData.category,
+        city: formData.city,
+        price: formData.price,
+        rating: formData.rating,
+        description: formData.description,
+        imageUrl: formData.coverImage || imageList[0] || '',
+        images: imageList,
         createdAt: serverTimestamp(),
       });
 
-      setVendorSuccess(true);
-      setImageFile(null);
-      setVendorForm({
+      // Formu Sıfırla
+      setFormData({
         name: '',
-        category: 'Düğün Mekanı',
+        category: 'Düğün Salonu',
         city: 'İstanbul',
-        price: '',
+        price: '100.000 TL - 150.000 TL',
         rating: '4.8',
         description: '',
+        coverImage: '',
+        image2: '',
+        image3: '',
+        image4: '',
       });
+
+      alert('Firma ve fotoğraf galerisi başarıyla eklendi! 🎉');
+      fetchData();
     } catch (error) {
       console.error('Firma ekleme hatası:', error);
-      alert('Firma eklenirken bir hata oluştu.');
+      alert('Firma eklenirken hata oluştu.');
     } finally {
-      setAddingVendor(false);
+      setIsAdding(false);
     }
   };
 
-  if (userLoading) {
-    return (
-      <div className="min-h-screen bg-[#FDFBFD] flex items-center justify-center">
-        <p className="text-[#4A154B] font-semibold">Oturum kontrol ediliyor...</p>
-      </div>
-    );
-  }
+  // Firma Silme
+  const handleDeleteVendor = async (id: string) => {
+    if (!confirm('Bu firmayı silmek istediğinize emin misiniz?')) return;
+    try {
+      await deleteDoc(doc(db, 'vendors', id));
+      setVendors(vendors.filter((v) => v.id !== id));
+    } catch (error) {
+      console.error('Silme hatası:', error);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-[#FDFBFD] text-slate-800">
       {/* Navbar */}
-      <nav className="flex items-center justify-between px-8 py-4 bg-[#4A154B] text-white shadow-md">
-        <div className="text-2xl font-bold">
-          Wedy<span className="text-[#E6007E]">Plan</span> <span className="text-xs font-normal opacity-75">| Admin Panel</span>
-        </div>
-        <div className="flex items-center gap-4">
-          <a href="/" className="text-xs font-semibold bg-white/10 hover:bg-white/20 px-4 py-2 rounded-lg transition">
-            Sitede Gör →
-          </a>
-          <button
-            onClick={handleLogout}
-            className="text-xs font-semibold bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg transition"
-          >
-            Çıkış Yap
-          </button>
-        </div>
+      <nav className="flex items-center justify-between px-8 py-4 bg-white border-b border-purple-100 shadow-sm">
+        <Link href="/" className="text-2xl font-bold text-[#4A154B]">
+          Wedy<span className="text-[#E6007E]">Plan</span>{' '}
+          <span className="text-xs bg-purple-100 text-[#4A154B] px-2 py-0.5 rounded-md ml-2 font-semibold">
+            Yönetim Paneli
+          </span>
+        </Link>
+        <Link href="/" className="text-xs font-semibold text-[#4A154B] hover:text-[#E6007E]">
+          ← Ana Sayfaya Dön
+        </Link>
       </nav>
 
-      <div className="max-w-6xl mx-auto px-4 py-8">
+      <div className="max-w-6xl mx-auto px-4 py-8 space-y-8">
         {/* Tab Menüsü */}
-        <div className="flex gap-4 border-b border-purple-100 mb-8">
+        <div className="flex gap-4 border-b border-purple-100 pb-3">
+          <button
+            onClick={() => setActiveTab('vendors')}
+            className={`text-sm font-bold pb-2 border-b-2 transition ${
+              activeTab === 'vendors'
+                ? 'border-[#E6007E] text-[#E6007E]'
+                : 'border-transparent text-slate-500 hover:text-slate-800'
+            }`}
+          >
+            🏢 Firmalar & Galeriler ({vendors.length})
+          </button>
           <button
             onClick={() => setActiveTab('requests')}
-            className={`pb-3 px-4 font-bold text-sm transition border-b-2 ${
+            className={`text-sm font-bold pb-2 border-b-2 transition ${
               activeTab === 'requests'
                 ? 'border-[#E6007E] text-[#E6007E]'
                 : 'border-transparent text-slate-500 hover:text-slate-800'
             }`}
           >
-            Gelen Teklif Talepleri ({requests.length})
-          </button>
-          <button
-            onClick={() => setActiveTab('addVendor')}
-            className={`pb-3 px-4 font-bold text-sm transition border-b-2 ${
-              activeTab === 'addVendor'
-                ? 'border-[#E6007E] text-[#E6007E]'
-                : 'border-transparent text-slate-500 hover:text-slate-800'
-            }`}
-          >
-            + Yeni Firma Ekle
+            📩 Gelen Teklif Talepleri ({requests.length})
           </button>
         </div>
 
-        {/* Tab 1: Talepler */}
-        {activeTab === 'requests' && (
-          <div>
-            <h2 className="text-xl font-bold text-[#4A154B] mb-4">Gelen Müşteri Talepleri</h2>
-            {loadingRequests ? (
-              <p className="text-slate-500">Talepler yükleniyor...</p>
-            ) : requests.length === 0 ? (
-              <div className="bg-white p-8 rounded-2xl border border-purple-100 text-center text-slate-500">
-                Henüz gelen bir teklif talebi bulunmuyor.
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {requests.map((req) => (
-                  <div key={req.id} className="bg-white p-6 rounded-2xl border border-purple-100 shadow-sm space-y-3">
-                    <div className="flex justify-between items-start border-b border-slate-100 pb-3">
-                      <div>
-                        <span className="text-xs text-[#E6007E] font-bold uppercase">Talep Edilen Firma:</span>
-                        <h3 className="text-lg font-bold text-[#4A154B]">{req.vendorName || 'Belirtilmedi'}</h3>
-                      </div>
-                      <span className="bg-purple-100 text-[#4A154B] text-xs px-2.5 py-1 rounded-full font-semibold">
-                        Yeni
-                      </span>
-                    </div>
+        {activeTab === 'vendors' ? (
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            {/* Sol: Yeni Firma ve Çoklu Fotoğraf Ekleme Formu */}
+            <div className="lg:col-span-1 bg-white p-6 rounded-2xl border border-purple-100 shadow-sm space-y-4">
+              <h2 className="text-base font-bold text-[#4A154B]">+ Yeni Firma & Galeri Ekle</h2>
 
-                    <div className="text-sm space-y-1 text-slate-600">
-                      <p><strong className="text-slate-800">Müşteri:</strong> {req.fullName}</p>
-                      <p><strong className="text-slate-800">Telefon:</strong> <a href={`tel:${req.phone}`} className="text-[#E6007E] underline">{req.phone}</a></p>
-                      <p><strong className="text-slate-800">Düğün Tarihi:</strong> {req.weddingDate || 'Belirtilmedi'}</p>
-                      <p><strong className="text-slate-800">Konuk Sayısı:</strong> {req.guestCount || 'Belirtilmedi'}</p>
-                      {req.message && (
-                        <div className="mt-2 p-3 bg-slate-50 rounded-xl text-xs italic border border-slate-100">
-                          "{req.message}"
+              <form onSubmit={handleAddVendor} className="space-y-3">
+                <div>
+                  <label className="block text-[11px] font-bold text-slate-600 mb-1">Firma Adı</label>
+                  <input
+                    type="text"
+                    required
+                    placeholder="Örn: Bosphorus Kır Bahçesi"
+                    value={formData.name}
+                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                    className="w-full p-2.5 border border-slate-200 rounded-xl text-xs focus:outline-none focus:border-[#E6007E]"
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-2">
+                  <div>
+                    <label className="block text-[11px] font-bold text-slate-600 mb-1">Kategori</label>
+                    <select
+                      value={formData.category}
+                      onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+                      className="w-full p-2.5 border border-slate-200 rounded-xl text-xs focus:outline-none focus:border-[#E6007E]"
+                    >
+                      <option value="Düğün Salonu">Düğün Salonu</option>
+                      <option value="Kır Bahçesi">Kır Bahçesi</option>
+                      <option value="Fotoğrafçı">Fotoğrafçı</option>
+                      <option value="Gelinlik">Gelinlik</option>
+                      <option value="Organizasyon">Organizasyon</option>
+                      <option value="Müzik & DJ">Müzik & DJ</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-[11px] font-bold text-slate-600 mb-1">Şehir</label>
+                    <input
+                      type="text"
+                      required
+                      placeholder="İstanbul"
+                      value={formData.city}
+                      onChange={(e) => setFormData({ ...formData, city: e.target.value })}
+                      className="w-full p-2.5 border border-slate-200 rounded-xl text-xs focus:outline-none focus:border-[#E6007E]"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-[11px] font-bold text-slate-600 mb-1">Fiyat Aralığı</label>
+                  <input
+                    type="text"
+                    placeholder="Örn: 80.000 TL - 120.000 TL"
+                    value={formData.price}
+                    onChange={(e) => setFormData({ ...formData, price: e.target.value })}
+                    className="w-full p-2.5 border border-slate-200 rounded-xl text-xs focus:outline-none focus:border-[#E6007E]"
+                  />
+                </div>
+
+                {/* Galeri Fotoğrafları Alanı */}
+                <div className="bg-purple-50/50 p-3 rounded-xl border border-purple-100 space-y-2">
+                  <span className="block text-[11px] font-bold text-[#4A154B]">📸 Galeri Fotoğrafları (URL)</span>
+                  
+                  <input
+                    type="url"
+                    placeholder="1. Kapak Görseli URL"
+                    value={formData.coverImage}
+                    onChange={(e) => setFormData({ ...formData, coverImage: e.target.value })}
+                    className="w-full p-2 border border-slate-200 rounded-lg text-xs focus:outline-none focus:border-[#E6007E] bg-white"
+                  />
+                  <input
+                    type="url"
+                    placeholder="2. Galeri Görseli URL"
+                    value={formData.image2}
+                    onChange={(e) => setFormData({ ...formData, image2: e.target.value })}
+                    className="w-full p-2 border border-slate-200 rounded-lg text-xs focus:outline-none focus:border-[#E6007E] bg-white"
+                  />
+                  <input
+                    type="url"
+                    placeholder="3. Galeri Görseli URL"
+                    value={formData.image3}
+                    onChange={(e) => setFormData({ ...formData, image3: e.target.value })}
+                    className="w-full p-2 border border-slate-200 rounded-lg text-xs focus:outline-none focus:border-[#E6007E] bg-white"
+                  />
+                  <input
+                    type="url"
+                    placeholder="4. Galeri Görseli URL"
+                    value={formData.image4}
+                    onChange={(e) => setFormData({ ...formData, image4: e.target.value })}
+                    className="w-full p-2 border border-slate-200 rounded-lg text-xs focus:outline-none focus:border-[#E6007E] bg-white"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-[11px] font-bold text-slate-600 mb-1">Açıklama</label>
+                  <textarea
+                    rows={3}
+                    placeholder="Firma hakkında kısa bilgi..."
+                    value={formData.description}
+                    onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                    className="w-full p-2.5 border border-slate-200 rounded-xl text-xs focus:outline-none focus:border-[#E6007E]"
+                  ></textarea>
+                </div>
+
+                <button
+                  type="submit"
+                  disabled={isAdding}
+                  className="w-full bg-[#E6007E] text-white py-3 rounded-xl font-bold text-xs hover:bg-pink-700 transition disabled:opacity-50"
+                >
+                  {isAdding ? 'Kaydediliyor...' : 'Firmayı Kaydet'}
+                </button>
+              </form>
+            </div>
+
+            {/* Sağ: Mevcut Firmalar Listesi */}
+            <div className="lg:col-span-2 space-y-4">
+              <h2 className="text-base font-bold text-[#4A154B]">Kayıtlı Firmalar</h2>
+
+              {loading ? (
+                <p className="text-xs text-slate-500">Yükleniyor...</p>
+              ) : vendors.length === 0 ? (
+                <div className="bg-white p-8 rounded-2xl border border-purple-100 text-center text-xs text-slate-400">
+                  Henüz kayıtlı firma yok. Soldaki formdan ekleyebilirsiniz.
+                </div>
+              ) : (
+                <div className="divide-y divide-slate-100 bg-white rounded-2xl border border-purple-100 overflow-hidden">
+                  {vendors.map((v) => (
+                    <div key={v.id} className="p-4 flex items-center justify-between gap-4 hover:bg-slate-50 transition">
+                      <div className="flex items-center gap-3">
+                        <img
+                          src={v.imageUrl || 'https://images.unsplash.com/photo-1519167758481-83f550bb49b3?w=200'}
+                          alt={v.name}
+                          className="w-12 h-12 rounded-xl object-cover border border-slate-100"
+                        />
+                        <div>
+                          <h3 className="text-xs font-bold text-slate-800">{v.name}</h3>
+                          <p className="text-[10px] text-slate-400">
+                            {v.category} • {v.city} • Galeri: {v.images?.length || 1} Fotoğraf
+                          </p>
                         </div>
-                      )}
+                      </div>
+
+                      <div className="flex items-center gap-2">
+                        <Link
+                          href={`/firma/${v.id}`}
+                          target="_blank"
+                          className="text-[10px] font-bold text-[#4A154B] bg-purple-50 px-3 py-1.5 rounded-lg hover:bg-purple-100 transition"
+                        >
+                          Görüntüle ↗
+                        </Link>
+                        <button
+                          onClick={() => handleDeleteVendor(v.id)}
+                          className="text-[10px] font-bold text-red-500 bg-red-50 px-3 py-1.5 rounded-lg hover:bg-red-100 transition"
+                        >
+                          Sil
+                        </button>
+                      </div>
                     </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        ) : (
+          /* Gelen Teklif Talepleri Sekmesi */
+          <div className="bg-white rounded-2xl border border-purple-100 shadow-sm p-6 space-y-4">
+            <h2 className="text-base font-bold text-[#4A154B]">Gelen Fiyat Teklifi Talepleri</h2>
+
+            {requests.length === 0 ? (
+              <p className="text-xs text-slate-400 py-6 text-center">Henüz gelen bir teklif talebi bulunmuyor.</p>
+            ) : (
+              <div className="divide-y divide-slate-100">
+                {requests.map((req) => (
+                  <div key={req.id} className="py-4 space-y-1">
+                    <div className="flex justify-between items-center">
+                      <span className="text-xs font-bold text-[#E6007E]">{req.vendorName || 'Firma'}</span>
+                      <span className="text-[10px] text-slate-400">Tarih: {req.weddingDate || 'Belirtilmedi'}</span>
+                    </div>
+                    <p className="text-xs font-semibold text-slate-800">
+                      👤 {req.fullName} — 📞 {req.phone}
+                    </p>
+                    {req.message && (
+                      <p className="text-xs text-slate-500 italic bg-slate-50 p-2 rounded-lg">
+                        "{req.message}"
+                      </p>
+                    )}
                   </div>
                 ))}
               </div>
             )}
-          </div>
-        )}
-
-        {/* Tab 2: Firma Ekleme */}
-        {activeTab === 'addVendor' && (
-          <div className="max-w-2xl bg-white p-8 rounded-2xl border border-purple-100 shadow-sm">
-            <h2 className="text-xl font-bold text-[#4A154B] mb-2">Yeni Firma / Mekan İlanı Oluştur</h2>
-            <p className="text-xs text-slate-500 mb-6">Bilgisayarınızdan görsel seçip doğrudan sisteme yükleyebilirsiniz.</p>
-
-            {vendorSuccess && (
-              <div className="mb-6 p-4 bg-green-50 border border-green-200 text-green-800 rounded-xl text-sm font-semibold">
-                🎉 Firma ve görsel başarıyla yüklendi, ilan anında yayına alındı!
-              </div>
-            )}
-
-            <form onSubmit={handleAddVendor} className="space-y-4">
-              <div>
-                <label className="block text-xs font-semibold text-slate-600 mb-1">Firma / Mekan Adı</label>
-                <input
-                  type="text"
-                  required
-                  placeholder="Örn: Portis Kır Bahçesi"
-                  value={vendorForm.name}
-                  onChange={(e) => setVendorForm({ ...vendorForm, name: e.target.value })}
-                  className="w-full p-2.5 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-[#E6007E]"
-                />
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-xs font-semibold text-slate-600 mb-1">Kategori</label>
-                  <select
-                    value={vendorForm.category}
-                    onChange={(e) => setVendorForm({ ...vendorForm, category: e.target.value })}
-                    className="w-full p-2.5 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-[#E6007E]"
-                  >
-                    <option value="Düğün Mekanı">Düğün Mekanı</option>
-                    <option value="Fotoğrafçı">Fotoğrafçı</option>
-                    <option value="Gelinlik">Gelinlik</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block text-xs font-semibold text-slate-600 mb-1">Şehir</label>
-                  <select
-                    value={vendorForm.city}
-                    onChange={(e) => setVendorForm({ ...vendorForm, city: e.target.value })}
-                    className="w-full p-2.5 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-[#E6007E]"
-                  >
-                    <option value="İstanbul">İstanbul</option>
-                    <option value="İzmir">İzmir</option>
-                    <option value="Ankara">Ankara</option>
-                  </select>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-xs font-semibold text-slate-600 mb-1">Başlangıç Fiyatı</label>
-                  <input
-                    type="text"
-                    placeholder="Örn: 50.000 TL'den başlayan"
-                    value={vendorForm.price}
-                    onChange={(e) => setVendorForm({ ...vendorForm, price: e.target.value })}
-                    className="w-full p-2.5 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-[#E6007E]"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-xs font-semibold text-slate-600 mb-1">Puan (1.0 - 5.0)</label>
-                  <input
-                    type="text"
-                    placeholder="4.8"
-                    value={vendorForm.rating}
-                    onChange={(e) => setVendorForm({ ...vendorForm, rating: e.target.value })}
-                    className="w-full p-2.5 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-[#E6007E]"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-xs font-semibold text-slate-600 mb-1">Firma Görseli Yükle</label>
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={(e) => {
-                    if (e.target.files && e.target.files[0]) {
-                      setImageFile(e.target.files[0]);
-                    }
-                  }}
-                  className="w-full p-2 border border-slate-200 rounded-xl text-sm text-slate-600 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-purple-50 file:text-[#4A154B] hover:file:bg-purple-100 cursor-pointer"
-                />
-              </div>
-
-              <div>
-                <label className="block text-xs font-semibold text-slate-600 mb-1">Açıklama</label>
-                <textarea
-                  rows={3}
-                  placeholder="Firma hakkında kısa bilgi..."
-                  value={vendorForm.description}
-                  onChange={(e) => setVendorForm({ ...vendorForm, description: e.target.value })}
-                  className="w-full p-2.5 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-[#E6007E]"
-                ></textarea>
-              </div>
-
-              <button
-                type="submit"
-                disabled={addingVendor}
-                className="w-full bg-[#E6007E] text-white py-3 rounded-xl font-bold hover:bg-pink-700 transition shadow-md disabled:opacity-50"
-              >
-                {addingVendor ? 'Görsel Yükleniyor ve Kaydediliyor...' : 'Firmayı Yayınla'}
-              </button>
-            </form>
           </div>
         )}
       </div>
