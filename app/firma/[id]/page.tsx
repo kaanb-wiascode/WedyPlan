@@ -25,6 +25,7 @@ interface Vendor {
   imageUrl?: string;
   images?: string[];
   description?: string;
+  phone?: string;
 }
 
 interface Review {
@@ -121,6 +122,16 @@ export default function VendorDetailPage() {
     setCurrentSlide((prev) => (prev - 1 + galleryImages.length) % galleryImages.length);
   };
 
+  // WhatsApp Link Oluşturucu
+  const getWhatsAppLink = () => {
+    const rawPhone = vendor?.phone ? vendor.phone.replace(/\D/g, '') : '905555555555';
+    const formattedPhone = rawPhone.startsWith('90') ? rawPhone : `90${rawPhone}`;
+    const text = encodeURIComponent(
+      `Merhaba ${vendor?.name || 'Firma Yetkilisi'}, WedyPlan platformu üzerinden ulaşıyorum. Hizmetleriniz ve fiyat teklifiniz hakkında bilgi alabilir miyim?`
+    );
+    return `https://wa.me/${formattedPhone}?text=${text}`;
+  };
+
   // Teklif Gönder
   const handleSubmitOffer = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -211,7 +222,7 @@ export default function VendorDetailPage() {
       </nav>
 
       <div className="max-w-6xl mx-auto px-4 py-8">
-        {/* İnteraktif Fotoğraf Galerisi (Slider) */}
+        {/* Fotoğraf Galerisi Slider */}
         <div className="relative w-full h-[380px] md:h-[480px] rounded-3xl overflow-hidden mb-8 shadow-xl bg-slate-900 group">
           <img
             src={galleryImages[currentSlide]}
@@ -219,7 +230,6 @@ export default function VendorDetailPage() {
             className="w-full h-full object-cover transition-all duration-500 ease-out"
           />
 
-          {/* Karartma Gradient */}
           <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent flex items-end p-6 md:p-8">
             <div className="text-white z-10">
               <span className="bg-[#E6007E] text-[10px] md:text-xs font-bold px-3 py-1 rounded-full uppercase">
@@ -234,7 +244,6 @@ export default function VendorDetailPage() {
             </div>
           </div>
 
-          {/* Sol Ok Butonu */}
           <button
             onClick={prevSlide}
             className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/20 hover:bg-white/40 backdrop-blur-md text-white p-3 rounded-full transition opacity-80 group-hover:opacity-100"
@@ -243,7 +252,6 @@ export default function VendorDetailPage() {
             ❮
           </button>
 
-          {/* Sağ Ok Butonu */}
           <button
             onClick={nextSlide}
             className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/20 hover:bg-white/40 backdrop-blur-md text-white p-3 rounded-full transition opacity-80 group-hover:opacity-100"
@@ -252,7 +260,6 @@ export default function VendorDetailPage() {
             ❯
           </button>
 
-          {/* Fotoğraf Sayacı ve Gösterge Noktaları */}
           <div className="absolute top-4 right-4 bg-black/60 backdrop-blur-md text-white text-xs font-bold px-3 py-1.5 rounded-full">
             {currentSlide + 1} / {galleryImages.length}
           </div>
@@ -270,7 +277,7 @@ export default function VendorDetailPage() {
           </div>
         </div>
 
-        {/* Küçük Resim (Thumbnail) Çubuğu */}
+        {/* Küçük Resimler */}
         <div className="grid grid-cols-4 gap-3 mb-8">
           {galleryImages.map((img, idx) => (
             <button
@@ -286,7 +293,7 @@ export default function VendorDetailPage() {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Sol Kolon: Hakkında ve Yorumlar */}
+          {/* Sol Kolon */}
           <div className="lg:col-span-2 space-y-8">
             <div className="bg-white p-6 rounded-2xl border border-purple-100 shadow-sm">
               <h2 className="text-xl font-bold text-[#4A154B] mb-4">Hakkında</h2>
@@ -295,7 +302,7 @@ export default function VendorDetailPage() {
               </p>
             </div>
 
-            {/* Yorumlar Bölümü */}
+            {/* Yorumlar */}
             <div className="bg-white p-6 rounded-2xl border border-purple-100 shadow-sm space-y-6">
               <div className="flex justify-between items-center border-b border-slate-100 pb-4">
                 <h2 className="text-xl font-bold text-[#4A154B]">
@@ -303,7 +310,6 @@ export default function VendorDetailPage() {
                 </h2>
               </div>
 
-              {/* Yorum Formu */}
               <div className="bg-purple-50/50 p-5 rounded-2xl border border-purple-100">
                 <h3 className="text-xs font-bold text-[#4A154B] mb-3 uppercase">Siz de Deneyiminizi Paylaşın</h3>
                 {reviewSubmitted ? (
@@ -352,7 +358,6 @@ export default function VendorDetailPage() {
                 )}
               </div>
 
-              {/* Yorumlar Listesi */}
               <div className="space-y-4">
                 {reviews.length === 0 ? (
                   <p className="text-xs text-slate-400 italic">Henüz yorum yapılmamış. İlk yorumu siz yapın!</p>
@@ -373,9 +378,21 @@ export default function VendorDetailPage() {
             </div>
           </div>
 
-          {/* Sağ Kolon: Teklif Formu */}
-          <div className="lg:col-span-1">
-            <div className="bg-white p-6 rounded-2xl border border-purple-100 shadow-md sticky top-6">
+          {/* Sağ Kolon: Teklif Formu ve WhatsApp Butonu */}
+          <div className="lg:col-span-1 space-y-4">
+            {/* WhatsApp Hızlı İletişim Kartı */}
+            <a
+              href={getWhatsAppLink()}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center justify-center gap-2.5 w-full bg-[#25D366] hover:bg-emerald-600 text-white font-bold text-xs py-3.5 px-4 rounded-2xl shadow-lg transition duration-200 hover:scale-[1.02]"
+            >
+              <span className="text-base">💬</span>
+              <span>WhatsApp ile Anında İletişim Kur</span>
+            </a>
+
+            {/* Ücretsiz Fiyat Teklif Formu */}
+            <div className="bg-white p-6 rounded-2xl border border-purple-100 shadow-md">
               <h3 className="text-base font-bold text-[#4A154B] mb-2">Ücretsiz Fiyat Teklifi Al</h3>
               
               {offerSubmitted ? (
