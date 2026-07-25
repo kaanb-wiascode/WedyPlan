@@ -1,12 +1,16 @@
-// Dosya: app/cift/layout.tsx
 import React from 'react';
-import RoleGuard from '@/components/RoleGuard';
+import RoleGuard from '../../components/RoleGuard';
 
-export default function CoupleLayout({ children }: { children: React.ReactNode }) {
+export default function CoupleLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   return (
-    // Bu kalkan sayesinde sadece ÇİFT (COUPLE) rolüne sahip olanlar bu klasördeki sayfalara erişebilir.
     <RoleGuard allowedRole="COUPLE">
-      {children}
+      <div className="min-h-screen bg-[#F8F8F7] text-[#111111] selection:bg-[#7C5CFF] selection:text-white">
+        {children}
+      </div>
     </RoleGuard>
   );
 }

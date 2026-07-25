@@ -1,9 +1,9 @@
 'use client';
 
 import React from 'react';
-import RoleGuard from '@/components/RoleGuard';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import RoleGuard from '../../components/RoleGuard';
 import { 
   LayoutDashboard, 
   Inbox, 
@@ -14,7 +14,11 @@ import {
   ArrowLeft 
 } from 'lucide-react';
 
-export default function PremiumVendorLayout({ children }: { children: React.ReactNode }) {
+export default function PremiumVendorLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   const pathname = usePathname();
 
   const navItems = [
@@ -27,15 +31,12 @@ export default function PremiumVendorLayout({ children }: { children: React.Reac
   ];
 
   return (
-    // 🛡️ ROLE GUARD İLE TÜM PANELİ KORUMA ALTINA ALDIK
     <RoleGuard allowedRole="VENDOR">
       <div className="min-h-screen bg-[#FFFFFF] text-[#111111] flex flex-col md:flex-row font-sans selection:bg-[#7C5CFF] selection:text-white">
         
-        {/* Sidebar (Linear / Notion Style) */}
+        {/* Sidebar */}
         <aside className="w-full md:w-[260px] bg-[#F8F8F7] border-r border-[rgba(0,0,0,0.06)] p-6 flex flex-col justify-between shrink-0 md:sticky md:top-0 md:h-screen z-40">
-          
           <div className="space-y-8">
-            {/* Logo Area */}
             <Link href="/" className="block">
               <span className="text-[22px] font-medium tracking-tight text-[#111111]">WedyPlan.</span>
               <span className="block text-[11px] font-medium text-[#666666] tracking-wider uppercase mt-1">
@@ -43,7 +44,6 @@ export default function PremiumVendorLayout({ children }: { children: React.Reac
               </span>
             </Link>
 
-            {/* Navigation Links */}
             <nav className="space-y-1">
               {navItems.map((item) => {
                 const isActive = pathname === item.href;
@@ -68,7 +68,6 @@ export default function PremiumVendorLayout({ children }: { children: React.Reac
             </nav>
           </div>
 
-          {/* Bottom Action */}
           <div className="pt-6">
             <Link
               href="/"
