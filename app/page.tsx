@@ -94,8 +94,14 @@ export default function HomePage() {
             <span>💍</span> Bütçe
           </Link>
           <Link
+            href="/satici"
+            className="text-sm font-semibold text-[#4A154B] hover:text-[#E6007E] transition"
+          >
+            🏢 Kurumsal / Firma Girişi
+          </Link>
+          <Link
             href="/admin"
-            className="text-xs font-semibold text-[#4A154B] border border-purple-200 px-3 py-1.5 rounded-xl hover:bg-purple-50 transition"
+            className="text-xs font-semibold text-slate-500 border border-slate-200 px-3 py-1.5 rounded-xl hover:bg-slate-50 transition"
           >
             Admin
           </Link>
@@ -126,6 +132,12 @@ export default function HomePage() {
                       {user.displayName || user.email}
                     </p>
                   </div>
+                  <Link
+                    href="/satici"
+                    className="block px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-purple-50 hover:text-[#E6007E] transition"
+                  >
+                    🏢 Firma Paneli
+                  </Link>
                   <Link
                     href="/arama"
                     className="block px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-purple-50 hover:text-[#E6007E] transition"
@@ -200,6 +212,13 @@ export default function HomePage() {
               className="flex items-center gap-3 p-3 rounded-xl bg-pink-50 text-xs font-bold text-[#E6007E]"
             >
               💍 Düğün Bütçesi Hesaplayıcı
+            </Link>
+            <Link
+              href="/satici"
+              onClick={() => setMobileMenuOpen(false)}
+              className="flex items-center gap-3 p-3 rounded-xl bg-purple-100 text-xs font-bold text-[#4A154B]"
+            >
+              🏢 Kurumsal / Firma Paneli
             </Link>
             <Link
               href="/admin"
@@ -331,7 +350,7 @@ export default function HomePage() {
           <p className="text-center text-slate-500 text-sm py-12">Firmalar yükleniyor...</p>
         ) : vendors.length === 0 ? (
           <div className="bg-white p-12 text-center rounded-2xl border border-purple-100 text-slate-500">
-            Henüz eklenmiş firma bulunmuyor. Admin panelinden ilk firmayı ekleyebilirsiniz!
+            Henüz eklenmiş firma bulunmuyor. Admin panelinden veya Satıcı Panelinden ilk firmayı ekleyebilirsiniz!
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
