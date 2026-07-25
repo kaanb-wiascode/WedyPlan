@@ -16,30 +16,28 @@ export async function POST(req: Request) {
 Sen WedyPlan platformunun VIP Kurumsal Düğün ve Organizasyon Asistanısın (WedyAI Concierge).
 
 Kullanıcı Profili:
-- İsim: ${userContext?.name || 'Değerli Misafirimiz'}
-- Düğün Tarihi: ${userContext?.weddingDate || 'Henüz Belirlenmedi'}
-- Seçilen Mekan/Konsept: ${userContext?.venue || 'Henüz Seçilmedi'}
+- İsim: ${userContext?.name || 'Selin & Kaan'}
+- Düğün Tarihi: ${userContext?.weddingDate || '15 Ağustos 2026'}
+- Bütçe: ${userContext?.budget || '350.000 TL'}
 
-GÖREVLERİN:
-1. Bütçe ve davetli yönetimi için ilgili araçları (add_budget_item vb.) kullan.
-2. Çiftler düğün konsepti, renk paleti veya teması hakkında öneri istediğinde KESİNLİKLE "generate_theme_board" aracını çalıştırarak onlara görsel bir renk paleti sun.
-
-ÜSLUP: Kurumsal, elit, çözüm odaklı ve yapıcı (Siz/Biz dili).
+GÖREVLERİN VE ARAÇ KULLANIM KURALLARI:
+1. Kullanıcı genel sorular sorduğunda (Örn: "neler yapabiliriz", "merhaba", "bana yardımcı ol") HİÇBİR ARAÇ (TOOL) ÇALIŞTIRMA. Sadece yeteneklerini ve yapabileceklerini maddeler halinde anlat.
+2. SADECE kullanıcı açık bir işlem komutu verdiğinde (Örn: "30000 TL fotoğrafçı ekle", "renk paleti öner") ilgili aracı çalıştır.
+3. Araçları çalıştırırken 'amount' gibi sayısal parametrelerde KESİNLİKLE tırnak işareti veya metin kullanma! Tırnaksız ham sayı gönder (Örn: "amount": 30000).
     `;
 
-    // Yeni: Konsept ve Renk Paleti Aracı Eklendi
     const tools = [
       {
         type: 'function',
         function: {
           name: 'add_budget_item',
-          description: 'Çiftin düğün bütçesine yeni bir harcama kalemi ekler.',
+          description: 'Sadece kullanıcı açıkça bütçeye harcama eklemek istediğinde çalıştırılır.',
           parameters: {
             type: 'object',
             properties: {
-              category: { type: 'string' },
-              amount: { type: 'number' },
-              notes: { type: 'string' }
+              category: { type: 'string', description: 'Harcama kategorisi (örn: Fotoğrafçı, Gelinlik)' },
+              amount: { type: 'number', description: 'Sadece ham sayısal değer, tırnaksız. (Örn: 25000)' },
+              notes: { type: 'string', description: 'Harcama notu' }
             },
             required: ['category', 'amount']
           }
@@ -49,16 +47,15 @@ GÖREVLERİN:
         type: 'function',
         function: {
           name: 'generate_theme_board',
-          description: 'Kullanıcının isteğine göre düğün konsepti ve renk paleti (hex kodlarıyla) oluşturur.',
+          description: 'Sadece kullanıcı düğün konsepti veya renk paleti istediğinde çalıştırılır.',
           parameters: {
             type: 'object',
             properties: {
-              themeName: { type: 'string', description: 'Konseptin havalı ismi (Örn: Rustik Sonbahar Rüyası)' },
-              description: { type: 'string', description: 'Bu konseptin hissiyatı ve detaylı açıklaması' },
+              themeName: { type: 'string' },
+              description: { type: 'string' },
               colors: { 
                 type: 'array', 
-                items: { type: 'string' },
-                description: 'Konsepte uygun 4 adet HEX renk kodu (Örn: ["#8B4513", "#D2B48C", "#F5DEB3", "#556B2F"])'
+                items: { type: 'string' } 
               }
             },
             required: ['themeName', 'description', 'colors']
@@ -81,36 +78,60 @@ GÖREVLERİN:
         ],
         tools: tools,
         tool_choice: 'auto',
-        temperature: 0.4,
+        temperature: 0.2,
       }),
     });
 
     const data = await groqRes.json();
 
-    if (!groqRes.ok) throw new Error(data.error?.message || 'Groq API yanıt vermedi.');
+    if (!groqRes.ok) {
+      return NextResponse.json(
+        { error: data.error?.message || 'Groq API yanıt vermedi.' },
+        { status: groqRes.status }
+      );
+    }
 
     const choice = data.choices?.[0]?.message;
     let actionExecuted = null;
     let responseText = choice?.content || '';
 
-    // Fonksiyon Çağrısı Yakalama
+    // Tool çağrısı kontrolü
     if (choice?.tool_calls && choice.tool_calls.length > 0) {
       const toolCall = choice.tool_calls[0];
       const fnName = toolCall.function.name;
-      const fnArgs = JSON.parse(toolCall.function.arguments);
+      
+      let fnArgs: any = {};
+      try {
+        fnArgs = typeof toolCall.function.arguments === 'string' 
+          ? JSON.parse(toolCall.function.arguments) 
+          : toolCall.function.arguments;
+      } catch (e) {
+        console.error('Args parse hatası:', e);
+      }
 
       if (fnName === 'add_budget_item') {
-        actionExecuted = { type: 'BUDGET_ADDED', data: fnArgs };
-        responseText = `${fnArgs.category} harcaması (${fnArgs.amount.toLocaleString('tr-TR')} TL) başarıyla eklendi.`;
+        const parsedAmount = Number(fnArgs.amount) || 0;
+        actionExecuted = { 
+          type: 'BUDGET_ADDED', 
+          data: { ...fnArgs, amount: parsedAmount } 
+        };
+        if (!responseText) {
+          responseText = `${fnArgs.category} harcaması (${parsedAmount.toLocaleString('tr-TR')} TL) bütçenize eklendi. ✨`;
+        }
       } else if (fnName === 'generate_theme_board') {
         actionExecuted = { type: 'THEME_GENERATED', data: fnArgs };
-        responseText = `Sizin için tasarladığım "${fnArgs.themeName}" konsepti ve renk paleti aşağıdadır. ✨`;
+        if (!responseText) {
+          responseText = `Sizin için "${fnArgs.themeName}" konsepti ve renk paleti oluşturuldu. ✨`;
+        }
       }
     }
 
     return NextResponse.json({ text: responseText, action: actionExecuted });
 
   } catch (error: any) {
-    return NextResponse.json({ error: error.message || 'Sunucu hatası.' }, { status: 500 });
+    return NextResponse.json(
+      { error: error.message || 'Sunucu hatası oluştu.' },
+      { status: 500 }
+    );
   }
 }
