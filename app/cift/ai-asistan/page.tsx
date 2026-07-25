@@ -1,27 +1,10 @@
 'use client';
 
 import React, { useState, useRef, useEffect } from 'react';
-import { 
-  Sparkles, 
-  Send, 
-  Crown, 
-  User, 
-  Building2, 
-  CalendarDays, 
-  Coins, 
-  Loader2, 
-  ShieldCheck, 
-  Copy, 
-  Check,
-  CheckCircle2,
-  PlusCircle,
-  Mic,
-  MicOff,
-  Download
-} from 'lucide-react';
+import { Sparkles, Send, Crown, User, Building2, CalendarDays, Coins, Loader2, ShieldCheck, Copy, Check, CheckCircle2, Mic, MicOff, Palette } from 'lucide-react';
 
 interface ActionPayload {
-  type: 'BUDGET_ADDED' | 'INFO_UPDATED';
+  type: 'BUDGET_ADDED' | 'INFO_UPDATED' | 'THEME_GENERATED';
   data: any;
 }
 
@@ -34,7 +17,7 @@ interface Message {
 }
 
 export default function PremiumWedyAIAssistant() {
-  const [userContext, setUserContext] = useState({
+  const [userContext] = useState({
     role: 'cift',
     name: 'Selin & Kaan',
     weddingDate: '15 Eylül 2026',
@@ -47,7 +30,7 @@ export default function PremiumWedyAIAssistant() {
     {
       id: '1',
       sender: 'ai',
-      text: `Hoş geldiniz ${userContext.name}.\n\nWedyPlan VIP Asistanınız olarak bütçe planlamanız, harcama kalemleriniz ve davetli yönetiminiz için emrinizdeyim.\n\nBana sesli olarak veya yazarak "Bütçeme 35.000 TL Fotoğrafçı ekle" diyerek doğrudan işlem yaptırabilirsiniz.`,
+      text: `Hoş geldiniz ${userContext.name}.\n\nWedyPlan VIP Asistanınız olarak emrinizdeyim. Bütçenize harcama ekleyebilir veya size özel düğün konseptleri ve renk paletleri tasarlayabilirim.`,
       time: new Date().toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' })
     }
   ]);
@@ -55,104 +38,47 @@ export default function PremiumWedyAIAssistant() {
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [isListening, setIsListening] = useState(false);
-  const [copiedId, setCopiedId] = useState<string | null>(null);
-  
   const chatEndRef = useRef<HTMLDivElement>(null);
   const recognitionRef = useRef<any>(null);
 
-  const scrollToBottom = () => {
-    chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  };
-
   useEffect(() => {
-    scrollToBottom();
+    chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, isLoading]);
 
-  // Sesli Dinleme (Speech Recognition) Kurulumu
   useEffect(() => {
     if (typeof window !== 'undefined' && ('SpeechRecognition' in window || 'webkitSpeechRecognition' in window)) {
       const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
       recognitionRef.current = new SpeechRecognition();
-      recognitionRef.current.continuous = false;
       recognitionRef.current.lang = 'tr-TR';
-
-      recognitionRef.current.onresult = (event: any) => {
-        const transcript = event.results[0][0].transcript;
-        setInput(transcript);
-        setIsListening(false);
-      };
-
-      recognitionRef.current.onerror = () => {
-        setIsListening(false);
-      };
-
-      recognitionRef.current.onend = () => {
-        setIsListening(false);
-      };
+      recognitionRef.current.onresult = (e: any) => { setInput(e.results[0][0].transcript); setIsListening(false); };
+      recognitionRef.current.onerror = () => setIsListening(false);
+      recognitionRef.current.onend = () => setIsListening(false);
     }
   }, []);
 
   const toggleListening = () => {
-    if (!recognitionRef.current) {
-      alert('Tarayıcınız sesli komut özelliğini desteklemiyor.');
-      return;
-    }
-
-    if (isListening) {
-      recognitionRef.current.stop();
-      setIsListening(false);
-    } else {
-      setIsListening(true);
-      recognitionRef.current.start();
-    }
+    if (!recognitionRef.current) return alert('Tarayıcı desteklemiyor.');
+    isListening ? recognitionRef.current.stop() : recognitionRef.current.start();
+    setIsListening(!isListening);
   };
 
   const quickPrompts = [
-    { title: 'Harcama Ekle', text: 'Bütçeme 30.000 TL Fotoğraf ve Video çekimi kalemi ekle.', icon: PlusCircle },
-    { title: 'Bütçe Analizi', text: `${userContext.budget} TL bütçemizi en verimli şekilde nasıl dağıtabiliriz?`, icon: Coins },
-    { title: 'Zaman Çizelgesi', text: `${userContext.weddingDate} tarihine kalan süre için yapılacaklar listesi ver.`, icon: CalendarDays },
+    { title: 'Renk Paleti Öner', text: 'Kır düğünümüz için Bohem tarzında, pastel tonlardan oluşan bir renk paleti tasarlar mısın?', icon: Palette },
+    { title: 'Bütçe Analizi', text: `${userContext.budget} TL bütçemizi nasıl dağıtabiliriz?`, icon: Coins },
+    { title: 'Zaman Çizelgesi', text: 'Düğüne 6 ay kala yapılacaklar listesi ver.', icon: CalendarDays },
   ];
-
-  const copyToClipboard = (id: string, text: string) => {
-    try {
-      navigator.clipboard.writeText(text);
-      setCopiedId(id);
-      setTimeout(() => setCopiedId(null), 2000);
-    } catch (e) {
-      console.error('Kopyalama hatası:', e);
-    }
-  };
-
-  const downloadSummary = (text: string) => {
-    const element = document.createElement('a');
-    const file = new Blob([`--- WedyPlan VIP Concierge Raporu ---\n\n${text}`], { type: 'text/plain;charset=utf-8' });
-    element.href = URL.createObjectURL(file);
-    element.download = `WedyPlan_Dugun_Ozet_${Date.now()}.txt`;
-    document.body.appendChild(element);
-    element.click();
-    document.body.removeChild(element);
-  };
 
   const handleSend = async (textToSend?: string) => {
     const query = textToSend || input;
     if (!query.trim() || isLoading) return;
 
     const now = new Date().toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' });
-
-    const userMsg: Message = {
-      id: Date.now().toString(),
-      sender: 'user',
-      text: query,
-      time: now
-    };
-
-    const updatedMessages = [...messages, userMsg];
-    setMessages(updatedMessages);
+    setMessages(prev => [...prev, { id: Date.now().toString(), sender: 'user', text: query, time: now }]);
     if (!textToSend) setInput('');
     setIsLoading(true);
 
     try {
-      const apiMessages = updatedMessages.map(m => ({
+      const apiMessages = messages.concat({ id: 'temp', sender: 'user', text: query, time: now }).map(m => ({
         role: m.sender === 'user' ? 'user' : 'assistant',
         content: m.text
       }));
@@ -160,43 +86,21 @@ export default function PremiumWedyAIAssistant() {
       const res = await fetch('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ messages: apiMessages, userContext: userContext }),
+        body: JSON.stringify({ messages: apiMessages, userContext }),
       });
 
       const data = await res.json();
+      if (!res.ok) throw new Error(data.error);
 
-      if (!res.ok) {
-        throw new Error(data.error || 'Yapay zeka yanıt veremedi.');
-      }
-
-      if (data.action) {
-        if (data.action.type === 'INFO_UPDATED') {
-          setUserContext(prev => ({
-            ...prev,
-            ...(data.action.data.guestCount && { guestCount: data.action.data.guestCount.toString() }),
-            ...(data.action.data.weddingDate && { weddingDate: data.action.data.weddingDate }),
-          }));
-        }
-      }
-
-      const aiMsg: Message = {
+      setMessages(prev => [...prev, {
         id: (Date.now() + 1).toString(),
         sender: 'ai',
         text: data.text,
         time: new Date().toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' }),
         action: data.action
-      };
-
-      setMessages(prev => [...prev, aiMsg]);
+      }]);
     } catch (error: any) {
-      console.error('WedyAI Hata:', error);
-      const errorMsg: Message = {
-        id: (Date.now() + 1).toString(),
-        sender: 'ai',
-        text: `⚠️ Sistem Uyarısı: ${error.message || 'Lütfen tekrar deneyin.'}`,
-        time: new Date().toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' })
-      };
-      setMessages(prev => [...prev, errorMsg]);
+      setMessages(prev => [...prev, { id: Date.now().toString(), sender: 'ai', text: `⚠️ Hata: ${error.message}`, time: now }]);
     } finally {
       setIsLoading(false);
     }
@@ -205,186 +109,80 @@ export default function PremiumWedyAIAssistant() {
   return (
     <div className="max-w-[900px] mx-auto space-y-8 pb-20 pt-4 font-sans selection:bg-[#111111] selection:text-white">
       
-      {/* Header */}
       <div className="text-center space-y-3">
-        <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-[#111111] text-white rounded-full text-[11px] font-medium tracking-widest uppercase shadow-sm">
+        <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-[#111111] text-white rounded-full text-[11px] font-medium tracking-widest uppercase">
           <ShieldCheck className="w-3.5 h-3.5 text-[#D4AF37]" />
-          <span>WedyPlan Concierge • Smart Voice & Actions</span>
+          <span>WedyPlan Concierge • Design & Actions</span>
         </div>
-        
-        <h1 className="text-[38px] md:text-[44px] font-serif font-normal tracking-tight text-[#111111] leading-tight">
-          Kişiselleştirilmiş Düğün Danışmanlığı
-        </h1>
-        
-        <p className="text-[15px] text-[#666666] max-w-[600px] mx-auto font-light leading-relaxed">
-          Sesli komutlarınızla veya yazarak bütçenizi yöneten ve canlı işlem yapan akıllı asistanınız.
-        </p>
-      </div>
-
-      {/* Profil Özet Bilgi Kartı */}
-      <div className="bg-[#FBFBFB] border border-black/[0.06] rounded-[24px] p-5 flex flex-wrap items-center justify-between gap-4 shadow-sm">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-full bg-[#111111] text-[#D4AF37] flex items-center justify-center font-serif text-lg font-bold">
-            {userContext.role === 'firma' ? <Building2 className="w-5 h-5" /> : <Crown className="w-5 h-5" />}
-          </div>
-          <div>
-            <div className="text-[14px] font-medium text-[#111111]">{userContext.name}</div>
-            <div className="text-[12px] text-[#888888]">{userContext.role === 'firma' ? 'Onaylı Tedarikçi Portalı' : 'Özel Müşteri Profili'}</div>
-          </div>
-        </div>
-
-        <div className="flex items-center gap-6 text-[13px] text-[#555555]">
-          <div><span className="text-[#999999]">Tarih:</span> <strong className="text-[#111111] font-medium">{userContext.weddingDate}</strong></div>
-          <div><span className="text-[#999999]">Bütçe:</span> <strong className="text-[#111111] font-medium">{userContext.budget} TL</strong></div>
-          <div><span className="text-[#999999]">Davetli:</span> <strong className="text-[#111111] font-medium">{userContext.guestCount} Kişi</strong></div>
-        </div>
+        <h1 className="text-[38px] md:text-[44px] font-serif font-normal tracking-tight text-[#111111]">Kişiselleştirilmiş Düğün Danışmanlığı</h1>
       </div>
 
       {/* Quick Prompts */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        {quickPrompts.map((p, idx) => {
-          const Icon = p.icon;
-          return (
-            <button
-              key={idx}
-              disabled={isLoading}
-              onClick={() => handleSend(p.text)}
-              className="p-5 bg-white border border-black/[0.08] rounded-[22px] text-left hover:border-[#111111] hover:shadow-[0_10px_30px_rgba(0,0,0,0.04)] transition-all space-y-2 group disabled:opacity-50"
-            >
-              <div className="flex items-center gap-2 text-[#111111]">
-                <Icon className="w-4 h-4 text-[#D4AF37]" />
-                <span className="text-[13px] font-medium tracking-wide">{p.title}</span>
-              </div>
-              <p className="text-[12px] text-[#666666] line-clamp-2 group-hover:text-[#111111] leading-relaxed">
-                {p.text}
-              </p>
-            </button>
-          );
-        })}
+        {quickPrompts.map((p, idx) => (
+          <button key={idx} disabled={isLoading} onClick={() => handleSend(p.text)} className="p-5 bg-white border border-black/[0.08] rounded-[22px] text-left hover:border-[#111111] transition-all">
+            <div className="flex items-center gap-2 text-[#111111] mb-2"><p.icon className="w-4 h-4 text-[#D4AF37]" /><span className="text-[13px] font-medium">{p.title}</span></div>
+            <p className="text-[12px] text-[#666666] line-clamp-2">{p.text}</p>
+          </button>
+        ))}
       </div>
 
       {/* Chat Container */}
-      <div className="bg-white border border-black/[0.08] rounded-[32px] p-6 shadow-[0_20px_50px_rgba(0,0,0,0.03)] space-y-6 min-h-[480px] flex flex-col justify-between">
+      <div className="bg-white border border-black/[0.08] rounded-[32px] p-6 shadow-sm min-h-[480px] flex flex-col justify-between">
         
-        {/* Messages List */}
         <div className="space-y-6 overflow-y-auto max-h-[500px] pr-2">
           {messages.map((m) => (
-            <div
-              key={m.id}
-              className={`flex items-start gap-4 ${m.sender === 'user' ? 'flex-row-reverse' : ''}`}
-            >
-              <div className={`w-9 h-9 rounded-full flex items-center justify-center text-xs shrink-0 shadow-sm ${
-                m.sender === 'user' ? 'bg-[#111111] text-white' : 'bg-[#F4F4F0] border border-black/10 text-[#111111]'
-              }`}>
+            <div key={m.id} className={`flex items-start gap-4 ${m.sender === 'user' ? 'flex-row-reverse' : ''}`}>
+              <div className={`w-9 h-9 rounded-full flex items-center justify-center shrink-0 ${m.sender === 'user' ? 'bg-[#111111] text-white' : 'bg-[#F4F4F0] text-[#111111]'}`}>
                 {m.sender === 'user' ? <User className="w-4 h-4" /> : <Sparkles className="w-4 h-4 text-[#D4AF37]" />}
               </div>
 
-              <div className={`group relative p-5 rounded-[22px] max-w-[82%] text-[14px] leading-relaxed whitespace-pre-wrap ${
-                m.sender === 'user'
-                  ? 'bg-[#111111] text-white rounded-tr-none font-light'
-                  : 'bg-[#FBFBF9] text-[#111111] rounded-tl-none border border-black/[0.05] font-normal shadow-sm'
-              }`}>
-                {/* Kopyala & İndir Butonları */}
-                {m.sender === 'ai' && m.text && (
-                  <div className="absolute right-3 top-3 opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1">
-                    <button
-                      onClick={() => downloadSummary(m.text)}
-                      className="p-1.5 hover:bg-black/5 rounded-lg text-[#888888]"
-                      title="Raporu İndir"
-                    >
-                      <Download className="w-3.5 h-3.5" />
-                    </button>
-                    <button
-                      onClick={() => copyToClipboard(m.id, m.text)}
-                      className="p-1.5 hover:bg-black/5 rounded-lg text-[#888888]"
-                      title="Kopyala"
-                    >
-                      {copiedId === m.id ? <Check className="w-3.5 h-3.5 text-green-600" /> : <Copy className="w-3.5 h-3.5" />}
-                    </button>
-                  </div>
-                )}
-
+              <div className={`p-5 rounded-[22px] max-w-[82%] text-[14px] leading-relaxed ${m.sender === 'user' ? 'bg-[#111111] text-white rounded-tr-none' : 'bg-[#FBFBF9] text-[#111111] rounded-tl-none border border-black/[0.05]'}`}>
                 <p>{m.text}</p>
 
-                {/* İnteraktif İşlem Onay Kartı */}
-                {m.action && m.action.type === 'BUDGET_ADDED' && (
-                  <div className="mt-4 p-4 bg-white border border-black/10 rounded-[16px] shadow-sm flex items-center justify-between gap-3 text-[13px]">
-                    <div className="flex items-center gap-2.5 text-[#111111]">
-                      <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0" />
-                      <div>
-                        <span className="font-semibold">{m.action.data.category}</span>
-                        <span className="text-[#666666] block text-[11px]">{m.action.data.notes}</span>
-                      </div>
-                    </div>
-                    <span className="font-mono font-bold text-[#111111] bg-[#F4F4F0] px-3 py-1 rounded-full text-[12px]">
-                      +{m.action.data.amount.toLocaleString('tr-TR')} TL
-                    </span>
+                {/* BÜTÇE KARTI */}
+                {m.action?.type === 'BUDGET_ADDED' && (
+                  <div className="mt-4 p-4 bg-white border rounded-[16px] flex justify-between gap-3 text-[13px]">
+                    <div className="flex gap-2.5"><CheckCircle2 className="w-5 h-5 text-emerald-600" /><div><span className="font-semibold block">{m.action.data.category}</span><span className="text-[#666666] text-[11px]">{m.action.data.notes}</span></div></div>
+                    <span className="font-mono font-bold bg-[#F4F4F0] px-3 py-1 rounded-full">+{m.action.data.amount.toLocaleString('tr-TR')} TL</span>
                   </div>
                 )}
 
-                <span className={`block text-[10px] mt-2 tracking-wider ${m.sender === 'user' ? 'text-white/40 text-right' : 'text-[#999999]'}`}>
-                  {m.time}
-                </span>
+                {/* YENİ: RENK PALETİ KARTI */}
+                {m.action?.type === 'THEME_GENERATED' && (
+                  <div className="mt-4 p-5 bg-white border border-black/10 rounded-[20px] shadow-sm">
+                    <div className="flex items-center gap-2 mb-2">
+                      <Palette className="w-5 h-5 text-[#D4AF37]" />
+                      <h4 className="font-serif text-[18px] font-medium text-[#111111]">{m.action.data.themeName}</h4>
+                    </div>
+                    <p className="text-[12px] text-[#666666] mb-4">{m.action.data.description}</p>
+                    <div className="flex h-16 w-full rounded-xl overflow-hidden shadow-inner">
+                      {m.action.data.colors.map((color: string, i: number) => (
+                        <div key={i} className="flex-1 flex items-end justify-center pb-2 group relative" style={{ backgroundColor: color }}>
+                          <span className="text-white text-[10px] font-mono font-bold opacity-0 group-hover:opacity-100 transition-opacity bg-black/30 px-2 py-0.5 rounded backdrop-blur-sm">{color}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                
+                <span className={`block text-[10px] mt-2 tracking-wider ${m.sender === 'user' ? 'text-white/40 text-right' : 'text-[#999999]'}`}>{m.time}</span>
               </div>
             </div>
           ))}
 
-          {/* Yükleniyor Durumu */}
           {isLoading && (
-            <div className="flex items-start gap-4 animate-pulse">
-              <div className="w-9 h-9 rounded-full bg-[#F4F4F0] border border-black/10 text-[#111111] flex items-center justify-center shrink-0">
-                <Sparkles className="w-4 h-4 text-[#D4AF37]" />
-              </div>
-              <div className="p-5 rounded-[22px] rounded-tl-none bg-[#FBFBF9] border border-black/[0.05] text-[#111111] flex items-center gap-3">
-                <Loader2 className="w-4 h-4 animate-spin text-[#111111]" />
-                <span className="text-[13px] font-medium text-[#666666]">WedyPlan Concierge yanıt hazırlıyor...</span>
-              </div>
-            </div>
+            <div className="flex items-start gap-4 animate-pulse"><div className="w-9 h-9 rounded-full bg-[#F4F4F0] flex items-center justify-center shrink-0"><Sparkles className="w-4 h-4 text-[#D4AF37]" /></div><div className="p-5 rounded-[22px] rounded-tl-none bg-[#FBFBF9] text-[#111111] flex gap-3"><Loader2 className="w-4 h-4 animate-spin text-[#111111]" /><span className="text-[13px] text-[#666666]">WedyPlan asistanınız tasarlıyor...</span></div></div>
           )}
-
           <div ref={chatEndRef} />
         </div>
 
-        {/* Input Form & Ses Düğmesi */}
-        <form
-          onSubmit={(e) => {
-            e.preventDefault();
-            handleSend();
-          }}
-          className="relative pt-2"
-        >
-          <input
-            type="text"
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            disabled={isLoading}
-            placeholder={isListening ? "Sizi dinliyorum, konuşabilirsiniz..." : "Örn: 'Bütçeme 20.000 TL gelinlik ekle' veya mikrofon butonuna basın..."}
-            className={`w-full h-[58px] pl-6 pr-28 border rounded-[22px] text-[14px] text-[#111111] outline-none transition-all shadow-inner disabled:opacity-60 placeholder:text-[#999999] ${
-              isListening ? 'bg-red-50 border-red-400 font-medium' : 'bg-[#FBFBF9] border-black/[0.08] focus:border-[#111111] focus:bg-white'
-            }`}
-          />
-
-          <div className="absolute right-2 top-1/2 -translate-y-1/2 translate-y-[1px] flex items-center gap-1.5">
-            {/* Mikrofon Düğmesi */}
-            <button
-              type="button"
-              onClick={toggleListening}
-              className={`w-10 h-10 rounded-[14px] flex items-center justify-center transition-all ${
-                isListening ? 'bg-red-600 text-white animate-pulse' : 'bg-[#F4F4F0] hover:bg-black/10 text-[#111111]'
-              }`}
-              title="Sesli Konuş"
-            >
-              {isListening ? <MicOff className="w-4 h-4" /> : <Mic className="w-4 h-4" />}
-            </button>
-
-            {/* Gönder Düğmesi */}
-            <button
-              type="submit"
-              disabled={!input.trim() || isLoading}
-              className="w-11 h-11 bg-[#111111] hover:bg-[#333333] text-white rounded-[16px] flex items-center justify-center transition-all disabled:opacity-30 shadow-md"
-            >
-              {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
-            </button>
+        {/* Input Form */}
+        <form onSubmit={(e) => { e.preventDefault(); handleSend(); }} className="relative pt-2">
+          <input type="text" value={input} onChange={(e) => setInput(e.target.value)} disabled={isLoading} placeholder="Örn: 'Kumsal düğünü için renk paleti öner'..." className={`w-full h-[58px] pl-6 pr-28 border rounded-[22px] text-[14px] outline-none transition-all ${isListening ? 'bg-red-50 border-red-400' : 'bg-[#FBFBF9] border-black/[0.08] focus:border-[#111111] focus:bg-white'}`} />
+          <div className="absolute right-2 top-1/2 -translate-y-1/2 flex gap-1.5">
+            <button type="button" onClick={toggleListening} className={`w-10 h-10 rounded-[14px] flex items-center justify-center ${isListening ? 'bg-red-600 text-white animate-pulse' : 'bg-[#F4F4F0] text-[#111111]'}`}>{isListening ? <MicOff className="w-4 h-4" /> : <Mic className="w-4 h-4" />}</button>
+            <button type="submit" disabled={!input.trim() || isLoading} className="w-11 h-11 bg-[#111111] text-white rounded-[16px] flex items-center justify-center"><Send className="w-4 h-4" /></button>
           </div>
         </form>
 

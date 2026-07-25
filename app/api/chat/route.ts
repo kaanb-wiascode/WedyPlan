@@ -15,24 +15,19 @@ export async function POST(req: Request) {
     const systemPrompt = `
 Sen WedyPlan platformunun VIP Kurumsal Düğün ve Organizasyon Asistanısın (WedyAI Concierge).
 
-Mevcut Kullanıcı Profili ve Verileri:
-- Kullanıcı Tipi: ${userContext?.role === 'firma' ? 'Tedarikçi / Firma' : 'Çift'}
+Kullanıcı Profili:
 - İsim: ${userContext?.name || 'Değerli Misafirimiz'}
 - Düğün Tarihi: ${userContext?.weddingDate || 'Henüz Belirlenmedi'}
-- Toplam Bütçe: ${userContext?.budget ? `${userContext.budget} TL` : 'Belirtilmedi'}
-- Davetli Sayısı: ${userContext?.guestCount ? `${userContext.guestCount} Kişi` : 'Belirtilmedi'}
 - Seçilen Mekan/Konsept: ${userContext?.venue || 'Henüz Seçilmedi'}
 
-YETKİLERİN VE ARAÇLARIN:
-Sana tanımlanmış araçları (tools) kullanarak bütçeye harcama kalemi ekleyebilir veya düğün detaylarını güncelleyebilirsin. Kullanıcı bir işlem yapmanı istediğinde ilgili aracı çağır.
+GÖREVLERİN:
+1. Bütçe ve davetli yönetimi için ilgili araçları (add_budget_item vb.) kullan.
+2. Çiftler düğün konsepti, renk paleti veya teması hakkında öneri istediğinde KESİNLİKLE "generate_theme_board" aracını çalıştırarak onlara görsel bir renk paleti sun.
 
-KURUMSAL İLETİŞİM İLKELERİ:
-1. ÜSLUP: Son derece saygın, elit, çözüm odaklı, yapıcı ve profesyonel bir dil kullan (Siz/Biz dili).
-2. VERİ BAĞLILIĞI: Cevaplarını öncelikle verilen kullanıcı verilerine ve WedyPlan platform imkanlarına dayandır.
-3. BİÇİM: Düzenli, maddeli ve şık başlıklar kullan.
+ÜSLUP: Kurumsal, elit, çözüm odaklı ve yapıcı (Siz/Biz dili).
     `;
 
-    // Yapay Zekanın Kullanabileceği Araçlar (Functions)
+    // Yeni: Konsept ve Renk Paleti Aracı Eklendi
     const tools = [
       {
         type: 'function',
@@ -42,9 +37,9 @@ KURUMSAL İLETİŞİM İLKELERİ:
           parameters: {
             type: 'object',
             properties: {
-              category: { type: 'string', description: 'Harcama kategorisi (örn: Fotoğrafçı, Gelinlik, Mekan, Müzik, Çiçek)' },
-              amount: { type: 'number', description: 'Harcama tutarı (TL cinsinden)' },
-              notes: { type: 'string', description: 'Harcamaya ait ek not veya açıklama' }
+              category: { type: 'string' },
+              amount: { type: 'number' },
+              notes: { type: 'string' }
             },
             required: ['category', 'amount']
           }
@@ -53,14 +48,20 @@ KURUMSAL İLETİŞİM İLKELERİ:
       {
         type: 'function',
         function: {
-          name: 'update_wedding_info',
-          description: 'Çiftin düğün tarihini veya davetli sayısını günceller.',
+          name: 'generate_theme_board',
+          description: 'Kullanıcının isteğine göre düğün konsepti ve renk paleti (hex kodlarıyla) oluşturur.',
           parameters: {
             type: 'object',
             properties: {
-              guestCount: { type: 'number', description: 'Yeni davetli sayısı' },
-              weddingDate: { type: 'string', description: 'Yeni düğün tarihi (örn: 20 Ekim 2026)' }
-            }
+              themeName: { type: 'string', description: 'Konseptin havalı ismi (Örn: Rustik Sonbahar Rüyası)' },
+              description: { type: 'string', description: 'Bu konseptin hissiyatı ve detaylı açıklaması' },
+              colors: { 
+                type: 'array', 
+                items: { type: 'string' },
+                description: 'Konsepte uygun 4 adet HEX renk kodu (Örn: ["#8B4513", "#D2B48C", "#F5DEB3", "#556B2F"])'
+              }
+            },
+            required: ['themeName', 'description', 'colors']
           }
         }
       }
@@ -80,57 +81,36 @@ KURUMSAL İLETİŞİM İLKELERİ:
         ],
         tools: tools,
         tool_choice: 'auto',
-        temperature: 0.3,
+        temperature: 0.4,
       }),
     });
 
     const data = await groqRes.json();
 
-    if (!groqRes.ok) {
-      return NextResponse.json(
-        { error: data.error?.message || 'Groq API yanıt vermedi.' },
-        { status: groqRes.status }
-      );
-    }
+    if (!groqRes.ok) throw new Error(data.error?.message || 'Groq API yanıt vermedi.');
 
     const choice = data.choices?.[0]?.message;
     let actionExecuted = null;
     let responseText = choice?.content || '';
 
-    // Eğer yapay zeka bir araç/fonksiyon çalıştırmak istediyse
+    // Fonksiyon Çağrısı Yakalama
     if (choice?.tool_calls && choice.tool_calls.length > 0) {
       const toolCall = choice.tool_calls[0];
       const fnName = toolCall.function.name;
       const fnArgs = JSON.parse(toolCall.function.arguments);
 
       if (fnName === 'add_budget_item') {
-        actionExecuted = {
-          type: 'BUDGET_ADDED',
-          data: {
-            category: fnArgs.category,
-            amount: fnArgs.amount,
-            notes: fnArgs.notes || 'WedyAI aracılığıyla eklendi'
-          }
-        };
-        responseText = `${fnArgs.category} harcama kalemi (${fnArgs.amount.toLocaleString('tr-TR')} TL) bütçe planlamanıza başarıyla işlendi. ✨`;
-      } else if (fnName === 'update_wedding_info') {
-        actionExecuted = {
-          type: 'INFO_UPDATED',
-          data: fnArgs
-        };
-        responseText = `Düğün detaylarınız başarıyla güncellendi. 📋`;
+        actionExecuted = { type: 'BUDGET_ADDED', data: fnArgs };
+        responseText = `${fnArgs.category} harcaması (${fnArgs.amount.toLocaleString('tr-TR')} TL) başarıyla eklendi.`;
+      } else if (fnName === 'generate_theme_board') {
+        actionExecuted = { type: 'THEME_GENERATED', data: fnArgs };
+        responseText = `Sizin için tasarladığım "${fnArgs.themeName}" konsepti ve renk paleti aşağıdadır. ✨`;
       }
     }
 
-    return NextResponse.json({
-      text: responseText,
-      action: actionExecuted
-    });
+    return NextResponse.json({ text: responseText, action: actionExecuted });
 
   } catch (error: any) {
-    return NextResponse.json(
-      { error: error.message || 'Bir sunucu hatası oluştu.' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: error.message || 'Sunucu hatası.' }, { status: 500 });
   }
 }
