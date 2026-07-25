@@ -62,9 +62,13 @@ export default function PremiumWedyAIAssistant() {
   ];
 
   const copyToClipboard = (id: string, text: string) => {
-    navigator.clipboard.writeText(text);
-    setCopiedId(id);
-    setTimeout(() => setCopiedId(null), 2000);
+    try {
+      navigator.clipboard.writeText(text);
+      setCopiedId(id);
+      setTimeout(() => setCopiedId(null), 2000);
+    } catch (e) {
+      console.error('Kopyalama hatası:', e);
+    }
   };
 
   const handleSend = async (textToSend?: string) => {
@@ -85,10 +89,6 @@ export default function PremiumWedyAIAssistant() {
     if (!textToSend) setInput('');
     setIsLoading(true);
 
-    const aiMsgId = (Date.now() + 1).toString();
-    
-    setMessages(prev => [...prev, { id: aiMsgId, sender: 'ai', text: '', time: now }]);
-
     try {
       const apiMessages = updatedMessages.map(m => ({
         role: m.sender === 'user' ? 'user' : 'assistant',
@@ -101,65 +101,29 @@ export default function PremiumWedyAIAssistant() {
         body: JSON.stringify({ messages: apiMessages, userContext: userContext }),
       });
 
+      const data = await res.json();
+
       if (!res.ok) {
-        let errorMsg = 'Yanıt alınamadı.';
-        try { 
-          const errData = await res.json(); 
-          errorMsg = errData.error || errorMsg; 
-        } catch { 
-          errorMsg = `Sunucu Hatası (${res.status})`; 
-        }
-        throw new Error(errorMsg);
+        throw new Error(data.error || 'Yapay zeka yanıt veremedi.');
       }
 
-      const reader = res.body?.getReader();
-      const decoder = new TextDecoder('utf-8');
-      if (!reader) throw new Error('Akış başlatılamadı.');
+      const aiMsg: Message = {
+        id: (Date.now() + 1).toString(),
+        sender: 'ai',
+        text: data.text,
+        time: new Date().toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' })
+      };
 
-      let accumulatedText = '';
-      let buffer = '';
-
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-
-        buffer += decoder.decode(value, { stream: true });
-        const lines = buffer.split('\n');
-        
-        buffer = lines.pop() || '';
-
-        for (const line of lines) {
-          const trimmed = line.trim();
-          if (!trimmed || trimmed.startsWith(':')) continue;
-          
-          if (trimmed === 'data: [DONE]') {
-            setIsLoading(false);
-            return;
-          }
-
-          if (trimmed.startsWith('data: ')) {
-            try {
-              const json = JSON.parse(trimmed.substring(6));
-              const content = json.choices?.[0]?.delta?.content;
-              if (content) {
-                accumulatedText += content;
-                setMessages(prev => prev.map(msg => msg.id === aiMsgId ? { ...msg, text: accumulatedText } : msg));
-              }
-            } catch (e) {
-              // Tamamlanmamış JSON paketleri geçilir
-            }
-          }
-        }
-      }
+      setMessages(prev => [...prev, aiMsg]);
     } catch (error: any) {
       console.error('WedyAI Hata:', error);
-      setMessages(prev =>
-        prev.map(msg =>
-          msg.id === aiMsgId
-            ? { ...msg, text: `⚠️ Sistem Uyarısı: ${error.message}` }
-            : msg
-        )
-      );
+      const errorMsg: Message = {
+        id: (Date.now() + 1).toString(),
+        sender: 'ai',
+        text: `⚠️ Sistem Uyarısı: ${error.message || 'Lütfen tekrar deneyin.'}`,
+        time: new Date().toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' })
+      };
+      setMessages(prev => [...prev, errorMsg]);
     } finally {
       setIsLoading(false);
     }
@@ -172,7 +136,7 @@ export default function PremiumWedyAIAssistant() {
       <div className="text-center space-y-3">
         <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-[#111111] text-white rounded-full text-[11px] font-medium tracking-widest uppercase shadow-sm">
           <ShieldCheck className="w-3.5 h-3.5 text-[#D4AF37]" />
-          <span>WedyPlan Concierge • Real-time AI Assistant</span>
+          <span>WedyPlan Concierge • VIP Private Assistant</span>
         </div>
         
         <h1 className="text-[38px] md:text-[44px] font-serif font-normal tracking-tight text-[#111111] leading-tight">
@@ -257,13 +221,26 @@ export default function PremiumWedyAIAssistant() {
                   </button>
                 )}
 
-                <p>{m.text || (isLoading && m.sender === 'ai' ? '...' : '')}</p>
+                <p>{m.text}</p>
                 <span className={`block text-[10px] mt-2 tracking-wider ${m.sender === 'user' ? 'text-white/40 text-right' : 'text-[#999999]'}`}>
                   {m.time}
                 </span>
               </div>
             </div>
           ))}
+
+          {/* Yükleniyor Durumu */}
+          {isLoading && (
+            <div className="flex items-start gap-4 animate-pulse">
+              <div className="w-9 h-9 rounded-full bg-[#F4F4F0] border border-black/10 text-[#111111] flex items-center justify-center shrink-0">
+                <Sparkles className="w-4 h-4 text-[#D4AF37]" />
+              </div>
+              <div className="p-5 rounded-[22px] rounded-tl-none bg-[#FBFBF9] border border-black/[0.05] text-[#111111] flex items-center gap-3">
+                <Loader2 className="w-4 h-4 animate-spin text-[#111111]" />
+                <span className="text-[13px] font-medium text-[#666666]">WedyPlan Concierge verilerinizi analiz ediyor...</span>
+              </div>
+            </div>
+          )}
 
           <div ref={chatEndRef} />
         </div>

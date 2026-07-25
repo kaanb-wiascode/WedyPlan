@@ -1,4 +1,4 @@
-export const runtime = 'edge';
+import { NextResponse } from 'next/server';
 
 export async function POST(req: Request) {
   try {
@@ -6,9 +6,9 @@ export async function POST(req: Request) {
     const apiKey = process.env.GROQ_API_KEY;
 
     if (!apiKey) {
-      return new Response(
-        JSON.stringify({ error: 'GROQ_API_KEY ortam değişkeni bulunamadı!' }),
-        { status: 500, headers: { 'Content-Type': 'application/json' } }
+      return NextResponse.json(
+        { error: 'GROQ_API_KEY ortam değişkeni bulunamadı! Lütfen Vercel panelini veya .env.local dosyanızı kontrol edin.' },
+        { status: 500 }
       );
     }
 
@@ -43,30 +43,26 @@ KURUMSAL İLETİŞİM İLKELERİ:
           ...messages,
         ],
         temperature: 0.5,
-        stream: true,
       }),
     });
 
+    const data = await groqRes.json();
+
     if (!groqRes.ok) {
-      const errText = await groqRes.text();
-      return new Response(
-        JSON.stringify({ error: `Groq API Hatası: ${errText}` }),
-        { status: groqRes.status, headers: { 'Content-Type': 'application/json' } }
+      return NextResponse.json(
+        { error: data.error?.message || 'Groq API yanıt vermedi.' },
+        { status: groqRes.status }
       );
     }
 
-    return new Response(groqRes.body, {
-      headers: {
-        'Content-Type': 'text/event-stream',
-        'Cache-Control': 'no-cache',
-        'Connection': 'keep-alive',
-      },
-    });
+    const aiText = data.choices?.[0]?.message?.content || 'Yanıt oluşturulamadı.';
+
+    return NextResponse.json({ text: aiText });
 
   } catch (error: any) {
-    return new Response(
-      JSON.stringify({ error: error.message || 'Sunucu hatası oluştu.' }),
-      { status: 500, headers: { 'Content-Type': 'application/json' } }
+    return NextResponse.json(
+      { error: error.message || 'Bir sunucu hatası oluştu.' },
+      { status: 500 }
     );
   }
 }
