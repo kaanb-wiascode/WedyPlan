@@ -19,11 +19,13 @@ Kullanıcı Profili:
 - İsim: ${userContext?.name || 'Selin & Kaan'}
 - Düğün Tarihi: ${userContext?.weddingDate || '15 Ağustos 2026'}
 - Bütçe: ${userContext?.budget || '350.000 TL'}
+- Konum: İstanbul (Geçerli şehir)
 
 GÖREVLERİN VE ARAÇ KULLANIM KURALLARI:
-1. Kullanıcı genel sorular sorduğunda (Örn: "neler yapabiliriz", "merhaba", "bana yardımcı ol") HİÇBİR ARAÇ (TOOL) ÇALIŞTIRMA. Sadece yeteneklerini ve yapabileceklerini maddeler halinde anlat.
-2. SADECE kullanıcı açık bir işlem komutu verdiğinde (Örn: "30000 TL fotoğrafçı ekle", "renk paleti öner") ilgili aracı çalıştır.
-3. Araçları çalıştırırken 'amount' gibi sayısal parametrelerde KESİNLİKLE tırnak işareti veya metin kullanma! Tırnaksız ham sayı gönder (Örn: "amount": 30000).
+1. Kullanıcı genel tavsiye istediğinde HİÇBİR ARAÇ (TOOL) ÇALIŞTIRMA.
+2. SADECE kullanıcı açık bir bütçe işlemi istediğinde "add_budget_item" aracını kullan.
+3. Kullanıcı konsept önerisi, renk paleti önerisi veya tema istediğinde (Örn: "kır düğünü renk paleti") "generate_theme_board" aracını kullan.
+4. LÜTFEN DİKKAT: Araçları çağırırken <function> etiketlerini DOĞRUDAN METİN İÇİNE YAZMA. API'nin JSON formatındaki tool_call özelliğini kullan.
     `;
 
     const tools = [
@@ -31,13 +33,13 @@ GÖREVLERİN VE ARAÇ KULLANIM KURALLARI:
         type: 'function',
         function: {
           name: 'add_budget_item',
-          description: 'Sadece kullanıcı açıkça bütçeye harcama eklemek istediğinde çalıştırılır.',
+          description: 'Sadece bütçeye harcama eklemek istenildiğinde kullanılır.',
           parameters: {
             type: 'object',
             properties: {
-              category: { type: 'string', description: 'Harcama kategorisi (örn: Fotoğrafçı, Gelinlik)' },
-              amount: { type: 'number', description: 'Sadece ham sayısal değer, tırnaksız. (Örn: 25000)' },
-              notes: { type: 'string', description: 'Harcama notu' }
+              category: { type: 'string', description: 'Harcama kategorisi' },
+              amount: { type: 'number', description: 'Sadece ham sayı (Örn: 25000)' },
+              notes: { type: 'string' }
             },
             required: ['category', 'amount']
           }
@@ -47,7 +49,7 @@ GÖREVLERİN VE ARAÇ KULLANIM KURALLARI:
         type: 'function',
         function: {
           name: 'generate_theme_board',
-          description: 'Sadece kullanıcı düğün konsepti veya renk paleti istediğinde çalıştırılır.',
+          description: 'Düğün konsepti ve renk paleti (hex kodlarıyla) oluşturur.',
           parameters: {
             type: 'object',
             properties: {
@@ -78,7 +80,7 @@ GÖREVLERİN VE ARAÇ KULLANIM KURALLARI:
         ],
         tools: tools,
         tool_choice: 'auto',
-        temperature: 0.2,
+        temperature: 0.3,
       }),
     });
 
@@ -92,11 +94,34 @@ GÖREVLERİN VE ARAÇ KULLANIM KURALLARI:
     }
 
     const choice = data.choices?.[0]?.message;
-    let actionExecuted = null;
     let responseText = choice?.content || '';
+    let actionExecuted = null;
 
-    // Tool çağrısı kontrolü
-    if (choice?.tool_calls && choice.tool_calls.length > 0) {
+    // 1. KAÇAK FONKSİYON YAKALAYICI (Llama Model Text-Leak Fix)
+    // Eğer yapay zeka fonksiyonu metin içine <function=isim>{json}</function> şeklinde sızdırırsa bunu yakalarız.
+    const regex = /<function=(\w+)>([\s\S]*?)<\/function>/;
+    const match = responseText.match(regex);
+
+    if (match) {
+      const fnName = match[1];
+      const fnArgsStr = match[2];
+      
+      try {
+        const fnArgs = JSON.parse(fnArgsStr);
+        if (fnName === 'add_budget_item') {
+          const parsedAmount = Number(fnArgs.amount) || 0;
+          actionExecuted = { type: 'BUDGET_ADDED', data: { ...fnArgs, amount: parsedAmount } };
+        } else if (fnName === 'generate_theme_board') {
+          actionExecuted = { type: 'THEME_GENERATED', data: fnArgs };
+        }
+        // Metin içindeki o çirkin <function> kodunu silip temiz metni bırakıyoruz
+        responseText = responseText.replace(regex, '').trim();
+      } catch (e) {
+        console.error("Regex parse hatası:", e);
+      }
+    } 
+    // 2. NORMAL (STANDART) FONKSİYON ÇAĞRISI YAKALAYICI
+    else if (choice?.tool_calls && choice.tool_calls.length > 0) {
       const toolCall = choice.tool_calls[0];
       const fnName = toolCall.function.name;
       
@@ -111,19 +136,19 @@ GÖREVLERİN VE ARAÇ KULLANIM KURALLARI:
 
       if (fnName === 'add_budget_item') {
         const parsedAmount = Number(fnArgs.amount) || 0;
-        actionExecuted = { 
-          type: 'BUDGET_ADDED', 
-          data: { ...fnArgs, amount: parsedAmount } 
-        };
-        if (!responseText) {
-          responseText = `${fnArgs.category} harcaması (${parsedAmount.toLocaleString('tr-TR')} TL) bütçenize eklendi. ✨`;
-        }
+        actionExecuted = { type: 'BUDGET_ADDED', data: { ...fnArgs, amount: parsedAmount } };
+        if (!responseText) responseText = `${fnArgs.category} harcaması (${parsedAmount.toLocaleString('tr-TR')} TL) bütçenize eklendi.`;
       } else if (fnName === 'generate_theme_board') {
         actionExecuted = { type: 'THEME_GENERATED', data: fnArgs };
-        if (!responseText) {
-          responseText = `Sizin için "${fnArgs.themeName}" konsepti ve renk paleti oluşturuldu. ✨`;
-        }
+        if (!responseText) responseText = `Sizin için "${fnArgs.themeName}" konsepti ve renk paleti oluşturuldu.`;
       }
+    }
+
+    // Eğer responseText tamamen boşaldıysa ve bir aksiyon alındıysa standart yanıt ver
+    if (!responseText.trim() && actionExecuted) {
+       responseText = actionExecuted.type === 'THEME_GENERATED' 
+         ? "İşte sizin için hazırladığım renk paleti ve konsept önerisi: ✨"
+         : "İşleminiz başarıyla gerçekleştirildi. ✨";
     }
 
     return NextResponse.json({ text: responseText, action: actionExecuted });
