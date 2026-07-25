@@ -2,6 +2,9 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { onAuthStateChanged, User } from 'firebase/auth';
+import { doc, getDoc, setDoc } from 'firebase/firestore';
+import { auth, db } from '../../lib/firebase';
 
 interface Task {
   id: string;
@@ -40,35 +43,87 @@ const DEFAULT_TASKS: Task[] = [
 const PERIODS = ['Tüm Adımlar', '12-6 Ay Önce', '6-3 Ay Önce', '3-1 Ay Önce', 'Son Haftalar', 'Düğün Günü'];
 
 export default function ChecklistPage() {
+  const [user, setUser] = useState<User | null>(null);
   const [weddingDate, setWeddingDate] = useState<string>('2026-09-15');
   const [timeLeft, setTimeLeft] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 });
   const [tasks, setTasks] = useState<Task[]>(DEFAULT_TASKS);
   const [selectedPeriod, setSelectedPeriod] = useState<string>('Tüm Adımlar');
   const [newTaskTitle, setNewTaskTitle] = useState<string>('');
   const [newTaskPeriod, setNewTaskPeriod] = useState<string>('6-3 Ay Önce');
+  
   const [isLoaded, setIsLoaded] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
 
-  // LocalStorage'dan yükle
+  // Oturum ve Veri Yükleme
   useEffect(() => {
-    try {
-      const savedDate = localStorage.getItem('wedy_wedding_date');
-      const savedTasks = localStorage.getItem('wedy_checklist_tasks');
-      if (savedDate) setWeddingDate(savedDate);
-      if (savedTasks) setTasks(JSON.parse(savedTasks));
-    } catch (e) {
-      console.error('Veri yükleme hatası:', e);
-    } finally {
+    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
+      setUser(currentUser);
+
+      if (currentUser) {
+        // Kullanıcı giriş yapmışsa Firestore'dan verilerini çek
+        try {
+          const docRef = doc(db, 'checklists', currentUser.uid);
+          const docSnap = await getDoc(docRef);
+
+          if (docSnap.exists()) {
+            const data = docSnap.data();
+            if (data.weddingDate) setWeddingDate(data.weddingDate);
+            if (data.tasks) setTasks(data.tasks);
+          } else {
+            // İlk kez giriş yapıyorsa LocalStorage'dakini buluta taşı
+            const savedDate = localStorage.getItem('wedy_wedding_date');
+            const savedTasks = localStorage.getItem('wedy_checklist_tasks');
+            if (savedDate) setWeddingDate(savedDate);
+            if (savedTasks) setTasks(JSON.parse(savedTasks));
+          }
+        } catch (error) {
+          console.error('Bulut veri çekme hatası:', error);
+        }
+      } else {
+        // Giriş yapmamışsa LocalStorage'dan oku
+        try {
+          const savedDate = localStorage.getItem('wedy_wedding_date');
+          const savedTasks = localStorage.getItem('wedy_checklist_tasks');
+          if (savedDate) setWeddingDate(savedDate);
+          if (savedTasks) setTasks(JSON.parse(savedTasks));
+        } catch (e) {
+          console.error('Yerel veri yükleme hatası:', e);
+        }
+      }
       setIsLoaded(true);
-    }
+    });
+
+    return () => unsubscribe();
   }, []);
 
-  // LocalStorage'a kaydet
+  // Değişiklikleri Kaydetme (Bulut / Yerel)
   useEffect(() => {
-    if (isLoaded) {
-      localStorage.setItem('wedy_wedding_date', weddingDate);
-      localStorage.setItem('wedy_checklist_tasks', JSON.stringify(tasks));
-    }
-  }, [weddingDate, tasks, isLoaded]);
+    if (!isLoaded) return;
+
+    const saveData = async () => {
+      setIsSaving(true);
+      try {
+        if (user) {
+          // Giriş yapmışsa Firestore'a kaydet
+          await setDoc(doc(db, 'checklists', user.uid), {
+            weddingDate,
+            tasks,
+            updatedAt: new Date().toISOString(),
+          });
+        } else {
+          // Giriş yapmamışsa LocalStorage'a kaydet
+          localStorage.setItem('wedy_wedding_date', weddingDate);
+          localStorage.setItem('wedy_checklist_tasks', JSON.stringify(tasks));
+        }
+      } catch (error) {
+        console.error('Kaydetme hatası:', error);
+      } finally {
+        setTimeout(() => setIsSaving(false), 500);
+      }
+    };
+
+    saveData();
+  }, [weddingDate, tasks, user, isLoaded]);
 
   // Canlı Geri Sayım Hesaplayıcı
   useEffect(() => {
@@ -78,19 +133,16 @@ export default function ChecklistPage() {
       const difference = target - now;
 
       if (difference > 0) {
-        setDays(Math.floor(difference / (1000 * 60 * 60 * 24)));
-        setHours(Math.floor((difference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)));
-        setMinutes(Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60)));
-        setSeconds(Math.floor((difference % (1000 * 60)) / 1000));
+        setTimeLeft({
+          days: Math.floor(difference / (1000 * 60 * 60 * 24)),
+          hours: Math.floor((difference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)),
+          minutes: Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60)),
+          seconds: Math.floor((difference % (1000 * 60)) / 1000),
+        });
       } else {
         setTimeLeft({ days: 0, hours: 0, minutes: 0, seconds: 0 });
       }
     };
-
-    const setDays = (d: number) => setTimeLeft((prev) => ({ ...prev, days: d }));
-    const setHours = (h: number) => setTimeLeft((prev) => ({ ...prev, hours: h }));
-    const setMinutes = (m: number) => setTimeLeft((prev) => ({ ...prev, minutes: m }));
-    const setSeconds = (s: number) => setTimeLeft((prev) => ({ ...prev, seconds: s }));
 
     calculateTime();
     const interval = setInterval(calculateTime, 1000);
@@ -155,16 +207,30 @@ export default function ChecklistPage() {
       </nav>
 
       <div className="max-w-5xl mx-auto px-4 py-8 space-y-8">
-        {/* Başlık */}
+        {/* Başlık ve Bulut Durum Rozeti */}
         <div className="text-center space-y-2">
-          <span className="bg-purple-100 text-[#4A154B] text-xs font-bold px-3 py-1 rounded-full uppercase">
-            Planlama Asistanı
-          </span>
+          <div className="flex items-center justify-center gap-2">
+            <span className="bg-purple-100 text-[#4A154B] text-xs font-bold px-3 py-1 rounded-full uppercase">
+              Planlama Asistanı
+            </span>
+            {user ? (
+              <span className="bg-emerald-100 text-emerald-800 text-[11px] font-bold px-3 py-1 rounded-full flex items-center gap-1">
+                ☁️ {isSaving ? 'Buluta Kaydediliyor...' : 'Hesabınızla Senkronize'}
+              </span>
+            ) : (
+              <Link
+                href="/login"
+                className="bg-amber-100 hover:bg-amber-200 text-amber-900 text-[11px] font-bold px-3 py-1 rounded-full transition flex items-center gap-1"
+              >
+                💾 Cihaza Kayıtlı (Bulut Kaydı İçin Giriş Yapın)
+              </Link>
+            )}
+          </div>
           <h1 className="text-3xl md:text-4xl font-extrabold text-[#4A154B]">
             Düğün Sayacı & Kontrol Listesi ⏳
           </h1>
           <p className="text-slate-500 text-sm max-w-xl mx-auto">
-            Düğün tarihinizi girin, geri sayımı başlatın ve adım adım tüm hazırlıklarınızı eksiksiz tamamlayın.
+            Düğün tarihinizi girin, geri sayımı başlatın ve tüm cihazlarınızdan adımları anında takip edin.
           </p>
         </div>
 
@@ -249,7 +315,7 @@ export default function ChecklistPage() {
             <input
               type="text"
               required
-              placeholder="Yeni yapılacak görev ekleyin (Örn: Gelin buketi siparişi)"
+              placeholder="Yeni yapılacağı görev ekleyin (Örn: Gelin buketi siparişi)"
               value={newTaskTitle}
               onChange={(e) => setNewTaskTitle(e.target.value)}
               className="flex-grow p-2.5 border border-slate-200 rounded-xl text-xs focus:outline-none focus:border-[#E6007E]"
