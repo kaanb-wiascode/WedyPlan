@@ -1,20 +1,30 @@
 'use client';
 
 import React, { useMemo } from 'react';
-import { useWeddingOS } from '@/store/useWeddingOS'; // SİSTEM BEYNİ
+import { useWeddingOS } from '@/store/useWeddingOS';
 import { Wallet, Search, Plus, Sparkles, CheckCircle2 } from 'lucide-react';
 
-const INITIAL_DEALS = [
+// TypeScript Tip Tanımı (Hatanın çözümü)
+interface Deal {
+  id: string;
+  clientName: string;
+  weddingDate: string;
+  totalAmount: number;
+  paidAmount: number;
+  status: string;
+  isOsAutomated?: boolean;
+}
+
+const INITIAL_DEALS: Deal[] = [
   { id: '1', clientName: 'Ayşe & Burak', weddingDate: '22.08.2026', totalAmount: 120000, paidAmount: 120000, status: 'Tamamlandı' },
   { id: '2', clientName: 'Zeynep & Murat', weddingDate: '05.09.2026', totalAmount: 80000, paidAmount: 20000, status: 'Kapora Alındı' },
 ];
 
 export default function PremiumVendorFinancePage() {
-  const { venueDealStatus } = useWeddingOS(); // BEYNİ DİNLİYORUZ
+  const { venueDealStatus } = useWeddingOS();
 
-  // OS OTOMASYONU: Eğer çift teklifi onayladıysa, Firmanın tablosuna Selin & Caner'i OTOMATİK ekle!
   const deals = useMemo(() => {
-    let allDeals = [...INITIAL_DEALS];
+    let allDeals: Deal[] = [...INITIAL_DEALS];
     if (venueDealStatus === 'ONAYLANDI') {
       allDeals = [
         { id: 'new_os_deal', clientName: 'Selin & Caner (Yeni Onay)', weddingDate: '15.08.2026', totalAmount: 150000, paidAmount: 0, status: 'Yeni Anlaşma', isOsAutomated: true },
@@ -62,13 +72,13 @@ export default function PremiumVendorFinancePage() {
           <h2 className="text-[16px] font-medium text-[#111111]">Aktif Düğün Anlaşmaları</h2>
         </div>
 
-        <table className="w-full text-left">
+        <table className="w-full text-left border-collapse">
           <thead>
             <tr className="bg-[#F8F8F7] border-b text-[13px] font-medium text-[#666666]">
-              <th className="px-6 py-4">Müşteri</th>
-              <th className="px-6 py-4">Tarih</th>
-              <th className="px-6 py-4">Tutar</th>
-              <th className="px-6 py-4">Durum</th>
+              <th className="px-6 py-4 font-medium">Müşteri</th>
+              <th className="px-6 py-4 font-medium">Tarih</th>
+              <th className="px-6 py-4 font-medium">Tutar</th>
+              <th className="px-6 py-4 font-medium">Durum</th>
             </tr>
           </thead>
           <tbody className="text-[14px]">

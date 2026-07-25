@@ -2,10 +2,19 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { useWeddingOS } from '@/store/useWeddingOS'; // SİSTEM BEYNİ
+import { useWeddingOS } from '@/store/useWeddingOS';
 import { CheckCircle2, Circle, Calendar, Plus, Sparkles } from 'lucide-react';
 
-const INITIAL_TASKS = [
+// TypeScript Tip Tanımı (Hatanın çözümü)
+interface Task {
+  id: string;
+  title: string;
+  category: string;
+  completed: boolean;
+  autoCompleted?: boolean;
+}
+
+const INITIAL_TASKS: Task[] = [
   { id: '1', title: 'Düğün bütçesini ve maksimum harcama limitini belirleyin.', category: '12-9 Ay Kala', completed: true },
   { id: '2', title: 'Taslak davetli listesini oluşturun.', category: '12-9 Ay Kala', completed: true },
   { id: '3', title: 'Hayalinizdeki düğün mekanını bulun ve resmi sözleşmeyi imzalayın.', category: '12-9 Ay Kala', completed: false },
@@ -14,10 +23,9 @@ const INITIAL_TASKS = [
 ];
 
 export default function PremiumChecklistPage() {
-  const { venueDealStatus } = useWeddingOS(); // OS DURUMUNU DİNLİYORUZ
-  const [tasks, setTasks] = useState(INITIAL_TASKS);
+  const { venueDealStatus } = useWeddingOS();
+  const [tasks, setTasks] = useState<Task[]>(INITIAL_TASKS);
 
-  // OS OTOMASYONU: Eğer Mekan ile anlaşıldıysa (ONAYLANDI), Mekan bulma görevini OTOMATİK tamamla!
   useEffect(() => {
     if (venueDealStatus === 'ONAYLANDI') {
       setTasks(prev => prev.map(task => 
@@ -37,7 +45,7 @@ export default function PremiumChecklistPage() {
     if (!acc[task.category]) acc[task.category] = [];
     acc[task.category].push(task);
     return acc;
-  }, {} as Record<string, typeof tasks>);
+  }, {} as Record<string, Task[]>);
 
   return (
     <div className="min-h-screen bg-[#FFFFFF] text-[#111111] font-sans selection:bg-[#7C5CFF] selection:text-white pb-32">
@@ -92,7 +100,6 @@ export default function PremiumChecklistPage() {
                       </span>
                     </div>
                     
-                    {/* OS OTOMASYONU ROZETİ */}
                     {task.autoCompleted && (
                       <div className="hidden sm:flex items-center gap-1.5 px-3 py-1 bg-[#1DB954]/10 text-[#1DB954] rounded-full text-[12px] font-medium shrink-0">
                         <Sparkles className="w-3.5 h-3.5" /> OS Tarafından Tamamlandı
