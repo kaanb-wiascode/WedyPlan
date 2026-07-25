@@ -1,244 +1,137 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
-import Link from 'next/link';
-import { collection, getDocs, updateDoc, doc } from 'firebase/firestore';
-import { db } from '../../../lib/firebase';
-import { generateWhatsAppLink } from '../../../lib/whatsapp';
+import React, { useState } from 'react';
+import { 
+  MessageCircle, 
+  CalendarCheck, 
+  CheckCircle2, 
+  Clock, 
+  MoreHorizontal,
+  Phone
+} from 'lucide-react';
 
-interface LeadRequest {
-  id: string;
-  vendorName?: string;
-  fullName: string;
-  phone: string;
-  weddingDate: string;
-  guestCount?: string;
-  message?: string;
-  status?: string;
-  createdAt?: any;
-}
-
-interface Appointment {
-  id: string;
-  vendorName: string;
-  fullName: string;
-  phone: string;
-  date: string;
-  timeSlot: string;
-  status?: string;
-}
-
-export default function VendorLeadsPage() {
+export default function PremiumVendorLeadsPage() {
   const [activeTab, setActiveTab] = useState<'requests' | 'appointments'>('requests');
-  const [requests, setRequests] = useState<LeadRequest[]>([]);
-  const [appointments, setAppointments] = useState<Appointment[]>([]);
-  const [loading, setLoading] = useState(true);
 
-  // Firestore'dan Gelen Talepleri Çek
-  const fetchVendorData = async () => {
-    setLoading(true);
-    try {
-      // Teklif Talepleri
-      const reqSnap = await getDocs(collection(db, 'requests'));
-      const reqList: LeadRequest[] = [];
-      reqSnap.forEach((d) => reqList.push({ id: d.id, status: 'Beklemede', ...d.data() } as LeadRequest));
-      setRequests(reqList);
+  // Mock Data
+  const requests = [
+    { id: '1', name: 'Selin Soylu', phone: '0532 123 45 67', date: '15.08.2026', guests: '300', status: 'Yeni', message: 'Merhaba, menü tadımı yapabiliyor muyuz?' },
+    { id: '2', name: 'Ayşe Demir', phone: '0555 987 65 43', date: '22.09.2026', guests: '150', status: 'Yanıtlandı', message: 'Fiyat bilgisi alabilir miyim?' },
+  ];
 
-      // Randevular
-      const appSnap = await getDocs(collection(db, 'appointments'));
-      const appList: Appointment[] = [];
-      appSnap.forEach((d) => appList.push({ id: d.id, status: 'Onay Bekliyor', ...d.data() } as Appointment));
-      setAppointments(appList);
-    } catch (error) {
-      console.error('Talepler yüklenirken hata oluştu:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchVendorData();
-  }, []);
-
-  // Teklif Durum Güncelleme
-  const handleUpdateStatus = async (id: string, newStatus: string) => {
-    try {
-      const docRef = doc(db, 'requests', id);
-      await updateDoc(docRef, { status: newStatus });
-      setRequests((prev) =>
-        prev.map((r) => (r.id === id ? { ...r, status: newStatus } : r))
-      );
-    } catch (error) {
-      console.error('Status güncelleme hatası:', error);
-    }
-  };
+  const appointments = [
+    { id: '3', name: 'Burak & Zeynep', phone: '0530 111 22 33', date: 'Yarın', time: '14:30', status: 'Onaylandı' },
+  ];
 
   return (
-    <div className="min-h-screen bg-[#FDFBFD] text-slate-800">
-      {/* Navbar */}
-      <nav className="flex items-center justify-between px-6 py-4 bg-white border-b border-purple-100 shadow-sm">
-        <Link href="/" className="text-2xl font-bold text-[#4A154B]">
-          Wedy<span className="text-[#E6007E]">Plan</span>
-          <span className="text-[10px] bg-purple-100 text-[#4A154B] px-2.5 py-1 rounded-md ml-2 font-bold uppercase">
-            İş Ortağı Paneli
-          </span>
-        </Link>
-        <Link href="/satici" className="text-xs font-semibold text-slate-500 hover:text-[#E6007E]">
-          ← İş Ortağı Ana Sayfası
-        </Link>
-      </nav>
-
-      <div className="max-w-6xl mx-auto px-4 py-8 space-y-6">
-        {/* Üst Bilgi Başlığı */}
-        <div className="bg-white p-6 rounded-3xl border border-purple-100 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-4">
-          <div>
-            <h1 className="text-xl font-extrabold text-[#4A154B]">Gelen Müşteri Talepleri & Randevular 📥</h1>
-            <p className="text-xs text-slate-500 mt-1">
-              Çiftlerden gelen fiyat teklifi taleplerini ve mekan gezisi randevularını buradan anlık takip edin.
-            </p>
-          </div>
-          <button
-            onClick={fetchVendorData}
-            className="bg-purple-50 hover:bg-purple-100 text-[#4A154B] text-xs font-bold px-4 py-2.5 rounded-xl border border-purple-200 transition"
-          >
-            🔄 Verileri Yenile
-          </button>
+    <div className="space-y-10 animate-in fade-in duration-500">
+      
+      {/* Header */}
+      <header className="flex flex-col md:flex-row md:items-end justify-between gap-6">
+        <div>
+          <h1 className="text-[32px] font-medium tracking-tight text-[#111111]">
+            Talepler & Randevular
+          </h1>
+          <p className="text-[15px] text-[#666666] mt-1">
+            Çiftlerden gelen istekleri ve mekan gezisi randevularını yönetin.
+          </p>
         </div>
+      </header>
 
-        {/* Sekme Değiştirici */}
-        <div className="flex gap-3 border-b border-purple-100 pb-2">
-          <button
-            onClick={() => setActiveTab('requests')}
-            className={`text-xs font-bold px-5 py-2.5 rounded-xl transition ${
-              activeTab === 'requests'
-                ? 'bg-[#4A154B] text-white shadow'
-                : 'bg-white text-slate-600 border border-slate-200 hover:bg-purple-50'
-            }`}
-          >
-            💬 Fiyat Teklifi Talepleri ({requests.length})
-          </button>
-          <button
-            onClick={() => setActiveTab('appointments')}
-            className={`text-xs font-bold px-5 py-2.5 rounded-xl transition ${
-              activeTab === 'appointments'
-                ? 'bg-[#4A154B] text-white shadow'
-                : 'bg-white text-slate-600 border border-slate-200 hover:bg-purple-50'
-            }`}
-          >
-            📅 Mekan Gezisi Randevuları ({appointments.length})
-          </button>
-        </div>
+      {/* Segmented Control (Apple Style Tabs) */}
+      <div className="inline-flex bg-[#F8F8F7] p-1 rounded-[14px] border border-[rgba(0,0,0,0.04)]">
+        <button
+          onClick={() => setActiveTab('requests')}
+          className={`flex items-center gap-2 px-6 h-[40px] rounded-[10px] text-[14px] font-medium transition-all duration-300 ${
+            activeTab === 'requests'
+              ? 'bg-white text-[#111111] shadow-[0_2px_8px_rgba(0,0,0,0.04)]'
+              : 'text-[#666666] hover:text-[#111111]'
+          }`}
+        >
+          <MessageCircle className="w-4 h-4" />
+          Fiyat Teklifleri ({requests.length})
+        </button>
+        <button
+          onClick={() => setActiveTab('appointments')}
+          className={`flex items-center gap-2 px-6 h-[40px] rounded-[10px] text-[14px] font-medium transition-all duration-300 ${
+            activeTab === 'appointments'
+              ? 'bg-white text-[#111111] shadow-[0_2px_8px_rgba(0,0,0,0.04)]'
+              : 'text-[#666666] hover:text-[#111111]'
+          }`}
+        >
+          <CalendarCheck className="w-4 h-4" />
+          Randevular ({appointments.length})
+        </button>
+      </div>
 
-        {/* Liste Alanı */}
-        {loading ? (
-          <p className="text-center text-slate-400 text-xs py-12">Talepler yükleniyor...</p>
-        ) : activeTab === 'requests' ? (
-          /* TEKLİF TALEPLERİ GRID */
-          requests.length === 0 ? (
-            <div className="bg-white p-12 text-center rounded-3xl border border-purple-100 text-slate-400 text-xs">
-              Henüz gelen bir fiyat teklifi talebi bulunmuyor.
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {requests.map((req) => {
-                const waLink = generateWhatsAppLink(
-                  req.phone,
-                  req.vendorName || 'Firmamız',
-                  req.fullName,
-                  req.weddingDate,
-                  req.message
-                );
-
-                return (
-                  <div
-                    key={req.id}
-                    className="bg-white p-5 rounded-2xl border border-purple-100 shadow-sm space-y-3 flex flex-col justify-between"
-                  >
-                    <div className="space-y-2">
-                      <div className="flex justify-between items-start">
-                        <span className="text-[10px] font-bold bg-pink-50 text-[#E6007E] px-2.5 py-1 rounded-md">
-                          {req.vendorName || 'Firma İlanı'}
-                        </span>
-                        <span
-                          className={`text-[10px] font-bold px-2 py-0.5 rounded ${
-                            req.status === 'Yanıtlandı'
-                              ? 'bg-emerald-50 text-emerald-700'
-                              : 'bg-amber-50 text-amber-700'
-                          }`}
-                        >
-                          ● {req.status}
-                        </span>
-                      </div>
-
-                      <h3 className="text-sm font-bold text-slate-800">{req.fullName}</h3>
-                      <div className="text-xs text-slate-500 space-y-1">
-                        <p>📞 <strong>Telefon:</strong> {req.phone}</p>
-                        <p>📅 <strong>Düğün Tarihi:</strong> {req.weddingDate || 'Belirtilmedi'}</p>
-                        {req.guestCount && <p>👥 <strong>Davetli Sayısı:</strong> {req.guestCount}</p>}
-                        {req.message && (
-                          <p className="bg-slate-50 p-2.5 rounded-xl border border-slate-100 text-slate-600 italic mt-2">
-                            "{req.message}"
-                          </p>
-                        )}
-                      </div>
-                    </div>
-
-                    <div className="pt-3 border-t border-slate-100 flex items-center justify-between gap-2">
-                      <button
-                        onClick={() => handleUpdateStatus(req.id, req.status === 'Yanıtlandı' ? 'Beklemede' : 'Yanıtlandı')}
-                        className="text-[11px] font-bold text-slate-500 hover:text-slate-800 underline"
-                      >
-                        {req.status === 'Yanıtlandı' ? 'Beklemeye Al' : '✓ Yanıtlandı İşaretle'}
-                      </button>
-
-                      <a
-                        href={waLink}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="bg-[#25D366] hover:bg-emerald-600 text-white text-xs font-bold px-4 py-2 rounded-xl transition flex items-center gap-1.5 shadow"
-                      >
-                        <span>💬</span>
-                        <span>WhatsApp'tan Yanıtla</span>
-                      </a>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          )
-        ) : (
-          /* RANDEVULAR GRID */
-          appointments.length === 0 ? (
-            <div className="bg-white p-12 text-center rounded-3xl border border-purple-100 text-slate-400 text-xs">
-              Henüz oluşturulmuş bir mekan ziyareti randevusu bulunmuyor.
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {appointments.map((app) => (
-                <div key={app.id} className="bg-white p-5 rounded-2xl border border-purple-100 shadow-sm space-y-3">
-                  <div className="flex justify-between items-start">
-                    <span className="text-[10px] font-bold bg-purple-100 text-[#4A154B] px-2.5 py-1 rounded-md">
-                      📍 {app.vendorName}
-                    </span>
-                    <span className="text-[10px] font-bold bg-emerald-50 text-emerald-700 px-2 py-0.5 rounded">
-                      {app.status}
-                    </span>
-                  </div>
-
+      {/* Content Area */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {activeTab === 'requests' ? (
+          requests.map((req) => (
+            <div key={req.id} className="bg-white p-6 rounded-[24px] border border-[rgba(0,0,0,0.06)] shadow-[0_4px_20px_rgba(0,0,0,0.02)] flex flex-col justify-between hover:border-[rgba(0,0,0,0.12)] transition-colors group">
+              <div className="space-y-4">
+                <div className="flex justify-between items-start">
                   <div>
-                    <h3 className="text-sm font-bold text-slate-800">{app.fullName}</h3>
-                    <p className="text-xs text-slate-500 mt-1">📞 {app.phone}</p>
-                    <div className="bg-purple-50/60 p-3 rounded-xl border border-purple-100 mt-2 flex items-center justify-between text-xs font-bold text-[#4A154B]">
-                      <span>📅 Tarih: {app.date}</span>
-                      <span>⏰ Saat: {app.timeSlot}</span>
+                    <h3 className="text-[18px] font-medium text-[#111111]">{req.name}</h3>
+                    <div className="flex items-center gap-4 mt-1 text-[13px] text-[#666666]">
+                      <span className="flex items-center gap-1.5"><CalendarCheck className="w-3.5 h-3.5" /> {req.date}</span>
+                      <span className="flex items-center gap-1.5"><Phone className="w-3.5 h-3.5" /> {req.phone}</span>
                     </div>
+                  </div>
+                  <span className={`px-2.5 py-1 rounded-[6px] text-[12px] font-medium ${
+                    req.status === 'Yeni' ? 'bg-[#7C5CFF]/10 text-[#7C5CFF]' : 'bg-[#F8F8F7] text-[#666666]'
+                  }`}>
+                    {req.status}
+                  </span>
+                </div>
+                
+                {req.message && (
+                  <div className="p-4 rounded-[16px] bg-[#F8F8F7] border border-[rgba(0,0,0,0.04)]">
+                    <p className="text-[14px] text-[#666666] leading-relaxed italic">"{req.message}"</p>
+                  </div>
+                )}
+              </div>
+
+              <div className="pt-6 mt-6 border-t border-[rgba(0,0,0,0.04)] flex items-center justify-between">
+                <button className="text-[14px] font-medium text-[#666666] hover:text-[#111111] flex items-center gap-1.5 transition-colors">
+                  <CheckCircle2 className="w-4 h-4" /> Okundu İşaretle
+                </button>
+                <button className="h-[40px] px-5 bg-[#1DB954] text-white rounded-[12px] text-[13px] font-medium flex items-center gap-1.5 hover:bg-[#1AA34A] transition-colors shadow-sm">
+                  <MessageCircle className="w-4 h-4 fill-current" /> WhatsApp'tan Yaz
+                </button>
+              </div>
+            </div>
+          ))
+        ) : (
+          appointments.map((app) => (
+            <div key={app.id} className="bg-white p-6 rounded-[24px] border border-[rgba(0,0,0,0.06)] shadow-[0_4px_20px_rgba(0,0,0,0.02)] hover:border-[rgba(0,0,0,0.12)] transition-colors group">
+              <div className="flex justify-between items-start mb-6">
+                <div>
+                  <h3 className="text-[18px] font-medium text-[#111111]">{app.name}</h3>
+                  <p className="text-[14px] text-[#666666] mt-1">{app.phone}</p>
+                </div>
+                <span className="px-2.5 py-1 rounded-[6px] text-[12px] font-medium bg-[#1DB954]/10 text-[#1DB954]">
+                  {app.status}
+                </span>
+              </div>
+
+              <div className="flex items-center justify-between p-4 rounded-[16px] bg-[#F8F8F7] border border-[rgba(0,0,0,0.04)]">
+                <div className="flex items-center gap-3 text-[#111111]">
+                  <Clock className="w-5 h-5 text-[#7C5CFF]" />
+                  <div>
+                    <span className="block text-[14px] font-medium">{app.date}</span>
+                    <span className="block text-[12px] text-[#666666]">Saat: {app.time}</span>
                   </div>
                 </div>
-              ))}
+                <button className="text-[#999999] hover:text-[#111111] transition-colors">
+                  <MoreHorizontal className="w-5 h-5" />
+                </button>
+              </div>
             </div>
-          )
+          ))
         )}
       </div>
+
     </div>
   );
 }

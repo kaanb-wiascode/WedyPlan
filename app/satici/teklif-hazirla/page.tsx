@@ -1,46 +1,45 @@
 'use client';
 
 import React, { useState } from 'react';
-import Link from 'next/link';
+import { 
+  FileText, 
+  UploadCloud, 
+  Check, 
+  Share2, 
+  MessageCircle, 
+  Sparkles, 
+  Calendar, 
+  Users, 
+  Trash2,
+  Paperclip,
+  CheckCircle2
+} from 'lucide-react';
 
 interface UploadedFile {
   id: string;
   name: string;
   size: string;
   type: string;
-  url: string;
-  uploadedAt: string;
 }
 
-export default function PrepareProposalPage() {
-  // İnteraktif Teklif Form State'i
+export default function PremiumPrepareProposalPage() {
   const [proposal, setProposal] = useState({
-    clientName: '',
-    clientPhone: '',
-    weddingDate: '',
+    clientName: 'Selin & Caner',
+    clientPhone: '05321234567',
+    weddingDate: '2026-08-15',
     guestCount: '300 Kişi',
     packageDetails: 'Standard Düğün Paketi (Yemekli Menü, Dış Çekim, Canlı Müzik, Anı Defteri)',
-    totalPrice: '',
-    depositPrice: '',
-    terms: '1. Etkinlik tarihinden 15 gün öncesine kadar iptal durumunda kaporanın %50\'si iade edilir.\n2. Alkol ve ek ikramlar ücrete dahil değildir.\n3. Ödeme peşin veya 3 taksit olarak yapılır.',
+    totalPrice: '180.000',
+    depositPrice: '50.000',
+    terms: '1. Etkinlik tarihinden 15 gün öncesine kadar iptal durumunda kaporanın %50\'si iade edilir.\n2. Alkol ve ek ikramlar ücrete dahil değildir.',
   });
 
-  // Dosya Yükleme State'i
   const [uploadedFiles, setUploadedFiles] = useState<UploadedFile[]>([
-    {
-      id: '1',
-      name: '2026_Dugun_Menuleri_Katalogu.pdf',
-      size: '2.4 MB',
-      type: 'PDF',
-      url: '#',
-      uploadedAt: '20.07.2026',
-    },
+    { id: '1', name: '2026_Dugun_Menuleri_Katalogu.pdf', size: '2.4 MB', type: 'PDF' }
   ]);
 
   const [isUploading, setIsUploading] = useState(false);
-  const [isGenerated, setIsGenerated] = useState(false);
 
-  // Dosya Yükleme Simülasyonu
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (!files || files.length === 0) return;
@@ -54,32 +53,22 @@ export default function PrepareProposalPage() {
         name: file.name,
         size: (file.size / (1024 * 1024)).toFixed(1) + ' MB',
         type: file.name.split('.').pop()?.toUpperCase() || 'DOSYA',
-        url: URL.createObjectURL(file),
-        uploadedAt: new Date().toLocaleDateString('tr-TR'),
       };
-
       setUploadedFiles([newFile, ...uploadedFiles]);
       setIsUploading(false);
-      alert('📄 Dosyanız başarıyla yüklendi ve tekliflerinize eklendi!');
-    }, 1000);
-  };
-
-  // Teklif Oluşturma & WhatsApp Bağlantısı
-  const handleGenerateProposal = (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsGenerated(true);
+    }, 800);
   };
 
   const handleShareWhatsApp = () => {
-    let msg = `*💍 ${proposal.clientName.toUpperCase()} - ÖZEL DÜĞÜN TEKLİFİ VE SÖZLEŞME TASLAĞI*\n\n`;
-    msg += `📅 *Düğün Tarihi:* ${proposal.weddingDate}\n`;
-    msg += `👥 *Davetli Sayısı:* ${proposal.guestCount}\n\n`;
+    let msg = `*💍 ${proposal.clientName.toUpperCase()} - DÜĞÜN TEKLİFİ VE SÖZLEŞME TASLAĞI*\n\n`;
+    msg += `📅 *Tarih:* ${proposal.weddingDate}\n`;
+    msg += `👥 *Kapasite:* ${proposal.guestCount}\n\n`;
     msg += `📦 *Dahil Hizmetler:*\n${proposal.packageDetails}\n\n`;
-    msg += `💰 *Toplam Tutar:* ${proposal.totalPrice} TL\n`;
-    msg += `💳 *Kapora / Ön Ödeme:* ${proposal.depositPrice} TL\n\n`;
-    msg += `📋 *Sözleşme Maddeleri:*\n${proposal.terms}\n\n`;
+    msg += `💰 *Toplam Anlaşma:* ${proposal.totalPrice} TL\n`;
+    msg += `💳 *Kapora:* ${proposal.depositPrice} TL\n\n`;
+    msg += `📋 *Şartlar:*\n${proposal.terms}\n\n`;
     if (uploadedFiles.length > 0) {
-      msg += `📄 *Ekli Fiyat Kataloğu / Menü:* ${uploadedFiles[0].name}\n\n`;
+      msg += `📄 *Ekli Katalog:* ${uploadedFiles[0].name}\n\n`;
     }
     msg += `Detayları onaylıyorsanız lütfen bu mesaja dönüş yapınız.`;
 
@@ -88,231 +77,210 @@ export default function PrepareProposalPage() {
   };
 
   return (
-    <div className="max-w-5xl mx-auto space-y-8">
-      {/* Üst Başlık */}
-      <div className="bg-white p-6 rounded-3xl border border-purple-100 shadow-sm flex flex-col md:flex-row items-center justify-between gap-4">
-        <div>
-          <span className="bg-purple-100 text-[#4A154B] text-[10px] font-extrabold px-3 py-1 rounded-full uppercase">
-            B2B Teklif & Doküman Stüdyosu
-          </span>
-          <h1 className="text-2xl font-extrabold text-[#4A154B] mt-1">Teklif Hazırla & Özel Dosya Yükle 📝</h1>
-          <p className="text-xs text-slate-500 mt-0.5">
-            Çiftlere özel dijital sözleşme taslağı oluşturun veya kendi menü/katalog PDF'lerinizi yükleyip paylaşın.
-          </p>
-        </div>
-      </div>
+    <div className="space-y-10 animate-in fade-in duration-500">
+      
+      {/* Header */}
+      <header>
+        <h1 className="text-[32px] font-medium tracking-tight text-[#111111]">
+          Teklif & Doküman Stüdyosu
+        </h1>
+        <p className="text-[15px] text-[#666666] mt-1">
+          Çifte özel dijital teklif oluşturun veya menü/katalog PDF'lerinizi yükleyin.
+        </p>
+      </header>
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-        {/* Sol Kolon: Form & Dosya Yükleme (7 Kolon) */}
-        <div className="lg:col-span-7 space-y-6">
+      {/* Grid Layout */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
+        
+        {/* Form Column (7 Columns) */}
+        <div className="lg:col-span-7 space-y-8">
           
-          {/* Özel Dosya / PDF Yükleme Alanı */}
-          <div className="bg-white p-6 rounded-3xl border border-purple-100 shadow-sm space-y-4">
-            <h2 className="text-sm font-bold text-[#4A154B] flex items-center gap-2">
-              <span>📁</span> Özel Fiyat Kataloğu / Menü PDF Yükle
-            </h2>
+          {/* File Upload Zone */}
+          <div className="bg-white p-6 rounded-[24px] border border-[rgba(0,0,0,0.06)] shadow-[0_4px_20px_rgba(0,0,0,0.02)] space-y-4">
+            <h2 className="text-[16px] font-medium text-[#111111]">Özel Katalog veya Menü PDF Yükle</h2>
 
-            {/* Yükleme Kutusu */}
-            <div className="border-2 border-dashed border-purple-200 hover:border-[#E6007E] bg-purple-50/40 p-6 rounded-2xl text-center space-y-2 transition cursor-pointer relative">
-              <input
-                type="file"
+            <div className="border-2 border-dashed border-[rgba(0,0,0,0.08)] hover:border-[#7C5CFF]/50 bg-[#F8F8F7] p-8 rounded-[20px] text-center space-y-3 transition-colors cursor-pointer relative">
+              <input 
+                type="file" 
                 accept=".pdf,.doc,.docx,.jpg,.png"
                 onChange={handleFileUpload}
                 className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
               />
-              <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center text-2xl mx-auto shadow-sm text-[#E6007E]">
-                📤
+              <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center mx-auto shadow-sm text-[#7C5CFF]">
+                <UploadCloud className="w-6 h-6" strokeWidth={1.5} />
               </div>
               <div>
-                <p className="text-xs font-bold text-slate-700">
-                  {isUploading ? 'Dosya Yükleniyor...' : 'Dosyayı Buraya Sürükleyin veya Seçin'}
+                <p className="text-[14px] font-medium text-[#111111]">
+                  {isUploading ? 'Dosya Yükleniyor...' : 'Sürükleyip bırakın veya dosya seçin'}
                 </p>
-                <p className="text-[10px] text-slate-400 mt-1">PDF, Word, JPG veya PNG (Max 10MB)</p>
+                <p className="text-[12px] text-[#999999] mt-0.5">PDF, Word veya Görsel (Max 10MB)</p>
               </div>
             </div>
 
-            {/* Yüklenen Dosyalar Listesi */}
-            <div className="space-y-2 pt-2">
-              <span className="text-[11px] font-bold text-slate-500 uppercase block">Yüklü Kurumsal Dokümanlar</span>
-              {uploadedFiles.map((file) => (
-                <div key={file.id} className="bg-slate-50 p-3 rounded-xl border border-slate-200 flex items-center justify-between text-xs">
-                  <div className="flex items-center gap-2">
-                    <span className="bg-[#4A154B] text-white text-[9px] font-bold px-2 py-1 rounded uppercase">
-                      {file.type}
+            {/* Uploaded File List */}
+            {uploadedFiles.length > 0 && (
+              <div className="space-y-2 pt-2">
+                {uploadedFiles.map(file => (
+                  <div key={file.id} className="bg-[#F8F8F7] p-3 rounded-[14px] flex items-center justify-between text-[13px]">
+                    <div className="flex items-center gap-2.5">
+                      <Paperclip className="w-4 h-4 text-[#7C5CFF]" />
+                      <span className="font-medium text-[#111111]">{file.name}</span>
+                      <span className="text-[#999999]">({file.size})</span>
+                    </div>
+                    <span className="text-[12px] text-[#1DB954] font-medium flex items-center gap-1">
+                      <Check className="w-3.5 h-3.5" /> Yüklendi
                     </span>
-                    <span className="font-bold text-slate-700 truncate max-w-[200px]">{file.name}</span>
-                    <span className="text-[10px] text-slate-400">({file.size})</span>
                   </div>
-                  <span className="text-[10px] text-emerald-600 font-bold bg-emerald-50 px-2 py-0.5 rounded">
-                    ✓ Yüklendi
-                  </span>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+            )}
           </div>
 
-          {/* Dijital Teklif & Sözleşme Formu */}
-          <div className="bg-white p-6 rounded-3xl border border-purple-100 shadow-sm space-y-4">
-            <h2 className="text-sm font-bold text-[#4A154B] flex items-center gap-2">
-              <span>✍️</span> Çifte Özel Fiyat & Sözleşme Detayları
-            </h2>
+          {/* Form Details */}
+          <div className="bg-white p-6 rounded-[24px] border border-[rgba(0,0,0,0.06)] shadow-[0_4px_20px_rgba(0,0,0,0.02)] space-y-6">
+            <h2 className="text-[16px] font-medium text-[#111111]">Teklif Detayları</h2>
 
-            <form onSubmit={handleGenerateProposal} className="space-y-3">
-              <div className="grid grid-cols-2 gap-3">
+            <div className="space-y-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-[11px] font-bold text-slate-600 mb-1">Müşteri (Çift) Adı</label>
-                  <input
-                    type="text"
-                    required
-                    placeholder="Örn: Ayşe & Ahmet"
+                  <label className="block text-[13px] font-medium text-[#111111] mb-1.5">Çift / Müşteri Adı</label>
+                  <input 
+                    type="text" 
                     value={proposal.clientName}
                     onChange={(e) => setProposal({ ...proposal, clientName: e.target.value })}
-                    className="w-full p-2.5 border border-slate-200 rounded-xl text-xs focus:outline-none focus:border-[#E6007E]"
+                    className="w-full h-[48px] px-4 bg-[#F8F8F7] border border-[rgba(0,0,0,0.06)] rounded-[14px] text-[14px] text-[#111111] outline-none focus:border-[#7C5CFF]/30 transition-colors"
                   />
                 </div>
                 <div>
-                  <label className="block text-[11px] font-bold text-slate-600 mb-1">Müşteri Telefonu</label>
-                  <input
-                    type="tel"
-                    required
-                    placeholder="05XX XXX XX XX"
+                  <label className="block text-[13px] font-medium text-[#111111] mb-1.5">Telefon</label>
+                  <input 
+                    type="tel" 
                     value={proposal.clientPhone}
                     onChange={(e) => setProposal({ ...proposal, clientPhone: e.target.value })}
-                    className="w-full p-2.5 border border-slate-200 rounded-xl text-xs focus:outline-none focus:border-[#E6007E]"
+                    className="w-full h-[48px] px-4 bg-[#F8F8F7] border border-[rgba(0,0,0,0.06)] rounded-[14px] text-[14px] text-[#111111] outline-none focus:border-[#7C5CFF]/30 transition-colors"
                   />
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-[11px] font-bold text-slate-600 mb-1">Anlaşılan Düğün Tarihi</label>
-                  <input
-                    type="date"
-                    required
+                  <label className="block text-[13px] font-medium text-[#111111] mb-1.5">Düğün Tarihi</label>
+                  <input 
+                    type="date" 
                     value={proposal.weddingDate}
                     onChange={(e) => setProposal({ ...proposal, weddingDate: e.target.value })}
-                    className="w-full p-2.5 border border-slate-200 rounded-xl text-xs focus:outline-none focus:border-[#E6007E]"
+                    className="w-full h-[48px] px-4 bg-[#F8F8F7] border border-[rgba(0,0,0,0.06)] rounded-[14px] text-[14px] text-[#111111] outline-none focus:border-[#7C5CFF]/30 transition-colors"
                   />
                 </div>
                 <div>
-                  <label className="block text-[11px] font-bold text-slate-600 mb-1">Davetli Kapasitesi</label>
-                  <input
-                    type="text"
+                  <label className="block text-[13px] font-medium text-[#111111] mb-1.5">Kapasite</label>
+                  <input 
+                    type="text" 
                     value={proposal.guestCount}
                     onChange={(e) => setProposal({ ...proposal, guestCount: e.target.value })}
-                    className="w-full p-2.5 border border-slate-200 rounded-xl text-xs focus:outline-none focus:border-[#E6007E]"
+                    className="w-full h-[48px] px-4 bg-[#F8F8F7] border border-[rgba(0,0,0,0.06)] rounded-[14px] text-[14px] text-[#111111] outline-none focus:border-[#7C5CFF]/30 transition-colors"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-[11px] font-bold text-slate-600 mb-1">Paket İçeriği & Dahil Hizmetler</label>
-                <textarea
+                <label className="block text-[13px] font-medium text-[#111111] mb-1.5">Paket İçeriği</label>
+                <textarea 
                   rows={3}
                   value={proposal.packageDetails}
                   onChange={(e) => setProposal({ ...proposal, packageDetails: e.target.value })}
-                  className="w-full p-2.5 border border-slate-200 rounded-xl text-xs focus:outline-none focus:border-[#E6007E]"
+                  className="w-full p-4 bg-[#F8F8F7] border border-[rgba(0,0,0,0.06)] rounded-[14px] text-[14px] text-[#111111] outline-none focus:border-[#7C5CFF]/30 transition-colors resize-none"
                 ></textarea>
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-[11px] font-bold text-slate-600 mb-1">Toplam Anlaşma Tutarı (TL)</label>
-                  <input
-                    type="text"
-                    required
-                    placeholder="Örn: 150.000"
+                  <label className="block text-[13px] font-medium text-[#111111] mb-1.5">Toplam Anlaşma Tutarı (TL)</label>
+                  <input 
+                    type="text" 
                     value={proposal.totalPrice}
                     onChange={(e) => setProposal({ ...proposal, totalPrice: e.target.value })}
-                    className="w-full p-2.5 border border-slate-200 rounded-xl text-xs focus:outline-none focus:border-[#E6007E] font-bold text-[#E6007E]"
+                    className="w-full h-[48px] px-4 bg-[#F8F8F7] border border-[rgba(0,0,0,0.06)] rounded-[14px] text-[14px] text-[#111111] font-medium outline-none focus:border-[#7C5CFF]/30 transition-colors"
                   />
                 </div>
                 <div>
-                  <label className="block text-[11px] font-bold text-slate-600 mb-1">Talep Edilen Kapora (TL)</label>
-                  <input
-                    type="text"
-                    placeholder="Örn: 30.000"
+                  <label className="block text-[13px] font-medium text-[#111111] mb-1.5">Kapora (TL)</label>
+                  <input 
+                    type="text" 
                     value={proposal.depositPrice}
                     onChange={(e) => setProposal({ ...proposal, depositPrice: e.target.value })}
-                    className="w-full p-2.5 border border-slate-200 rounded-xl text-xs focus:outline-none focus:border-[#E6007E]"
+                    className="w-full h-[48px] px-4 bg-[#F8F8F7] border border-[rgba(0,0,0,0.06)] rounded-[14px] text-[14px] text-[#111111] font-medium outline-none focus:border-[#7C5CFF]/30 transition-colors"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-[11px] font-bold text-slate-600 mb-1">Sözleşme Maddeleri & İptal Şartları</label>
-                <textarea
+                <label className="block text-[13px] font-medium text-[#111111] mb-1.5">Sözleşme Şartları</label>
+                <textarea 
                   rows={3}
                   value={proposal.terms}
                   onChange={(e) => setProposal({ ...proposal, terms: e.target.value })}
-                  className="w-full p-2.5 border border-slate-200 rounded-xl text-xs focus:outline-none focus:border-[#E6007E]"
+                  className="w-full p-4 bg-[#F8F8F7] border border-[rgba(0,0,0,0.06)] rounded-[14px] text-[14px] text-[#111111] outline-none focus:border-[#7C5CFF]/30 transition-colors resize-none"
                 ></textarea>
               </div>
-
-              <button
-                type="submit"
-                className="w-full bg-[#4A154B] hover:bg-purple-900 text-white font-bold text-xs py-3.5 rounded-xl transition shadow"
-              >
-                Önizleme Oluştur ✨
-              </button>
-            </form>
+            </div>
           </div>
+
         </div>
 
-        {/* Sağ Kolon: Dijital Önizleme & Paylaşım (5 Kolon) */}
-        <div className="lg:col-span-5 space-y-4">
-          <span className="text-xs font-bold text-slate-400 block text-center">
-            📄 Canlı Sözleşme Taslağı Önizlemesi
+        {/* Preview Column (5 Columns) */}
+        <div className="lg:col-span-5 lg:sticky lg:top-6 space-y-4">
+          <span className="text-[13px] font-medium text-[#666666] block text-center">
+            Dijital Sözleşme Önizlemesi
           </span>
 
-          <div className="bg-white rounded-3xl border border-purple-200 p-6 shadow-xl space-y-4 text-xs relative">
-            <div className="border-b border-purple-100 pb-3 flex justify-between items-center">
+          <div className="bg-white rounded-[28px] border border-[rgba(0,0,0,0.08)] p-8 shadow-[0_8px_40px_rgba(0,0,0,0.04)] space-y-6 text-[14px]">
+            
+            <div className="border-b border-[rgba(0,0,0,0.06)] pb-4 flex justify-between items-center">
               <div>
-                <h3 className="font-extrabold text-[#4A154B] text-sm">WEDYPLAN RESMİ TEKLİF FORMU</h3>
-                <p className="text-[10px] text-slate-400">Tarih: {new Date().toLocaleDateString('tr-TR')}</p>
+                <span className="text-[18px] font-medium tracking-tight text-[#111111] block">WEDYPLAN</span>
+                <span className="text-[11px] text-[#999999] uppercase tracking-wider">Resmi Teklif Formu</span>
               </div>
-              <span className="bg-pink-50 text-[#E6007E] font-bold text-[9px] px-2 py-1 rounded">TASLAK</span>
+              <span className="px-2.5 py-1 bg-[#F8F8F7] text-[#666666] text-[11px] font-medium rounded-full">
+                TASLAK
+              </span>
             </div>
 
             <div className="space-y-2">
-              <p><strong>Müşteri:</strong> {proposal.clientName || 'Ayşe & Ahmet'}</p>
-              <p><strong>Tarih / Kapasite:</strong> {proposal.weddingDate || 'Tarih Seçilmedi'} ({proposal.guestCount})</p>
+              <p className="text-[#666666]"><strong>Müşteri:</strong> <span className="text-[#111111]">{proposal.clientName}</span></p>
+              <p className="text-[#666666]"><strong>Düğün Tarihi:</strong> <span className="text-[#111111]">{proposal.weddingDate}</span></p>
+              <p className="text-[#666666]"><strong>Kapasite:</strong> <span className="text-[#111111]">{proposal.guestCount}</span></p>
             </div>
 
-            <div className="bg-purple-50/60 p-3 rounded-xl border border-purple-100 space-y-1">
-              <span className="font-bold text-[#4A154B] block">Dahil Hizmetler:</span>
-              <p className="text-slate-600 whitespace-pre-line">{proposal.packageDetails}</p>
+            <div className="p-4 rounded-[16px] bg-[#F8F8F7] border border-[rgba(0,0,0,0.04)] space-y-1">
+              <span className="text-[12px] font-medium text-[#666666] block">Dahil Hizmetler</span>
+              <p className="text-[#111111] whitespace-pre-line text-[13px]">{proposal.packageDetails}</p>
             </div>
 
-            <div className="flex justify-between items-center bg-slate-900 text-white p-3 rounded-xl font-bold">
-              <span>Toplam Tutar:</span>
-              <span className="text-emerald-400 text-sm">{proposal.totalPrice || '0'} TL</span>
+            <div className="flex justify-between items-center p-4 rounded-[16px] bg-[#111111] text-white">
+              <span className="text-[13px] font-medium text-white/70">Toplam Anlaşma</span>
+              <span className="text-[18px] font-medium">{proposal.totalPrice} TL</span>
             </div>
-
-            {proposal.terms && (
-              <div className="text-[10px] text-slate-500 space-y-1 pt-1">
-                <span className="font-bold text-slate-700 block">Şartlar:</span>
-                <p className="whitespace-pre-line">{proposal.terms}</p>
-              </div>
-            )}
 
             {uploadedFiles.length > 0 && (
-              <div className="pt-2 border-t border-slate-100 text-[10px] text-purple-900 font-bold">
-                📎 Ekli Katalog: {uploadedFiles[0].name}
+              <div className="pt-2 text-[12px] text-[#7C5CFF] font-medium flex items-center gap-1.5">
+                <Paperclip className="w-3.5 h-3.5" />
+                <span>Ekli Katalog: {uploadedFiles[0].name}</span>
               </div>
             )}
 
-            <button
+            <button 
               onClick={handleShareWhatsApp}
-              disabled={!proposal.clientPhone}
-              className="w-full bg-[#25D366] hover:bg-emerald-600 text-white font-bold py-3.5 rounded-xl transition shadow flex items-center justify-center gap-2 text-xs disabled:opacity-50"
+              className="w-full h-[52px] bg-[#1DB954] hover:bg-[#1AA34A] text-white font-medium text-[15px] rounded-[18px] transition-colors shadow-sm flex items-center justify-center gap-2"
             >
-              <span>💬</span>
-              <span>WhatsApp'tan Çifte Gönder</span>
+              <MessageCircle className="w-5 h-5 fill-current" />
+              <span>WhatsApp'tan Gönder</span>
             </button>
           </div>
         </div>
+
       </div>
+
     </div>
   );
 }
