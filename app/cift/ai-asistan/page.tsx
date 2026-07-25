@@ -7,9 +7,9 @@ import {
   Bot, 
   User, 
   Lightbulb, 
-  HeartHandshake,
   CalendarDays,
-  Coins
+  Coins,
+  Loader2
 } from 'lucide-react';
 
 interface Message {
@@ -30,6 +30,7 @@ export default function WedyAIAssistantPage() {
   ]);
 
   const [input, setInput] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
 
   const quickPrompts = [
     { title: 'Bütçe Tavsiyesi', text: '350.000 TL bütçe ile İstanbul kır düğünü nasıl planlanır?', icon: Coins },
@@ -37,30 +38,66 @@ export default function WedyAIAssistantPage() {
     { title: 'Mekan İpuçları', text: 'Düğün mekanı seçerken sözleşmede neye dikkat etmeliyim?', icon: Lightbulb },
   ];
 
-  const handleSend = (textToSend?: string) => {
+  const handleSend = async (textToSend?: string) => {
     const query = textToSend || input;
-    if (!query.trim()) return;
+    if (!query.trim() || isLoading) return;
 
+    const now = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+    // 1. Kullanıcı mesajını ekrana ekle
     const userMsg: Message = {
       id: Date.now().toString(),
       sender: 'user',
       text: query,
-      time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+      time: now
     };
 
-    setMessages(prev => [...prev, userMsg]);
+    const updatedMessages = [...messages, userMsg];
+    setMessages(updatedMessages);
     if (!textToSend) setInput('');
+    setIsLoading(true);
 
-    // Simulate AI response
-    setTimeout(() => {
+    try {
+      // 2. Mesaj geçmişini API formatına getir
+      const apiMessages = updatedMessages.map(m => ({
+        role: m.sender === 'user' ? 'user' : 'assistant',
+        content: m.text
+      }));
+
+      // 3. Backend API'ye istek at
+      const res = await fetch('/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ messages: apiMessages }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.error || 'Yapay zeka yanıt veremedi.');
+      }
+
+      // 4. Gerçek AI cevabını ekrana ekle
       const aiMsg: Message = {
         id: (Date.now() + 1).toString(),
         sender: 'ai',
-        text: `"${query}" sorunuzu inceledim. WedyPlan veri tabanına göre ideal yaklaşım: Bütçenizin %45'ini mekana, %20'sini fotoğraf/video ve organizasyona, kalanı ise gelinlik/damatlık ve sürpriz harcamalara ayırmanız önerilir. Sözleşmelerde mutlaka iptal/iade şartlarını ve LCV netleşme tarihini yazılı hale getirin.`,
+        text: data.text,
         time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
       };
+
       setMessages(prev => [...prev, aiMsg]);
-    }, 800);
+    } catch (error: any) {
+      console.error('AI Hatası:', error);
+      const errorMsg: Message = {
+        id: (Date.now() + 1).toString(),
+        sender: 'ai',
+        text: `⚠️ Bir bağlantı hatası oluştu: ${error.message || 'Lütfen tekrar deneyin.'}`,
+        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+      };
+      setMessages(prev => [...prev, errorMsg]);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -87,8 +124,9 @@ export default function WedyAIAssistantPage() {
           return (
             <button
               key={idx}
+              disabled={isLoading}
               onClick={() => handleSend(p.text)}
-              className="p-4 bg-white border border-[rgba(0,0,0,0.06)] rounded-[20px] text-left hover:border-[#7C5CFF] hover:shadow-[0_4px_20px_rgba(124,92,255,0.08)] transition-all space-y-2 group"
+              className="p-4 bg-white border border-[rgba(0,0,0,0.06)] rounded-[20px] text-left hover:border-[#7C5CFF] hover:shadow-[0_4px_20px_rgba(124,92,255,0.08)] transition-all space-y-2 group disabled:opacity-50"
             >
               <div className="flex items-center gap-2 text-[#7C5CFF]">
                 <Icon className="w-4 h-4" />
@@ -118,7 +156,7 @@ export default function WedyAIAssistantPage() {
                 {m.sender === 'user' ? <User className="w-4 h-4" /> : <Bot className="w-4 h-4" />}
               </div>
 
-              <div className={`p-4 rounded-[20px] max-w-[80%] text-[14px] leading-relaxed ${
+              <div className={`p-4 rounded-[20px] max-w-[80%] text-[14px] leading-relaxed whitespace-pre-wrap ${
                 m.sender === 'user'
                   ? 'bg-[#111111] text-white rounded-tr-none'
                   : 'bg-[#F8F8F7] text-[#111111] rounded-tl-none border border-[rgba(0,0,0,0.04)]'
@@ -130,6 +168,19 @@ export default function WedyAIAssistantPage() {
               </div>
             </div>
           ))}
+
+          {/* Loading Indicator */}
+          {isLoading && (
+            <div className="flex items-start gap-3">
+              <div className="w-8 h-8 rounded-full bg-[#7C5CFF] text-white flex items-center justify-center shrink-0">
+                <Bot className="w-4 h-4" />
+              </div>
+              <div className="p-4 rounded-[20px] rounded-tl-none bg-[#F8F8F7] border border-[rgba(0,0,0,0.04)] text-[#7C5CFF] flex items-center gap-2">
+                <Loader2 className="w-4 h-4 animate-spin" />
+                <span className="text-[13px] font-medium text-[#666666]">WedyAI cevabı hazırlıyor...</span>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Input Bar */}
@@ -144,14 +195,16 @@ export default function WedyAIAssistantPage() {
             type="text"
             value={input}
             onChange={(e) => setInput(e.target.value)}
+            disabled={isLoading}
             placeholder="WedyAI'a bir şey sorun..."
-            className="w-full h-[54px] pl-5 pr-14 bg-[#F8F8F7] border border-[rgba(0,0,0,0.06)] rounded-[20px] text-[14px] text-[#111111] outline-none focus:border-[#7C5CFF] focus:bg-white transition-all"
+            className="w-full h-[54px] pl-5 pr-14 bg-[#F8F8F7] border border-[rgba(0,0,0,0.06)] rounded-[20px] text-[14px] text-[#111111] outline-none focus:border-[#7C5CFF] focus:bg-white transition-all disabled:opacity-60"
           />
           <button
             type="submit"
-            className="absolute right-2 top-1/2 -translate-y-1/2 translate-y-[1px] w-10 h-10 bg-[#111111] hover:bg-[#333333] text-white rounded-[14px] flex items-center justify-center transition-all"
+            disabled={!input.trim() || isLoading}
+            className="absolute right-2 top-1/2 -translate-y-1/2 translate-y-[1px] w-10 h-10 bg-[#111111] hover:bg-[#333333] text-white rounded-[14px] flex items-center justify-center transition-all disabled:opacity-40"
           >
-            <Send className="w-4 h-4" />
+            {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
           </button>
         </form>
 
