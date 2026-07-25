@@ -12,33 +12,35 @@ export async function POST(req: Request) {
       );
     }
 
-    const systemPrompt = `
-Sen WedyPlan platformunun VIP Kurumsal Düğün ve Organizasyon Asistanısın (WedyAI Concierge).
+    // 1. DÜZELTME: TAMAMEN YENİLENMİŞ VE KISITLANMIŞ SİSTEM BEYNİ
+    const systemPrompt = `Sen WedyPlan'ın VIP Düğün Asistanısın (WedyAI Concierge).
+Kullanıcı Adı: ${userContext?.name || 'Selin & Kaan'} (Bütçe: ${userContext?.budget})
 
-Kullanıcı Profili:
-- İsim: ${userContext?.name || 'Selin & Kaan'}
-- Düğün Tarihi: ${userContext?.weddingDate || '15 Ağustos 2026'}
-- Bütçe: ${userContext?.budget || '350.000 TL'}
-- Konum: İstanbul (Geçerli şehir)
+MANTIK VE SOHBET KURALLARI (KESİNLİKLE UY):
+1. DOĞAL İNSAN GİBİ KONUŞ: Kullanıcı sana tavsiye, fikir veya soru soruyorsa (Örn: "Bütçe olarak ne önerirsin?", "Ne yapalım?"), SADECE akıcı ve mantıklı bir METİN cevabı ver.
+2. HAFIZA: Önceki mesajları oku. Kullanıcı YENİ soru sorduysa ESKİ KONUYU BIRAK ve sadece yeni soruya odaklan. Eski işlemleri asla tekrarlama.
+3. ARAÇ (TOOL) KULLANIMI KISITLAMASI:
+   - Kullanıcı AÇIKÇA "Renk paleti oluştur", "Konsept çiz" demediği sürece ASLA 'generate_theme_board' aracını kullanma!
+   - Kullanıcı AÇIKÇA "Bütçeme 5000 TL ekle" demediği sürece ASLA 'add_budget_item' aracını kullanma!
+4. Eğer bir işlem (tool) yaparsan, cevabını kısa tut (Örn: "İsteğiniz üzerine renk paleti oluşturuldu.").`;
 
-GÖREVLERİN VE ARAÇ KULLANIM KURALLARI:
-1. Kullanıcı genel tavsiye istediğinde HİÇBİR ARAÇ (TOOL) ÇALIŞTIRMA.
-2. SADECE kullanıcı açık bir bütçe işlemi istediğinde "add_budget_item" aracını kullan.
-3. Kullanıcı konsept önerisi, renk paleti önerisi veya tema istediğinde (Örn: "kır düğünü renk paleti") "generate_theme_board" aracını kullan.
-4. LÜTFEN DİKKAT: Araçları çağırırken <function> etiketlerini DOĞRUDAN METİN İÇİNE YAZMA. API'nin JSON formatındaki tool_call özelliğini kullan.
-    `;
+    // 2. DÜZELTME: Sohbet geçmişindeki olası boşlukları doldurup "LLM Looping" hatasını engelliyoruz
+    const safeMessages = messages.map((m: any) => ({
+      role: m.role,
+      content: m.content || 'Bir önceki işlem başarıyla ekrana çizildi.'
+    }));
 
     const tools = [
       {
         type: 'function',
         function: {
           name: 'add_budget_item',
-          description: 'Sadece bütçeye harcama eklemek istenildiğinde kullanılır.',
+          description: 'YALNIZCA KULLANICI BÜTÇEYE HARCAMA EKLEMEK İSTEDİĞİNDE KULLAN.',
           parameters: {
             type: 'object',
             properties: {
-              category: { type: 'string', description: 'Harcama kategorisi' },
-              amount: { type: 'number', description: 'Sadece ham sayı (Örn: 25000)' },
+              category: { type: 'string' },
+              amount: { type: 'number' },
               notes: { type: 'string' }
             },
             required: ['category', 'amount']
@@ -49,16 +51,13 @@ GÖREVLERİN VE ARAÇ KULLANIM KURALLARI:
         type: 'function',
         function: {
           name: 'generate_theme_board',
-          description: 'Düğün konsepti ve renk paleti (hex kodlarıyla) oluşturur.',
+          description: 'YALNIZCA KULLANICI GÖRSEL BİR RENK PALETİ VEYA KONSEPT TABLOSU İSTEDİĞİNDE KULLAN.',
           parameters: {
             type: 'object',
             properties: {
               themeName: { type: 'string' },
               description: { type: 'string' },
-              colors: { 
-                type: 'array', 
-                items: { type: 'string' } 
-              }
+              colors: { type: 'array', items: { type: 'string' } }
             },
             required: ['themeName', 'description', 'colors']
           }
@@ -76,11 +75,11 @@ GÖREVLERİN VE ARAÇ KULLANIM KURALLARI:
         model: 'llama-3.3-70b-versatile',
         messages: [
           { role: 'system', content: systemPrompt },
-          ...messages,
+          ...safeMessages, // Temizlenmiş geçmiş
         ],
         tools: tools,
         tool_choice: 'auto',
-        temperature: 0.3,
+        temperature: 0.5, // 3. DÜZELTME: Robotik döngüyü kırmak için yaratıcılık artırıldı (0.2 -> 0.5)
       }),
     });
 
@@ -97,30 +96,29 @@ GÖREVLERİN VE ARAÇ KULLANIM KURALLARI:
     let responseText = choice?.content || '';
     let actionExecuted = null;
 
-    // 1. KAÇAK FONKSİYON YAKALAYICI (Llama Model Text-Leak Fix)
-    // Eğer yapay zeka fonksiyonu metin içine <function=isim>{json}</function> şeklinde sızdırırsa bunu yakalarız.
-    const regex = /<function=(\w+)>([\s\S]*?)<\/function>/;
+    // Kaçak Fonksiyon Yakalayıcı 
+    const regex = /<function=(\w+)>([\s\S]*?)(?:<\/function>|$)/;
     const match = responseText.match(regex);
 
     if (match) {
       const fnName = match[1];
-      const fnArgsStr = match[2];
+      const fnArgsStr = match[2].trim();
       
       try {
-        const fnArgs = JSON.parse(fnArgsStr);
+        const cleanJson = fnArgsStr.replace(/<\/function>$/, '');
+        const fnArgs = JSON.parse(cleanJson);
+        
         if (fnName === 'add_budget_item') {
-          const parsedAmount = Number(fnArgs.amount) || 0;
-          actionExecuted = { type: 'BUDGET_ADDED', data: { ...fnArgs, amount: parsedAmount } };
+          actionExecuted = { type: 'BUDGET_ADDED', data: { ...fnArgs, amount: Number(fnArgs.amount) || 0 } };
         } else if (fnName === 'generate_theme_board') {
           actionExecuted = { type: 'THEME_GENERATED', data: fnArgs };
         }
-        // Metin içindeki o çirkin <function> kodunu silip temiz metni bırakıyoruz
         responseText = responseText.replace(regex, '').trim();
       } catch (e) {
         console.error("Regex parse hatası:", e);
       }
     } 
-    // 2. NORMAL (STANDART) FONKSİYON ÇAĞRISI YAKALAYICI
+    // Normal Fonksiyon Yakalayıcı
     else if (choice?.tool_calls && choice.tool_calls.length > 0) {
       const toolCall = choice.tool_calls[0];
       const fnName = toolCall.function.name;
@@ -144,7 +142,7 @@ GÖREVLERİN VE ARAÇ KULLANIM KURALLARI:
       }
     }
 
-    // Eğer responseText tamamen boşaldıysa ve bir aksiyon alındıysa standart yanıt ver
+    // Metin tamamen boş gelirse koruma
     if (!responseText.trim() && actionExecuted) {
        responseText = actionExecuted.type === 'THEME_GENERATED' 
          ? "İşte sizin için hazırladığım renk paleti ve konsept önerisi: ✨"
