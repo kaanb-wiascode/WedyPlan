@@ -2,137 +2,96 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
+import { 
+  Sparkles, 
+  Send, 
+  ChevronLeft, 
+  Paperclip,
+  MoreHorizontal
+} from 'lucide-react';
 
-export default function AIAssistantPage() {
-  const [budget, setBudget] = useState('150000');
-  const [guests, setGuests] = useState('250');
-  const [city, setCity] = useState('İstanbul');
-  const [isAnalyzing, setIsAnalyzing] = useState(false);
-  const [aiResult, setAiResult] = useState<any>(null);
+export default function PremiumAIAssistantPage() {
+  const [input, setInput] = useState('');
+  const [messages, setMessages] = useState([
+    { role: 'ai', content: 'Merhaba. Ben WedyAI. Düğün konseptiniz, bütçe dağılımınız veya mekan önerileri hakkında size nasıl yardımcı olabilirim?' }
+  ]);
 
-  const handleAnalyze = (e: React.FormEvent) => {
+  const handleSend = (e: React.FormEvent) => {
     e.preventDefault();
-    setIsAnalyzing(true);
-
+    if (!input.trim()) return;
+    
+    setMessages([...messages, { role: 'user', content: input }]);
+    setInput('');
+    
+    // Simulate AI response
     setTimeout(() => {
-      const b = Number(budget);
-      setAiResult({
-        venueBudget: (b * 0.55).toLocaleString('tr-TR') + ' TL',
-        photoBudget: (b * 0.15).toLocaleString('tr-TR') + ' TL',
-        dressBudget: (b * 0.18).toLocaleString('tr-TR') + ' TL',
-        otherBudget: (b * 0.12).toLocaleString('tr-TR') + ' TL',
-        recommendation: `${city} lokasyonunda ${guests} kişilik organizasyon için %55 mekan, %15 fotoğraf ve %18 gelinlik/damatlık dağılımı idealdir.`,
-      });
-      setIsAnalyzing(false);
-    }, 1200);
+      setMessages(prev => [...prev, { role: 'ai', content: 'Bu harika bir fikir. Kır düğünü konsepti için İstanbul Beykoz bölgesindeki mekanları ve ortalama fiyatlarını sizin için listeleyebilirim. İncelemek ister misiniz?' }]);
+    }, 1000);
   };
 
   return (
-    <div className="min-h-screen bg-[#FDFBFD] text-slate-800">
-      <nav className="flex items-center justify-between px-6 py-4 bg-white border-b border-purple-100 shadow-sm">
-        <Link href="/" className="text-2xl font-bold text-[#4A154B]">
-          Wedy<span className="text-[#E6007E]">Plan</span>
-          <span className="text-[10px] bg-purple-100 text-[#4A154B] px-2 py-0.5 rounded-md ml-2 font-bold uppercase">
-            🤖 WedyAI
-          </span>
-        </Link>
-        <Link href="/" className="text-xs font-semibold text-slate-500 hover:text-[#E6007E]">
-          ← Ana Sayfa
-        </Link>
+    <div className="min-h-screen bg-[#FFFFFF] text-[#111111] font-sans selection:bg-[#7C5CFF] selection:text-white flex flex-col">
+      
+      {/* Navigation */}
+      <nav className="sticky top-0 z-50 bg-white/80 backdrop-blur-xl border-b border-[rgba(0,0,0,0.06)] shrink-0">
+        <div className="max-w-[800px] mx-auto px-6 h-[72px] flex items-center justify-between">
+          <Link href="/" className="flex items-center gap-2 text-[15px] font-medium text-[#666666] hover:text-[#111111] transition-colors">
+            <ChevronLeft className="w-4 h-4" /> Çıkış
+          </Link>
+          
+          <div className="flex items-center gap-2 text-[15px] font-medium text-[#111111]">
+            <Sparkles className="w-4 h-4 text-[#7C5CFF]" /> WedyAI
+          </div>
+
+          <button className="text-[#999999] hover:text-[#111111] transition-colors">
+            <MoreHorizontal className="w-5 h-5" />
+          </button>
+        </div>
       </nav>
 
-      <div className="max-w-4xl mx-auto px-4 py-10 space-y-8">
-        <div className="text-center space-y-2">
-          <h1 className="text-3xl font-extrabold text-[#4A154B]">Yapay Zeka Düğün Asistanı 🤖</h1>
-          <p className="text-xs text-slate-500 max-w-md mx-auto">
-            Bütçenizi ve hayalinizdeki düğün detaylarını girin, WedyAI size en ideal bütçe dağılımını ve firma tavsiyelerini çıkarsın.
-          </p>
-        </div>
+      {/* Chat Area */}
+      <main className="flex-1 w-full max-w-[800px] mx-auto px-6 pt-8 pb-32 flex flex-col gap-6 overflow-y-auto">
+        {messages.map((msg, idx) => (
+          <div key={idx} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+            <div className={`max-w-[85%] md:max-w-[70%] p-5 text-[15px] leading-relaxed rounded-[24px] ${
+              msg.role === 'user' 
+                ? 'bg-[#F8F8F7] text-[#111111] rounded-tr-[8px]' 
+                : 'bg-white border border-[rgba(0,0,0,0.06)] shadow-[0_4px_20px_rgba(0,0,0,0.02)] text-[#111111] rounded-tl-[8px]'
+            }`}>
+              {msg.content}
+            </div>
+          </div>
+        ))}
+      </main>
 
-        {/* Input Form */}
-        <form onSubmit={handleAnalyze} className="bg-white p-6 rounded-3xl border border-purple-100 shadow-sm grid grid-cols-1 md:grid-cols-4 gap-4">
-          <div>
-            <label className="block text-[11px] font-bold text-slate-600 mb-1">Toplam Bütçe (TL)</label>
-            <input
-              type="number"
-              value={budget}
-              onChange={(e) => setBudget(e.target.value)}
-              className="w-full p-2.5 border border-slate-200 rounded-xl text-xs focus:outline-none focus:border-[#E6007E]"
-            />
-          </div>
-          <div>
-            <label className="block text-[11px] font-bold text-slate-600 mb-1">Davetli Sayısı</label>
-            <input
-              type="number"
-              value={guests}
-              onChange={(e) => setGuests(e.target.value)}
-              className="w-full p-2.5 border border-slate-200 rounded-xl text-xs focus:outline-none focus:border-[#E6007E]"
-            />
-          </div>
-          <div>
-            <label className="block text-[11px] font-bold text-slate-600 mb-1">Şehir</label>
-            <select
-              value={city}
-              onChange={(e) => setCity(e.target.value)}
-              className="w-full p-2.5 border border-slate-200 rounded-xl text-xs focus:outline-none focus:border-[#E6007E] bg-white"
-            >
-              <option value="İstanbul">İstanbul</option>
-              <option value="Ankara">Ankara</option>
-              <option value="İzmir">İzmir</option>
-              <option value="Bursa">Bursa</option>
-            </select>
-          </div>
-          <div className="flex items-end">
-            <button
-              type="submit"
-              disabled={isAnalyzing}
-              className="w-full bg-[#E6007E] hover:bg-pink-700 text-white text-xs font-bold py-3 rounded-xl transition shadow disabled:opacity-50"
-            >
-              {isAnalyzing ? 'Analiz Ediliyor...' : 'WedyAI Analiz Et ✨'}
+      {/* Input Area (Sticky Bottom) */}
+      <div className="fixed bottom-0 left-0 w-full bg-gradient-to-t from-white via-white to-transparent pt-10 pb-8 px-6 shrink-0">
+        <div className="max-w-[800px] mx-auto relative">
+          <form onSubmit={handleSend} className="relative flex items-center">
+            <button type="button" className="absolute left-4 text-[#999999] hover:text-[#111111] transition-colors">
+              <Paperclip className="w-5 h-5" />
             </button>
+            <input 
+              type="text" 
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              placeholder="WedyAI'a bir soru sorun..."
+              className="w-full bg-[#F8F8F7] border border-[rgba(0,0,0,0.06)] rounded-full h-[56px] pl-12 pr-14 text-[15px] text-[#111111] outline-none focus:border-[#7C5CFF]/40 transition-colors placeholder:text-[#999999] shadow-[0_4px_20px_rgba(0,0,0,0.02)]"
+            />
+            <button 
+              type="submit" 
+              disabled={!input.trim()}
+              className="absolute right-2 w-[40px] h-[40px] bg-[#111111] text-white rounded-full flex items-center justify-center disabled:opacity-50 disabled:bg-[#E5E5E5] transition-colors"
+            >
+              <Send className="w-4 h-4 ml-0.5" />
+            </button>
+          </form>
+          <div className="text-center mt-3 text-[11px] text-[#999999]">
+            WedyAI hata yapabilir. Lütfen önemli bilgileri teyit edin.
           </div>
-        </form>
-
-        {/* AI Output */}
-        {aiResult && (
-          <div className="bg-gradient-to-br from-purple-900 to-[#4A154B] text-white p-8 rounded-3xl shadow-xl space-y-6 animate-in fade-in duration-300">
-            <div className="flex items-center gap-2 border-b border-purple-700/50 pb-4">
-              <span className="text-xl">💡</span>
-              <h2 className="text-base font-bold">WedyAI Bütçe Optimize Raporu</h2>
-            </div>
-
-            <p className="text-xs text-purple-200 leading-relaxed">{aiResult.recommendation}</p>
-
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 pt-2">
-              <div className="bg-white/10 p-4 rounded-2xl border border-white/10 text-center">
-                <span className="text-[10px] text-pink-300 font-bold block">Mekan & Yemek</span>
-                <span className="text-sm font-extrabold mt-1 block">{aiResult.venueBudget}</span>
-              </div>
-              <div className="bg-white/10 p-4 rounded-2xl border border-white/10 text-center">
-                <span className="text-[10px] text-pink-300 font-bold block">Fotoğraf & Drone</span>
-                <span className="text-sm font-extrabold mt-1 block">{aiResult.photoBudget}</span>
-              </div>
-              <div className="bg-white/10 p-4 rounded-2xl border border-white/10 text-center">
-                <span className="text-[10px] text-pink-300 font-bold block">Gelinlik & Damatlık</span>
-                <span className="text-sm font-extrabold mt-1 block">{aiResult.dressBudget}</span>
-              </div>
-              <div className="bg-white/10 p-4 rounded-2xl border border-white/10 text-center">
-                <span className="text-[10px] text-pink-300 font-bold block">Müzik & Süsleme</span>
-                <span className="text-sm font-extrabold mt-1 block">{aiResult.otherBudget}</span>
-              </div>
-            </div>
-
-            <div className="text-center pt-2">
-              <Link
-                href="/arama"
-                className="inline-block bg-[#E6007E] text-white text-xs font-bold px-6 py-3 rounded-xl hover:bg-pink-600 transition shadow"
-              >
-                Bu Bütçeye Uygun Firmaları Listele →
-              </Link>
-            </div>
-          </div>
-        )}
+        </div>
       </div>
+
     </div>
   );
 }
