@@ -2,17 +2,36 @@ import { NextResponse } from 'next/server';
 
 export async function POST(req: Request) {
   try {
-    const { messages } = await req.json();
+    // Front-end'den gelen mesajlar VE kullanıcı/firma özel verileri (userContext)
+    const { messages, userContext } = await req.json();
     const apiKey = process.env.GROQ_API_KEY;
 
     if (!apiKey) {
       return NextResponse.json(
-        { error: 'GROQ_API_KEY bulunamadı! Lütfen .env.local dosyanızı veya Vercel panelini kontrol edin.' },
+        { error: 'GROQ_API_KEY bulunamadı!' },
         { status: 500 }
       );
     }
 
-    // Groq API İstegi
+    // Dinamik Sistem Metni: Kullanıcının rolüne göre özelleşir
+    const systemPrompt = `
+Sen WedyPlan platformunun VIP Kurumsal Düğün ve Organizasyon Asistanısın (WedyAI Concierge).
+
+Mevcut Kullanıcı Profili ve Verileri:
+- Kullanıcı Tipi: ${userContext?.role === 'firma' ? 'Tedarikçi / Firma' : 'Çift'}
+- İsim: ${userContext?.name || 'Değerli Misafirimiz'}
+- Düğün Tarihi: ${userContext?.weddingDate || 'Henüz Belirlenmedi'}
+- Toplam Bütçe: ${userContext?.budget ? `${userContext.budget} TL` : 'Belirtilmedi'}
+- Davetli Sayısı: ${userContext?.guestCount ? `${userContext.guestCount} Kişi` : 'Belirtilmedi'}
+- Seçilen Mekan/Konsept: ${userContext?.venue || 'Henüz Seçilmedi'}
+
+KURUMSAL İLETİŞİM İLKELERİ:
+1. ÜSLUP: Son derece saygın, elit, çözüm odaklı, yapıcı ve profesyonel bir dil kullan (Siz/Biz dili).
+2. VERİ BAĞLILIĞI: Cevaplarını öncelikle yukarıda verilen kullanıcı verilerine ve WedyPlan platform imkanlarına dayandır.
+3. DİNAMİK YANIT: Eğer kullanıcı çift ise bütçe yönetimi, zaman çizelgesi ve mekan organizasyonunda premium tavsiyeler ver. Eğer kullanıcı firma ise müşteri ilişkileri, teklif yönetimi ve randevu optimizasyonu konularında kurumsal çözümler sun.
+4. GÖRSELLİK VE BİÇİM: Paragrafları düzenli, maddeli ve şık başlıklar kullanarak sun. Gereksiz lakayıt emojilerden kaçın; sadece seçkin ve zarif simgeler (✨, ⚜️, 📋, 🥂) kullan.
+    `;
+
     const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
       method: 'POST',
       headers: {
@@ -20,39 +39,20 @@ export async function POST(req: Request) {
         Authorization: `Bearer ${apiKey}`,
       },
       body: JSON.stringify({
-        model: 'llama-3.3-70b-versatile', // Aktif ve en güncel Groq modeli
+        model: 'llama-3.3-70b-versatile',
         messages: [
-          {
-            role: 'system',
-            content: `Sen WedyPlan platformunun resmi, uzman ve son derece samimi Yapay Zeka Düğün Asistanısın (WedyAI).
-
-ÖNEMLİ KURALLAR:
-1. SADECE düğün, nişan, kına, bütçe planlaması, mekan seçimi, davetli yönetimi (LCV), gelinlik/damatlık ve düğün tedarikçileri konularında rehberlik et.
-2. Düğün dışındaki genel konularda nazikçe sadece düğün planlama uzmanı olduğunu hatırlatarak konuyu düğün hazırlıklarına getir.
-3. Türkçe dilini mükemmel ve akıcı kullan. Bol bol uygun emojiler (✨, 💒, 💍, 💐, 📋) ve kısa, okunabilir paragraflar/maddeler ekle.
-4. Çiftlere heyecan verici, motive edici ama aynı zamanda bütçe ve zaman yönetimi açısından ayakları yere basan profesyonel tavsiyeler ver.`,
-          },
+          { role: 'system', content: systemPrompt },
           ...messages,
         ],
-        temperature: 0.6,
+        temperature: 0.5, // Daha tutarlı ve kurumsal yanıtlar için sıcaklığı biraz düşürdük
       }),
     });
 
     const data = await response.json();
+    if (!response.ok) throw new Error(data.error?.message || 'API Hatası');
 
-    if (!response.ok) {
-      console.error('Groq API Hata Detayı:', data);
-      throw new Error(data.error?.message || 'Groq API yanıt veremedi.');
-    }
-
-    const aiText = data.choices?.[0]?.message?.content || 'Yanıt oluşturulamadı.';
-
-    return NextResponse.json({ text: aiText });
+    return NextResponse.json({ text: data.choices?.[0]?.message?.content || 'Yanıt oluşturulamadı.' });
   } catch (error: any) {
-    console.error('WedyAI Groq Error:', error);
-    return NextResponse.json(
-      { error: error.message || 'Bir hata oluştu.' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: error.message || 'Hata oluştu.' }, { status: 500 });
   }
 }

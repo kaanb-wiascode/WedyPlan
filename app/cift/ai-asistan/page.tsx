@@ -4,12 +4,13 @@ import React, { useState } from 'react';
 import { 
   Sparkles, 
   Send, 
-  Bot, 
+  Crown,
   User, 
-  Lightbulb, 
+  Building2,
   CalendarDays,
   Coins,
-  Loader2
+  Loader2,
+  ShieldCheck
 } from 'lucide-react';
 
 interface Message {
@@ -19,12 +20,22 @@ interface Message {
   time: string;
 }
 
-export default function WedyAIAssistantPage() {
+export default function PremiumWedyAIAssistant() {
+  // ÖRNEK: Gerçek uygulamada bu veriyi Supabase/Auth/Session içinden alacaksın
+  const [userContext] = useState({
+    role: 'cift', // 'cift' veya 'firma'
+    name: 'Selin & Kaan',
+    weddingDate: '15 Eylül 2026',
+    budget: '450.000',
+    guestCount: '250',
+    venue: 'Kır Düğünü / Beykoz'
+  });
+
   const [messages, setMessages] = useState<Message[]>([
     {
       id: '1',
       sender: 'ai',
-      text: 'Merhaba! Ben WedyAI, kişisel düğün planlama asistanınızım. Bütçeniz, konsept seçiminiz, davetli yönetimi veya tedarikçi pazarlıkları ile ilgili bana dilediğiniz soruyu sorabilirsiniz.',
+      text: `Hoş geldiniz ${userContext.name}.\n\nWedyPlan VIP Asistanınız olarak 15 Eylül 2026 tarihindeki düğün organizasyonunuz, 450.000 TL bütçe planlamanız ve davetli yönetimiz ile ilgili tüm detaylara hakimim. Bugün size nasıl yardımcı olabilirim?`,
       time: '14:00'
     }
   ]);
@@ -33,9 +44,9 @@ export default function WedyAIAssistantPage() {
   const [isLoading, setIsLoading] = useState(false);
 
   const quickPrompts = [
-    { title: 'Bütçe Tavsiyesi', text: '350.000 TL bütçe ile İstanbul kır düğünü nasıl planlanır?', icon: Coins },
-    { title: 'Düğün Takvimi', text: 'Düğüne 6 ay kala yapılması gerekenlerin listesini ver.', icon: CalendarDays },
-    { title: 'Mekan İpuçları', text: 'Düğün mekanı seçerken sözleşmede neye dikkat etmeliyim?', icon: Lightbulb },
+    { title: 'Bütçe Optimizasyonu', text: `${userContext.budget} TL bütçemizi kal kalem en verimli şekilde nasıl dağıtabiliriz?`, icon: Coins },
+    { title: 'Zaman Çizelgesi', text: `${userContext.weddingDate} tarihine kalan süre için detaylı aksiyon planı çıkar.`, icon: CalendarDays },
+    { title: 'Mekan & Sözleşme', text: `${userContext.venue} konsepti için sözleşmede dikkat etmemiz gereken kritik maddeler nelerdir?`, icon: Crown },
   ];
 
   const handleSend = async (textToSend?: string) => {
@@ -44,7 +55,6 @@ export default function WedyAIAssistantPage() {
 
     const now = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
-    // 1. Kullanıcı mesajını ekrana ekle
     const userMsg: Message = {
       id: Date.now().toString(),
       sender: 'user',
@@ -58,26 +68,24 @@ export default function WedyAIAssistantPage() {
     setIsLoading(true);
 
     try {
-      // 2. Mesaj geçmişini API formatına getir
       const apiMessages = updatedMessages.map(m => ({
         role: m.sender === 'user' ? 'user' : 'assistant',
         content: m.text
       }));
 
-      // 3. Backend API'ye istek at
+      // Kullanıcı bağlamını (userContext) isteğe ekliyoruz
       const res = await fetch('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ messages: apiMessages }),
+        body: JSON.stringify({ 
+          messages: apiMessages,
+          userContext: userContext 
+        }),
       });
 
       const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Yanıt alınamadı.');
 
-      if (!res.ok) {
-        throw new Error(data.error || 'Yapay zeka yanıt veremedi.');
-      }
-
-      // 4. Gerçek AI cevabını ekrana ekle
       const aiMsg: Message = {
         id: (Date.now() + 1).toString(),
         sender: 'ai',
@@ -87,38 +95,61 @@ export default function WedyAIAssistantPage() {
 
       setMessages(prev => [...prev, aiMsg]);
     } catch (error: any) {
-      console.error('AI Hatası:', error);
-      const errorMsg: Message = {
-        id: (Date.now() + 1).toString(),
-        sender: 'ai',
-        text: `⚠️ Bir bağlantı hatası oluştu: ${error.message || 'Lütfen tekrar deneyin.'}`,
-        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-      };
-      setMessages(prev => [...prev, errorMsg]);
+      setMessages(prev => [
+        ...prev,
+        {
+          id: (Date.now() + 1).toString(),
+          sender: 'ai',
+          text: `⚠️ Bağlantı kurulurken bir sistem uyarısı oluştu: ${error.message}`,
+          time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+        }
+      ]);
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <div className="max-w-[800px] mx-auto space-y-6 animate-in fade-in duration-500 pb-20">
+    <div className="max-w-[900px] mx-auto space-y-8 pb-20 pt-4 font-sans selection:bg-[#111111] selection:text-white">
       
-      {/* Header */}
-      <div className="text-center space-y-2">
-        <div className="inline-flex items-center gap-2 px-3 py-1 bg-[#7C5CFF]/10 text-[#7C5CFF] rounded-full text-[12px] font-medium">
-          <Sparkles className="w-3.5 h-3.5" />
-          <span>WedyAI Düğün Motoru v2.0</span>
+      {/* Premium Header */}
+      <div className="text-center space-y-3">
+        <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-[#111111] text-white rounded-full text-[11px] font-medium tracking-widest uppercase shadow-sm">
+          <ShieldCheck className="w-3.5 h-3.5 text-[#D4AF37]" />
+          <span>WedyPlan Concierge • VIP Private Assistant</span>
         </div>
-        <h1 className="text-[32px] font-medium tracking-tight text-[#111111]">
-          Akıllı Planlama Asistanı (TEST)
+        
+        {/* Serif Başlık (Kurumsal & Lüks) */}
+        <h1 className="text-[38px] md:text-[44px] font-serif font-normal tracking-tight text-[#111111] leading-tight">
+          Kişiselleştirilmiş Düğün Danışmanlığı
         </h1>
-        <p className="text-[14px] text-[#666666]">
-          Sorularınızı sorun, anında uzman tavsiyeleri ve bütçe analizleri alın.
+        
+        <p className="text-[15px] text-[#666666] max-w-[600px] mx-auto font-light leading-relaxed">
+          Sadece size özel bütçe, davetli ve konsept verileriyle entegre çalışan kurumsal yapay zeka asistanınız.
         </p>
       </div>
 
+      {/* Profil Özet Bilgi Kartı (Müşteriye Özel) */}
+      <div className="bg-[#FBFBFB] border border-black/[0.06] rounded-[24px] p-5 flex flex-wrap items-center justify-between gap-4 shadow-sm">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-full bg-[#111111] text-[#D4AF37] flex items-center justify-center font-serif text-lg font-bold">
+            {userContext.role === 'firma' ? <Building2 className="w-5 h-5" /> : <Crown className="w-5 h-5" />}
+          </div>
+          <div>
+            <div className="text-[14px] font-medium text-[#111111]">{userContext.name}</div>
+            <div className="text-[12px] text-[#888888]">{userContext.role === 'firma' ? 'Onaylı Tedarikçi Portalı' : 'Özel Müşteri Profili'}</div>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-6 text-[13px] text-[#555555]">
+          <div><span className="text-[#999999]">Tarih:</span> <strong className="text-[#111111] font-medium">{userContext.weddingDate}</strong></div>
+          <div><span className="text-[#999999]">Bütçe:</span> <strong className="text-[#111111] font-medium">{userContext.budget} TL</strong></div>
+          <div><span className="text-[#999999]">Davetli:</span> <strong className="text-[#111111] font-medium">{userContext.guestCount} Kişi</strong></div>
+        </div>
+      </div>
+
       {/* Quick Prompts */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {quickPrompts.map((p, idx) => {
           const Icon = p.icon;
           return (
@@ -126,13 +157,13 @@ export default function WedyAIAssistantPage() {
               key={idx}
               disabled={isLoading}
               onClick={() => handleSend(p.text)}
-              className="p-4 bg-white border border-[rgba(0,0,0,0.06)] rounded-[20px] text-left hover:border-[#7C5CFF] hover:shadow-[0_4px_20px_rgba(124,92,255,0.08)] transition-all space-y-2 group disabled:opacity-50"
+              className="p-5 bg-white border border-black/[0.08] rounded-[22px] text-left hover:border-[#111111] hover:shadow-[0_10px_30px_rgba(0,0,0,0.04)] transition-all space-y-2 group disabled:opacity-50"
             >
-              <div className="flex items-center gap-2 text-[#7C5CFF]">
-                <Icon className="w-4 h-4" />
-                <span className="text-[13px] font-medium">{p.title}</span>
+              <div className="flex items-center gap-2 text-[#111111]">
+                <Icon className="w-4 h-4 text-[#D4AF37]" />
+                <span className="text-[13px] font-medium tracking-wide">{p.title}</span>
               </div>
-              <p className="text-[12px] text-[#666666] line-clamp-2 group-hover:text-[#111111]">
+              <p className="text-[12px] text-[#666666] line-clamp-2 group-hover:text-[#111111] leading-relaxed">
                 {p.text}
               </p>
             </button>
@@ -141,49 +172,49 @@ export default function WedyAIAssistantPage() {
       </div>
 
       {/* Chat Container */}
-      <div className="bg-white border border-[rgba(0,0,0,0.06)] rounded-[32px] p-6 shadow-[0_8px_30px_rgba(0,0,0,0.03)] space-y-4 min-h-[400px] flex flex-col justify-between">
+      <div className="bg-white border border-black/[0.08] rounded-[32px] p-6 shadow-[0_20px_50px_rgba(0,0,0,0.03)] space-y-6 min-h-[480px] flex flex-col justify-between">
         
-        {/* Messages */}
-        <div className="space-y-4 overflow-y-auto max-h-[450px] pr-2">
+        {/* Messages List */}
+        <div className="space-y-6 overflow-y-auto max-h-[500px] pr-2">
           {messages.map((m) => (
             <div
               key={m.id}
-              className={`flex items-start gap-3 ${m.sender === 'user' ? 'flex-row-reverse' : ''}`}
+              className={`flex items-start gap-4 ${m.sender === 'user' ? 'flex-row-reverse' : ''}`}
             >
-              <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs shrink-0 ${
-                m.sender === 'user' ? 'bg-[#111111] text-white' : 'bg-[#7C5CFF] text-white'
+              <div className={`w-9 h-9 rounded-full flex items-center justify-center text-xs shrink-0 shadow-sm ${
+                m.sender === 'user' ? 'bg-[#111111] text-white' : 'bg-[#F4F4F0] border border-black/10 text-[#111111]'
               }`}>
-                {m.sender === 'user' ? <User className="w-4 h-4" /> : <Bot className="w-4 h-4" />}
+                {m.sender === 'user' ? <User className="w-4 h-4" /> : <Sparkles className="w-4 h-4 text-[#D4AF37]" />}
               </div>
 
-              <div className={`p-4 rounded-[20px] max-w-[80%] text-[14px] leading-relaxed whitespace-pre-wrap ${
+              <div className={`p-5 rounded-[22px] max-w-[82%] text-[14px] leading-relaxed whitespace-pre-wrap ${
                 m.sender === 'user'
-                  ? 'bg-[#111111] text-white rounded-tr-none'
-                  : 'bg-[#F8F8F7] text-[#111111] rounded-tl-none border border-[rgba(0,0,0,0.04)]'
+                  ? 'bg-[#111111] text-white rounded-tr-none font-light'
+                  : 'bg-[#FBFBF9] text-[#111111] rounded-tl-none border border-black/[0.05] font-normal shadow-sm'
               }`}>
                 <p>{m.text}</p>
-                <span className={`block text-[10px] mt-1.5 ${m.sender === 'user' ? 'text-white/50 text-right' : 'text-[#999999]'}`}>
+                <span className={`block text-[10px] mt-2 tracking-wider ${m.sender === 'user' ? 'text-white/40 text-right' : 'text-[#999999]'}`}>
                   {m.time}
                 </span>
               </div>
             </div>
           ))}
 
-          {/* Loading Indicator */}
+          {/* Loading State */}
           {isLoading && (
-            <div className="flex items-start gap-3">
-              <div className="w-8 h-8 rounded-full bg-[#7C5CFF] text-white flex items-center justify-center shrink-0">
-                <Bot className="w-4 h-4" />
+            <div className="flex items-start gap-4">
+              <div className="w-9 h-9 rounded-full bg-[#F4F4F0] border border-black/10 text-[#111111] flex items-center justify-center shrink-0">
+                <Sparkles className="w-4 h-4 text-[#D4AF37]" />
               </div>
-              <div className="p-4 rounded-[20px] rounded-tl-none bg-[#F8F8F7] border border-[rgba(0,0,0,0.04)] text-[#7C5CFF] flex items-center gap-2">
-                <Loader2 className="w-4 h-4 animate-spin" />
-                <span className="text-[13px] font-medium text-[#666666]">WedyAI cevabı hazırlıyor...</span>
+              <div className="p-5 rounded-[22px] rounded-tl-none bg-[#FBFBF9] border border-black/[0.05] text-[#111111] flex items-center gap-3">
+                <Loader2 className="w-4 h-4 animate-spin text-[#111111]" />
+                <span className="text-[13px] font-medium text-[#666666]">WedyPlan Concierge verilerinizi inceliyor...</span>
               </div>
             </div>
           )}
         </div>
 
-        {/* Input Bar */}
+        {/* Input Form */}
         <form
           onSubmit={(e) => {
             e.preventDefault();
@@ -196,13 +227,13 @@ export default function WedyAIAssistantPage() {
             value={input}
             onChange={(e) => setInput(e.target.value)}
             disabled={isLoading}
-            placeholder="WedyAI'a bir şey sorun..."
-            className="w-full h-[54px] pl-5 pr-14 bg-[#F8F8F7] border border-[rgba(0,0,0,0.06)] rounded-[20px] text-[14px] text-[#111111] outline-none focus:border-[#7C5CFF] focus:bg-white transition-all disabled:opacity-60"
+            placeholder="Düğün planlamanız veya bütçeniz hakkında bir soru sorun..."
+            className="w-full h-[58px] pl-6 pr-16 bg-[#FBFBF9] border border-black/[0.08] rounded-[22px] text-[14px] text-[#111111] outline-none focus:border-[#111111] focus:bg-white transition-all shadow-inner disabled:opacity-60 placeholder:text-[#999999]"
           />
           <button
             type="submit"
             disabled={!input.trim() || isLoading}
-            className="absolute right-2 top-1/2 -translate-y-1/2 translate-y-[1px] w-10 h-10 bg-[#111111] hover:bg-[#333333] text-white rounded-[14px] flex items-center justify-center transition-all disabled:opacity-40"
+            className="absolute right-2 top-1/2 -translate-y-1/2 translate-y-[1px] w-11 h-11 bg-[#111111] hover:bg-[#333333] text-white rounded-[16px] flex items-center justify-center transition-all disabled:opacity-30 shadow-md"
           >
             {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
           </button>
@@ -212,4 +243,4 @@ export default function WedyAIAssistantPage() {
 
     </div>
   );
-}   
+}
