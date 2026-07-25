@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
 import { Analytics } from '@vercel/analytics/react';
+import GlobalCommandPalette from '@/components/GlobalCommandPalette';
 import './globals.css';
 
 const inter = Inter({ subsets: ['latin'] });
@@ -26,11 +27,11 @@ export const metadata: Metadata = {
     title: "WedyPlan - Akıllı Düğün Pazaryeri & Planlama Asistanı",
     description:
       "Aradığınız tüm düğün profesyonelleri burada! Ücretsiz fiyat teklifi alın, bütçenizi ve hazırlık adımlarınızı yönetin.",
-    url: "[https://wedy-plan.vercel.app](https://wedy-plan.vercel.app)",
+    url: "https://wedy-plan.vercel.app",
     siteName: "WedyPlan",
     images: [
       {
-        url: "[https://images.unsplash.com/photo-1519167758481-83f550bb49b3?w=1200](https://images.unsplash.com/photo-1519167758481-83f550bb49b3?w=1200)",
+        url: "https://images.unsplash.com/photo-1519167758481-83f550bb49b3?w=1200",
         width: 1200,
         height: 630,
         alt: "WedyPlan Düğün Pazaryeri",
@@ -43,7 +44,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "WedyPlan - Düğün Mekanları & Planlama Asistanı",
     description: "Düğün hazırlıklarınızı kolaylaştıracak tüm araçlar ve firmalar WedyPlan'da.",
-    images: ["[https://images.unsplash.com/photo-1519167758481-83f550bb49b3?w=1200](https://images.unsplash.com/photo-1519167758481-83f550bb49b3?w=1200)"],
+    images: ["https://images.unsplash.com/photo-1519167758481-83f550bb49b3?w=1200"],
   },
   robots: {
     index: true,
@@ -60,6 +61,7 @@ export default function RootLayout({
     <html lang="tr">
       <body className={inter.className}>
         {children}
+        <GlobalCommandPalette />
         <Analytics />
       </body>
     </html>
