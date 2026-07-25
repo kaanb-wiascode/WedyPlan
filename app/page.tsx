@@ -16,6 +16,7 @@ interface Vendor {
   rating?: string | number;
   imageUrl?: string;
   description?: string;
+  isFeatured?: boolean;
 }
 
 export default function HomePage() {
@@ -34,7 +35,7 @@ export default function HomePage() {
     return () => unsubscribe();
   }, []);
 
-  // Firmaları Çek
+  // Firmaları Çek ve Sponsorluları Üste Al
   useEffect(() => {
     async function fetchVendors() {
       try {
@@ -43,6 +44,8 @@ export default function HomePage() {
         querySnapshot.forEach((doc) => {
           vendorData.push({ id: doc.id, ...doc.data() } as Vendor);
         });
+        
+        vendorData.sort((a, b) => (b.isFeatured ? 1 : 0) - (a.isFeatured ? 1 : 0));
         setVendors(vendorData);
       } catch (error) {
         console.error('Firmalar çekilirken hata oluştu:', error);
@@ -74,35 +77,23 @@ export default function HomePage() {
         </Link>
         
         {/* Masaüstü Menü Linkleri */}
-        <div className="hidden md:flex items-center gap-6">
-          <Link
-            href="/arama"
-            className="text-sm font-semibold text-slate-600 hover:text-[#E6007E] transition"
-          >
+        <div className="hidden lg:flex items-center gap-5">
+          <Link href="/arama" className="text-sm font-semibold text-slate-600 hover:text-[#E6007E] transition">
             Firma Ara
           </Link>
-          <Link
-            href="/kontrol-listesi"
-            className="text-sm font-semibold text-slate-600 hover:text-[#E6007E] transition"
-          >
-            ⏳ Planlama Listesi
+          <Link href="/kontrol-listesi" className="text-sm font-semibold text-slate-600 hover:text-[#E6007E] transition">
+            ⏳ Checklist
           </Link>
-          <Link
-            href="/butce-hesaplayici"
-            className="text-sm font-bold text-[#E6007E] bg-pink-50 hover:bg-pink-100 px-3 py-1.5 rounded-full transition flex items-center gap-1"
-          >
+          <Link href="/davetli-listesi" className="text-sm font-semibold text-slate-600 hover:text-[#E6007E] transition">
+            🎟️ Davetliler
+          </Link>
+          <Link href="/butce-hesaplayici" className="text-sm font-bold text-[#E6007E] bg-pink-50 hover:bg-pink-100 px-3 py-1.5 rounded-full transition flex items-center gap-1">
             <span>💍</span> Bütçe
           </Link>
-          <Link
-            href="/satici"
-            className="text-sm font-semibold text-[#4A154B] hover:text-[#E6007E] transition"
-          >
-            🏢 Kurumsal / Firma Girişi
+          <Link href="/satici" className="text-sm font-semibold text-[#4A154B] hover:text-[#E6007E] transition">
+            🏢 Kurumsal
           </Link>
-          <Link
-            href="/admin"
-            className="text-xs font-semibold text-slate-500 border border-slate-200 px-3 py-1.5 rounded-xl hover:bg-slate-50 transition"
-          >
+          <Link href="/admin" className="text-xs font-semibold text-slate-500 border border-slate-200 px-3 py-1.5 rounded-xl hover:bg-slate-50 transition">
             Admin
           </Link>
 
@@ -125,34 +116,28 @@ export default function HomePage() {
               </button>
 
               {showUserMenu && (
-                <div className="absolute right-0 mt-2 w-48 bg-white border border-purple-100 rounded-2xl shadow-xl py-2 z-50">
-                  <div className="px-4 py-2 border-b border-slate-50 mb-1">
-                    <p className="text-[11px] text-slate-400 font-semibold">Hoş Geldiniz,</p>
+                <div className="absolute right-0 mt-2 w-52 bg-white border border-purple-100 rounded-2xl shadow-xl py-2 z-50">
+                  <div className="px-4 py-3 border-b border-slate-50 mb-1 bg-purple-50/50">
+                    <p className="text-[11px] text-slate-500 font-semibold">Hoş Geldiniz,</p>
                     <p className="text-xs font-bold text-[#4A154B] truncate">
                       {user.displayName || user.email}
                     </p>
                   </div>
-                  <Link
-                    href="/satici"
-                    className="block px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-purple-50 hover:text-[#E6007E] transition"
-                  >
-                    🏢 Firma Paneli
-                  </Link>
-                  <Link
-                    href="/arama"
-                    className="block px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-purple-50 hover:text-[#E6007E] transition"
-                  >
+                  <Link href="/favoriler" className="flex items-center gap-2 px-4 py-2.5 text-xs font-semibold text-slate-600 hover:bg-purple-50 hover:text-[#E6007E] transition">
                     ❤️ Favori Firmalarım
                   </Link>
-                  <Link
-                    href="/kontrol-listesi"
-                    className="block px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-purple-50 hover:text-[#E6007E] transition"
-                  >
+                  <Link href="/kontrol-listesi" className="flex items-center gap-2 px-4 py-2.5 text-xs font-semibold text-slate-600 hover:bg-purple-50 hover:text-[#E6007E] transition">
                     ⏳ Düğün Sayacım
+                  </Link>
+                  <Link href="/davetli-listesi" className="flex items-center gap-2 px-4 py-2.5 text-xs font-semibold text-slate-600 hover:bg-purple-50 hover:text-[#E6007E] transition">
+                    🎟️ Davetli Listem
+                  </Link>
+                  <Link href="/satici" className="flex items-center gap-2 px-4 py-2.5 text-xs font-semibold text-slate-600 hover:bg-purple-50 hover:text-[#E6007E] transition border-t border-slate-50">
+                    🏢 Firma Paneli
                   </Link>
                   <button
                     onClick={handleLogout}
-                    className="w-full text-left px-4 py-2 text-xs font-bold text-red-500 hover:bg-red-50 transition mt-1 border-t border-slate-50"
+                    className="w-full text-left px-4 py-2.5 text-xs font-bold text-red-500 hover:bg-red-50 transition mt-1 border-t border-slate-50"
                   >
                     Çıkış Yap
                   </button>
@@ -170,7 +155,7 @@ export default function HomePage() {
         </div>
 
         {/* Mobil Hamburger Butonu */}
-        <div className="flex md:hidden items-center gap-3">
+        <div className="flex lg:hidden items-center gap-3">
           {user && (
             <img
               src={user.photoURL || `https://ui-avatars.com/api/?name=${user.displayName || user.email}&background=E6007E&color=fff`}
@@ -190,42 +175,25 @@ export default function HomePage() {
 
       {/* Mobil Açılır Menü Overlay */}
       {mobileMenuOpen && (
-        <div className="md:hidden bg-white border-b border-purple-100 shadow-xl px-6 py-6 space-y-4 animate-in slide-in-from-top duration-300">
-          <div className="flex flex-col space-y-3">
-            <Link
-              href="/arama"
-              onClick={() => setMobileMenuOpen(false)}
-              className="flex items-center gap-3 p-3 rounded-xl bg-purple-50/50 text-xs font-bold text-[#4A154B]"
-            >
+        <div className="lg:hidden bg-white border-b border-purple-100 shadow-xl px-6 py-6 space-y-4 animate-in slide-in-from-top duration-300 absolute w-full z-40">
+          <div className="flex flex-col space-y-2">
+            <Link href="/arama" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 p-3 rounded-xl bg-purple-50/50 text-xs font-bold text-[#4A154B]">
               🔍 Firma & Mekan Ara
             </Link>
-            <Link
-              href="/kontrol-listesi"
-              onClick={() => setMobileMenuOpen(false)}
-              className="flex items-center gap-3 p-3 rounded-xl bg-purple-50/50 text-xs font-bold text-[#4A154B]"
-            >
+            <Link href="/favoriler" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 p-3 rounded-xl bg-pink-50/50 text-xs font-bold text-[#E6007E]">
+              ❤️ Favori Firmalarım
+            </Link>
+            <Link href="/kontrol-listesi" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 p-3 rounded-xl bg-purple-50/50 text-xs font-bold text-[#4A154B]">
               ⏳ Düğün Geri Sayımı & Checklist
             </Link>
-            <Link
-              href="/butce-hesaplayici"
-              onClick={() => setMobileMenuOpen(false)}
-              className="flex items-center gap-3 p-3 rounded-xl bg-pink-50 text-xs font-bold text-[#E6007E]"
-            >
-              💍 Düğün Bütçesi Hesaplayıcı
+            <Link href="/davetli-listesi" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 p-3 rounded-xl bg-purple-50/50 text-xs font-bold text-[#4A154B]">
+              🎟️ Masa & Davetli Listesi
             </Link>
-            <Link
-              href="/satici"
-              onClick={() => setMobileMenuOpen(false)}
-              className="flex items-center gap-3 p-3 rounded-xl bg-purple-100 text-xs font-bold text-[#4A154B]"
-            >
+            <Link href="/butce-hesaplayici" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 p-3 rounded-xl bg-pink-50 text-xs font-bold text-[#E6007E]">
+              💍 Bütçe Hesaplayıcı
+            </Link>
+            <Link href="/satici" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 p-3 rounded-xl bg-purple-100 text-xs font-bold text-[#4A154B]">
               🏢 Kurumsal / Firma Paneli
-            </Link>
-            <Link
-              href="/admin"
-              onClick={() => setMobileMenuOpen(false)}
-              className="flex items-center gap-3 p-3 rounded-xl bg-slate-100 text-xs font-bold text-slate-700"
-            >
-              🛠️ Yönetim Paneli
             </Link>
           </div>
 
@@ -243,19 +211,12 @@ export default function HomePage() {
                     <p className="text-[10px] text-slate-400 truncate max-w-[180px]">{user.email}</p>
                   </div>
                 </div>
-                <button
-                  onClick={handleLogout}
-                  className="w-full bg-red-50 text-red-500 py-2.5 rounded-xl text-xs font-bold hover:bg-red-100 transition"
-                >
+                <button onClick={handleLogout} className="w-full bg-red-50 text-red-500 py-2.5 rounded-xl text-xs font-bold hover:bg-red-100 transition">
                   Çıkış Yap
                 </button>
               </div>
             ) : (
-              <Link
-                href="/login"
-                onClick={() => setMobileMenuOpen(false)}
-                className="block text-center w-full bg-[#E6007E] text-white py-3 rounded-xl text-xs font-bold shadow-md hover:bg-pink-700 transition"
-              >
+              <Link href="/login" onClick={() => setMobileMenuOpen(false)} className="block text-center w-full bg-[#E6007E] text-white py-3 rounded-xl text-xs font-bold shadow-md hover:bg-pink-700 transition">
                 Giriş Yap / Üye Ol
               </Link>
             )}
@@ -277,61 +238,55 @@ export default function HomePage() {
           </p>
 
           <div className="pt-4 flex flex-wrap justify-center gap-4">
-            <Link
-              href="/arama"
-              className="bg-[#E6007E] hover:bg-pink-700 text-white text-sm font-bold px-6 py-3 rounded-xl transition shadow-lg"
-            >
+            <Link href="/arama" className="bg-[#E6007E] hover:bg-pink-700 text-white text-sm font-bold px-6 py-3 rounded-xl transition shadow-lg">
               Firmaları İncele →
             </Link>
-            <Link
-              href="/kontrol-listesi"
-              className="bg-white/10 hover:bg-white/20 text-white text-sm font-bold px-6 py-3 rounded-xl border border-white/20 transition"
-            >
+            <Link href="/kontrol-listesi" className="bg-white/10 hover:bg-white/20 text-white text-sm font-bold px-6 py-3 rounded-xl border border-white/20 transition">
               ⏳ Geri Sayımı Başlat
             </Link>
           </div>
         </div>
       </section>
 
-      {/* Akıllı Araç Tanıtım Banner Alanı */}
-      <section className="max-w-6xl mx-auto px-6 -mt-8 relative z-10 grid grid-cols-1 md:grid-cols-2 gap-4">
+      {/* Akıllı Araç Tanıtım Banner Alanı (ÜÇLÜ GRID) */}
+      <section className="max-w-7xl mx-auto px-4 md:px-6 -mt-8 relative z-10 grid grid-cols-1 md:grid-cols-3 gap-4">
+        
         {/* Banner 1: Bütçe Hesaplayıcı */}
-        <div className="bg-white p-6 rounded-3xl border border-purple-100 shadow-xl flex flex-col sm:flex-row items-center justify-between gap-4">
-          <div className="space-y-1 text-center sm:text-left">
-            <div className="flex items-center gap-2 justify-center sm:justify-start">
-              <span className="text-xl">💰</span>
-              <h3 className="text-sm font-bold text-[#4A154B]">Düğün Bütçenizi Planlayın</h3>
-            </div>
-            <p className="text-[11px] text-slate-500">
-              Ücretsiz hesaplayıcımız ile bütçenizi kontrol altında tutun.
-            </p>
+        <div className="bg-white p-6 rounded-3xl border border-purple-100 shadow-xl flex flex-col justify-between gap-4 transition hover:-translate-y-1">
+          <div className="space-y-2">
+            <div className="w-10 h-10 bg-pink-50 rounded-full flex items-center justify-center text-xl text-[#E6007E]">💰</div>
+            <h3 className="text-sm font-bold text-[#4A154B]">Düğün Bütçenizi Planlayın</h3>
+            <p className="text-[11px] text-slate-500 line-clamp-2">Harçlamalarınızı kategorize edin, ücretsiz hesaplayıcımız ile bütçenizi kontrol altında tutun.</p>
           </div>
-          <Link
-            href="/butce-hesaplayici"
-            className="bg-[#4A154B] text-white text-[11px] font-bold px-4 py-2.5 rounded-xl hover:bg-purple-900 transition whitespace-nowrap"
-          >
-            Aracı Aç →
+          <Link href="/butce-hesaplayici" className="bg-[#4A154B] text-white text-center text-[11px] font-bold px-4 py-2.5 rounded-xl hover:bg-purple-900 transition w-full">
+            Hesaplayıcıyı Aç →
           </Link>
         </div>
 
         {/* Banner 2: Düğün Sayacı & Checklist */}
-        <div className="bg-white p-6 rounded-3xl border border-pink-100 shadow-xl flex flex-col sm:flex-row items-center justify-between gap-4">
-          <div className="space-y-1 text-center sm:text-left">
-            <div className="flex items-center gap-2 justify-center sm:justify-start">
-              <span className="text-xl">⏳</span>
-              <h3 className="text-sm font-bold text-[#E6007E]">Büyük Güne Ne Kadar Kaldı?</h3>
-            </div>
-            <p className="text-[11px] text-slate-500">
-              Sayacı başlatın, hazırlık adımlarını eksiksiz tamamlayın.
-            </p>
+        <div className="bg-white p-6 rounded-3xl border border-pink-100 shadow-xl flex flex-col justify-between gap-4 transition hover:-translate-y-1 ring-2 ring-pink-500/10">
+          <div className="space-y-2">
+            <div className="w-10 h-10 bg-purple-50 rounded-full flex items-center justify-center text-xl text-[#4A154B]">⏳</div>
+            <h3 className="text-sm font-bold text-[#E6007E]">Geri Sayım & Checklist</h3>
+            <p className="text-[11px] text-slate-500 line-clamp-2">Düğün tarihinizi girin, sayacı başlatın ve tüm hazırlık adımlarını eksiksiz tamamlayın.</p>
           </div>
-          <Link
-            href="/kontrol-listesi"
-            className="bg-[#E6007E] text-white text-[11px] font-bold px-4 py-2.5 rounded-xl hover:bg-pink-700 transition whitespace-nowrap"
-          >
+          <Link href="/kontrol-listesi" className="bg-[#E6007E] text-white text-center text-[11px] font-bold px-4 py-2.5 rounded-xl hover:bg-pink-700 transition w-full shadow-md">
             Sayacı Başlat →
           </Link>
         </div>
+
+        {/* Banner 3: Davetli Listesi */}
+        <div className="bg-white p-6 rounded-3xl border border-purple-100 shadow-xl flex flex-col justify-between gap-4 transition hover:-translate-y-1">
+          <div className="space-y-2">
+            <div className="w-10 h-10 bg-emerald-50 rounded-full flex items-center justify-center text-xl text-emerald-600">🎟️</div>
+            <h3 className="text-sm font-bold text-[#4A154B]">Masa & Davetli Listesi</h3>
+            <p className="text-[11px] text-slate-500 line-clamp-2">Davetlilerinizi gruplandırın, LCV katılımlarını yönetin ve oturma planınızı zahmetsizce yapın.</p>
+          </div>
+          <Link href="/davetli-listesi" className="bg-emerald-600 text-white text-center text-[11px] font-bold px-4 py-2.5 rounded-xl hover:bg-emerald-700 transition w-full">
+            Listeyi Oluştur →
+          </Link>
+        </div>
+
       </section>
 
       {/* Öne Çıkan Firmalar */}
@@ -350,14 +305,16 @@ export default function HomePage() {
           <p className="text-center text-slate-500 text-sm py-12">Firmalar yükleniyor...</p>
         ) : vendors.length === 0 ? (
           <div className="bg-white p-12 text-center rounded-2xl border border-purple-100 text-slate-500">
-            Henüz eklenmiş firma bulunmuyor. Admin panelinden veya Satıcı Panelinden ilk firmayı ekleyebilirsiniz!
+            Henüz eklenmiş firma bulunmuyor.
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {vendors.map((vendor) => (
+            {vendors.slice(0, 6).map((vendor) => (
               <div
                 key={vendor.id}
-                className="bg-white rounded-2xl border border-purple-100 shadow-sm overflow-hidden hover:shadow-md transition flex flex-col justify-between"
+                className={`bg-white rounded-2xl border shadow-sm overflow-hidden hover:shadow-md transition flex flex-col justify-between relative ${
+                  vendor.isFeatured ? 'border-amber-300 ring-2 ring-amber-400/20' : 'border-purple-100'
+                }`}
               >
                 <div>
                   <div className="relative h-48 w-full bg-slate-100">
@@ -369,6 +326,11 @@ export default function HomePage() {
                     <span className="absolute top-3 left-3 bg-[#4A154B] text-white text-[10px] font-bold px-2.5 py-1 rounded-md uppercase">
                       {vendor.category}
                     </span>
+                    {vendor.isFeatured && (
+                      <span className="absolute top-3 right-3 bg-gradient-to-r from-amber-500 to-amber-600 text-white text-[10px] font-bold px-2.5 py-1 rounded-md shadow">
+                        👑 Sponsorlu
+                      </span>
+                    )}
                   </div>
 
                   <div className="p-5 space-y-2">
@@ -385,10 +347,7 @@ export default function HomePage() {
 
                 <div className="p-5 pt-0 border-t border-slate-50 flex items-center justify-between mt-4">
                   <span className="text-xs font-bold text-[#E6007E]">{vendor.price || 'Fiyat Alınız'}</span>
-                  <Link
-                    href={`/firma/${vendor.id}`}
-                    className="bg-[#4A154B] text-white text-xs px-4 py-2 rounded-lg font-semibold hover:bg-purple-900 transition"
-                  >
+                  <Link href={`/firma/${vendor.id}`} className="bg-[#4A154B] text-white text-xs px-4 py-2 rounded-lg font-semibold hover:bg-purple-900 transition">
                     Teklif Al
                   </Link>
                 </div>
