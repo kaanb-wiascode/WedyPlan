@@ -1,425 +1,187 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
-import { collection, getDocs } from 'firebase/firestore';
-import { onAuthStateChanged, signOut, User } from 'firebase/auth';
-import { db, auth } from '../lib/firebase';
+import { Search, Heart, Calendar, Sparkles, ArrowRight, Camera, MapPin, Music } from 'lucide-react';
 
-interface Vendor {
-  id: string;
-  name?: string;
-  category?: string;
-  city?: string;
-  price?: string;
-  rating?: string | number;
-  imageUrl?: string;
-  description?: string;
-  isFeatured?: boolean;
-}
-
-export default function HomePage() {
-  const [vendors, setVendors] = useState<Vendor[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [user, setUser] = useState<User | null>(null);
-  const [showUserMenu, setShowUserMenu] = useState(false);
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const router = useRouter();
-
-  // Oturum Durumunu Dinle
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-      setUser(currentUser);
-    });
-    return () => unsubscribe();
-  }, []);
-
-  // Firmaları Çek ve Sponsorluları Üste Al
-  useEffect(() => {
-    async function fetchVendors() {
-      try {
-        const querySnapshot = await getDocs(collection(db, 'vendors'));
-        const vendorData: Vendor[] = [];
-        querySnapshot.forEach((doc) => {
-          vendorData.push({ id: doc.id, ...doc.data() } as Vendor);
-        });
-        
-        vendorData.sort((a, b) => (b.isFeatured ? 1 : 0) - (a.isFeatured ? 1 : 0));
-        setVendors(vendorData);
-      } catch (error) {
-        console.error('Firmalar çekilirken hata oluştu:', error);
-      } finally {
-        setLoading(false);
-      }
-    }
-    fetchVendors();
-  }, []);
-
-  // Çıkış Yap
-  const handleLogout = async () => {
-    try {
-      await signOut(auth);
-      setShowUserMenu(false);
-      setMobileMenuOpen(false);
-      router.push('/');
-    } catch (error) {
-      console.error('Çıkış hatası:', error);
-    }
-  };
-
+export default function PremiumHomePage() {
   return (
-    <div className="min-h-screen bg-[#FDFBFD] text-slate-800 flex flex-col">
-      {/* Navbar */}
-      <nav className="flex items-center justify-between px-6 md:px-12 py-4 bg-white border-b border-purple-100 shadow-sm sticky top-0 z-50">
-        <Link href="/" className="text-2xl font-bold text-[#4A154B]">
-          Wedy<span className="text-[#E6007E]">Plan</span>
-        </Link>
-        
-        {/* Masaüstü Menü Linkleri */}
-        <div className="hidden lg:flex items-center gap-5">
-          <Link href="/arama" className="text-sm font-semibold text-slate-600 hover:text-[#E6007E] transition">
-            Firma Ara
+    <div className="min-h-screen bg-[#FFFFFF] text-[#111111] selection:bg-[#7C5CFF] selection:text-white font-sans">
+      
+      {/* Navigation (Minimal, Crisp, Sticky) */}
+      <nav className="sticky top-0 z-50 bg-white/80 backdrop-blur-xl border-b border-[rgba(0,0,0,0.06)]">
+        <div className="max-w-[1200px] mx-auto px-6 h-[72px] flex items-center justify-between">
+          <Link href="/" className="text-[22px] font-medium tracking-tight">
+            WedyPlan.
           </Link>
-          <Link href="/firsatlar" className="text-sm font-bold text-[#E6007E] hover:underline transition">
-  🏷️ Fırsatlar
-</Link>
-          <Link href="/kontrol-listesi" className="text-sm font-semibold text-slate-600 hover:text-[#E6007E] transition">
-            ⏳ Checklist
-          </Link>
-          <Link href="/davetli-listesi" className="text-sm font-semibold text-slate-600 hover:text-[#E6007E] transition">
-            🎟️ Davetliler
-          </Link>
-          <Link href="/butce-hesaplayici" className="text-sm font-bold text-[#E6007E] bg-pink-50 hover:bg-pink-100 px-3 py-1.5 rounded-full transition flex items-center gap-1">
-            <span>💍</span> Bütçe
-          </Link>
-          <Link href="/blog" className="text-sm font-semibold text-slate-600 hover:text-[#E6007E] transition">
-            📰 Blog
-          </Link>
-          <div className="h-4 w-px bg-slate-200 mx-1"></div> {/* Ayırıcı çizgi */}
-          <Link href="/satici" className="text-sm font-semibold text-[#4A154B] hover:text-[#E6007E] transition">
-            🏢 Kurumsal
-          </Link>
+          
+          <div className="hidden md:flex items-center gap-8 text-[15px] text-[#666666] font-medium">
+            <Link href="/arama" className="hover:text-[#111111] transition-colors duration-300">Keşfet</Link>
+            <Link href="/kontrol-listesi" className="hover:text-[#111111] transition-colors duration-300">Planlama</Link>
+            <Link href="/hediye-listesi" className="hover:text-[#111111] transition-colors duration-300">Kayıtlar</Link>
+          </div>
 
-          {/* Masaüstü Profil Menüsü */}
-          {user ? (
-            <div className="relative">
-              <button
-                onClick={() => setShowUserMenu(!showUserMenu)}
-                className="flex items-center gap-2 bg-slate-50 hover:bg-slate-100 p-1.5 pr-4 rounded-full border border-slate-200 transition"
-              >
-                <img
-                  src={user.photoURL || `https://ui-avatars.com/api/?name=${user.displayName || user.email}&background=E6007E&color=fff`}
-                  alt="Profil"
-                  className="w-7 h-7 rounded-full object-cover"
-                />
-                <span className="text-xs font-bold text-slate-700">
-                  {user.displayName?.split(' ')[0] || 'Hesabım'}
-                </span>
-                <span className="text-[10px] text-slate-400">▼</span>
-              </button>
-
-              {showUserMenu && (
-                <div className="absolute right-0 mt-2 w-52 bg-white border border-purple-100 rounded-2xl shadow-xl py-2 z-50">
-                  <div className="px-4 py-3 border-b border-slate-50 mb-1 bg-purple-50/50">
-                    <p className="text-[11px] text-slate-500 font-semibold">Hoş Geldiniz,</p>
-                    <p className="text-xs font-bold text-[#4A154B] truncate">
-                      {user.displayName || user.email}
-                    </p>
-                  </div>
-                  <Link href="/favoriler" className="flex items-center gap-2 px-4 py-2.5 text-xs font-semibold text-slate-600 hover:bg-purple-50 hover:text-[#E6007E] transition">
-                    ❤️ Favori Firmalarım
-                  </Link>
-                  <Link href="/kontrol-listesi" className="flex items-center gap-2 px-4 py-2.5 text-xs font-semibold text-slate-600 hover:bg-purple-50 hover:text-[#E6007E] transition">
-                    ⏳ Düğün Sayacım
-                  </Link>
-                  <Link href="/davetli-listesi" className="flex items-center gap-2 px-4 py-2.5 text-xs font-semibold text-slate-600 hover:bg-purple-50 hover:text-[#E6007E] transition">
-                    🎟️ Davetli Listem
-                  </Link>
-                  <Link href="/satici" className="flex items-center gap-2 px-4 py-2.5 text-xs font-semibold text-slate-600 hover:bg-purple-50 hover:text-[#E6007E] transition border-t border-slate-50">
-                    🏢 Firma Paneli
-                  </Link>
-                  <button
-                    onClick={handleLogout}
-                    className="w-full text-left px-4 py-2.5 text-xs font-bold text-red-500 hover:bg-red-50 transition mt-1 border-t border-slate-50"
-                  >
-                    Çıkış Yap
-                  </button>
-                </div>
-              )}
-            </div>
-          ) : (
-            <Link
-              href="/login"
-              className="text-xs font-bold bg-[#E6007E] text-white px-5 py-2.5 rounded-xl hover:bg-pink-700 transition shadow-md whitespace-nowrap"
-            >
-              Giriş Yap / Üye Ol
+          <div className="flex items-center gap-4">
+            <Link href="/login" className="text-[15px] font-medium text-[#111111] hover:text-[#666666] transition-colors">
+              Giriş
             </Link>
-          )}
-        </div>
-
-        {/* Mobil Hamburger Butonu */}
-        <div className="flex lg:hidden items-center gap-3">
-          {user && (
-            <img
-              src={user.photoURL || `https://ui-avatars.com/api/?name=${user.displayName || user.email}&background=E6007E&color=fff`}
-              alt="Profil"
-              className="w-8 h-8 rounded-full object-cover border border-purple-200"
-            />
-          )}
-          <button
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="text-slate-700 hover:text-[#E6007E] focus:outline-none p-1 text-2xl font-bold"
-            aria-label="Menüyü Aç"
-          >
-            {mobileMenuOpen ? '✕' : '☰'}
-          </button>
+            <Link 
+              href="/satici" 
+              className="bg-[#111111] text-white text-[15px] font-medium h-[44px] px-6 rounded-[14px] flex items-center justify-center hover:bg-[#333333] transition-colors duration-300"
+            >
+              İş Ortağı Ol
+            </Link>
+          </div>
         </div>
       </nav>
 
-      {/* Mobil Açılır Menü Overlay */}
-      {mobileMenuOpen && (
-        <div className="lg:hidden bg-white border-b border-purple-100 shadow-xl px-6 py-6 space-y-4 animate-in slide-in-from-top duration-300 absolute w-full z-40">
-          <div className="flex flex-col space-y-2">
-            <Link href="/arama" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 p-3 rounded-xl bg-purple-50/50 text-xs font-bold text-[#4A154B]">
-              🔍 Firma & Mekan Ara
-            </Link>
-            <Link href="/blog" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 p-3 rounded-xl bg-purple-50/50 text-xs font-bold text-[#4A154B]">
-              📰 Düğün Rehberi & Blog
-            </Link>
-            <Link href="/favoriler" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 p-3 rounded-xl bg-pink-50/50 text-xs font-bold text-[#E6007E]">
-              ❤️ Favori Firmalarım
-            </Link>
-            <Link href="/kontrol-listesi" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 p-3 rounded-xl bg-purple-50/50 text-xs font-bold text-[#4A154B]">
-              ⏳ Düğün Geri Sayımı & Checklist
-            </Link>
-            <Link href="/davetli-listesi" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 p-3 rounded-xl bg-purple-50/50 text-xs font-bold text-[#4A154B]">
-              🎟️ Masa & Davetli Listesi
-            </Link>
-            <Link href="/butce-hesaplayici" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 p-3 rounded-xl bg-pink-50 text-xs font-bold text-[#E6007E]">
-              💍 Bütçe Hesaplayıcı
-            </Link>
-            <Link href="/satici" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 p-3 rounded-xl bg-purple-100 text-xs font-bold text-[#4A154B]">
-              🏢 Kurumsal / Firma Paneli
-            </Link>
+      {/* Hero Section (Apple-like, Centered, Huge Typography) */}
+      <section className="relative pt-32 pb-24 px-6 overflow-hidden flex flex-col items-center text-center">
+        {/* Subtle Background Glow */}
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-[#7C5CFF] opacity-[0.04] blur-[100px] rounded-full pointer-events-none"></div>
+        
+        <div className="inline-flex items-center gap-2 px-4 py-2 rounded-[14px] bg-[#F8F8F7] border border-[rgba(0,0,0,0.04)] mb-8">
+          <Sparkles className="w-4 h-4 text-[#7C5CFF]" strokeWidth={2} />
+          <span className="text-[13px] font-medium text-[#666666]">Yeni nesil düğün asistanı ile tanışın.</span>
+        </div>
+
+        <h1 className="text-[56px] md:text-[72px] font-medium tracking-tight leading-[1.05] max-w-[800px]">
+          Hayalinizdeki günü <br className="hidden md:block"/> zahmetsizce tasarlayın.
+        </h1>
+        
+        <p className="mt-6 text-[18px] md:text-[22px] text-[#666666] max-w-[600px] font-normal leading-relaxed">
+          Zamanın ötesinde bir kutlama için ihtiyacınız olan mekanlar, 
+          profesyoneller ve planlama araçları tek bir zarif ekosistemde.
+        </p>
+
+        <div className="mt-12 flex flex-col sm:flex-row items-center gap-4 w-full sm:w-auto">
+          <Link 
+            href="/arama"
+            className="w-full sm:w-auto h-[56px] px-8 bg-[#7C5CFF] text-white rounded-[18px] text-[18px] font-medium flex items-center justify-center gap-2 hover:bg-[#6A4FE0] transition-colors duration-300 shadow-[0_8px_40px_rgba(124,92,255,0.2)]"
+          >
+            Planlamaya Başla <ArrowRight className="w-5 h-5" />
+          </Link>
+          <Link 
+            href="/ai-asistan"
+            className="w-full sm:w-auto h-[56px] px-8 bg-[#F8F8F7] text-[#111111] rounded-[18px] text-[18px] font-medium flex items-center justify-center hover:bg-[#F0F0F0] transition-colors duration-300"
+          >
+            WedyAI ile Konuş
+          </Link>
+        </div>
+
+        {/* Minimal Search Input Simulation */}
+        <div className="mt-20 w-full max-w-[700px] bg-white rounded-[28px] p-2 border border-[rgba(0,0,0,0.08)] shadow-[0_8px_40px_rgba(0,0,0,0.04)] flex flex-col md:flex-row items-center gap-2">
+          <div className="flex-1 flex items-center gap-3 px-4 h-[56px] w-full">
+            <Search className="w-5 h-5 text-[#666666]" />
+            <input 
+              type="text" 
+              placeholder="Mekan, fotoğrafçı veya şehir arayın..." 
+              className="w-full bg-transparent border-none outline-none text-[18px] text-[#111111] placeholder:text-[#999999]"
+            />
+          </div>
+          <button className="w-full md:w-auto h-[56px] px-8 bg-[#111111] text-white rounded-[18px] text-[15px] font-medium hover:bg-[#333333] transition-colors duration-300">
+            Arama Yap
+          </button>
+        </div>
+      </section>
+
+      {/* Editorial Image Showcase */}
+      <section className="max-w-[1200px] mx-auto px-6 pb-32">
+        <div className="relative w-full aspect-[21/9] md:aspect-[21/7] rounded-[28px] overflow-hidden bg-[#F8F8F7]">
+          <img 
+            src="https://images.unsplash.com/photo-1519225421980-715cb0215aed?q=80&w=2000&auto=format&fit=crop" 
+            alt="Zarif düğün tasarımı" 
+            className="w-full h-full object-cover opacity-90"
+          />
+        </div>
+      </section>
+
+      {/* Feature Cards (Linear/Stripe style) */}
+      <section className="bg-[#F8F8F7] py-32 px-6 border-t border-[rgba(0,0,0,0.04)]">
+        <div className="max-w-[1200px] mx-auto">
+          <div className="mb-16">
+            <h2 className="text-[36px] font-medium tracking-tight text-[#111111]">
+              Her detay, kusursuzca tasarlandı.
+            </h2>
+            <p className="text-[18px] text-[#666666] mt-4 max-w-[500px]">
+              Düğün planlamanın karmaşasını ortadan kaldıran, 
+              size sadece anın tadını çıkarmayı bırakan akıllı araçlar.
+            </p>
           </div>
 
-          <div className="pt-3 border-t border-slate-100">
-            {user ? (
-              <div className="space-y-3">
-                <div className="flex items-center gap-3">
-                  <img
-                    src={user.photoURL || `https://ui-avatars.com/api/?name=${user.displayName || user.email}&background=E6007E&color=fff`}
-                    alt="Profil"
-                    className="w-9 h-9 rounded-full object-cover"
-                  />
-                  <div>
-                    <p className="text-xs font-bold text-slate-800">{user.displayName || 'Kullanıcı'}</p>
-                    <p className="text-[10px] text-slate-400 truncate max-w-[180px]">{user.email}</p>
-                  </div>
-                </div>
-                <button onClick={handleLogout} className="w-full bg-red-50 text-red-500 py-2.5 rounded-xl text-xs font-bold hover:bg-red-100 transition">
-                  Çıkış Yap
-                </button>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {/* Card 1 */}
+            <div className="bg-white p-8 rounded-[28px] border border-[rgba(0,0,0,0.06)] hover:shadow-[0_8px_40px_rgba(0,0,0,0.04)] transition-shadow duration-300">
+              <div className="w-12 h-12 bg-[#7C5CFF]/10 rounded-full flex items-center justify-center mb-6">
+                <Calendar className="w-6 h-6 text-[#7C5CFF]" strokeWidth={1.5} />
               </div>
-            ) : (
-              <Link href="/login" onClick={() => setMobileMenuOpen(false)} className="block text-center w-full bg-[#E6007E] text-white py-3 rounded-xl text-xs font-bold shadow-md hover:bg-pink-700 transition">
-                Giriş Yap / Üye Ol
-              </Link>
-            )}
-          </div>
-        </div>
-      )}
-
-      {/* Sayfa İçeriği */}
-      <main className="flex-grow">
-        {/* Hero Alanı */}
-        <section className="relative bg-gradient-to-br from-[#4A154B] to-purple-900 text-white py-16 md:py-24 px-6 text-center">
-          <div className="max-w-3xl mx-auto space-y-4 relative z-10">
-            <span className="bg-white/10 text-pink-300 text-xs font-semibold px-3.5 py-1.5 rounded-full border border-white/20 shadow-sm">
-              Hayalinizdeki Düğün İçin Tek Adres
-            </span>
-            <h1 className="text-3xl md:text-5xl font-extrabold leading-tight">
-              En İyi Düğün Mekanları & Hizmetleri WedyPlan'da
-            </h1>
-            <p className="text-purple-100 text-sm md:text-base max-w-xl mx-auto opacity-90">
-              Mekanlardan fotoğrafçılara, gelinlikten organizasyona aradığınız tüm profesyonelleri keşfedin, ücretsiz fiyat teklifi alın.
-            </p>
-
-            <div className="pt-4 flex flex-wrap justify-center gap-4">
-              <Link href="/arama" className="bg-[#E6007E] hover:bg-pink-700 text-white text-sm font-bold px-6 py-3 rounded-xl transition shadow-lg">
-                Firmaları İncele →
-              </Link>
-              <Link href="/kontrol-listesi" className="bg-white/10 hover:bg-white/20 text-white text-sm font-bold px-6 py-3 rounded-xl border border-white/20 transition">
-                ⏳ Geri Sayımı Başlat
-              </Link>
+              <h3 className="text-[22px] font-medium mb-3">Akıllı Planlama</h3>
+              <p className="text-[15px] text-[#666666] leading-relaxed">
+                Davetli listenizi, oturma düzeninizi ve düğün günü akışınızı sezgisel bir arayüzle saniyeler içinde oluşturun.
+              </p>
             </div>
-          </div>
-          {/* Arka plan süslemeleri */}
-          <div className="absolute top-10 left-10 w-32 h-32 bg-white/5 rounded-full blur-2xl"></div>
-          <div className="absolute bottom-10 right-10 w-48 h-48 bg-[#E6007E]/20 rounded-full blur-3xl"></div>
-        </section>
 
-        {/* Akıllı Araç Tanıtım Banner Alanı (ÜÇLÜ GRID) */}
-        <section className="max-w-7xl mx-auto px-4 md:px-6 -mt-8 relative z-10 grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div className="bg-white p-6 rounded-3xl border border-purple-100 shadow-xl flex flex-col justify-between gap-4 transition hover:-translate-y-1">
-            <div className="space-y-2">
-              <div className="w-10 h-10 bg-pink-50 rounded-full flex items-center justify-center text-xl text-[#E6007E]">💰</div>
-              <h3 className="text-sm font-bold text-[#4A154B]">Düğün Bütçenizi Planlayın</h3>
-              <p className="text-[11px] text-slate-500 line-clamp-2">Harcamalarınızı kategorize edin, ücretsiz hesaplayıcımız ile bütçenizi kontrol altında tutun.</p>
+            {/* Card 2 */}
+            <div className="bg-white p-8 rounded-[28px] border border-[rgba(0,0,0,0.06)] hover:shadow-[0_8px_40px_rgba(0,0,0,0.04)] transition-shadow duration-300">
+              <div className="w-12 h-12 bg-[#7C5CFF]/10 rounded-full flex items-center justify-center mb-6">
+                <Heart className="w-6 h-6 text-[#7C5CFF]" strokeWidth={1.5} />
+              </div>
+              <h3 className="text-[22px] font-medium mb-3">Kişisel Web Sitesi</h3>
+              <p className="text-[15px] text-[#666666] leading-relaxed">
+                Hikayenizi anlatan, davetlilerinizden dijital LCV toplayan zarif ve tamamen size özel bir düğün web sitesi yayınlayın.
+              </p>
             </div>
-            <Link href="/butce-hesaplayici" className="bg-[#4A154B] text-white text-center text-[11px] font-bold px-4 py-2.5 rounded-xl hover:bg-purple-900 transition w-full">
-              Hesaplayıcıyı Aç →
-            </Link>
-          </div>
-          <div className="bg-white p-6 rounded-3xl border border-pink-100 shadow-xl flex flex-col justify-between gap-4 transition hover:-translate-y-1 ring-2 ring-pink-500/10">
-            <div className="space-y-2">
-              <div className="w-10 h-10 bg-purple-50 rounded-full flex items-center justify-center text-xl text-[#4A154B]">⏳</div>
-              <h3 className="text-sm font-bold text-[#E6007E]">Geri Sayım & Checklist</h3>
-              <p className="text-[11px] text-slate-500 line-clamp-2">Düğün tarihinizi girin, sayacı başlatın ve tüm hazırlık adımlarını eksiksiz tamamlayın.</p>
-            </div>
-            <Link href="/kontrol-listesi" className="bg-[#E6007E] text-white text-center text-[11px] font-bold px-4 py-2.5 rounded-xl hover:bg-pink-700 transition w-full shadow-md">
-              Sayacı Başlat →
-            </Link>
-          </div>
-          <div className="bg-white p-6 rounded-3xl border border-purple-100 shadow-xl flex flex-col justify-between gap-4 transition hover:-translate-y-1">
-            <div className="space-y-2">
-              <div className="w-10 h-10 bg-emerald-50 rounded-full flex items-center justify-center text-xl text-emerald-600">🎟️</div>
-              <h3 className="text-sm font-bold text-[#4A154B]">Masa & Davetli Listesi</h3>
-              <p className="text-[11px] text-slate-500 line-clamp-2">Davetlilerinizi gruplandırın, LCV katılımlarını yönetin ve oturma planınızı zahmetsizce yapın.</p>
-            </div>
-            <Link href="/davetli-listesi" className="bg-emerald-600 text-white text-center text-[11px] font-bold px-4 py-2.5 rounded-xl hover:bg-emerald-700 transition w-full">
-              Listeyi Oluştur →
-            </Link>
-          </div>
-        </section>
 
-        {/* Öne Çıkan Firmalar */}
-        <section className="max-w-6xl mx-auto px-6 py-16 space-y-8">
-          <div className="flex justify-between items-end border-b border-purple-100 pb-4">
-            <div>
-              <h2 className="text-2xl font-bold text-[#4A154B]">Öne Çıkan Firmalar</h2>
-              <p className="text-xs text-slate-500 mt-1">En çok tercih edilen düğün profesyonelleri</p>
-            </div>
-            <Link href="/arama" className="text-xs font-bold text-[#E6007E] hover:underline">
-              Tümünü Gör →
-            </Link>
-          </div>
-
-          {loading ? (
-            <p className="text-center text-slate-500 text-sm py-12">Firmalar yükleniyor...</p>
-          ) : vendors.length === 0 ? (
-            <div className="bg-white p-12 text-center rounded-2xl border border-purple-100 text-slate-500">
-              Henüz eklenmiş firma bulunmuyor.
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {vendors.slice(0, 6).map((vendor) => (
-                <div
-                  key={vendor.id}
-                  className={`bg-white rounded-2xl border shadow-sm overflow-hidden hover:shadow-md transition flex flex-col justify-between relative ${
-                    vendor.isFeatured ? 'border-amber-300 ring-2 ring-amber-400/20' : 'border-purple-100'
-                  }`}
-                >
-                  <div>
-                    <div className="relative h-48 w-full bg-slate-100">
-                      <img
-                        src={vendor.imageUrl || 'https://images.unsplash.com/photo-1519167758481-83f550bb49b3?w=800'}
-                        alt={vendor.name}
-                        className="w-full h-full object-cover"
-                      />
-                      <span className="absolute top-3 left-3 bg-[#4A154B] text-white text-[10px] font-bold px-2.5 py-1 rounded-md uppercase">
-                        {vendor.category}
-                      </span>
-                      {vendor.isFeatured && (
-                        <span className="absolute top-3 right-3 bg-gradient-to-r from-amber-500 to-amber-600 text-white text-[10px] font-bold px-2.5 py-1 rounded-md shadow">
-                          👑 Sponsorlu
-                        </span>
-                      )}
-                    </div>
-
-                    <div className="p-5 space-y-2">
-                      <div className="flex justify-between items-start">
-                        <h3 className="text-base font-bold text-[#4A154B] line-clamp-1">{vendor.name}</h3>
-                        <span className="text-xs font-bold text-amber-500 bg-amber-50 px-2 py-0.5 rounded-md">
-                          ★ {vendor.rating || '4.8'}
-                        </span>
-                      </div>
-                      <p className="text-xs text-slate-500">📍 {vendor.city}</p>
-                      <p className="text-xs text-slate-600 line-clamp-2 mt-2">{vendor.description}</p>
-                    </div>
-                  </div>
-
-                  <div className="p-5 pt-0 border-t border-slate-50 flex items-center justify-between mt-4">
-                    <span className="text-xs font-bold text-[#E6007E]">{vendor.price || 'Fiyat Alınız'}</span>
-                    <Link href={`/firma/${vendor.id}`} className="bg-[#4A154B] text-white text-xs px-4 py-2 rounded-lg font-semibold hover:bg-purple-900 transition">
-                      Teklif Al
-                    </Link>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </section>
-      </main>
-
-      {/* Gelişmiş Kurumsal Footer */}
-      <footer className="bg-slate-900 text-slate-300 pt-16 pb-8 px-6 border-t-[6px] border-[#E6007E]">
-        <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
-          {/* Logo & Hakkımızda */}
-          <div className="space-y-4">
-            <Link href="/" className="text-2xl font-bold text-white">
-              Wedy<span className="text-[#E6007E]">Plan</span>
-            </Link>
-            <p className="text-xs leading-relaxed text-slate-400 pr-4">
-              Evlilik hazırlığındaki çiftleri Türkiye'nin en iyi düğün profesyonelleriyle buluşturan, akıllı planlama araçlarına sahip dijital düğün asistanınız.
-            </p>
-          </div>
-
-          {/* Hızlı Linkler */}
-          <div>
-            <h4 className="text-white font-bold mb-4">Keşfet</h4>
-            <ul className="space-y-2 text-xs">
-              <li><Link href="/arama" className="hover:text-[#E6007E] transition">Düğün Mekanları</Link></li>
-              <li><Link href="/arama" className="hover:text-[#E6007E] transition">Düğün Fotoğrafçıları</Link></li>
-              <li><Link href="/arama" className="hover:text-[#E6007E] transition">Gelinlik & Modaevleri</Link></li>
-              <li><Link href="/blog" className="hover:text-[#E6007E] transition">Düğün Rehberi & Blog</Link></li>
-            </ul>
-          </div>
-
-          {/* Planlama Araçları */}
-          <div>
-            <h4 className="text-white font-bold mb-4">Ücretsiz Araçlar</h4>
-            <ul className="space-y-2 text-xs">
-              <li><Link href="/butce-hesaplayici" className="hover:text-[#E6007E] transition">Bütçe Hesaplayıcı</Link></li>
-              <li><Link href="/kontrol-listesi" className="hover:text-[#E6007E] transition">Düğün Kontrol Listesi</Link></li>
-              <li><Link href="/davetli-listesi" className="hover:text-[#E6007E] transition">Oturma Planı & LCV</Link></li>
-              <li><Link href="/satici" className="hover:text-[#E6007E] transition text-amber-400">Firmalar İçin: Kurumsal Üyelik</Link></li>
-            </ul>
-          </div>
-
-          {/* İletişim */}
-          <div>
-            <h4 className="text-white font-bold mb-4">İletişim</h4>
-            <ul className="space-y-2 text-xs text-slate-400">
-              <li>📍 Maslak, İstanbul, Türkiye</li>
-              <li>✉️ merhaba@wedyplan.com</li>
-              <li>📞 +90 (850) 123 45 67</li>
-            </ul>
-            <div className="flex gap-4 mt-4">
-              {/* Sosyal Medya İkonları (Sembolik) */}
-              <a href="#" className="w-8 h-8 rounded-full bg-slate-800 flex items-center justify-center hover:bg-[#E6007E] text-white transition">In</a>
-              <a href="#" className="w-8 h-8 rounded-full bg-slate-800 flex items-center justify-center hover:bg-[#E6007E] text-white transition">Ig</a>
-              <a href="#" className="w-8 h-8 rounded-full bg-slate-800 flex items-center justify-center hover:bg-[#E6007E] text-white transition">Fb</a>
+            {/* Card 3 */}
+            <div className="bg-white p-8 rounded-[28px] border border-[rgba(0,0,0,0.06)] hover:shadow-[0_8px_40px_rgba(0,0,0,0.04)] transition-shadow duration-300">
+              <div className="w-12 h-12 bg-[#7C5CFF]/10 rounded-full flex items-center justify-center mb-6">
+                <MapPin className="w-6 h-6 text-[#7C5CFF]" strokeWidth={1.5} />
+              </div>
+              <h3 className="text-[22px] font-medium mb-3">Seçkin Mekanlar</h3>
+              <p className="text-[15px] text-[#666666] leading-relaxed">
+                Şehrin en premium mekanlarını ve yaratıcı profesyonellerini şeffaf fiyatlarla keşfedin ve doğrudan iletişim kurun.
+              </p>
             </div>
           </div>
         </div>
+      </section>
 
-        <div className="border-t border-slate-800 pt-8 flex flex-col md:flex-row items-center justify-between text-[11px] text-slate-500 max-w-6xl mx-auto">
-          <p>© {new Date().getFullYear()} WedyPlan Teknoloji A.Ş. Tüm hakları saklıdır.</p>
-          <div className="flex gap-4 mt-4 md:mt-0">
-            <a href="#" className="hover:text-white transition">Kullanım Koşulları</a>
-            <a href="#" className="hover:text-white transition">Gizlilik Politikası (KVKK)</a>
+      {/* Categories / Directory (Minimalist List) */}
+      <section className="py-32 px-6 max-w-[1200px] mx-auto">
+        <h2 className="text-[36px] font-medium tracking-tight mb-12">Kusursuz ekibi kurun.</h2>
+        
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          {[
+            { name: 'Kır Bahçeleri', icon: MapPin },
+            { name: 'Fotoğraf Sanatçıları', icon: Camera },
+            { name: 'Orkestra & DJ', icon: Music },
+            { name: 'Moda Evleri', icon: Heart },
+          ].map((cat, i) => (
+            <Link 
+              key={i} 
+              href="/arama" 
+              className="group flex flex-col items-center justify-center h-[160px] bg-[#F8F8F7] rounded-[28px] border border-[rgba(0,0,0,0.04)] hover:bg-[#F0F0EF] transition-colors duration-300"
+            >
+              <cat.icon className="w-8 h-8 text-[#111111] mb-4 opacity-60 group-hover:opacity-100 group-hover:text-[#7C5CFF] transition-all" strokeWidth={1.5} />
+              <span className="text-[15px] font-medium text-[#111111]">{cat.name}</span>
+            </Link>
+          ))}
+        </div>
+      </section>
+
+      {/* Minimal Footer */}
+      <footer className="border-t border-[rgba(0,0,0,0.06)] py-12 px-6">
+        <div className="max-w-[1200px] mx-auto flex flex-col md:flex-row justify-between items-center gap-6">
+          <div className="text-[22px] font-medium tracking-tight text-[#111111]">
+            WedyPlan.
+          </div>
+          <div className="flex gap-8 text-[15px] text-[#666666]">
+            <Link href="#" className="hover:text-[#111111] transition-colors">Gizlilik</Link>
+            <Link href="#" className="hover:text-[#111111] transition-colors">Şartlar</Link>
+            <Link href="#" className="hover:text-[#111111] transition-colors">İletişim</Link>
+          </div>
+          <div className="text-[13px] text-[#999999]">
+            © {new Date().getFullYear()} WedyPlan. Tasarımın zarafetiyle oluşturuldu.
           </div>
         </div>
       </footer>

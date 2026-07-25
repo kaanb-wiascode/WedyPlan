@@ -1,397 +1,178 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import Link from 'next/link';
-import { onAuthStateChanged, User } from 'firebase/auth';
-import { doc, getDoc, setDoc } from 'firebase/firestore';
-import { auth, db } from '../../lib/firebase';
+import { 
+  CheckCircle2, 
+  Circle, 
+  Calendar, 
+  Plus, 
+  ChevronRight,
+  Sparkles,
+  ArrowRight
+} from 'lucide-react';
 
-interface Task {
-  id: string;
-  title: string;
-  period: string;
-  completed: boolean;
-}
-
-const DEFAULT_TASKS: Task[] = [
-  // 12-6 Ay Önce
-  { id: '1', title: 'Düğün bütçesini ve tahmini davetli sayısını belirle', period: '12-6 Ay Önce', completed: false },
-  { id: '2', title: 'Hayalindeki düğün mekanını seç ve rezervasyon yaptır', period: '12-6 Ay Önce', completed: false },
-  { id: '3', title: 'Düğün konseptini ve renk paletini kararlaştır', period: '12-6 Ay Önce', completed: false },
-
-  // 6-3 Ay Önce
-  { id: '4', title: 'Düğün fotoğrafçısı ve videograferi ile anlaş', period: '6-3 Ay Önce', completed: false },
-  { id: '5', title: 'Gelinlik ve damatlık modellerini seç ve sipariş ver', period: '6-3 Ay Önce', completed: false },
-  { id: '6', title: 'Müzik ekibi, DJ veya orkestrayı belirle', period: '6-3 Ay Önce', completed: false },
-  { id: '7', title: 'Organizasyon ve süsleme firmasını seç', period: '6-3 Ay Önce', completed: false },
-
-  // 3-1 Ay Önce
-  { id: '8', title: 'Davetiye tasarımını seç, bastır ve dağıtmaya başla', period: '3-1 Ay Önce', completed: false },
-  { id: '9', title: 'Nikah hediyelikleri ve şekerlerini sipariş et', period: '3-1 Ay Önce', completed: false },
-  { id: '10', title: 'Gelin saç ve makyaj provası için randevu al', period: '3-1 Ay Önce', completed: false },
-
-  // Son Haftalar
-  { id: '11', title: 'Davetli katılımlarını (LCV) teyit et ve masa düzenini yap', period: 'Son Haftalar', completed: false },
-  { id: '12', title: 'Son gelinlik ve damatlık provasını gerçekleştir', period: 'Son Haftalar', completed: false },
-  { id: '13', title: 'Düğün günü akış planını tüm firmalarla paylaş', period: 'Son Haftalar', completed: false },
-
-  // Düğün Günü
-  { id: '14', title: 'Rahat bir yedek ayakkabı ve acil durum çantasını hazırla', period: 'Düğün Günü', completed: false },
-  { id: '15', title: 'Derin bir nefes al ve bu özel günün tadını çıkar! 💍', period: 'Düğün Günü', completed: false },
+// --- Mock Data ---
+const INITIAL_TASKS = [
+  { id: '1', title: 'Düğün bütçesini ve maksimum harcama limitini belirleyin.', category: '12-9 Ay Kala', completed: true },
+  { id: '2', title: 'Taslak davetli listesini oluşturun.', category: '12-9 Ay Kala', completed: true },
+  { id: '3', title: 'Hayalinizdeki düğün mekanlarını araştırın ve teklif alın.', category: '12-9 Ay Kala', completed: false },
+  { id: '4', title: 'Fotoğraf ve video sanatçısı ile anlaşıp tarihi rezerve edin.', category: '9-6 Ay Kala', completed: false },
+  { id: '5', title: 'Gelinlik / Damatlık araştırmalarına başlayın.', category: '9-6 Ay Kala', completed: false },
+  { id: '6', title: 'Balayı destinasyonunu seçip uçak/otel rezervasyonunu yapın.', category: '6-3 Ay Kala', completed: false },
+  { id: '7', title: 'Nikah tarihi için belediyeye resmi başvuruda bulunun.', category: '6-3 Ay Kala', completed: false },
+  { id: '8', title: 'Dijital davetiyenizi tasarlayın ve sevdiklerinize gönderin.', category: '3-1 Ay Kala', completed: false },
 ];
 
-const PERIODS = ['Tüm Adımlar', '12-6 Ay Önce', '6-3 Ay Önce', '3-1 Ay Önce', 'Son Haftalar', 'Düğün Günü'];
+export default function PremiumChecklistPage() {
+  const [tasks, setTasks] = useState(INITIAL_TASKS);
 
-export default function ChecklistPage() {
-  const [user, setUser] = useState<User | null>(null);
-  const [weddingDate, setWeddingDate] = useState<string>('2026-09-15');
-  const [timeLeft, setTimeLeft] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 });
-  const [tasks, setTasks] = useState<Task[]>(DEFAULT_TASKS);
-  const [selectedPeriod, setSelectedPeriod] = useState<string>('Tüm Adımlar');
-  const [newTaskTitle, setNewTaskTitle] = useState<string>('');
-  const [newTaskPeriod, setNewTaskPeriod] = useState<string>('6-3 Ay Önce');
-  
-  const [isLoaded, setIsLoaded] = useState(false);
-  const [isSaving, setIsSaving] = useState(false);
-
-  // Oturum ve Veri Yükleme
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
-      setUser(currentUser);
-
-      if (currentUser) {
-        // Kullanıcı giriş yapmışsa Firestore'dan verilerini çek
-        try {
-          const docRef = doc(db, 'checklists', currentUser.uid);
-          const docSnap = await getDoc(docRef);
-
-          if (docSnap.exists()) {
-            const data = docSnap.data();
-            if (data.weddingDate) setWeddingDate(data.weddingDate);
-            if (data.tasks) setTasks(data.tasks);
-          } else {
-            // İlk kez giriş yapıyorsa LocalStorage'dakini buluta taşı
-            const savedDate = localStorage.getItem('wedy_wedding_date');
-            const savedTasks = localStorage.getItem('wedy_checklist_tasks');
-            if (savedDate) setWeddingDate(savedDate);
-            if (savedTasks) setTasks(JSON.parse(savedTasks));
-          }
-        } catch (error) {
-          console.error('Bulut veri çekme hatası:', error);
-        }
-      } else {
-        // Giriş yapmamışsa LocalStorage'dan oku
-        try {
-          const savedDate = localStorage.getItem('wedy_wedding_date');
-          const savedTasks = localStorage.getItem('wedy_checklist_tasks');
-          if (savedDate) setWeddingDate(savedDate);
-          if (savedTasks) setTasks(JSON.parse(savedTasks));
-        } catch (e) {
-          console.error('Yerel veri yükleme hatası:', e);
-        }
-      }
-      setIsLoaded(true);
-    });
-
-    return () => unsubscribe();
-  }, []);
-
-  // Değişiklikleri Kaydetme (Bulut / Yerel)
-  useEffect(() => {
-    if (!isLoaded) return;
-
-    const saveData = async () => {
-      setIsSaving(true);
-      try {
-        if (user) {
-          // Giriş yapmışsa Firestore'a kaydet
-          await setDoc(doc(db, 'checklists', user.uid), {
-            weddingDate,
-            tasks,
-            updatedAt: new Date().toISOString(),
-          });
-        } else {
-          // Giriş yapmamışsa LocalStorage'a kaydet
-          localStorage.setItem('wedy_wedding_date', weddingDate);
-          localStorage.setItem('wedy_checklist_tasks', JSON.stringify(tasks));
-        }
-      } catch (error) {
-        console.error('Kaydetme hatası:', error);
-      } finally {
-        setTimeout(() => setIsSaving(false), 500);
-      }
-    };
-
-    saveData();
-  }, [weddingDate, tasks, user, isLoaded]);
-
-  // Canlı Geri Sayım Hesaplayıcı
-  useEffect(() => {
-    const calculateTime = () => {
-      const target = new Date(weddingDate).getTime();
-      const now = new Date().getTime();
-      const difference = target - now;
-
-      if (difference > 0) {
-        setTimeLeft({
-          days: Math.floor(difference / (1000 * 60 * 60 * 24)),
-          hours: Math.floor((difference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)),
-          minutes: Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60)),
-          seconds: Math.floor((difference % (1000 * 60)) / 1000),
-        });
-      } else {
-        setTimeLeft({ days: 0, hours: 0, minutes: 0, seconds: 0 });
-      }
-    };
-
-    calculateTime();
-    const interval = setInterval(calculateTime, 1000);
-    return () => clearInterval(interval);
-  }, [weddingDate]);
-
-  // Görev tamamlama
   const toggleTask = (id: string) => {
-    setTasks((prev) =>
-      prev.map((task) => (task.id === id ? { ...task, completed: !task.completed } : task))
-    );
+    setTasks(tasks.map(task => 
+      task.id === id ? { ...task, completed: !task.completed } : task
+    ));
   };
 
-  // Yeni görev ekleme
-  const handleAddTask = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!newTaskTitle.trim()) return;
+  // İlerleme Hesaplaması
+  const totalTasks = tasks.length;
+  const completedTasks = tasks.filter(t => t.completed).length;
+  const progressPercent = Math.round((completedTasks / totalTasks) * 100);
 
-    const newTask: Task = {
-      id: Date.now().toString(),
-      title: newTaskTitle.trim(),
-      period: newTaskPeriod,
-      completed: false,
-    };
-
-    setTasks((prev) => [...prev, newTask]);
-    setNewTaskTitle('');
-  };
-
-  // Görev silme
-  const deleteTask = (id: string) => {
-    setTasks((prev) => prev.filter((t) => t.id !== id));
-  };
-
-  // İlerleme Oranı
-  const completedCount = tasks.filter((t) => t.completed).length;
-  const progressPercentage = tasks.length > 0 ? Math.round((completedCount / tasks.length) * 100) : 0;
-
-  // Filtrelenmiş görevler
-  const filteredTasks = selectedPeriod === 'Tüm Adımlar'
-    ? tasks
-    : tasks.filter((t) => t.period === selectedPeriod);
+  // Kategoriye Göre Gruplama
+  const groupedTasks = tasks.reduce((acc, task) => {
+    if (!acc[task.category]) acc[task.category] = [];
+    acc[task.category].push(task);
+    return acc;
+  }, {} as Record<string, typeof tasks>);
 
   return (
-    <div className="min-h-screen bg-[#FDFBFD] text-slate-800">
-      {/* Navbar */}
-      <nav className="flex items-center justify-between px-6 md:px-12 py-4 bg-white border-b border-purple-100 shadow-sm sticky top-0 z-50">
-        <Link href="/" className="text-2xl font-bold text-[#4A154B]">
-          Wedy<span className="text-[#E6007E]">Plan</span>
-        </Link>
-        <div className="flex items-center gap-4">
-          <Link
-            href="/butce-hesaplayici"
-            className="text-xs font-bold text-[#E6007E] bg-pink-50 hover:bg-pink-100 px-3 py-1.5 rounded-full transition"
-          >
-            💍 Bütçe Hesaplayıcı
+    <div className="min-h-screen bg-[#FFFFFF] text-[#111111] font-sans selection:bg-[#7C5CFF] selection:text-white pb-32">
+      
+      {/* Premium Navigation */}
+      <nav className="sticky top-0 z-50 bg-white/80 backdrop-blur-xl border-b border-[rgba(0,0,0,0.06)]">
+        <div className="max-w-[1000px] mx-auto px-6 h-[72px] flex items-center justify-between">
+          <Link href="/" className="text-[22px] font-medium tracking-tight">
+            WedyPlan.
           </Link>
-          <Link href="/" className="text-xs font-semibold text-[#4A154B] hover:text-[#E6007E]">
-            ← Ana Sayfa
-          </Link>
+          
+          <div className="hidden md:flex items-center gap-8 text-[15px] font-medium">
+            <Link href="/arama" className="text-[#666666] hover:text-[#111111] transition-colors">Keşfet</Link>
+            <Link href="/kontrol-listesi" className="text-[#7C5CFF]">Planlama</Link>
+            <Link href="/hediye-listesi" className="text-[#666666] hover:text-[#111111] transition-colors">Kayıtlar</Link>
+          </div>
+
+          <div className="flex items-center gap-4">
+            <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 bg-[#F8F8F7] rounded-full text-[13px] font-medium text-[#111111]">
+              <div className="w-2 h-2 bg-[#1DB954] rounded-full animate-pulse"></div>
+              <span>Selin & Caner</span>
+            </div>
+          </div>
         </div>
       </nav>
 
-      <div className="max-w-5xl mx-auto px-4 py-8 space-y-8">
-        {/* Başlık ve Bulut Durum Rozeti */}
-        <div className="text-center space-y-2">
-          <div className="flex items-center justify-center gap-2">
-            <span className="bg-purple-100 text-[#4A154B] text-xs font-bold px-3 py-1 rounded-full uppercase">
-              Planlama Asistanı
-            </span>
-            {user ? (
-              <span className="bg-emerald-100 text-emerald-800 text-[11px] font-bold px-3 py-1 rounded-full flex items-center gap-1">
-                ☁️ {isSaving ? 'Buluta Kaydediliyor...' : 'Hesabınızla Senkronize'}
-              </span>
-            ) : (
-              <Link
-                href="/login"
-                className="bg-amber-100 hover:bg-amber-200 text-amber-900 text-[11px] font-bold px-3 py-1 rounded-full transition flex items-center gap-1"
-              >
-                💾 Cihaza Kayıtlı (Bulut Kaydı İçin Giriş Yapın)
-              </Link>
-            )}
+      <main className="max-w-[1000px] mx-auto px-6 pt-16">
+        
+        {/* Header & Countdown (Apple Editorial Style) */}
+        <header className="mb-16">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#F8F8F7] text-[13px] font-medium text-[#666666] mb-6">
+            <Calendar className="w-3.5 h-3.5" />
+            <span>15 Eylül 2026</span>
           </div>
-          <h1 className="text-3xl md:text-4xl font-extrabold text-[#4A154B]">
-            Düğün Sayacı & Kontrol Listesi ⏳
-          </h1>
-          <p className="text-slate-500 text-sm max-w-xl mx-auto">
-            Düğün tarihinizi girin, geri sayımı başlatın ve tüm cihazlarınızdan adımları anında takip edin.
-          </p>
-        </div>
+          
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-8">
+            <div>
+              <h1 className="text-[48px] md:text-[56px] font-medium tracking-tight leading-[1.05] mb-4">
+                Büyük güne <br/>
+                <span className="text-[#7C5CFF]">234 gün</span> kaldı.
+              </h1>
+              <p className="text-[18px] text-[#666666] max-w-[500px]">
+                Her şey kontrol altında. Adım adım ilerleyerek stresten uzak bir planlama süreci yaşayın.
+              </p>
+            </div>
 
-        {/* Geri Sayım Kartı */}
-        <div className="bg-gradient-to-br from-[#4A154B] to-purple-900 rounded-3xl p-6 md:p-8 text-white shadow-xl space-y-6">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-4 border-b border-white/10 pb-4">
-            <span className="text-sm font-semibold text-purple-200">✨ Büyük Güne Kalan Zaman:</span>
-            <div className="flex items-center gap-2 bg-white/10 px-4 py-2 rounded-2xl border border-white/20">
-              <span className="text-xs text-purple-200 font-bold">Düğün Tarihiniz:</span>
-              <input
-                type="date"
-                value={weddingDate}
-                onChange={(e) => setWeddingDate(e.target.value)}
-                className="bg-transparent text-white text-xs font-bold focus:outline-none cursor-pointer"
-              />
+            {/* Smart Progress Widget */}
+            <div className="w-full md:w-[320px] bg-[#F8F8F7] p-6 rounded-[24px] border border-[rgba(0,0,0,0.04)] shrink-0">
+              <div className="flex justify-between items-baseline mb-4">
+                <span className="text-[15px] font-medium text-[#111111]">Genel İlerleme</span>
+                <span className="text-[24px] font-medium tracking-tight text-[#7C5CFF]">%{progressPercent}</span>
+              </div>
+              {/* Very thin, elegant progress bar */}
+              <div className="w-full h-[4px] bg-[rgba(0,0,0,0.06)] rounded-full overflow-hidden">
+                <div 
+                  className="h-full bg-[#7C5CFF] rounded-full transition-all duration-700 ease-out"
+                  style={{ width: `${progressPercent}%` }}
+                ></div>
+              </div>
+              <p className="text-[13px] text-[#999999] mt-3">
+                {totalTasks} görevden {completedTasks} tanesi tamamlandı.
+              </p>
             </div>
           </div>
+        </header>
 
-          {/* Canlı Sayaç Blokları */}
-          <div className="grid grid-cols-4 gap-2 md:gap-4 text-center">
-            <div className="bg-white/10 backdrop-blur-md p-3 md:p-5 rounded-2xl border border-white/10">
-              <span className="block text-2xl md:text-5xl font-extrabold text-[#E6007E]">
-                {timeLeft.days}
-              </span>
-              <span className="text-[10px] md:text-xs font-semibold text-purple-200 uppercase">Gün</span>
-            </div>
-            <div className="bg-white/10 backdrop-blur-md p-3 md:p-5 rounded-2xl border border-white/10">
-              <span className="block text-2xl md:text-5xl font-extrabold text-white">
-                {timeLeft.hours}
-              </span>
-              <span className="text-[10px] md:text-xs font-semibold text-purple-200 uppercase">Saat</span>
-            </div>
-            <div className="bg-white/10 backdrop-blur-md p-3 md:p-5 rounded-2xl border border-white/10">
-              <span className="block text-2xl md:text-5xl font-extrabold text-white">
-                {timeLeft.minutes}
-              </span>
-              <span className="text-[10px] md:text-xs font-semibold text-purple-200 uppercase">Dakika</span>
-            </div>
-            <div className="bg-white/10 backdrop-blur-md p-3 md:p-5 rounded-2xl border border-white/10">
-              <span className="block text-2xl md:text-5xl font-extrabold text-pink-300">
-                {timeLeft.seconds}
-              </span>
-              <span className="text-[10px] md:text-xs font-semibold text-purple-200 uppercase">Saniye</span>
-            </div>
-          </div>
-        </div>
+        {/* Dynamic Checklist Layout */}
+        <div className="space-y-16">
+          {Object.entries(groupedTasks).map(([category, categoryTasks]) => (
+            <section key={category}>
+              {/* Category Header */}
+              <div className="flex items-center gap-4 mb-6 sticky top-[72px] bg-white/90 backdrop-blur-md py-4 z-10 border-b border-[rgba(0,0,0,0.04)]">
+                <h2 className="text-[22px] font-medium tracking-tight text-[#111111]">
+                  {category}
+                </h2>
+                <span className="px-2 py-0.5 rounded-[6px] bg-[#F8F8F7] text-[12px] font-medium text-[#666666]">
+                  {categoryTasks.filter(t => t.completed).length} / {categoryTasks.length}
+                </span>
+              </div>
 
-        {/* İlerleme Çubuğu */}
-        <div className="bg-white p-6 rounded-2xl border border-purple-100 shadow-sm space-y-2">
-          <div className="flex justify-between text-xs font-bold">
-            <span className="text-[#4A154B]">Hazırlık Tamamlanma Oranı ({completedCount}/{tasks.length})</span>
-            <span className="text-[#E6007E]">%{progressPercentage}</span>
-          </div>
-          <div className="w-full bg-slate-100 h-3.5 rounded-full overflow-hidden">
-            <div
-              className="h-full bg-gradient-to-r from-purple-600 to-[#E6007E] transition-all duration-500"
-              style={{ width: `${progressPercentage}%` }}
-            ></div>
-          </div>
-        </div>
-
-        {/* Dönem Filtre Butonları */}
-        <div className="flex flex-wrap gap-2">
-          {PERIODS.map((period) => (
-            <button
-              key={period}
-              onClick={() => setSelectedPeriod(period)}
-              className={`text-xs font-bold px-4 py-2 rounded-xl transition ${
-                selectedPeriod === period
-                  ? 'bg-[#4A154B] text-white shadow'
-                  : 'bg-white text-slate-600 border border-purple-100 hover:bg-purple-50'
-              }`}
-            >
-              {period}
-            </button>
+              {/* Tasks List */}
+              <div className="space-y-2">
+                {categoryTasks.map((task) => (
+                  <div 
+                    key={task.id}
+                    onClick={() => toggleTask(task.id)}
+                    className="group flex items-start gap-4 p-4 rounded-[18px] hover:bg-[#F8F8F7] transition-colors cursor-pointer"
+                  >
+                    <button className="shrink-0 mt-0.5 focus:outline-none transition-transform duration-200 active:scale-90">
+                      {task.completed ? (
+                        <CheckCircle2 className="w-6 h-6 text-[#7C5CFF] transition-colors" strokeWidth={1.5} />
+                      ) : (
+                        <Circle className="w-6 h-6 text-[#CCCCCC] group-hover:text-[#999999] transition-colors" strokeWidth={1.5} />
+                      )}
+                    </button>
+                    <span 
+                      className={`text-[16px] leading-relaxed transition-all duration-300 ${
+                        task.completed 
+                          ? 'text-[#999999] line-through decoration-[rgba(0,0,0,0.1)]' 
+                          : 'text-[#111111]'
+                      }`}
+                    >
+                      {task.title}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </section>
           ))}
         </div>
 
-        {/* Yeni Adım Ekle Formu */}
-        <div className="bg-white p-5 rounded-2xl border border-purple-100 shadow-sm">
-          <form onSubmit={handleAddTask} className="flex flex-col sm:flex-row gap-3">
-            <input
-              type="text"
-              required
-              placeholder="Yeni yapılacağı görev ekleyin (Örn: Gelin buketi siparişi)"
-              value={newTaskTitle}
-              onChange={(e) => setNewTaskTitle(e.target.value)}
-              className="flex-grow p-2.5 border border-slate-200 rounded-xl text-xs focus:outline-none focus:border-[#E6007E]"
-            />
-            <select
-              value={newTaskPeriod}
-              onChange={(e) => setNewTaskPeriod(e.target.value)}
-              className="p-2.5 border border-slate-200 rounded-xl text-xs focus:outline-none focus:border-[#E6007E] bg-white"
-            >
-              <option value="12-6 Ay Önce">12-6 Ay Önce</option>
-              <option value="6-3 Ay Önce">6-3 Ay Önce</option>
-              <option value="3-1 Ay Önce">3-1 Ay Önce</option>
-              <option value="Son Haftalar">Son Haftalar</option>
-              <option value="Düğün Günü">Düğün Günü</option>
-            </select>
-            <button
-              type="submit"
-              className="bg-[#E6007E] text-white text-xs font-bold px-6 py-2.5 rounded-xl hover:bg-pink-700 transition"
-            >
-              + Ekle
-            </button>
-          </form>
+        {/* Action Bottom Bar */}
+        <div className="mt-16 p-8 bg-[#F8F8F7] rounded-[28px] border border-[rgba(0,0,0,0.04)] flex flex-col md:flex-row items-center justify-between gap-6">
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-[0_4px_20px_rgba(0,0,0,0.04)]">
+              <Sparkles className="w-5 h-5 text-[#7C5CFF]" strokeWidth={1.5} />
+            </div>
+            <div>
+              <h3 className="text-[16px] font-medium text-[#111111]">Özel Görev Ekle</h3>
+              <p className="text-[14px] text-[#666666]">İhtiyacınıza göre kendi maddelerinizi listeye dahil edin.</p>
+            </div>
+          </div>
+          
+          <button className="w-full md:w-auto h-[52px] px-6 bg-white border border-[rgba(0,0,0,0.08)] hover:bg-[#F0F0EF] text-[#111111] rounded-[18px] text-[15px] font-medium flex items-center justify-center gap-2 transition-colors duration-300 shadow-sm">
+            <Plus className="w-4 h-4" /> Yeni Görev
+          </button>
         </div>
 
-        {/* Görev Listesi */}
-        <div className="bg-white rounded-2xl border border-purple-100 shadow-sm overflow-hidden">
-          <div className="p-4 bg-slate-50 border-b border-slate-100 flex justify-between items-center">
-            <span className="text-xs font-bold text-[#4A154B]">{selectedPeriod} Listesi</span>
-            <span className="text-[11px] text-slate-400">İşaretlemek için kutucuğa tıklayın</span>
-          </div>
-
-          <div className="divide-y divide-slate-100">
-            {filteredTasks.length === 0 ? (
-              <p className="p-6 text-center text-xs text-slate-400">Bu dönem için kayıtlı adım bulunmuyor.</p>
-            ) : (
-              filteredTasks.map((task) => (
-                <div
-                  key={task.id}
-                  className={`p-4 flex items-center justify-between gap-4 transition hover:bg-purple-50/20 ${
-                    task.completed ? 'bg-slate-50/60' : ''
-                  }`}
-                >
-                  <label className="flex items-center gap-3 cursor-pointer flex-grow">
-                    <input
-                      type="checkbox"
-                      checked={task.completed}
-                      onChange={() => toggleTask(task.id)}
-                      className="w-4 h-4 accent-[#E6007E] rounded cursor-pointer"
-                    />
-                    <div className="space-y-0.5">
-                      <span className="text-[10px] font-bold bg-purple-100 text-[#4A154B] px-2 py-0.5 rounded">
-                        {task.period}
-                      </span>
-                      <p
-                        className={`text-xs font-semibold ${
-                          task.completed ? 'line-through text-slate-400' : 'text-slate-800'
-                        }`}
-                      >
-                        {task.title}
-                      </p>
-                    </div>
-                  </label>
-
-                  <button
-                    onClick={() => deleteTask(task.id)}
-                    className="text-slate-300 hover:text-red-500 font-bold text-sm px-2"
-                    title="Görevi Sil"
-                  >
-                    ✕
-                  </button>
-                </div>
-              ))
-            )}
-          </div>
-        </div>
-      </div>
+      </main>
     </div>
   );
 }

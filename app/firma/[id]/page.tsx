@@ -1,372 +1,326 @@
 'use client';
 
-import React, { useEffect, useState, use } from 'react';
+import React, { useState, use } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
-import { doc, getDoc, collection, addDoc, query, where, getDocs, serverTimestamp } from 'firebase/firestore';
-import { onAuthStateChanged, User } from 'firebase/auth';
-import { db, auth } from '../../../lib/firebase';
+import { 
+  Star, 
+  MapPin, 
+  Users, 
+  Calendar, 
+  Check, 
+  Share2, 
+  Heart, 
+  Sparkles, 
+  MessageCircle, 
+  ChevronLeft,
+  Info,
+  Building,
+  Utensils,
+  Car,
+  Music
+} from 'lucide-react';
 
-interface Vendor {
-  id: string;
-  name: string;
-  category: string;
-  city: string;
-  price: string;
-  rating: string | number;
-  imageUrl: string;
-  images?: string[];
-  description: string;
-  phone?: string;
-}
-
-interface Review {
-  id: string;
-  userName: string;
-  userPhoto?: string;
-  rating: number;
-  comment: string;
-  createdAt: any;
-}
-
-export default function VendorDetailPage({ params }: { params: Promise<{ id: string }> }) {
+export default function PremiumVendorDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
-  const router = useRouter();
 
-  const [vendor, setVendor] = useState<Vendor | null>(null);
-  const [reviews, setReviews] = useState<Review[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [user, setUser] = useState<User | null>(null);
+  // Form State
+  const [weddingDate, setWeddingDate] = useState('');
+  const [guestCount, setGuestCount] = useState('300');
+  const [note, setNote] = useState('');
+  const [isSaved, setIsSaved] = useState(false);
+  const [isSubmitted, setIsSubmitted] = useState(false);
 
-  // Teklif Modal State'leri
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [requestForm, setRequestForm] = useState({
-    fullName: '',
-    phone: '',
-    weddingDate: '',
-    guestCount: '200-300 Kişi',
-    message: '',
-  });
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  // Mock Vendor Data (Production'da Firestore'dan çekilir)
+  const vendor = {
+    id: id,
+    name: 'Bosphorus Palace Kır Bahçesi',
+    category: 'Kır Bahçesi & Tarihi Mekan',
+    city: 'İstanbul',
+    district: 'Beykoz',
+    address: 'Çayır Caddesi No:14, Beykoz / İstanbul',
+    rating: 4.9,
+    reviewsCount: 128,
+    pricePerPerson: '1.200 TL / Kişi',
+    startingPrice: '150.000 TL',
+    capacity: '200 - 800 Kişi',
+    description: `Boğaz’ın en büyüleyici noktasında, tarihi doku ile modern zarafetin buluştuğu Bosphorus Palace, hayatınızın en özel gününü unutulmaz kılmak için tasarlandı. 
 
-  // Yorum Form State'leri
-  const [newRating, setNewRating] = useState(5);
-  const [newComment, setNewComment] = useState('');
-  const [isReviewSubmitting, setIsReviewSubmitting] = useState(false);
-
-  // Oturum ve Firma Verilerini Çek
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-      setUser(currentUser);
-      if (currentUser) {
-        setRequestForm(prev => ({
-          ...prev,
-          fullName: currentUser.displayName || '',
-        }));
-      }
-    });
-
-    async function fetchVendorDetails() {
-      try {
-        const docRef = doc(db, 'vendors', id);
-        const docSnap = await getDoc(docRef);
-
-        if (docSnap.exists()) {
-          setVendor({ id: docSnap.id, ...docSnap.data() } as Vendor);
-        }
-
-        // Yorumları Çek
-        const q = query(collection(db, 'reviews'), where('vendorId', '==', id));
-        const reviewSnap = await getDocs(q);
-        const reviewList: Review[] = [];
-        reviewSnap.forEach((d) => reviewList.push({ id: d.id, ...d.data() } as Review));
-        setReviews(reviewList);
-      } catch (error) {
-        console.error('Firma detay hatası:', error);
-      } finally {
-        setLoading(false);
-      }
-    }
-
-    fetchVendorDetails();
-    return () => unsubscribe();
-  }, [id]);
-
-  // Teklif Formu Gönderme
-  const handleSendRequest = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsSubmitting(true);
-
-    try {
-      await addDoc(collection(db, 'requests'), {
-        vendorId: id,
-        vendorName: vendor?.name,
-        fullName: requestForm.fullName,
-        phone: requestForm.phone,
-        weddingDate: requestForm.weddingDate,
-        guestCount: requestForm.guestCount,
-        message: requestForm.message,
-        createdAt: serverTimestamp(),
-      });
-
-      alert('🎉 Fiyat teklifi talebiniz firmaya iletildi! En kısa sürede sizinle iletişime geçecekler.');
-      setIsModalOpen(false);
-      setRequestForm({ fullName: '', phone: '', weddingDate: '', guestCount: '200-300 Kişi', message: '' });
-    } catch (error) {
-      console.error('Teklif gönderme hatası:', error);
-      alert('Teklif gönderilirken bir hata oluştu.');
-    } finally {
-      setIsSubmitting(false);
-    }
+Geniş çim alanı, asırlık ağaçların altındaki davet düzeni ve kesintisiz deniz manzarası ile 800 kişiye kadar olan düğün ve davetlerinize ev sahipliği yapıyoruz. Deneyimli şeflerimizin hazırladığı gastronomi odaklı menüler ve kişiselleştirilebilir konsept seçeneklerimizle her detayı kusursuzlaştırıyoruz.`,
+    features: [
+      { name: 'Açık & Kapalı Alan', icon: Building },
+      { name: 'Özel Menü & Tadım', icon: Utensils },
+      { name: 'Vale & Otopark (250 Araç)', icon: Car },
+      { name: 'Gelişmiş Ses & Işık Düzeni', icon: Music },
+    ],
+    gallery: [
+      'https://images.unsplash.com/photo-1519167758481-83f550bb49b3?auto=format&fit=crop&q=80&w=1200',
+      'https://images.unsplash.com/photo-1511285560929-80b456fea0bc?auto=format&fit=crop&q=80&w=800',
+      'https://images.unsplash.com/photo-1545232979-fbf4d284f32d?auto=format&fit=crop&q=80&w=800',
+      'https://images.unsplash.com/photo-1519225421980-715cb0215aed?auto=format&fit=crop&q=80&w=800',
+    ],
   };
 
-  // Yorum Gönderme
-  const handleAddReview = async (e: React.FormEvent) => {
+  const handleSubmitQuote = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!user) {
-      alert('Yorum yapabilmek için lütfen giriş yapın.');
-      router.push('/login');
-      return;
-    }
-
-    setIsReviewSubmitting(true);
-    try {
-      const reviewPayload = {
-        vendorId: id,
-        userId: user.uid,
-        userName: user.displayName || 'Anonim Kullanıcı',
-        userPhoto: user.photoURL || '',
-        rating: newRating,
-        comment: newComment,
-        createdAt: new Date().toLocaleDateString('tr-TR'),
-      };
-
-      const docRef = await addDoc(collection(db, 'reviews'), reviewPayload);
-      setReviews([{ id: docRef.id, ...reviewPayload }, ...reviews]);
-      setNewComment('');
-      alert('Yorumunuz başarıyla yayınlandı!');
-    } catch (error) {
-      console.error('Yorum hatası:', error);
-    } finally {
-      setIsReviewSubmitting(false);
-    }
+    setIsSubmitted(true);
   };
-
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-[#FDFBFD]">
-        <p className="text-[#4A154B] font-bold">Firma detayları yükleniyor...</p>
-      </div>
-    );
-  }
-
-  if (!vendor) {
-    return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-[#FDFBFD] space-y-4">
-        <p className="text-slate-500 font-bold">Aradığınız firma bulunamadı.</p>
-        <Link href="/arama" className="bg-[#4A154B] text-white text-xs font-bold px-5 py-2.5 rounded-xl">
-          Firmalara Dön
-        </Link>
-      </div>
-    );
-  }
-
-  const galleryImages = vendor.images && vendor.images.length > 0 ? vendor.images : [vendor.imageUrl];
 
   return (
-    <div className="min-h-screen bg-[#FDFBFD] text-slate-800">
-      {/* Navbar */}
-      <nav className="flex items-center justify-between px-6 md:px-12 py-4 bg-white border-b border-purple-100 shadow-sm sticky top-0 z-50">
-        <Link href="/" className="text-2xl font-bold text-[#4A154B]">
-          Wedy<span className="text-[#E6007E]">Plan</span>
-        </Link>
-        <Link href="/arama" className="text-xs font-semibold text-slate-500 hover:text-[#E6007E]">
-          ← Arama Listesine Dön
-        </Link>
+    <div className="min-h-screen bg-[#FFFFFF] text-[#111111] font-sans selection:bg-[#7C5CFF] selection:text-white pb-32">
+      
+      {/* Navigation */}
+      <nav className="sticky top-0 z-50 bg-white/80 backdrop-blur-xl border-b border-[rgba(0,0,0,0.06)]">
+        <div className="max-w-[1200px] mx-auto px-6 h-[72px] flex items-center justify-between">
+          <Link 
+            href="/arama" 
+            className="inline-flex items-center gap-2 text-[15px] font-medium text-[#666666] hover:text-[#111111] transition-colors"
+          >
+            <ChevronLeft className="w-4 h-4" />
+            <span>Aramaya Dön</span>
+          </Link>
+          
+          <Link href="/" className="text-[22px] font-medium tracking-tight">
+            WedyPlan.
+          </Link>
+
+          <div className="flex items-center gap-3">
+            <button 
+              onClick={() => setIsSaved(!isSaved)}
+              className="w-10 h-10 rounded-full bg-[#F8F8F7] flex items-center justify-center text-[#111111] hover:bg-[#F0F0EF] transition-colors"
+              aria-label="Kaydet"
+            >
+              <Heart className={`w-5 h-5 ${isSaved ? 'fill-[#7C5CFF] text-[#7C5CFF]' : 'text-[#666666]'}`} />
+            </button>
+            <button 
+              className="w-10 h-10 rounded-full bg-[#F8F8F7] flex items-center justify-center text-[#111111] hover:bg-[#F0F0EF] transition-colors"
+              aria-label="Paylaş"
+            >
+              <Share2 className="w-5 h-5 text-[#666666]" />
+            </button>
+          </div>
+        </div>
       </nav>
 
-      <div className="max-w-6xl mx-auto px-4 py-8 space-y-8">
+      <div className="max-w-[1200px] mx-auto px-6 pt-8">
         
-        {/* Fotoğraf Galerisi Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 rounded-3xl overflow-hidden shadow-lg border border-purple-100">
-          <div className="md:col-span-2 h-80 md:h-[420px] relative">
-            <img src={galleryImages[0]} alt={vendor.name} className="w-full h-full object-cover" />
-            <span className="absolute top-4 left-4 bg-[#4A154B] text-white text-xs font-bold px-3 py-1 rounded-full uppercase">
-              {vendor.category}
-            </span>
+        {/* Title Header Section */}
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8">
+          <div>
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#F8F8F7] text-[13px] font-medium text-[#666666] mb-3">
+              <Sparkles className="w-3.5 h-3.5 text-[#7C5CFF]" />
+              <span>{vendor.category}</span>
+            </div>
+            <h1 className="text-[36px] md:text-[48px] font-medium tracking-tight text-[#111111]">
+              {vendor.name}
+            </h1>
+            <div className="flex items-center gap-4 text-[15px] text-[#666666] mt-2">
+              <div className="flex items-center gap-1 text-[#111111] font-medium">
+                <Star className="w-4 h-4 fill-[#111111]" />
+                <span>{vendor.rating}</span>
+                <span className="text-[#666666] font-normal">({vendor.reviewsCount} değerlendirme)</span>
+              </div>
+              <span>•</span>
+              <div className="flex items-center gap-1">
+                <MapPin className="w-4 h-4" />
+                <span>{vendor.district}, {vendor.city}</span>
+              </div>
+            </div>
           </div>
-          <div className="hidden md:grid grid-rows-2 gap-4 h-[420px]">
-            <img src={galleryImages[1] || galleryImages[0]} alt="Galeri 2" className="w-full h-[202px] object-cover" />
-            <img src={galleryImages[2] || galleryImages[0]} alt="Galeri 3" className="w-full h-[202px] object-cover" />
+
+          <div className="text-left md:text-right">
+            <span className="text-[13px] text-[#999999] uppercase tracking-wider block">Başlangıç Fiyatı</span>
+            <span className="text-[28px] font-medium text-[#111111]">{vendor.startingPrice}</span>
           </div>
         </div>
 
-        {/* Başlık ve Hızlı Aksiyon Kartı */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        {/* Editorial Photo Gallery (Airbnb / Apple Style Grid) */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-16 rounded-[28px] overflow-hidden border border-[rgba(0,0,0,0.06)] bg-[#F8F8F7]">
+          <div className="md:col-span-2 aspect-[4/3] md:aspect-auto">
+            <img 
+              src={vendor.gallery[0]} 
+              alt={vendor.name} 
+              className="w-full h-full object-cover hover:opacity-95 transition-opacity cursor-pointer"
+            />
+          </div>
+          <div className="hidden md:grid md:col-span-2 grid-cols-2 gap-4">
+            {vendor.gallery.slice(1, 4).map((img, i) => (
+              <div key={i} className="aspect-[4/3] overflow-hidden bg-[#F0F0EF]">
+                <img 
+                  src={img} 
+                  alt={`${vendor.name} - ${i+2}`} 
+                  className="w-full h-full object-cover hover:opacity-95 transition-opacity cursor-pointer"
+                />
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Main Content & Sticky Booking Card Grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
           
-          {/* Sol: Detaylar & Yorumlar */}
-          <div className="lg:col-span-2 space-y-8">
-            <div className="bg-white p-6 md:p-8 rounded-3xl border border-purple-100 shadow-sm space-y-4">
-              <div className="flex justify-between items-start flex-wrap gap-2">
-                <div>
-                  <h1 className="text-2xl md:text-3xl font-extrabold text-[#4A154B]">{vendor.name}</h1>
-                  <p className="text-xs font-semibold text-slate-500 mt-1">📍 {vendor.city}</p>
-                </div>
-                <span className="text-sm font-bold text-amber-500 bg-amber-50 px-3 py-1 rounded-xl">
-                  ★ {vendor.rating || '5.0'} (Yüksek Müşteri Memnuniyeti)
+          {/* Left Column: Information & Details (7 Columns) */}
+          <div className="lg:col-span-7 space-y-12">
+            
+            {/* Quick Specs */}
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 p-6 rounded-[24px] bg-[#F8F8F7] border border-[rgba(0,0,0,0.04)]">
+              <div className="space-y-1">
+                <span className="text-[13px] text-[#999999] flex items-center gap-1.5">
+                  <Users className="w-3.5 h-3.5" /> Kapasite
                 </span>
+                <span className="text-[15px] font-medium text-[#111111] block">{vendor.capacity}</span>
               </div>
-
-              <div className="pt-4 border-t border-slate-100">
-                <h3 className="text-sm font-bold text-[#4A154B] mb-2">Hakkında</h3>
-                <p className="text-xs text-slate-600 leading-relaxed whitespace-pre-line">{vendor.description}</p>
+              <div className="space-y-1">
+                <span className="text-[13px] text-[#999999] flex items-center gap-1.5">
+                  <Calendar className="w-3.5 h-3.5" /> Kişi Başı
+                </span>
+                <span className="text-[15px] font-medium text-[#111111] block">{vendor.pricePerPerson}</span>
+              </div>
+              <div className="space-y-1">
+                <span className="text-[13px] text-[#999999] flex items-center gap-1.5">
+                  <MapPin className="w-3.5 h-3.5" /> Lokasyon
+                </span>
+                <span className="text-[15px] font-medium text-[#111111] block">{vendor.district}</span>
               </div>
             </div>
 
-            {/* Yorumlar Bölümü */}
-            <div className="bg-white p-6 md:p-8 rounded-3xl border border-purple-100 shadow-sm space-y-6">
-              <h3 className="text-base font-bold text-[#4A154B]">Çift Yorumları ({reviews.length})</h3>
+            {/* Description */}
+            <div className="space-y-4">
+              <h2 className="text-[24px] font-medium tracking-tight text-[#111111]">Mekan Hakkında</h2>
+              <p className="text-[16px] text-[#666666] leading-relaxed whitespace-pre-line font-normal">
+                {vendor.description}
+              </p>
+            </div>
 
-              {/* Yorum Yapma Formu */}
-              <form onSubmit={handleAddReview} className="bg-purple-50/50 p-4 rounded-2xl border border-purple-100 space-y-3">
-                <span className="text-xs font-bold text-slate-700 block">Siz de Değerlendirin:</span>
-                <div className="flex items-center gap-2">
-                  <span className="text-xs font-bold text-slate-500">Puanınız:</span>
-                  <select
-                    value={newRating}
-                    onChange={(e) => setNewRating(Number(e.target.value))}
-                    className="p-1.5 border border-slate-200 rounded-lg text-xs font-bold bg-white"
+            {/* Features */}
+            <div className="space-y-6 pt-6 border-t border-[rgba(0,0,0,0.06)]">
+              <h2 className="text-[24px] font-medium tracking-tight text-[#111111]">Öne Çıkan Özellikler</h2>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {vendor.features.map((feat, i) => (
+                  <div key={i} className="flex items-center gap-3 p-4 rounded-[18px] bg-[#F8F8F7]">
+                    <feat.icon className="w-5 h-5 text-[#7C5CFF]" strokeWidth={1.5} />
+                    <span className="text-[15px] font-medium text-[#111111]">{feat.name}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Location / Address */}
+            <div className="space-y-4 pt-6 border-t border-[rgba(0,0,0,0.06)]">
+              <h2 className="text-[24px] font-medium tracking-tight text-[#111111]">Konum</h2>
+              <p className="text-[15px] text-[#666666]">{vendor.address}</p>
+              
+              {/* Minimal Map Placeholder */}
+              <div className="w-full h-[240px] rounded-[24px] bg-[#F8F8F7] border border-[rgba(0,0,0,0.06)] flex flex-col items-center justify-center gap-2 text-[#999999]">
+                <MapPin className="w-8 h-8 text-[#7C5CFF]" strokeWidth={1.5} />
+                <span className="text-[14px] font-medium text-[#111111]">İnteraktif Harita Önizlemesi</span>
+              </div>
+            </div>
+
+          </div>
+
+          {/* Right Column: Sticky Lead Capture / Quote Card (5 Columns) */}
+          <div className="lg:col-span-5 lg:sticky lg:top-[104px]">
+            <div className="bg-white rounded-[28px] border border-[rgba(0,0,0,0.08)] p-8 shadow-[0_8px_40px_rgba(0,0,0,0.04)] space-y-6">
+              
+              {isSubmitted ? (
+                <div className="py-8 text-center space-y-4">
+                  <div className="w-12 h-12 bg-[#1DB954]/10 text-[#1DB954] rounded-full flex items-center justify-center mx-auto">
+                    <Check className="w-6 h-6" strokeWidth={2} />
+                  </div>
+                  <h3 className="text-[22px] font-medium tracking-tight">Talebiniz İletildi</h3>
+                  <p className="text-[15px] text-[#666666] leading-relaxed">
+                    <strong>{vendor.name}</strong> yetkilileri seçtiğiniz tarihler için sizinle en kısa sürede iletişime geçecektir.
+                  </p>
+                  <button 
+                    onClick={() => setIsSubmitted(false)}
+                    className="text-[14px] font-medium text-[#7C5CFF] hover:underline pt-2 block mx-auto"
                   >
-                    <option value={5}>⭐⭐⭐⭐⭐ (5/5)</option>
-                    <option value={4}>⭐⭐⭐⭐ (4/5)</option>
-                    <option value={3}>⭐⭐⭐ (3/5)</option>
-                  </select>
+                    Yeni Teklif İstediğinde Bulun
+                  </button>
                 </div>
-                <textarea
-                  rows={2}
-                  required
-                  placeholder="Deneyimlerinizi yazın..."
-                  value={newComment}
-                  onChange={(e) => setNewComment(e.target.value)}
-                  className="w-full p-3 border border-slate-200 rounded-xl text-xs focus:outline-none focus:border-[#E6007E]"
-                ></textarea>
-                <button
-                  type="submit"
-                  disabled={isReviewSubmitting}
-                  className="bg-[#4A154B] text-white text-xs font-bold px-5 py-2.5 rounded-xl hover:bg-purple-900 transition"
-                >
-                  Yorum Gönder
-                </button>
-              </form>
-
-              {/* Var Olan Yorumlar */}
-              <div className="space-y-4 divide-y divide-slate-100">
-                {reviews.length === 0 ? (
-                  <p className="text-xs text-slate-400 italic pt-2">Henüz yorum yapılmamış. İlk yorumu siz yazın!</p>
-                ) : (
-                  reviews.map((rev) => (
-                    <div key={rev.id} className="pt-4 space-y-1">
-                      <div className="flex items-center justify-between">
-                        <span className="text-xs font-bold text-slate-800">{rev.userName}</span>
-                        <span className="text-xs text-amber-500 font-bold">{'★'.repeat(rev.rating)}</span>
-                      </div>
-                      <p className="text-xs text-slate-600">{rev.comment}</p>
+              ) : (
+                <>
+                  <div>
+                    <div className="flex items-baseline justify-between mb-1">
+                      <span className="text-[13px] font-medium text-[#666666] uppercase">Başlangıç Paketi</span>
+                      <span className="text-[22px] font-medium text-[#111111]">{vendor.startingPrice}</span>
                     </div>
-                  ))
-                )}
-              </div>
-            </div>
-          </div>
+                    <p className="text-[13px] text-[#999999]">Tarih ve davetli sayısına göre fiyat değişiklik gösterebilir.</p>
+                  </div>
 
-          {/* Sağ: Fiyat & İletişim Kartı */}
-          <div className="space-y-4">
-            <div className="bg-white p-6 rounded-3xl border border-purple-100 shadow-xl space-y-6 sticky top-24">
-              <div>
-                <span className="text-[11px] font-bold text-slate-400 uppercase">Başlangıç Fiyatı</span>
-                <p className="text-2xl font-extrabold text-[#E6007E] mt-0.5">{vendor.price}</p>
-              </div>
+                  <form onSubmit={handleSubmitQuote} className="space-y-4 pt-2">
+                    <div>
+                      <label className="block text-[13px] font-medium text-[#111111] mb-1.5">
+                        Planlanan Düğün Tarihi
+                      </label>
+                      <input 
+                        type="date"
+                        required
+                        value={weddingDate}
+                        onChange={(e) => setWeddingDate(e.target.value)}
+                        className="w-full h-[52px] px-4 bg-[#F8F8F7] border border-[rgba(0,0,0,0.06)] rounded-[18px] text-[15px] text-[#111111] outline-none focus:border-[#7C5CFF]/40 transition-colors"
+                      />
+                    </div>
 
-              <button
-                onClick={() => setIsModalOpen(true)}
-                className="w-full bg-[#E6007E] hover:bg-pink-700 text-white font-bold text-xs py-3.5 rounded-xl transition shadow-lg flex items-center justify-center gap-2"
-              >
-                <span>💬</span>
-                <span>Ücretsiz Fiyat Teklifi Al</span>
-              </button>
+                    <div>
+                      <label className="block text-[13px] font-medium text-[#111111] mb-1.5">
+                        Tahmini Davetli Sayısı
+                      </label>
+                      <select 
+                        value={guestCount}
+                        onChange={(e) => setGuestCount(e.target.value)}
+                        className="w-full h-[52px] px-4 bg-[#F8F8F7] border border-[rgba(0,0,0,0.06)] rounded-[18px] text-[15px] text-[#111111] outline-none focus:border-[#7C5CFF]/40 transition-colors"
+                      >
+                        <option value="100">100 Kişiye Kadar</option>
+                        <option value="300">200 - 300 Kişi</option>
+                        <option value="500">400 - 500 Kişi</option>
+                        <option value="800">500+ Kişi</option>
+                      </select>
+                    </div>
 
-              {vendor.phone && (
-                <a
-                  href={`https://wa.me/${vendor.phone.replace(/\D/g, '')}?text=${encodeURIComponent(`Merhaba ${vendor.name}, WedyPlan üzerinden ulaşmıştım. Fiyatlarınız hakkında bilgi alabilir miyim?`)}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="w-full bg-[#25D366] hover:bg-emerald-600 text-white font-bold text-xs py-3.5 rounded-xl transition shadow flex items-center justify-center gap-2 block text-center"
-                >
-                  <span>📱</span>
-                  <span>WhatsApp ile Sor</span>
-                </a>
+                    <div>
+                      <label className="block text-[13px] font-medium text-[#111111] mb-1.5">
+                        Özel Notunuz (Opsiyonel)
+                      </label>
+                      <textarea 
+                        rows={3}
+                        placeholder="Menü beklentiniz, organizasyon detayları..."
+                        value={note}
+                        onChange={(e) => setNote(e.target.value)}
+                        className="w-full p-4 bg-[#F8F8F7] border border-[rgba(0,0,0,0.06)] rounded-[18px] text-[15px] text-[#111111] outline-none focus:border-[#7C5CFF]/40 transition-colors resize-none placeholder:text-[#999999]"
+                      ></textarea>
+                    </div>
+
+                    <button 
+                      type="submit"
+                      className="w-full h-[56px] bg-[#7C5CFF] hover:bg-[#6A4FE0] text-white font-medium text-[16px] rounded-[18px] transition-colors shadow-[0_8px_30px_rgba(124,92,255,0.2)]"
+                    >
+                      Ücretsiz Fiyat Teklifi Al
+                    </button>
+                  </form>
+
+                  <div className="pt-4 border-t border-[rgba(0,0,0,0.06)] flex items-center justify-between text-[13px] text-[#666666]">
+                    <span className="flex items-center gap-1.5">
+                      <Info className="w-4 h-4 text-[#7C5CFF]" /> Komisyon veya gizli ücret yok
+                    </span>
+                    <a 
+                      href="https://wa.me/" 
+                      target="_blank" 
+                      rel="noopener noreferrer" 
+                      className="text-[#111111] font-medium flex items-center gap-1 hover:underline"
+                    >
+                      <MessageCircle className="w-3.5 h-3.5" /> WhatsApp
+                    </a>
+                  </div>
+                </>
               )}
+
             </div>
           </div>
+
         </div>
+
       </div>
-
-      {/* Teklif Alma Modalı */}
-      {isModalOpen && (
-        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl max-w-md w-full p-6 space-y-4 shadow-2xl relative animate-in zoom-in-95 duration-200">
-            <button
-              onClick={() => setIsModalOpen(false)}
-              className="absolute top-4 right-4 text-slate-400 hover:text-slate-700 font-bold text-lg"
-            >
-              ✕
-            </button>
-
-            <h3 className="text-lg font-bold text-[#4A154B]">{vendor.name} - Teklif Al</h3>
-            <p className="text-xs text-slate-500">Bilgilerinizi girin, firma size özel fiyat teklifi hazırlasın.</p>
-
-            <form onSubmit={handleSendRequest} className="space-y-3">
-              <input
-                type="text"
-                required
-                placeholder="Adınız Soyadınız"
-                value={requestForm.fullName}
-                onChange={(e) => setRequestForm({ ...requestForm, fullName: e.target.value })}
-                className="w-full p-3 border border-slate-200 rounded-xl text-xs focus:outline-none focus:border-[#E6007E]"
-              />
-              <input
-                type="tel"
-                required
-                placeholder="Telefon Numaranız (05XX...)"
-                value={requestForm.phone}
-                onChange={(e) => setRequestForm({ ...requestForm, phone: e.target.value })}
-                className="w-full p-3 border border-slate-200 rounded-xl text-xs focus:outline-none focus:border-[#E6007E]"
-              />
-              <input
-                type="date"
-                required
-                value={requestForm.weddingDate}
-                onChange={(e) => setRequestForm({ ...requestForm, weddingDate: e.target.value })}
-                className="w-full p-3 border border-slate-200 rounded-xl text-xs focus:outline-none focus:border-[#E6007E]"
-              />
-              <textarea
-                rows={3}
-                placeholder="Eklemek istediğiniz notlar..."
-                value={requestForm.message}
-                onChange={(e) => setRequestForm({ ...requestForm, message: e.target.value })}
-                className="w-full p-3 border border-slate-200 rounded-xl text-xs focus:outline-none focus:border-[#E6007E]"
-              ></textarea>
-
-              <button
-                type="submit"
-                disabled={isSubmitting}
-                className="w-full bg-[#E6007E] text-white text-xs font-bold py-3.5 rounded-xl hover:bg-pink-700 transition shadow disabled:opacity-50"
-              >
-                {isSubmitting ? 'Gönderiliyor...' : 'Teklif Talebini Gönder'}
-              </button>
-            </form>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

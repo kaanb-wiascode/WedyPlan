@@ -1,223 +1,264 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import Link from 'next/link';
-import { collection, getDocs } from 'firebase/firestore';
-import { db } from '../../lib/firebase';
+import { Search, MapPin, SlidersHorizontal, ChevronRight, Star } from 'lucide-react';
 
-interface Vendor {
-  id: string;
-  name?: string;
-  category?: string;
-  city?: string;
-  price?: string;
-  rating?: string | number;
-  imageUrl?: string;
-  description?: string;
-  isFeatured?: boolean; // Sponsorlu / Öne Çıkan İlan
-}
-
-const CATEGORIES = [
-  'Tümü',
-  'Düğün Salonu',
-  'Kır Bahçesi',
-  'Fotoğrafçı',
-  'Gelinlik',
-  'Organizasyon',
-  'Müzik & DJ',
+// --- Mock Data ---
+const VENDORS = [
+  {
+    id: '1',
+    name: 'Bosphorus Palace',
+    category: 'Kır Bahçesi',
+    city: 'İstanbul',
+    district: 'Beykoz',
+    price: '150.000 TL',
+    rating: 4.9,
+    reviews: 128,
+    image: 'https://images.unsplash.com/photo-1519167758481-83f550bb49b3?auto=format&fit=crop&q=80&w=800'
+  },
+  {
+    id: '2',
+    name: 'Art & Motion Studios',
+    category: 'Fotoğrafçı',
+    city: 'İstanbul',
+    district: 'Beşiktaş',
+    price: '25.000 TL',
+    rating: 4.8,
+    reviews: 84,
+    image: 'https://images.unsplash.com/photo-1537633552985-df8429e8048b?auto=format&fit=crop&q=80&w=800'
+  },
+  {
+    id: '3',
+    name: 'Galia Modaevi',
+    category: 'Gelinlik',
+    city: 'İzmir',
+    district: 'Alsancak',
+    price: '45.000 TL',
+    rating: 5.0,
+    reviews: 56,
+    image: 'https://images.unsplash.com/photo-1594552072238-b8a33785b261?auto=format&fit=crop&q=80&w=800'
+  },
+  {
+    id: '4',
+    name: 'The Grand Tarabya',
+    category: 'Otel Düğünü',
+    city: 'İstanbul',
+    district: 'Sarıyer',
+    price: '350.000 TL',
+    rating: 4.7,
+    reviews: 210,
+    image: 'https://images.unsplash.com/photo-1511285560929-80b456fea0bc?auto=format&fit=crop&q=80&w=800'
+  },
+  {
+    id: '5',
+    name: 'Symphony Orkestrası',
+    category: 'Müzik & DJ',
+    city: 'Ankara',
+    district: 'Çankaya',
+    price: '35.000 TL',
+    rating: 4.9,
+    reviews: 92,
+    image: 'https://images.unsplash.com/photo-1519225421980-715cb0215aed?auto=format&fit=crop&q=80&w=800'
+  },
+  {
+    id: '6',
+    name: 'Kemer Country Club',
+    category: 'Kır Bahçesi',
+    city: 'İstanbul',
+    district: 'Kemerburgaz',
+    price: '280.000 TL',
+    rating: 4.8,
+    reviews: 145,
+    image: 'https://images.unsplash.com/photo-1545232979-fbf4d284f32d?auto=format&fit=crop&q=80&w=800'
+  }
 ];
 
-const CITIES = ['Tüm Şehirler', 'İstanbul', 'Ankara', 'İzmir', 'Bursa', 'Antalya'];
+const CATEGORIES = ['Tümü', 'Kır Bahçesi', 'Otel Düğünü', 'Fotoğrafçı', 'Gelinlik', 'Müzik & DJ'];
+const CITIES = ['Tümü', 'İstanbul', 'Ankara', 'İzmir', 'Antalya'];
 
-export default function SearchPage() {
-  const [vendors, setVendors] = useState<Vendor[]>([]);
-  const [loading, setLoading] = useState(true);
+export default function PremiumSearchPage() {
+  const [activeCategory, setActiveCategory] = useState('Tümü');
+  const [activeCity, setActiveCity] = useState('Tümü');
 
-  // Filtre State'leri
-  const [selectedCategory, setSelectedCategory] = useState('Tümü');
-  const [selectedCity, setSelectedCity] = useState('Tüm Şehirler');
-  const [searchQuery, setSearchQuery] = useState('');
-
-  useEffect(() => {
-    async function fetchVendors() {
-      try {
-        const querySnapshot = await getDocs(collection(db, 'vendors'));
-        const vendorData: Vendor[] = [];
-        querySnapshot.forEach((doc) => {
-          vendorData.push({ id: doc.id, ...doc.data() } as Vendor);
-        });
-
-        // Öne çıkan firmaları her zaman en üste sıralayalım
-        vendorData.sort((a, b) => (b.isFeatured ? 1 : 0) - (a.isFeatured ? 1 : 0));
-
-        setVendors(vendorData);
-      } catch (error) {
-        console.error('Firmalar çekilirken hata oluştu:', error);
-      } finally {
-        setLoading(false);
-      }
-    }
-
-    fetchVendors();
-  }, []);
-
-  // Filtreleme Mantığı
-  const filteredVendors = vendors.filter((vendor) => {
-    const matchesCategory =
-      selectedCategory === 'Tümü' || vendor.category === selectedCategory;
-    const matchesCity =
-      selectedCity === 'Tüm Şehirler' || vendor.city === selectedCity;
-    const matchesQuery =
-      !searchQuery ||
-      vendor.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      vendor.description?.toLowerCase().includes(searchQuery.toLowerCase());
-
-    return matchesCategory && matchesCity && matchesQuery;
+  // Basit Filtreleme Mantığı
+  const filteredVendors = VENDORS.filter(v => {
+    if (activeCategory !== 'Tümü' && v.category !== activeCategory) return false;
+    if (activeCity !== 'Tümü' && v.city !== activeCity) return false;
+    return true;
   });
 
   return (
-    <div className="min-h-screen bg-[#FDFBFD] text-slate-800">
-      {/* Navbar */}
-      <nav className="flex items-center justify-between px-6 md:px-12 py-4 bg-white border-b border-purple-100 shadow-sm sticky top-0 z-50">
-        <Link href="/" className="text-2xl font-bold text-[#4A154B]">
-          Wedy<span className="text-[#E6007E]">Plan</span>
-        </Link>
-        <Link href="/" className="text-xs font-semibold text-[#4A154B] hover:text-[#E6007E]">
-          ← Ana Sayfa
-        </Link>
+    <div className="min-h-screen bg-[#FFFFFF] text-[#111111] font-sans selection:bg-[#7C5CFF] selection:text-white">
+      
+      {/* Navigation */}
+      <nav className="sticky top-0 z-50 bg-white/80 backdrop-blur-xl border-b border-[rgba(0,0,0,0.06)]">
+        <div className="max-w-[1400px] mx-auto px-6 h-[72px] flex items-center justify-between">
+          <Link href="/" className="text-[22px] font-medium tracking-tight">
+            WedyPlan.
+          </Link>
+          
+          <div className="hidden md:flex items-center gap-8 text-[15px] text-[#111111] font-medium">
+            <Link href="/arama" className="text-[#7C5CFF]">Keşfet</Link>
+            <Link href="/kontrol-listesi" className="text-[#666666] hover:text-[#111111] transition-colors">Planlama</Link>
+            <Link href="/hediye-listesi" className="text-[#666666] hover:text-[#111111] transition-colors">Kayıtlar</Link>
+          </div>
+
+          <div className="flex items-center gap-4">
+            <Link href="/satici" className="text-[14px] font-medium text-[#666666] hover:text-[#111111] transition-colors hidden sm:block">
+              İş Ortağı Girişi
+            </Link>
+          </div>
+        </div>
       </nav>
 
-      <div className="max-w-6xl mx-auto px-4 py-8 space-y-8">
-        {/* Başlık */}
-        <div className="text-center space-y-2">
-          <h1 className="text-3xl font-extrabold text-[#4A154B]">
-            Düğün Firmaları & Mekanları 🔍
-          </h1>
-          <p className="text-xs text-slate-500 max-w-md mx-auto">
-            Hayalinizdeki organizasyon için en iyi profesyonelleri filtreleyin, inceleyin ve fiyat teklifi alın.
-          </p>
-        </div>
+      {/* Main Layout */}
+      <div className="max-w-[1400px] mx-auto px-6 py-12 flex flex-col md:flex-row gap-12 items-start">
+        
+        {/* Left Sidebar (Filters) - Sticky */}
+        <aside className="w-full md:w-[280px] shrink-0 md:sticky md:top-[104px] space-y-10">
+          
+          <div>
+            <h1 className="text-[32px] font-medium tracking-tight leading-tight mb-2">
+              Kusursuz <br/> mekanı bulun.
+            </h1>
+            <p className="text-[15px] text-[#666666]">
+              Kriterlerinize en uygun profesyonelleri keşfedin.
+            </p>
+          </div>
 
-        {/* Filtreleme Alanı */}
-        <div className="bg-white p-6 rounded-3xl border border-purple-100 shadow-sm space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-            {/* İsimle Arama */}
-            <input
-              type="text"
-              placeholder="Firma veya mekan adı ara..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="p-3 border border-slate-200 rounded-xl text-xs focus:outline-none focus:border-[#E6007E]"
+          {/* Search Input */}
+          <div className="relative">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[#999999]" />
+            <input 
+              type="text" 
+              placeholder="İsim ile ara..."
+              className="w-full bg-[#F8F8F7] border border-[rgba(0,0,0,0.06)] rounded-[14px] h-[48px] pl-11 pr-4 text-[15px] text-[#111111] outline-none focus:border-[#7C5CFF]/30 transition-colors placeholder:text-[#999999]"
             />
+          </div>
 
-            {/* Şehir Seçimi */}
-            <select
-              value={selectedCity}
-              onChange={(e) => setSelectedCity(e.target.value)}
-              className="p-3 border border-slate-200 rounded-xl text-xs focus:outline-none focus:border-[#E6007E] bg-white"
-            >
-              {CITIES.map((city) => (
-                <option key={city} value={city}>
-                  📍 {city}
-                </option>
+          {/* Categories */}
+          <div>
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-[14px] font-medium text-[#111111]">Kategori</h3>
+              <SlidersHorizontal className="w-4 h-4 text-[#666666]" />
+            </div>
+            <div className="space-y-1">
+              {CATEGORIES.map(cat => (
+                <button
+                  key={cat}
+                  onClick={() => setActiveCategory(cat)}
+                  className={`w-full text-left px-3 py-2 rounded-[10px] text-[14px] transition-colors ${
+                    activeCategory === cat 
+                      ? 'bg-[#111111] text-white font-medium' 
+                      : 'text-[#666666] hover:bg-[#F8F8F7]'
+                  }`}
+                >
+                  {cat}
+                </button>
               ))}
-            </select>
-
-            {/* Temizle Butonu */}
-            <button
-              onClick={() => {
-                setSelectedCategory('Tümü');
-                setSelectedCity('Tüm Şehirler');
-                setSearchQuery('');
-              }}
-              className="bg-slate-100 hover:bg-slate-200 text-slate-600 text-xs font-bold py-3 px-4 rounded-xl transition"
-            >
-              Filtreleri Temizle
-            </button>
+            </div>
           </div>
 
-          {/* Kategori Butonları */}
-          <div className="flex flex-wrap gap-2 pt-2 border-t border-slate-100">
-            {CATEGORIES.map((cat) => (
-              <button
-                key={cat}
-                onClick={() => setSelectedCategory(cat)}
-                className={`text-xs font-bold px-4 py-2 rounded-xl transition ${
-                  selectedCategory === cat
-                    ? 'bg-[#4A154B] text-white shadow'
-                    : 'bg-slate-50 text-slate-600 border border-slate-200 hover:bg-purple-50'
-                }`}
-              >
-                {cat}
-              </button>
-            ))}
+          {/* Cities */}
+          <div>
+            <h3 className="text-[14px] font-medium text-[#111111] mb-4">Şehir</h3>
+            <div className="space-y-1">
+              {CITIES.map(city => (
+                <button
+                  key={city}
+                  onClick={() => setActiveCity(city)}
+                  className={`w-full text-left px-3 py-2 rounded-[10px] text-[14px] transition-colors ${
+                    activeCity === city 
+                      ? 'bg-[#111111] text-white font-medium' 
+                      : 'text-[#666666] hover:bg-[#F8F8F7]'
+                  }`}
+                >
+                  {city}
+                </button>
+              ))}
+            </div>
           </div>
-        </div>
 
-        {/* Sonuç Listesi */}
-        {loading ? (
-          <p className="text-center text-slate-400 text-xs py-12">Firmalar yükleniyor...</p>
-        ) : filteredVendors.length === 0 ? (
-          <div className="bg-white p-12 text-center rounded-3xl border border-purple-100 text-slate-500 space-y-2">
-            <p className="text-2xl">🔎</p>
-            <p className="text-xs font-bold">Aramanıza uygun firma bulunamadı.</p>
-            <p className="text-[11px] text-slate-400">Filtre kriterlerinizi değiştirerek tekrar deneyebilirsiniz.</p>
+        </aside>
+
+        {/* Right Content (Vendor Grid) */}
+        <main className="flex-1 w-full">
+          
+          {/* Results Header */}
+          <div className="flex items-center justify-between mb-8 pb-4 border-b border-[rgba(0,0,0,0.06)]">
+            <span className="text-[15px] text-[#666666]">
+              <strong className="text-[#111111] font-medium">{filteredVendors.length}</strong> sonuç listeleniyor
+            </span>
+            <div className="flex items-center gap-2 text-[14px] text-[#666666] cursor-pointer hover:text-[#111111] transition-colors">
+              <span>Önerilen Sıralama</span>
+              <ChevronRight className="w-4 h-4 rotate-90" />
+            </div>
           </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+
+          {/* Grid */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-10">
             {filteredVendors.map((vendor) => (
-              <div
+              <Link 
+                href={`/firma/${vendor.id}`} 
                 key={vendor.id}
-                className={`bg-white rounded-2xl border shadow-sm overflow-hidden hover:shadow-md transition flex flex-col justify-between relative ${
-                  vendor.isFeatured ? 'border-amber-300 ring-2 ring-amber-400/20' : 'border-purple-100'
-                }`}
+                className="group flex flex-col gap-4 cursor-pointer"
               >
-                <div>
-                  <div className="relative h-48 w-full bg-slate-100">
-                    <img
-                      src={vendor.imageUrl || 'https://images.unsplash.com/photo-1519167758481-83f550bb49b3?w=800'}
-                      alt={vendor.name}
-                      className="w-full h-full object-cover"
-                    />
-                    
-                    {/* Kategori Rozeti */}
-                    <span className="absolute top-3 left-3 bg-[#4A154B] text-white text-[10px] font-bold px-2.5 py-1 rounded-md uppercase">
-                      {vendor.category}
-                    </span>
-
-                    {/* Sponsorlu / Öne Çıkan Rozeti */}
-                    {vendor.isFeatured && (
-                      <span className="absolute top-3 right-3 bg-gradient-to-r from-amber-500 to-amber-600 text-white text-[10px] font-bold px-2.5 py-1 rounded-md shadow flex items-center gap-1">
-                        👑 Sponsorlu
-                      </span>
-                    )}
+                {/* Image Container with Subtle Apple-like Hover */}
+                <div className="relative w-full aspect-[4/3] rounded-[24px] overflow-hidden bg-[#F8F8F7] border border-[rgba(0,0,0,0.04)]">
+                  <img 
+                    src={vendor.image} 
+                    alt={vendor.name} 
+                    className="w-full h-full object-cover transition-transform duration-[400ms] ease-out group-hover:scale-105"
+                  />
+                  {/* Category Pill */}
+                  <div className="absolute top-4 left-4 bg-white/90 backdrop-blur-md px-3 py-1.5 rounded-full text-[12px] font-medium text-[#111111] shadow-[0_4px_12px_rgba(0,0,0,0.08)]">
+                    {vendor.category}
                   </div>
+                </div>
 
-                  <div className="p-5 space-y-2">
-                    <div className="flex justify-between items-start">
-                      <h3 className="text-base font-bold text-[#4A154B] line-clamp-1">{vendor.name}</h3>
-                      <span className="text-xs font-bold text-amber-500 bg-amber-50 px-2 py-0.5 rounded-md">
-                        ★ {vendor.rating || '4.8'}
-                      </span>
+                {/* Content */}
+                <div className="space-y-1 px-1">
+                  <div className="flex justify-between items-start">
+                    <h3 className="text-[18px] font-medium text-[#111111] tracking-tight truncate">
+                      {vendor.name}
+                    </h3>
+                    <div className="flex items-center gap-1 mt-1">
+                      <Star className="w-[14px] h-[14px] text-[#111111] fill-[#111111]" />
+                      <span className="text-[14px] font-medium text-[#111111]">{vendor.rating}</span>
+                      <span className="text-[13px] text-[#999999]">({vendor.reviews})</span>
                     </div>
-                    <p className="text-xs text-slate-500">📍 {vendor.city}</p>
-                    <p className="text-xs text-slate-600 line-clamp-2 mt-2">{vendor.description}</p>
+                  </div>
+                  
+                  <div className="flex items-center gap-1.5 text-[14px] text-[#666666]">
+                    <MapPin className="w-3.5 h-3.5" />
+                    <span>{vendor.district}, {vendor.city}</span>
+                  </div>
+
+                  <div className="pt-2 text-[15px]">
+                    <span className="text-[#666666]">Başlangıç: </span>
+                    <span className="font-medium text-[#111111]">{vendor.price}</span>
                   </div>
                 </div>
-
-                <div className="p-5 pt-0 border-t border-slate-50 flex items-center justify-between mt-4">
-                  <span className="text-xs font-bold text-[#E6007E]">{vendor.price || 'Fiyat Alınız'}</span>
-                  <Link
-                    href={`/firma/${vendor.id}`}
-                    className="bg-[#4A154B] text-white text-xs px-4 py-2 rounded-lg font-semibold hover:bg-purple-900 transition"
-                  >
-                    Teklif Al
-                  </Link>
-                </div>
-              </div>
+              </Link>
             ))}
           </div>
-        )}
+
+          {filteredVendors.length === 0 && (
+            <div className="py-20 text-center flex flex-col items-center">
+              <Search className="w-12 h-12 text-[#E5E5E5] mb-4" strokeWidth={1} />
+              <h3 className="text-[18px] font-medium text-[#111111]">Sonuç bulunamadı</h3>
+              <p className="text-[15px] text-[#666666] mt-2">Seçtiğiniz kriterlere uygun firma bulunmuyor. Lütfen filtreleri esnetin.</p>
+              <button 
+                onClick={() => { setActiveCategory('Tümü'); setActiveCity('Tümü'); }}
+                className="mt-6 text-[#7C5CFF] text-[15px] font-medium hover:underline"
+              >
+                Filtreleri Temizle
+              </button>
+            </div>
+          )}
+
+        </main>
       </div>
     </div>
   );
