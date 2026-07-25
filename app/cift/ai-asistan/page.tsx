@@ -37,7 +37,7 @@ export default function PremiumWedyAIAssistant() {
       id: '1',
       sender: 'ai',
       text: `Hoş geldiniz ${userContext.name}.\n\nWedyPlan VIP Asistanınız olarak 15 Eylül 2026 tarihindeki düğün organizasyonunuz, 450.000 TL bütçe planlamanız ve davetli yönetimiz ile ilgili tüm detaylara hakimim. Bugün size nasıl yardımcı olabilirim?`,
-      time: '14:00'
+      time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
     }
   ]);
 
@@ -110,8 +110,14 @@ export default function PremiumWedyAIAssistant() {
       });
 
       if (!res.ok) {
-        const errorData = await res.json();
-        throw new Error(errorData.error || 'Yanıt alınamadı.');
+        let errorMsg = 'Yanıt alınamadı.';
+        try {
+           const errorData = await res.json();
+           errorMsg = errorData.error || errorMsg;
+        } catch {
+           errorMsg = `Sunucu Hatası (${res.status})`;
+        }
+        throw new Error(errorMsg);
       }
 
       // ReadableStream okuyucusu
@@ -137,10 +143,11 @@ export default function PremiumWedyAIAssistant() {
         );
       }
     } catch (error: any) {
+      console.error('WedyAI Error:', error);
       setMessages(prev =>
         prev.map(msg =>
           msg.id === aiMsgId
-            ? { ...msg, text: `⚠️ Bağlantı hatası: ${error.message}` }
+            ? { ...msg, text: `⚠️ Sistem Uyarısı: ${error.message || 'Lütfen tekrar deneyin.'}` }
             : msg
         )
       );
