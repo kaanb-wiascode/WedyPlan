@@ -14,7 +14,10 @@ import {
   Copy, 
   Check,
   CheckCircle2,
-  PlusCircle
+  PlusCircle,
+  Mic,
+  MicOff,
+  Download
 } from 'lucide-react';
 
 interface ActionPayload {
@@ -40,22 +43,22 @@ export default function PremiumWedyAIAssistant() {
     venue: 'Kır Düğünü / Beykoz'
   });
 
-  const [recentExpenses, setRecentExpenses] = useState<Array<{ category: string; amount: number; notes: string }>>([]);
-
   const [messages, setMessages] = useState<Message[]>([
     {
       id: '1',
       sender: 'ai',
-      text: `Hoş geldiniz ${userContext.name}.\n\nWedyPlan VIP Asistanınız olarak bütçe planlamanız, harcama kalemleriniz ve davetli yönetiminiz için emrinizdeyim.\n\nBana "Bütçeme 35.000 TL Fotoğrafçı ekle" veya "Davetli sayımızı 300 yap" diyerek doğrudan işlem yaptırabilirsiniz.`,
+      text: `Hoş geldiniz ${userContext.name}.\n\nWedyPlan VIP Asistanınız olarak bütçe planlamanız, harcama kalemleriniz ve davetli yönetiminiz için emrinizdeyim.\n\nBana sesli olarak veya yazarak "Bütçeme 35.000 TL Fotoğrafçı ekle" diyerek doğrudan işlem yaptırabilirsiniz.`,
       time: new Date().toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' })
     }
   ]);
 
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [isListening, setIsListening] = useState(false);
   const [copiedId, setCopiedId] = useState<string | null>(null);
   
   const chatEndRef = useRef<HTMLDivElement>(null);
+  const recognitionRef = useRef<any>(null);
 
   const scrollToBottom = () => {
     chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -64,6 +67,45 @@ export default function PremiumWedyAIAssistant() {
   useEffect(() => {
     scrollToBottom();
   }, [messages, isLoading]);
+
+  // Sesli Dinleme (Speech Recognition) Kurulumu
+  useEffect(() => {
+    if (typeof window !== 'undefined' && ('SpeechRecognition' in window || 'webkitSpeechRecognition' in window)) {
+      const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+      recognitionRef.current = new SpeechRecognition();
+      recognitionRef.current.continuous = false;
+      recognitionRef.current.lang = 'tr-TR';
+
+      recognitionRef.current.onresult = (event: any) => {
+        const transcript = event.results[0][0].transcript;
+        setInput(transcript);
+        setIsListening(false);
+      };
+
+      recognitionRef.current.onerror = () => {
+        setIsListening(false);
+      };
+
+      recognitionRef.current.onend = () => {
+        setIsListening(false);
+      };
+    }
+  }, []);
+
+  const toggleListening = () => {
+    if (!recognitionRef.current) {
+      alert('Tarayıcınız sesli komut özelliğini desteklemiyor.');
+      return;
+    }
+
+    if (isListening) {
+      recognitionRef.current.stop();
+      setIsListening(false);
+    } else {
+      setIsListening(true);
+      recognitionRef.current.start();
+    }
+  };
 
   const quickPrompts = [
     { title: 'Harcama Ekle', text: 'Bütçeme 30.000 TL Fotoğraf ve Video çekimi kalemi ekle.', icon: PlusCircle },
@@ -79,6 +121,16 @@ export default function PremiumWedyAIAssistant() {
     } catch (e) {
       console.error('Kopyalama hatası:', e);
     }
+  };
+
+  const downloadSummary = (text: string) => {
+    const element = document.createElement('a');
+    const file = new Blob([`--- WedyPlan VIP Concierge Raporu ---\n\n${text}`], { type: 'text/plain;charset=utf-8' });
+    element.href = URL.createObjectURL(file);
+    element.download = `WedyPlan_Dugun_Ozet_${Date.now()}.txt`;
+    document.body.appendChild(element);
+    element.click();
+    document.body.removeChild(element);
   };
 
   const handleSend = async (textToSend?: string) => {
@@ -117,11 +169,8 @@ export default function PremiumWedyAIAssistant() {
         throw new Error(data.error || 'Yapay zeka yanıt veremedi.');
       }
 
-      // Eğer yapay zeka bir aksiyon gerçekleştirdiyse ön yüzdeki durumu güncelle
       if (data.action) {
-        if (data.action.type === 'BUDGET_ADDED') {
-          setRecentExpenses(prev => [...prev, data.action.data]);
-        } else if (data.action.type === 'INFO_UPDATED') {
+        if (data.action.type === 'INFO_UPDATED') {
           setUserContext(prev => ({
             ...prev,
             ...(data.action.data.guestCount && { guestCount: data.action.data.guestCount.toString() }),
@@ -160,7 +209,7 @@ export default function PremiumWedyAIAssistant() {
       <div className="text-center space-y-3">
         <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-[#111111] text-white rounded-full text-[11px] font-medium tracking-widest uppercase shadow-sm">
           <ShieldCheck className="w-3.5 h-3.5 text-[#D4AF37]" />
-          <span>WedyPlan Concierge • Action-Enabled AI</span>
+          <span>WedyPlan Concierge • Smart Voice & Actions</span>
         </div>
         
         <h1 className="text-[38px] md:text-[44px] font-serif font-normal tracking-tight text-[#111111] leading-tight">
@@ -168,7 +217,7 @@ export default function PremiumWedyAIAssistant() {
         </h1>
         
         <p className="text-[15px] text-[#666666] max-w-[600px] mx-auto font-light leading-relaxed">
-          Sesli veya yazılı komutlarınızla bütçenizi yöneten ve canlı işlem yapan akıllı asistanınız.
+          Sesli komutlarınızla veya yazarak bütçenizi yöneten ve canlı işlem yapan akıllı asistanınız.
         </p>
       </div>
 
@@ -235,14 +284,24 @@ export default function PremiumWedyAIAssistant() {
                   ? 'bg-[#111111] text-white rounded-tr-none font-light'
                   : 'bg-[#FBFBF9] text-[#111111] rounded-tl-none border border-black/[0.05] font-normal shadow-sm'
               }`}>
+                {/* Kopyala & İndir Butonları */}
                 {m.sender === 'ai' && m.text && (
-                  <button
-                    onClick={() => copyToClipboard(m.id, m.text)}
-                    className="absolute right-3 top-3 opacity-0 group-hover:opacity-100 transition-opacity p-1.5 hover:bg-black/5 rounded-lg text-[#888888]"
-                    title="Mesajı Kopyala"
-                  >
-                    {copiedId === m.id ? <Check className="w-3.5 h-3.5 text-green-600" /> : <Copy className="w-3.5 h-3.5" />}
-                  </button>
+                  <div className="absolute right-3 top-3 opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1">
+                    <button
+                      onClick={() => downloadSummary(m.text)}
+                      className="p-1.5 hover:bg-black/5 rounded-lg text-[#888888]"
+                      title="Raporu İndir"
+                    >
+                      <Download className="w-3.5 h-3.5" />
+                    </button>
+                    <button
+                      onClick={() => copyToClipboard(m.id, m.text)}
+                      className="p-1.5 hover:bg-black/5 rounded-lg text-[#888888]"
+                      title="Kopyala"
+                    >
+                      {copiedId === m.id ? <Check className="w-3.5 h-3.5 text-green-600" /> : <Copy className="w-3.5 h-3.5" />}
+                    </button>
+                  </div>
                 )}
 
                 <p>{m.text}</p>
@@ -278,7 +337,7 @@ export default function PremiumWedyAIAssistant() {
               </div>
               <div className="p-5 rounded-[22px] rounded-tl-none bg-[#FBFBF9] border border-black/[0.05] text-[#111111] flex items-center gap-3">
                 <Loader2 className="w-4 h-4 animate-spin text-[#111111]" />
-                <span className="text-[13px] font-medium text-[#666666]">WedyPlan Concierge komutunuzu işliyor...</span>
+                <span className="text-[13px] font-medium text-[#666666]">WedyPlan Concierge yanıt hazırlıyor...</span>
               </div>
             </div>
           )}
@@ -286,7 +345,7 @@ export default function PremiumWedyAIAssistant() {
           <div ref={chatEndRef} />
         </div>
 
-        {/* Input Form */}
+        {/* Input Form & Ses Düğmesi */}
         <form
           onSubmit={(e) => {
             e.preventDefault();
@@ -299,16 +358,34 @@ export default function PremiumWedyAIAssistant() {
             value={input}
             onChange={(e) => setInput(e.target.value)}
             disabled={isLoading}
-            placeholder="Örn: 'Bütçeme 20.000 TL gelinlik harcaması ekle'..."
-            className="w-full h-[58px] pl-6 pr-16 bg-[#FBFBF9] border border-black/[0.08] rounded-[22px] text-[14px] text-[#111111] outline-none focus:border-[#111111] focus:bg-white transition-all shadow-inner disabled:opacity-60 placeholder:text-[#999999]"
+            placeholder={isListening ? "Sizi dinliyorum, konuşabilirsiniz..." : "Örn: 'Bütçeme 20.000 TL gelinlik ekle' veya mikrofon butonuna basın..."}
+            className={`w-full h-[58px] pl-6 pr-28 border rounded-[22px] text-[14px] text-[#111111] outline-none transition-all shadow-inner disabled:opacity-60 placeholder:text-[#999999] ${
+              isListening ? 'bg-red-50 border-red-400 font-medium' : 'bg-[#FBFBF9] border-black/[0.08] focus:border-[#111111] focus:bg-white'
+            }`}
           />
-          <button
-            type="submit"
-            disabled={!input.trim() || isLoading}
-            className="absolute right-2 top-1/2 -translate-y-1/2 translate-y-[1px] w-11 h-11 bg-[#111111] hover:bg-[#333333] text-white rounded-[16px] flex items-center justify-center transition-all disabled:opacity-30 shadow-md"
-          >
-            {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
-          </button>
+
+          <div className="absolute right-2 top-1/2 -translate-y-1/2 translate-y-[1px] flex items-center gap-1.5">
+            {/* Mikrofon Düğmesi */}
+            <button
+              type="button"
+              onClick={toggleListening}
+              className={`w-10 h-10 rounded-[14px] flex items-center justify-center transition-all ${
+                isListening ? 'bg-red-600 text-white animate-pulse' : 'bg-[#F4F4F0] hover:bg-black/10 text-[#111111]'
+              }`}
+              title="Sesli Konuş"
+            >
+              {isListening ? <MicOff className="w-4 h-4" /> : <Mic className="w-4 h-4" />}
+            </button>
+
+            {/* Gönder Düğmesi */}
+            <button
+              type="submit"
+              disabled={!input.trim() || isLoading}
+              className="w-11 h-11 bg-[#111111] hover:bg-[#333333] text-white rounded-[16px] flex items-center justify-center transition-all disabled:opacity-30 shadow-md"
+            >
+              {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
+            </button>
+          </div>
         </form>
 
       </div>
