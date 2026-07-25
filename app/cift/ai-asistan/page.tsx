@@ -12,18 +12,26 @@ import {
   Loader2, 
   ShieldCheck, 
   Copy, 
-  Check 
+  Check,
+  CheckCircle2,
+  PlusCircle
 } from 'lucide-react';
+
+interface ActionPayload {
+  type: 'BUDGET_ADDED' | 'INFO_UPDATED';
+  data: any;
+}
 
 interface Message {
   id: string;
   sender: 'user' | 'ai';
   text: string;
   time: string;
+  action?: ActionPayload;
 }
 
 export default function PremiumWedyAIAssistant() {
-  const [userContext] = useState({
+  const [userContext, setUserContext] = useState({
     role: 'cift',
     name: 'Selin & Kaan',
     weddingDate: '15 Eylül 2026',
@@ -32,11 +40,13 @@ export default function PremiumWedyAIAssistant() {
     venue: 'Kır Düğünü / Beykoz'
   });
 
+  const [recentExpenses, setRecentExpenses] = useState<Array<{ category: string; amount: number; notes: string }>>([]);
+
   const [messages, setMessages] = useState<Message[]>([
     {
       id: '1',
       sender: 'ai',
-      text: `Hoş geldiniz ${userContext.name}.\n\nWedyPlan VIP Asistanınız olarak 15 Eylül 2026 tarihindeki düğün organizasyonunuz, 450.000 TL bütçe planlamanız ve davetli yönetimiz ile ilgili tüm detaylara hakimim. Bugün size nasıl yardımcı olabilirim?`,
+      text: `Hoş geldiniz ${userContext.name}.\n\nWedyPlan VIP Asistanınız olarak bütçe planlamanız, harcama kalemleriniz ve davetli yönetiminiz için emrinizdeyim.\n\nBana "Bütçeme 35.000 TL Fotoğrafçı ekle" veya "Davetli sayımızı 300 yap" diyerek doğrudan işlem yaptırabilirsiniz.`,
       time: new Date().toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' })
     }
   ]);
@@ -56,9 +66,9 @@ export default function PremiumWedyAIAssistant() {
   }, [messages, isLoading]);
 
   const quickPrompts = [
-    { title: 'Bütçe Optimizasyonu', text: `${userContext.budget} TL bütçemizi kalem kalem en verimli şekilde nasıl dağıtabiliriz?`, icon: Coins },
-    { title: 'Zaman Çizelgesi', text: `${userContext.weddingDate} tarihine kalan süre için detaylı aksiyon planı çıkar.`, icon: CalendarDays },
-    { title: 'Mekan & Sözleşme', text: `${userContext.venue} konsepti için sözleşmede dikkat etmemiz gereken kritik maddeler nelerdir?`, icon: Crown },
+    { title: 'Harcama Ekle', text: 'Bütçeme 30.000 TL Fotoğraf ve Video çekimi kalemi ekle.', icon: PlusCircle },
+    { title: 'Bütçe Analizi', text: `${userContext.budget} TL bütçemizi en verimli şekilde nasıl dağıtabiliriz?`, icon: Coins },
+    { title: 'Zaman Çizelgesi', text: `${userContext.weddingDate} tarihine kalan süre için yapılacaklar listesi ver.`, icon: CalendarDays },
   ];
 
   const copyToClipboard = (id: string, text: string) => {
@@ -107,11 +117,25 @@ export default function PremiumWedyAIAssistant() {
         throw new Error(data.error || 'Yapay zeka yanıt veremedi.');
       }
 
+      // Eğer yapay zeka bir aksiyon gerçekleştirdiyse ön yüzdeki durumu güncelle
+      if (data.action) {
+        if (data.action.type === 'BUDGET_ADDED') {
+          setRecentExpenses(prev => [...prev, data.action.data]);
+        } else if (data.action.type === 'INFO_UPDATED') {
+          setUserContext(prev => ({
+            ...prev,
+            ...(data.action.data.guestCount && { guestCount: data.action.data.guestCount.toString() }),
+            ...(data.action.data.weddingDate && { weddingDate: data.action.data.weddingDate }),
+          }));
+        }
+      }
+
       const aiMsg: Message = {
         id: (Date.now() + 1).toString(),
         sender: 'ai',
         text: data.text,
-        time: new Date().toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' })
+        time: new Date().toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' }),
+        action: data.action
       };
 
       setMessages(prev => [...prev, aiMsg]);
@@ -136,7 +160,7 @@ export default function PremiumWedyAIAssistant() {
       <div className="text-center space-y-3">
         <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-[#111111] text-white rounded-full text-[11px] font-medium tracking-widest uppercase shadow-sm">
           <ShieldCheck className="w-3.5 h-3.5 text-[#D4AF37]" />
-          <span>WedyPlan Concierge • VIP Private Assistant</span>
+          <span>WedyPlan Concierge • Action-Enabled AI</span>
         </div>
         
         <h1 className="text-[38px] md:text-[44px] font-serif font-normal tracking-tight text-[#111111] leading-tight">
@@ -144,7 +168,7 @@ export default function PremiumWedyAIAssistant() {
         </h1>
         
         <p className="text-[15px] text-[#666666] max-w-[600px] mx-auto font-light leading-relaxed">
-          Sadece size özel bütçe, davetli ve konsept verileriyle entegre çalışan canlı yapay zeka asistanınız.
+          Sesli veya yazılı komutlarınızla bütçenizi yöneten ve canlı işlem yapan akıllı asistanınız.
         </p>
       </div>
 
@@ -222,6 +246,23 @@ export default function PremiumWedyAIAssistant() {
                 )}
 
                 <p>{m.text}</p>
+
+                {/* İnteraktif İşlem Onay Kartı */}
+                {m.action && m.action.type === 'BUDGET_ADDED' && (
+                  <div className="mt-4 p-4 bg-white border border-black/10 rounded-[16px] shadow-sm flex items-center justify-between gap-3 text-[13px]">
+                    <div className="flex items-center gap-2.5 text-[#111111]">
+                      <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0" />
+                      <div>
+                        <span className="font-semibold">{m.action.data.category}</span>
+                        <span className="text-[#666666] block text-[11px]">{m.action.data.notes}</span>
+                      </div>
+                    </div>
+                    <span className="font-mono font-bold text-[#111111] bg-[#F4F4F0] px-3 py-1 rounded-full text-[12px]">
+                      +{m.action.data.amount.toLocaleString('tr-TR')} TL
+                    </span>
+                  </div>
+                )}
+
                 <span className={`block text-[10px] mt-2 tracking-wider ${m.sender === 'user' ? 'text-white/40 text-right' : 'text-[#999999]'}`}>
                   {m.time}
                 </span>
@@ -237,7 +278,7 @@ export default function PremiumWedyAIAssistant() {
               </div>
               <div className="p-5 rounded-[22px] rounded-tl-none bg-[#FBFBF9] border border-black/[0.05] text-[#111111] flex items-center gap-3">
                 <Loader2 className="w-4 h-4 animate-spin text-[#111111]" />
-                <span className="text-[13px] font-medium text-[#666666]">WedyPlan Concierge verilerinizi analiz ediyor...</span>
+                <span className="text-[13px] font-medium text-[#666666]">WedyPlan Concierge komutunuzu işliyor...</span>
               </div>
             </div>
           )}
@@ -258,7 +299,7 @@ export default function PremiumWedyAIAssistant() {
             value={input}
             onChange={(e) => setInput(e.target.value)}
             disabled={isLoading}
-            placeholder="Düğün planlamanız veya bütçeniz hakkında bir soru sorun..."
+            placeholder="Örn: 'Bütçeme 20.000 TL gelinlik harcaması ekle'..."
             className="w-full h-[58px] pl-6 pr-16 bg-[#FBFBF9] border border-black/[0.08] rounded-[22px] text-[14px] text-[#111111] outline-none focus:border-[#111111] focus:bg-white transition-all shadow-inner disabled:opacity-60 placeholder:text-[#999999]"
           />
           <button
