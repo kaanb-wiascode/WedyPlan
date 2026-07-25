@@ -1,4 +1,4 @@
-export const runtime = 'edge'; // Streaming için Edge altyapısı zorunludur!
+export const runtime = 'edge';
 
 export async function POST(req: Request) {
   try {
@@ -7,7 +7,7 @@ export async function POST(req: Request) {
 
     if (!apiKey) {
       return new Response(
-        JSON.stringify({ error: 'GROQ_API_KEY bulunamadı!' }),
+        JSON.stringify({ error: 'GROQ_API_KEY ortam değişkeni bulunamadı!' }),
         { status: 500, headers: { 'Content-Type': 'application/json' } }
       );
     }
@@ -27,6 +27,7 @@ KURUMSAL İLETİŞİM İLKELERİ:
 1. ÜSLUP: Son derece saygın, elit, çözüm odaklı, yapıcı ve profesyonel bir dil kullan (Siz/Biz dili).
 2. VERİ BAĞLILIĞI: Cevaplarını öncelikle yukarıda verilen kullanıcı verilerine ve WedyPlan platform imkanlarına dayandır.
 3. DİNAMİK YANIT: Eğer kullanıcı çift ise bütçe yönetimi, zaman çizelgesi ve mekan organizasyonunda premium tavsiyeler ver. Eğer kullanıcı firma ise müşteri ilişkileri, teklif yönetimi ve randevu optimizasyonu konularında kurumsal çözümler sun.
+4. GÖRSELLİK VE BİÇİM: Paragrafları düzenli, maddeli ve şık başlıklar kullanarak sun.
     `;
 
     const groqRes = await fetch('https://api.groq.com/openai/v1/chat/completions', {
@@ -47,66 +48,24 @@ KURUMSAL İLETİŞİM İLKELERİ:
     });
 
     if (!groqRes.ok) {
-      const err = await groqRes.text();
-      throw new Error(`Groq Hatası: ${err}`);
+      const errText = await groqRes.text();
+      return new Response(
+        JSON.stringify({ error: `Groq API Hatası: ${errText}` }),
+        { status: groqRes.status, headers: { 'Content-Type': 'application/json' } }
+      );
     }
 
-    const encoder = new TextEncoder();
-    const decoder = new TextDecoder();
-
-    const stream = new ReadableStream({
-      async start(controller) {
-        const reader = groqRes.body?.getReader();
-        if (!reader) {
-          controller.close();
-          return;
-        }
-
-        let buffer = '';
-
-        try {
-          while (true) {
-            const { done, value } = await reader.read();
-            if (done) break;
-
-            buffer += decoder.decode(value, { stream: true });
-            const lines = buffer.split('\n');
-            buffer = lines.pop() || '';
-
-            for (const line of lines) {
-              const trimmed = line.trim();
-              if (!trimmed || trimmed.startsWith(':')) continue;
-              if (trimmed === 'data: [DONE]') {
-                controller.close();
-                return;
-              }
-
-              if (trimmed.startsWith('data: ')) {
-                try {
-                  const json = JSON.parse(trimmed.substring(6));
-                  const content = json.choices?.[0]?.delta?.content;
-                  if (content) {
-                    controller.enqueue(encoder.encode(content));
-                  }
-                } catch (e) {
-                  // Pass
-                }
-              }
-            }
-          }
-          controller.close();
-        } catch (e) {
-          controller.error(e);
-        }
+    return new Response(groqRes.body, {
+      headers: {
+        'Content-Type': 'text/event-stream',
+        'Cache-Control': 'no-cache',
+        'Connection': 'keep-alive',
       },
     });
 
-    return new Response(stream, {
-      headers: { 'Content-Type': 'text/plain; charset=utf-8' },
-    });
   } catch (error: any) {
     return new Response(
-      JSON.stringify({ error: error.message || 'Bir sunucu hatası oluştu.' }),
+      JSON.stringify({ error: error.message || 'Sunucu hatası oluştu.' }),
       { status: 500, headers: { 'Content-Type': 'application/json' } }
     );
   }

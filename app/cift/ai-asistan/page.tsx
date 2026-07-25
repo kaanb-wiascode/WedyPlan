@@ -4,15 +4,15 @@ import React, { useState, useRef, useEffect } from 'react';
 import { 
   Sparkles, 
   Send, 
-  Crown,
+  Crown, 
   User, 
-  Building2,
-  CalendarDays,
-  Coins,
-  Loader2,
-  ShieldCheck,
-  Copy,
-  Check
+  Building2, 
+  CalendarDays, 
+  Coins, 
+  Loader2, 
+  ShieldCheck, 
+  Copy, 
+  Check 
 } from 'lucide-react';
 
 interface Message {
@@ -37,7 +37,7 @@ export default function PremiumWedyAIAssistant() {
       id: '1',
       sender: 'ai',
       text: `Hoş geldiniz ${userContext.name}.\n\nWedyPlan VIP Asistanınız olarak 15 Eylül 2026 tarihindeki düğün organizasyonunuz, 450.000 TL bütçe planlamanız ve davetli yönetimiz ile ilgili tüm detaylara hakimim. Bugün size nasıl yardımcı olabilirim?`,
-      time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+      time: new Date().toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' })
     }
   ]);
 
@@ -47,7 +47,6 @@ export default function PremiumWedyAIAssistant() {
   
   const chatEndRef = useRef<HTMLDivElement>(null);
 
-  // Oto Kaydırma Efekti
   const scrollToBottom = () => {
     chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
@@ -72,7 +71,7 @@ export default function PremiumWedyAIAssistant() {
     const query = textToSend || input;
     if (!query.trim() || isLoading) return;
 
-    const now = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    const now = new Date().toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' });
 
     const userMsg: Message = {
       id: Date.now().toString(),
@@ -88,11 +87,7 @@ export default function PremiumWedyAIAssistant() {
 
     const aiMsgId = (Date.now() + 1).toString();
     
-    // Geçici boş AI mesajı oluştur
-    setMessages(prev => [
-      ...prev,
-      { id: aiMsgId, sender: 'ai', text: '', time: now }
-    ]);
+    setMessages(prev => [...prev, { id: aiMsgId, sender: 'ai', text: '', time: now }]);
 
     try {
       const apiMessages = updatedMessages.map(m => ({
@@ -103,51 +98,65 @@ export default function PremiumWedyAIAssistant() {
       const res = await fetch('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          messages: apiMessages,
-          userContext: userContext 
-        }),
+        body: JSON.stringify({ messages: apiMessages, userContext: userContext }),
       });
 
       if (!res.ok) {
         let errorMsg = 'Yanıt alınamadı.';
-        try {
-           const errorData = await res.json();
-           errorMsg = errorData.error || errorMsg;
-        } catch {
-           errorMsg = `Sunucu Hatası (${res.status})`;
+        try { 
+          const errData = await res.json(); 
+          errorMsg = errData.error || errorMsg; 
+        } catch { 
+          errorMsg = `Sunucu Hatası (${res.status})`; 
         }
         throw new Error(errorMsg);
       }
 
-      // ReadableStream okuyucusu
       const reader = res.body?.getReader();
       const decoder = new TextDecoder('utf-8');
-
-      if (!reader) throw new Error('Akış okuyucu başlatılamadı.');
+      if (!reader) throw new Error('Akış başlatılamadı.');
 
       let accumulatedText = '';
+      let buffer = '';
 
       while (true) {
         const { done, value } = await reader.read();
         if (done) break;
 
-        const chunk = decoder.decode(value, { stream: true });
-        accumulatedText += chunk;
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split('\n');
+        
+        buffer = lines.pop() || '';
 
-        // Anlık canlı güncelleme
-        setMessages(prev =>
-          prev.map(msg =>
-            msg.id === aiMsgId ? { ...msg, text: accumulatedText } : msg
-          )
-        );
+        for (const line of lines) {
+          const trimmed = line.trim();
+          if (!trimmed || trimmed.startsWith(':')) continue;
+          
+          if (trimmed === 'data: [DONE]') {
+            setIsLoading(false);
+            return;
+          }
+
+          if (trimmed.startsWith('data: ')) {
+            try {
+              const json = JSON.parse(trimmed.substring(6));
+              const content = json.choices?.[0]?.delta?.content;
+              if (content) {
+                accumulatedText += content;
+                setMessages(prev => prev.map(msg => msg.id === aiMsgId ? { ...msg, text: accumulatedText } : msg));
+              }
+            } catch (e) {
+              // Tamamlanmamış JSON paketleri geçilir
+            }
+          }
+        }
       }
     } catch (error: any) {
-      console.error('WedyAI Error:', error);
+      console.error('WedyAI Hata:', error);
       setMessages(prev =>
         prev.map(msg =>
           msg.id === aiMsgId
-            ? { ...msg, text: `⚠️ Sistem Uyarısı: ${error.message || 'Lütfen tekrar deneyin.'}` }
+            ? { ...msg, text: `⚠️ Sistem Uyarısı: ${error.message}` }
             : msg
         )
       );
@@ -159,7 +168,7 @@ export default function PremiumWedyAIAssistant() {
   return (
     <div className="max-w-[900px] mx-auto space-y-8 pb-20 pt-4 font-sans selection:bg-[#111111] selection:text-white">
       
-      {/* Premium Header */}
+      {/* Header */}
       <div className="text-center space-y-3">
         <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-[#111111] text-white rounded-full text-[11px] font-medium tracking-widest uppercase shadow-sm">
           <ShieldCheck className="w-3.5 h-3.5 text-[#D4AF37]" />
@@ -238,7 +247,6 @@ export default function PremiumWedyAIAssistant() {
                   ? 'bg-[#111111] text-white rounded-tr-none font-light'
                   : 'bg-[#FBFBF9] text-[#111111] rounded-tl-none border border-black/[0.05] font-normal shadow-sm'
               }`}>
-                {/* Kopyala Butonu (Sadece AI mesajlarında) */}
                 {m.sender === 'ai' && m.text && (
                   <button
                     onClick={() => copyToClipboard(m.id, m.text)}
@@ -249,7 +257,7 @@ export default function PremiumWedyAIAssistant() {
                   </button>
                 )}
 
-                <p>{m.text || (isLoading ? '...' : '')}</p>
+                <p>{m.text || (isLoading && m.sender === 'ai' ? '...' : '')}</p>
                 <span className={`block text-[10px] mt-2 tracking-wider ${m.sender === 'user' ? 'text-white/40 text-right' : 'text-[#999999]'}`}>
                   {m.time}
                 </span>
@@ -286,7 +294,6 @@ export default function PremiumWedyAIAssistant() {
         </form>
 
       </div>
-
     </div>
   );
 }
