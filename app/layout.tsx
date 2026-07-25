@@ -1,34 +1,63 @@
-import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
-import "./globals.css";
+import type { Metadata } from 'next';
+import { Inter } from 'next/font/google';
+import './globals.css';
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
+const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  title: "WedyPlan — Hayalindeki Düğünü Planla",
+  title: {
+    default: "WedyPlan - Düğün Mekanları & Düğün Planlama Asistanı",
+    template: "%s | WedyPlan",
+  },
   description:
-    "Mekan, fotoğrafçı, gelinlik ve daha fazlası. Türkiye'nin düğün planlama platformu WedyPlan ile hayalinizdeki düğünü planlayın.",
+    "Hayalinizdeki düğün mekanlarını, fotoğrafçıları ve organizasyon firmalarını keşfedin. Ücretsiz bütçe hesaplayıcı ve düğün geri sayım sayacı ile düğününüzü kolayca planlayın.",
+  keywords: [
+    "düğün mekanları",
+    "kır bahçesi",
+    "düğün salonu",
+    "düğün fotoğrafçısı",
+    "düğün bütçe hesaplayıcı",
+    "düğün geri sayımı",
+    "düğün organizasyon",
+  ],
+  authors: [{ name: "WedyPlan Team" }],
+  openGraph: {
+    title: "WedyPlan - Akıllı Düğün Pazaryeri & Planlama Asistanı",
+    description:
+      "Aradığınız tüm düğün profesyonelleri burada! Ücretsiz fiyat teklifi alın, bütçenizi ve hazırlık adımlarınızı yönetin.",
+    url: "https://wedy-plan.vercel.app",
+    siteName: "WedyPlan",
+    images: [
+      {
+        url: "https://images.unsplash.com/photo-1519167758481-83f550bb49b3?w=1200",
+        width: 1200,
+        height: 630,
+        alt: "WedyPlan Düğün Pazaryeri",
+      },
+    ],
+    locale: "tr_TR",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "WedyPlan - Düğün Mekanları & Planlama Asistanı",
+    description: "Düğün hazırlıklarınızı kolaylaştıracak tüm araçlar ve firmalar WedyPlan'da.",
+    images: ["https://images.unsplash.com/photo-1519167758481-83f550bb49b3?w=1200"],
+  },
+  robots: {
+    index: true,
+    follow: true,
+  },
 };
 
 export default function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode;
-}>) {
+}) {
   return (
-    <html
-      lang="tr"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
-    >
-      <body className="min-h-full flex flex-col">{children}</body>
+    <html lang="tr">
+      <body className={inter.className}>{children}</body>
     </html>
   );
 }
