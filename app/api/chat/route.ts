@@ -2,18 +2,16 @@ import { NextResponse } from 'next/server';
 
 export async function POST(req: Request) {
   try {
-    // Front-end'den gelen mesajlar VE kullanıcı/firma özel verileri (userContext)
     const { messages, userContext } = await req.json();
     const apiKey = process.env.GROQ_API_KEY;
 
     if (!apiKey) {
-      return NextResponse.json(
-        { error: 'GROQ_API_KEY bulunamadı!' },
-        { status: 500 }
+      return new Response(
+        JSON.stringify({ error: 'GROQ_API_KEY bulunamadı! Lütfen .env.local veya Vercel panelini kontrol edin.' }),
+        { status: 500, headers: { 'Content-Type': 'application/json' } }
       );
     }
 
-    // Dinamik Sistem Metni: Kullanıcının rolüne göre özelleşir
     const systemPrompt = `
 Sen WedyPlan platformunun VIP Kurumsal Düğün ve Organizasyon Asistanısın (WedyAI Concierge).
 
@@ -32,7 +30,8 @@ KURUMSAL İLETİŞİM İLKELERİ:
 4. GÖRSELLİK VE BİÇİM: Paragrafları düzenli, maddeli ve şık başlıklar kullanarak sun. Gereksiz lakayıt emojilerden kaçın; sadece seçkin ve zarif simgeler (✨, ⚜️, 📋, 🥂) kullan.
     `;
 
-    const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+    // Groq API Akış İsteyi (stream: true)
+    const groqRes = await fetch('https://api.groq.com/openai/v1/chat/completions', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -44,15 +43,75 @@ KURUMSAL İLETİŞİM İLKELERİ:
           { role: 'system', content: systemPrompt },
           ...messages,
         ],
-        temperature: 0.5, // Daha tutarlı ve kurumsal yanıtlar için sıcaklığı biraz düşürdük
+        temperature: 0.5,
+        stream: true, // Canlı yayın aktif!
       }),
     });
 
-    const data = await response.json();
-    if (!response.ok) throw new Error(data.error?.message || 'API Hatası');
+    if (!groqRes.ok) {
+      const errData = await groqRes.json();
+      return new Response(
+        JSON.stringify({ error: errData.error?.message || 'Groq API Hatası' }),
+        { status: 500, headers: { 'Content-Type': 'application/json' } }
+      );
+    }
 
-    return NextResponse.json({ text: data.choices?.[0]?.message?.content || 'Yanıt oluşturulamadı.' });
+    // Server-Sent Events (SSE) verisini düz metin akışına dönüştürüyoruz
+    const encoder = new TextEncoder();
+    const decoder = new TextDecoder();
+
+    const stream = new ReadableStream({
+      async start(controller) {
+        const reader = groqRes.body?.getReader();
+        if (!reader) {
+          controller.close();
+          return;
+        }
+
+        let buffer = '';
+
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+
+          buffer += decoder.decode(value, { stream: true });
+          const lines = buffer.split('\n');
+          buffer = lines.pop() || '';
+
+          for (const line of lines) {
+            const trimmed = line.trim();
+            if (!trimmed || trimmed.startsWith(':')) continue;
+            if (trimmed === 'data: [DONE]') {
+              controller.close();
+              return;
+            }
+
+            if (trimmed.startsWith('data: ')) {
+              try {
+                const json = JSON.parse(trimmed.substring(6));
+                const content = json.choices?.[0]?.delta?.content;
+                if (content) {
+                  controller.enqueue(encoder.encode(content));
+                }
+              } catch (e) {
+                // Parçalı JSON hatalarını yutuyoruz
+              }
+            }
+          }
+        }
+        controller.close();
+      },
+    });
+
+    return new Response(stream, {
+      headers: {
+        'Content-Type': 'text/plain; charset=utf-8',
+      },
+    });
   } catch (error: any) {
-    return NextResponse.json({ error: error.message || 'Hata oluştu.' }, { status: 500 });
+    return new Response(
+      JSON.stringify({ error: error.message || 'Bir sunucu hatası oluştu.' }),
+      { status: 500, headers: { 'Content-Type': 'application/json' } }
+    );
   }
 }

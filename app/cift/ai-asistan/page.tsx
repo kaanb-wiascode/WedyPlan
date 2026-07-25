@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { 
   Sparkles, 
   Send, 
@@ -10,7 +10,9 @@ import {
   CalendarDays,
   Coins,
   Loader2,
-  ShieldCheck
+  ShieldCheck,
+  Copy,
+  Check
 } from 'lucide-react';
 
 interface Message {
@@ -21,9 +23,8 @@ interface Message {
 }
 
 export default function PremiumWedyAIAssistant() {
-  // ÖRNEK: Gerçek uygulamada bu veriyi Supabase/Auth/Session içinden alacaksın
   const [userContext] = useState({
-    role: 'cift', // 'cift' veya 'firma'
+    role: 'cift',
     name: 'Selin & Kaan',
     weddingDate: '15 Eylül 2026',
     budget: '450.000',
@@ -42,12 +43,30 @@ export default function PremiumWedyAIAssistant() {
 
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [copiedId, setCopiedId] = useState<string | null>(null);
+  
+  const chatEndRef = useRef<HTMLDivElement>(null);
+
+  // Oto Kaydırma Efekti
+  const scrollToBottom = () => {
+    chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  };
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages, isLoading]);
 
   const quickPrompts = [
-    { title: 'Bütçe Optimizasyonu', text: `${userContext.budget} TL bütçemizi kal kalem en verimli şekilde nasıl dağıtabiliriz?`, icon: Coins },
+    { title: 'Bütçe Optimizasyonu', text: `${userContext.budget} TL bütçemizi kalem kalem en verimli şekilde nasıl dağıtabiliriz?`, icon: Coins },
     { title: 'Zaman Çizelgesi', text: `${userContext.weddingDate} tarihine kalan süre için detaylı aksiyon planı çıkar.`, icon: CalendarDays },
     { title: 'Mekan & Sözleşme', text: `${userContext.venue} konsepti için sözleşmede dikkat etmemiz gereken kritik maddeler nelerdir?`, icon: Crown },
   ];
+
+  const copyToClipboard = (id: string, text: string) => {
+    navigator.clipboard.writeText(text);
+    setCopiedId(id);
+    setTimeout(() => setCopiedId(null), 2000);
+  };
 
   const handleSend = async (textToSend?: string) => {
     const query = textToSend || input;
@@ -67,13 +86,20 @@ export default function PremiumWedyAIAssistant() {
     if (!textToSend) setInput('');
     setIsLoading(true);
 
+    const aiMsgId = (Date.now() + 1).toString();
+    
+    // Geçici boş AI mesajı oluştur
+    setMessages(prev => [
+      ...prev,
+      { id: aiMsgId, sender: 'ai', text: '', time: now }
+    ]);
+
     try {
       const apiMessages = updatedMessages.map(m => ({
         role: m.sender === 'user' ? 'user' : 'assistant',
         content: m.text
       }));
 
-      // Kullanıcı bağlamını (userContext) isteğe ekliyoruz
       const res = await fetch('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -83,27 +109,41 @@ export default function PremiumWedyAIAssistant() {
         }),
       });
 
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || 'Yanıt alınamadı.');
+      if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.error || 'Yanıt alınamadı.');
+      }
 
-      const aiMsg: Message = {
-        id: (Date.now() + 1).toString(),
-        sender: 'ai',
-        text: data.text,
-        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-      };
+      // ReadableStream okuyucusu
+      const reader = res.body?.getReader();
+      const decoder = new TextDecoder('utf-8');
 
-      setMessages(prev => [...prev, aiMsg]);
+      if (!reader) throw new Error('Akış okuyucu başlatılamadı.');
+
+      let accumulatedText = '';
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        const chunk = decoder.decode(value, { stream: true });
+        accumulatedText += chunk;
+
+        // Anlık canlı güncelleme
+        setMessages(prev =>
+          prev.map(msg =>
+            msg.id === aiMsgId ? { ...msg, text: accumulatedText } : msg
+          )
+        );
+      }
     } catch (error: any) {
-      setMessages(prev => [
-        ...prev,
-        {
-          id: (Date.now() + 1).toString(),
-          sender: 'ai',
-          text: `⚠️ Bağlantı kurulurken bir sistem uyarısı oluştu: ${error.message}`,
-          time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-        }
-      ]);
+      setMessages(prev =>
+        prev.map(msg =>
+          msg.id === aiMsgId
+            ? { ...msg, text: `⚠️ Bağlantı hatası: ${error.message}` }
+            : msg
+        )
+      );
     } finally {
       setIsLoading(false);
     }
@@ -116,20 +156,19 @@ export default function PremiumWedyAIAssistant() {
       <div className="text-center space-y-3">
         <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-[#111111] text-white rounded-full text-[11px] font-medium tracking-widest uppercase shadow-sm">
           <ShieldCheck className="w-3.5 h-3.5 text-[#D4AF37]" />
-          <span>WedyPlan Concierge • VIP Private Assistant</span>
+          <span>WedyPlan Concierge • Real-time AI Assistant</span>
         </div>
         
-        {/* Serif Başlık (Kurumsal & Lüks) */}
         <h1 className="text-[38px] md:text-[44px] font-serif font-normal tracking-tight text-[#111111] leading-tight">
           Kişiselleştirilmiş Düğün Danışmanlığı
         </h1>
         
         <p className="text-[15px] text-[#666666] max-w-[600px] mx-auto font-light leading-relaxed">
-          Sadece size özel bütçe, davetli ve konsept verileriyle entegre çalışan kurumsal yapay zeka asistanınız.
+          Sadece size özel bütçe, davetli ve konsept verileriyle entegre çalışan canlı yapay zeka asistanınız.
         </p>
       </div>
 
-      {/* Profil Özet Bilgi Kartı (Müşteriye Özel) */}
+      {/* Profil Özet Bilgi Kartı */}
       <div className="bg-[#FBFBFB] border border-black/[0.06] rounded-[24px] p-5 flex flex-wrap items-center justify-between gap-4 shadow-sm">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-full bg-[#111111] text-[#D4AF37] flex items-center justify-center font-serif text-lg font-bold">
@@ -187,12 +226,23 @@ export default function PremiumWedyAIAssistant() {
                 {m.sender === 'user' ? <User className="w-4 h-4" /> : <Sparkles className="w-4 h-4 text-[#D4AF37]" />}
               </div>
 
-              <div className={`p-5 rounded-[22px] max-w-[82%] text-[14px] leading-relaxed whitespace-pre-wrap ${
+              <div className={`group relative p-5 rounded-[22px] max-w-[82%] text-[14px] leading-relaxed whitespace-pre-wrap ${
                 m.sender === 'user'
                   ? 'bg-[#111111] text-white rounded-tr-none font-light'
                   : 'bg-[#FBFBF9] text-[#111111] rounded-tl-none border border-black/[0.05] font-normal shadow-sm'
               }`}>
-                <p>{m.text}</p>
+                {/* Kopyala Butonu (Sadece AI mesajlarında) */}
+                {m.sender === 'ai' && m.text && (
+                  <button
+                    onClick={() => copyToClipboard(m.id, m.text)}
+                    className="absolute right-3 top-3 opacity-0 group-hover:opacity-100 transition-opacity p-1.5 hover:bg-black/5 rounded-lg text-[#888888]"
+                    title="Mesajı Kopyala"
+                  >
+                    {copiedId === m.id ? <Check className="w-3.5 h-3.5 text-green-600" /> : <Copy className="w-3.5 h-3.5" />}
+                  </button>
+                )}
+
+                <p>{m.text || (isLoading ? '...' : '')}</p>
                 <span className={`block text-[10px] mt-2 tracking-wider ${m.sender === 'user' ? 'text-white/40 text-right' : 'text-[#999999]'}`}>
                   {m.time}
                 </span>
@@ -200,18 +250,7 @@ export default function PremiumWedyAIAssistant() {
             </div>
           ))}
 
-          {/* Loading State */}
-          {isLoading && (
-            <div className="flex items-start gap-4">
-              <div className="w-9 h-9 rounded-full bg-[#F4F4F0] border border-black/10 text-[#111111] flex items-center justify-center shrink-0">
-                <Sparkles className="w-4 h-4 text-[#D4AF37]" />
-              </div>
-              <div className="p-5 rounded-[22px] rounded-tl-none bg-[#FBFBF9] border border-black/[0.05] text-[#111111] flex items-center gap-3">
-                <Loader2 className="w-4 h-4 animate-spin text-[#111111]" />
-                <span className="text-[13px] font-medium text-[#666666]">WedyPlan Concierge verilerinizi inceliyor...</span>
-              </div>
-            </div>
-          )}
+          <div ref={chatEndRef} />
         </div>
 
         {/* Input Form */}
