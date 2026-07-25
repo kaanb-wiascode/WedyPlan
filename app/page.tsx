@@ -81,6 +81,9 @@ export default function HomePage() {
           <Link href="/arama" className="text-sm font-semibold text-slate-600 hover:text-[#E6007E] transition">
             Firma Ara
           </Link>
+          <Link href="/firsatlar" className="text-sm font-bold text-[#E6007E] hover:underline transition">
+  🏷️ Fırsatlar
+</Link>
           <Link href="/kontrol-listesi" className="text-sm font-semibold text-slate-600 hover:text-[#E6007E] transition">
             ⏳ Checklist
           </Link>
