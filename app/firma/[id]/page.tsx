@@ -1,420 +1,276 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
-import { useParams } from 'next/navigation';
+import React, { useEffect, useState, use } from 'react';
 import Link from 'next/link';
-import {
-  doc,
-  getDoc,
-  collection,
-  addDoc,
-  getDocs,
-  query,
-  where,
-  serverTimestamp,
-} from 'firebase/firestore';
+import { useRouter } from 'next/navigation';
+import { doc, getDoc, collection, addDoc, query, where, getDocs, serverTimestamp } from 'firebase/firestore';
 import { onAuthStateChanged, User } from 'firebase/auth';
 import { db, auth } from '../../../lib/firebase';
 
 interface Vendor {
   id: string;
-  name?: string;
-  category?: string;
-  city?: string;
-  price?: string;
-  rating?: string | number;
-  imageUrl?: string;
+  name: string;
+  category: string;
+  city: string;
+  price: string;
+  rating: string | number;
+  imageUrl: string;
   images?: string[];
-  description?: string;
+  description: string;
   phone?: string;
 }
 
 interface Review {
   id: string;
-  authorName: string;
-  authorPhoto?: string;
+  userName: string;
+  userPhoto?: string;
   rating: number;
   comment: string;
-  createdAt?: any;
+  createdAt: any;
 }
 
-const DEFAULT_GALLERY = [
-  'https://images.unsplash.com/photo-1519167758481-83f550bb49b3?w=1200',
-  'https://images.unsplash.com/photo-1511285560929-80b456fea0bc?w=1200',
-  'https://images.unsplash.com/photo-1519225421980-715cb0215aed?w=1200',
-  'https://images.unsplash.com/photo-1465495976277-4387d4b0b4c6?w=1200',
-];
-
-export default function VendorDetailPage() {
-  const params = useParams();
-  const vendorId = params?.id as string;
+export default function VendorDetailPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = use(params);
+  const router = useRouter();
 
   const [vendor, setVendor] = useState<Vendor | null>(null);
   const [reviews, setReviews] = useState<Review[]>([]);
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState<User | null>(null);
 
-  // Slider State'i
-  const [currentSlide, setCurrentSlide] = useState(0);
-
-  // Teklif Formu State'leri
-  const [isSubmittingOffer, setIsSubmittingOffer] = useState(false);
-  const [offerSubmitted, setOfferSubmitted] = useState(false);
-  const [offerData, setOfferData] = useState({
+  // Teklif Modal State'leri
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [requestForm, setRequestForm] = useState({
     fullName: '',
     phone: '',
     weddingDate: '',
-    guestCount: '',
+    guestCount: '200-300 Kişi',
     message: '',
   });
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Yorum Formu State'leri
-  const [reviewData, setReviewData] = useState({
-    rating: 5,
-    comment: '',
-  });
-  const [isSubmittingReview, setIsSubmittingReview] = useState(false);
-  const [reviewSubmitted, setReviewSubmitted] = useState(false);
+  // Yorum Form State'leri
+  const [newRating, setNewRating] = useState(5);
+  const [newComment, setNewComment] = useState('');
+  const [isReviewSubmitting, setIsReviewSubmitting] = useState(false);
 
-  // Oturum Durumunu Dinle
+  // Oturum ve Firma Verilerini Çek
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       setUser(currentUser);
-      if (currentUser?.displayName) {
-        setOfferData((prev) => ({ ...prev, fullName: currentUser.displayName || '' }));
+      if (currentUser) {
+        setRequestForm(prev => ({
+          ...prev,
+          fullName: currentUser.displayName || '',
+        }));
       }
     });
-    return () => unsubscribe();
-  }, []);
 
-  // Verileri Çek
-  useEffect(() => {
-    async function fetchData() {
-      if (!vendorId) return;
+    async function fetchVendorDetails() {
       try {
-        const docRef = doc(db, 'vendors', vendorId);
+        const docRef = doc(db, 'vendors', id);
         const docSnap = await getDoc(docRef);
 
         if (docSnap.exists()) {
           setVendor({ id: docSnap.id, ...docSnap.data() } as Vendor);
         }
 
-        const reviewsQuery = query(
-          collection(db, 'reviews'),
-          where('vendorId', '==', vendorId)
-        );
-        const reviewsSnap = await getDocs(reviewsQuery);
-        const fetchedReviews: Review[] = [];
-        reviewsSnap.forEach((doc) => {
-          fetchedReviews.push({ id: doc.id, ...doc.data() } as Review);
-        });
-        setReviews(fetchedReviews);
+        // Yorumları Çek
+        const q = query(collection(db, 'reviews'), where('vendorId', '==', id));
+        const reviewSnap = await getDocs(q);
+        const reviewList: Review[] = [];
+        reviewSnap.forEach((d) => reviewList.push({ id: d.id, ...d.data() } as Review));
+        setReviews(reviewList);
       } catch (error) {
-        console.error('Veri çekme hatası:', error);
+        console.error('Firma detay hatası:', error);
       } finally {
         setLoading(false);
       }
     }
 
-    fetchData();
-  }, [vendorId]);
+    fetchVendorDetails();
+    return () => unsubscribe();
+  }, [id]);
 
-  // Galeri fotoğraflarını hazırla
-  const galleryImages =
-    vendor?.images && vendor.images.length > 0
-      ? vendor.images
-      : vendor?.imageUrl
-      ? [vendor.imageUrl, ...DEFAULT_GALLERY.slice(1)]
-      : DEFAULT_GALLERY;
-
-  const nextSlide = () => {
-    setCurrentSlide((prev) => (prev + 1) % galleryImages.length);
-  };
-
-  const prevSlide = () => {
-    setCurrentSlide((prev) => (prev - 1 + galleryImages.length) % galleryImages.length);
-  };
-
-  // WhatsApp Link Oluşturucu
-  const getWhatsAppLink = () => {
-    const rawPhone = vendor?.phone ? vendor.phone.replace(/\D/g, '') : '905555555555';
-    const formattedPhone = rawPhone.startsWith('90') ? rawPhone : `90${rawPhone}`;
-    const text = encodeURIComponent(
-      `Merhaba ${vendor?.name || 'Firma Yetkilisi'}, WedyPlan platformu üzerinden ulaşıyorum. Hizmetleriniz ve fiyat teklifiniz hakkında bilgi alabilir miyim?`
-    );
-    return `https://wa.me/${formattedPhone}?text=${text}`;
-  };
-
-  // Teklif Gönder
-  const handleSubmitOffer = async (e: React.FormEvent) => {
+  // Teklif Formu Gönderme
+  const handleSendRequest = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!vendor) return;
+    setIsSubmitting(true);
 
-    setIsSubmittingOffer(true);
     try {
       await addDoc(collection(db, 'requests'), {
-        vendorId: vendor.id,
-        vendorName: vendor.name,
-        fullName: offerData.fullName,
-        phone: offerData.phone,
-        weddingDate: offerData.weddingDate,
-        guestCount: offerData.guestCount,
-        message: offerData.message,
-        userId: user?.uid || null,
+        vendorId: id,
+        vendorName: vendor?.name,
+        fullName: requestForm.fullName,
+        phone: requestForm.phone,
+        weddingDate: requestForm.weddingDate,
+        guestCount: requestForm.guestCount,
+        message: requestForm.message,
         createdAt: serverTimestamp(),
-        status: 'pending',
       });
-      setOfferSubmitted(true);
+
+      alert('🎉 Fiyat teklifi talebiniz firmaya iletildi! En kısa sürede sizinle iletişime geçecekler.');
+      setIsModalOpen(false);
+      setRequestForm({ fullName: '', phone: '', weddingDate: '', guestCount: '200-300 Kişi', message: '' });
     } catch (error) {
-      console.error('Teklif hatası:', error);
-      alert('Teklif gönderilemedi.');
+      console.error('Teklif gönderme hatası:', error);
+      alert('Teklif gönderilirken bir hata oluştu.');
     } finally {
-      setIsSubmittingOffer(false);
+      setIsSubmitting(false);
     }
   };
 
-  // Yorum Gönder (Auth Korumalı)
-  const handleSubmitReview = async (e: React.FormEvent) => {
+  // Yorum Gönderme
+  const handleAddReview = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!vendor || !user) return;
+    if (!user) {
+      alert('Yorum yapabilmek için lütfen giriş yapın.');
+      router.push('/login');
+      return;
+    }
 
-    setIsSubmittingReview(true);
+    setIsReviewSubmitting(true);
     try {
-      const newReview = {
-        vendorId: vendor.id,
-        authorName: user.displayName || user.email?.split('@')[0] || 'Kullanıcı',
-        authorPhoto: user.photoURL || `https://ui-avatars.com/api/?name=${user.displayName || 'U'}&background=E6007E&color=fff`,
+      const reviewPayload = {
+        vendorId: id,
         userId: user.uid,
-        rating: Number(reviewData.rating),
-        comment: reviewData.comment,
+        userName: user.displayName || 'Anonim Kullanıcı',
+        userPhoto: user.photoURL || '',
+        rating: newRating,
+        comment: newComment,
         createdAt: new Date().toLocaleDateString('tr-TR'),
       };
 
-      const docRef = await addDoc(collection(db, 'reviews'), {
-        ...newReview,
-        createdAtTimestamp: serverTimestamp(),
-      });
-
-      setReviews([{ id: docRef.id, ...newReview }, ...reviews]);
-      setReviewSubmitted(true);
-      setReviewData({ rating: 5, comment: '' });
+      const docRef = await addDoc(collection(db, 'reviews'), reviewPayload);
+      setReviews([{ id: docRef.id, ...reviewPayload }, ...reviews]);
+      setNewComment('');
+      alert('Yorumunuz başarıyla yayınlandı!');
     } catch (error) {
-      console.error('Yorum ekleme hatası:', error);
-      alert('Yorum kaydedilirken bir hata oluştu.');
+      console.error('Yorum hatası:', error);
     } finally {
-      setIsSubmittingReview(false);
+      setIsReviewSubmitting(false);
     }
   };
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#FDFBFD] flex items-center justify-center">
-        <p className="text-[#4A154B] font-semibold">Yükleniyor...</p>
+      <div className="min-h-screen flex items-center justify-center bg-[#FDFBFD]">
+        <p className="text-[#4A154B] font-bold">Firma detayları yükleniyor...</p>
       </div>
     );
   }
 
   if (!vendor) {
     return (
-      <div className="min-h-screen bg-[#FDFBFD] flex flex-col items-center justify-center p-4">
-        <h2 className="text-2xl font-bold text-[#4A154B] mb-2">Firma Bulunamadı</h2>
-        <Link href="/" className="bg-[#E6007E] text-white px-6 py-2.5 rounded-xl font-semibold">
-          Ana Sayfaya Dön
+      <div className="min-h-screen flex flex-col items-center justify-center bg-[#FDFBFD] space-y-4">
+        <p className="text-slate-500 font-bold">Aradığınız firma bulunamadı.</p>
+        <Link href="/arama" className="bg-[#4A154B] text-white text-xs font-bold px-5 py-2.5 rounded-xl">
+          Firmalara Dön
         </Link>
       </div>
     );
   }
 
+  const galleryImages = vendor.images && vendor.images.length > 0 ? vendor.images : [vendor.imageUrl];
+
   return (
     <div className="min-h-screen bg-[#FDFBFD] text-slate-800">
       {/* Navbar */}
-      <nav className="flex items-center justify-between px-8 py-4 bg-white border-b border-purple-100 shadow-sm">
+      <nav className="flex items-center justify-between px-6 md:px-12 py-4 bg-white border-b border-purple-100 shadow-sm sticky top-0 z-50">
         <Link href="/" className="text-2xl font-bold text-[#4A154B]">
           Wedy<span className="text-[#E6007E]">Plan</span>
         </Link>
-        <Link href="/arama" className="text-xs font-semibold text-[#4A154B] hover:text-[#E6007E]">
+        <Link href="/arama" className="text-xs font-semibold text-slate-500 hover:text-[#E6007E]">
           ← Arama Listesine Dön
         </Link>
       </nav>
 
-      <div className="max-w-6xl mx-auto px-4 py-8">
-        {/* Fotoğraf Galerisi Slider */}
-        <div className="relative w-full h-[380px] md:h-[480px] rounded-3xl overflow-hidden mb-8 shadow-xl bg-slate-900 group">
-          <img
-            src={galleryImages[currentSlide]}
-            alt={`${vendor.name} - Fotoğraf ${currentSlide + 1}`}
-            className="w-full h-full object-cover transition-all duration-500 ease-out"
-          />
-
-          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent flex items-end p-6 md:p-8">
-            <div className="text-white z-10">
-              <span className="bg-[#E6007E] text-[10px] md:text-xs font-bold px-3 py-1 rounded-full uppercase">
-                {vendor.category || 'Kategori'}
-              </span>
-              <h1 className="text-2xl md:text-4xl font-extrabold mt-2">{vendor.name}</h1>
-              <p className="text-slate-200 mt-1 flex flex-wrap items-center gap-4 text-xs md:text-sm">
-                <span>📍 {vendor.city}</span>
-                <span>★ {vendor.rating || '4.9'} Puan</span>
-                <span>💬 {reviews.length} Yorum</span>
-              </p>
-            </div>
+      <div className="max-w-6xl mx-auto px-4 py-8 space-y-8">
+        
+        {/* Fotoğraf Galerisi Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 rounded-3xl overflow-hidden shadow-lg border border-purple-100">
+          <div className="md:col-span-2 h-80 md:h-[420px] relative">
+            <img src={galleryImages[0]} alt={vendor.name} className="w-full h-full object-cover" />
+            <span className="absolute top-4 left-4 bg-[#4A154B] text-white text-xs font-bold px-3 py-1 rounded-full uppercase">
+              {vendor.category}
+            </span>
           </div>
-
-          <button
-            onClick={prevSlide}
-            className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/20 hover:bg-white/40 backdrop-blur-md text-white p-3 rounded-full transition opacity-80 group-hover:opacity-100"
-            aria-label="Önceki Fotoğraf"
-          >
-            ❮
-          </button>
-
-          <button
-            onClick={nextSlide}
-            className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/20 hover:bg-white/40 backdrop-blur-md text-white p-3 rounded-full transition opacity-80 group-hover:opacity-100"
-            aria-label="Sonraki Fotoğraf"
-          >
-            ❯
-          </button>
-
-          <div className="absolute top-4 right-4 bg-black/60 backdrop-blur-md text-white text-xs font-bold px-3 py-1.5 rounded-full">
-            {currentSlide + 1} / {galleryImages.length}
-          </div>
-
-          <div className="absolute bottom-4 right-6 flex gap-1.5 z-10">
-            {galleryImages.map((_, idx) => (
-              <button
-                key={idx}
-                onClick={() => setCurrentSlide(idx)}
-                className={`h-2 rounded-full transition-all ${
-                  currentSlide === idx ? 'w-6 bg-[#E6007E]' : 'w-2 bg-white/50'
-                }`}
-              />
-            ))}
+          <div className="hidden md:grid grid-rows-2 gap-4 h-[420px]">
+            <img src={galleryImages[1] || galleryImages[0]} alt="Galeri 2" className="w-full h-[202px] object-cover" />
+            <img src={galleryImages[2] || galleryImages[0]} alt="Galeri 3" className="w-full h-[202px] object-cover" />
           </div>
         </div>
 
-        {/* Küçük Resimler */}
-        <div className="grid grid-cols-4 gap-3 mb-8">
-          {galleryImages.map((img, idx) => (
-            <button
-              key={idx}
-              onClick={() => setCurrentSlide(idx)}
-              className={`relative h-20 rounded-xl overflow-hidden border-2 transition ${
-                currentSlide === idx ? 'border-[#E6007E] scale-[0.98]' : 'border-transparent opacity-60 hover:opacity-100'
-              }`}
-            >
-              <img src={img} alt="Thumbnail" className="w-full h-full object-cover" />
-            </button>
-          ))}
-        </div>
-
+        {/* Başlık ve Hızlı Aksiyon Kartı */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Sol Kolon */}
+          
+          {/* Sol: Detaylar & Yorumlar */}
           <div className="lg:col-span-2 space-y-8">
-            <div className="bg-white p-6 rounded-2xl border border-purple-100 shadow-sm">
-              <h2 className="text-xl font-bold text-[#4A154B] mb-4">Hakkında</h2>
-              <p className="text-slate-600 leading-relaxed text-sm">
-                {vendor.description || `${vendor.name}, ${vendor.city} şehrinde hayalinizdeki düğün organizasyonunu gerçeğe dönüştürmek için profesyonel ekibiyle hizmet vermektedir.`}
-              </p>
+            <div className="bg-white p-6 md:p-8 rounded-3xl border border-purple-100 shadow-sm space-y-4">
+              <div className="flex justify-between items-start flex-wrap gap-2">
+                <div>
+                  <h1 className="text-2xl md:text-3xl font-extrabold text-[#4A154B]">{vendor.name}</h1>
+                  <p className="text-xs font-semibold text-slate-500 mt-1">📍 {vendor.city}</p>
+                </div>
+                <span className="text-sm font-bold text-amber-500 bg-amber-50 px-3 py-1 rounded-xl">
+                  ★ {vendor.rating || '5.0'} (Yüksek Müşteri Memnuniyeti)
+                </span>
+              </div>
+
+              <div className="pt-4 border-t border-slate-100">
+                <h3 className="text-sm font-bold text-[#4A154B] mb-2">Hakkında</h3>
+                <p className="text-xs text-slate-600 leading-relaxed whitespace-pre-line">{vendor.description}</p>
+              </div>
             </div>
 
             {/* Yorumlar Bölümü */}
-            <div className="bg-white p-6 rounded-2xl border border-purple-100 shadow-sm space-y-6">
-              <div className="flex justify-between items-center border-b border-slate-100 pb-4">
-                <h2 className="text-xl font-bold text-[#4A154B]">
-                  Değerlendirmeler & Yorumlar ({reviews.length})
-                </h2>
-              </div>
+            <div className="bg-white p-6 md:p-8 rounded-3xl border border-purple-100 shadow-sm space-y-6">
+              <h3 className="text-base font-bold text-[#4A154B]">Çift Yorumları ({reviews.length})</h3>
 
-              {/* Yorum Formu VEYA Giriş Uyarısı */}
-              <div className="bg-purple-50/50 p-5 rounded-2xl border border-purple-100">
-                <h3 className="text-xs font-bold text-[#4A154B] mb-3 uppercase">Siz de Deneyiminizi Paylaşın</h3>
-                
-                {!user ? (
-                  <div className="text-center py-4 space-y-3">
-                    <p className="text-xs text-slate-600">
-                      Firma hakkında değerlendirme ve yorum yapabilmek için lütfen giriş yapın.
-                    </p>
-                    <Link
-                      href="/login"
-                      className="inline-block bg-[#E6007E] text-white text-xs font-bold px-5 py-2.5 rounded-xl hover:bg-pink-700 transition shadow"
-                    >
-                      Giriş Yap / Üye Ol →
-                    </Link>
-                  </div>
-                ) : reviewSubmitted ? (
-                  <div className="p-3 bg-green-100 text-green-800 rounded-xl text-xs font-semibold text-center">
-                    🎉 Yorumunuz onaylı hesabınızla başarıyla yayınlandı! Teşekkür ederiz.
-                  </div>
-                ) : (
-                  <form onSubmit={handleSubmitReview} className="space-y-3">
-                    <div className="flex items-center gap-3 bg-white p-2.5 rounded-xl border border-slate-200">
-                      <img
-                        src={user.photoURL || `https://ui-avatars.com/api/?name=${user.displayName || 'U'}&background=E6007E&color=fff`}
-                        alt="Profil"
-                        className="w-8 h-8 rounded-full object-cover"
-                      />
-                      <div className="flex-grow">
-                        <p className="text-xs font-bold text-slate-800">{user.displayName || user.email}</p>
-                        <p className="text-[10px] text-green-600 font-semibold">✓ Doğrulanmış Kullanıcı</p>
-                      </div>
-                      <select
-                        value={reviewData.rating}
-                        onChange={(e) => setReviewData({ ...reviewData, rating: Number(e.target.value) })}
-                        className="p-1.5 border border-slate-200 rounded-lg text-xs focus:outline-none focus:border-[#E6007E] bg-white text-amber-600 font-bold"
-                      >
-                        <option value="5">★★★★★ (5 Yıldız)</option>
-                        <option value="4">★★★★☆ (4 Yıldız)</option>
-                        <option value="3">★★★☆☆ (3 Yıldız)</option>
-                        <option value="2">★★☆☆☆ (2 Yıldız)</option>
-                        <option value="1">★☆☆☆☆ (1 Yıldız)</option>
-                      </select>
-                    </div>
+              {/* Yorum Yapma Formu */}
+              <form onSubmit={handleAddReview} className="bg-purple-50/50 p-4 rounded-2xl border border-purple-100 space-y-3">
+                <span className="text-xs font-bold text-slate-700 block">Siz de Değerlendirin:</span>
+                <div className="flex items-center gap-2">
+                  <span className="text-xs font-bold text-slate-500">Puanınız:</span>
+                  <select
+                    value={newRating}
+                    onChange={(e) => setNewRating(Number(e.target.value))}
+                    className="p-1.5 border border-slate-200 rounded-lg text-xs font-bold bg-white"
+                  >
+                    <option value={5}>⭐⭐⭐⭐⭐ (5/5)</option>
+                    <option value={4}>⭐⭐⭐⭐ (4/5)</option>
+                    <option value={3}>⭐⭐⭐ (3/5)</option>
+                  </select>
+                </div>
+                <textarea
+                  rows={2}
+                  required
+                  placeholder="Deneyimlerinizi yazın..."
+                  value={newComment}
+                  onChange={(e) => setNewComment(e.target.value)}
+                  className="w-full p-3 border border-slate-200 rounded-xl text-xs focus:outline-none focus:border-[#E6007E]"
+                ></textarea>
+                <button
+                  type="submit"
+                  disabled={isReviewSubmitting}
+                  className="bg-[#4A154B] text-white text-xs font-bold px-5 py-2.5 rounded-xl hover:bg-purple-900 transition"
+                >
+                  Yorum Gönder
+                </button>
+              </form>
 
-                    <textarea
-                      rows={3}
-                      required
-                      placeholder="Firma hakkındaki düşünceleriniz, hizmet kalitesi ve deneyimleriniz..."
-                      value={reviewData.comment}
-                      onChange={(e) => setReviewData({ ...reviewData, comment: e.target.value })}
-                      className="w-full p-2.5 border border-slate-200 rounded-xl text-xs focus:outline-none focus:border-[#E6007E] bg-white"
-                    ></textarea>
-
-                    <button
-                      type="submit"
-                      disabled={isSubmittingReview}
-                      className="bg-[#4A154B] text-white text-xs px-5 py-2.5 rounded-xl font-bold hover:bg-purple-900 transition disabled:opacity-50"
-                    >
-                      {isSubmittingReview ? 'Yayınlanıyor...' : 'Yorumu Gönder'}
-                    </button>
-                  </form>
-                )}
-              </div>
-
-              {/* Yorumlar Listesi */}
-              <div className="space-y-4">
+              {/* Var Olan Yorumlar */}
+              <div className="space-y-4 divide-y divide-slate-100">
                 {reviews.length === 0 ? (
-                  <p className="text-xs text-slate-400 italic">Henüz yorum yapılmamış. İlk yorumu siz yapın!</p>
+                  <p className="text-xs text-slate-400 italic pt-2">Henüz yorum yapılmamış. İlk yorumu siz yazın!</p>
                 ) : (
                   reviews.map((rev) => (
-                    <div key={rev.id} className="p-4 rounded-xl border border-slate-100 bg-slate-50/50 space-y-2">
-                      <div className="flex justify-between items-center">
-                        <div className="flex items-center gap-2.5">
-                          <img
-                            src={rev.authorPhoto || `https://ui-avatars.com/api/?name=${rev.authorName}&background=4A154B&color=fff`}
-                            alt={rev.authorName}
-                            className="w-7 h-7 rounded-full object-cover border border-purple-100"
-                          />
-                          <div>
-                            <span className="text-xs font-bold text-[#4A154B] block">{rev.authorName}</span>
-                            <span className="text-[10px] text-slate-400">{rev.createdAt || 'Yakın zamanda'}</span>
-                          </div>
-                        </div>
-                        <span className="text-xs font-bold text-amber-500">
-                          {'★'.repeat(rev.rating)}{'☆'.repeat(5 - rev.rating)}
-                        </span>
+                    <div key={rev.id} className="pt-4 space-y-1">
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs font-bold text-slate-800">{rev.userName}</span>
+                        <span className="text-xs text-amber-500 font-bold">{'★'.repeat(rev.rating)}</span>
                       </div>
-                      <p className="text-xs text-slate-600 leading-relaxed pl-9">{rev.comment}</p>
+                      <p className="text-xs text-slate-600">{rev.comment}</p>
                     </div>
                   ))
                 )}
@@ -422,72 +278,95 @@ export default function VendorDetailPage() {
             </div>
           </div>
 
-          {/* Sağ Kolon: WhatsApp ve Fiyat Teklifi */}
-          <div className="lg:col-span-1 space-y-4">
-            <a
-              href={getWhatsAppLink()}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center justify-center gap-2.5 w-full bg-[#25D366] hover:bg-emerald-600 text-white font-bold text-xs py-3.5 px-4 rounded-2xl shadow-lg transition duration-200 hover:scale-[1.02]"
-            >
-              <span className="text-base">💬</span>
-              <span>WhatsApp ile Anında İletişim Kur</span>
-            </a>
+          {/* Sağ: Fiyat & İletişim Kartı */}
+          <div className="space-y-4">
+            <div className="bg-white p-6 rounded-3xl border border-purple-100 shadow-xl space-y-6 sticky top-24">
+              <div>
+                <span className="text-[11px] font-bold text-slate-400 uppercase">Başlangıç Fiyatı</span>
+                <p className="text-2xl font-extrabold text-[#E6007E] mt-0.5">{vendor.price}</p>
+              </div>
 
-            <div className="bg-white p-6 rounded-2xl border border-purple-100 shadow-md">
-              <h3 className="text-base font-bold text-[#4A154B] mb-2">Ücretsiz Fiyat Teklifi Al</h3>
-              
-              {offerSubmitted ? (
-                <div className="bg-green-50 border border-green-200 text-green-800 p-4 rounded-xl text-center">
-                  <p className="font-bold text-xs mb-1">Teklif Talebiniz İletildi! 🎉</p>
-                  <p className="text-[11px]">{vendor.name} yetkilileri sizinle iletişime geçecektir.</p>
-                </div>
-              ) : (
-                <form onSubmit={handleSubmitOffer} className="space-y-3">
-                  <div>
-                    <label className="block text-xs font-semibold text-slate-600 mb-1">Adınız Soyadınız</label>
-                    <input
-                      type="text"
-                      required
-                      placeholder="Ahmet Yılmaz"
-                      value={offerData.fullName}
-                      onChange={(e) => setOfferData({ ...offerData, fullName: e.target.value })}
-                      className="w-full p-2.5 border border-slate-200 rounded-xl text-xs focus:outline-none focus:border-[#E6007E]"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-xs font-semibold text-slate-600 mb-1">Telefon Numaranız</label>
-                    <input
-                      type="tel"
-                      required
-                      placeholder="05XX XXX XX XX"
-                      value={offerData.phone}
-                      onChange={(e) => setOfferData({ ...offerData, phone: e.target.value })}
-                      className="w-full p-2.5 border border-slate-200 rounded-xl text-xs focus:outline-none focus:border-[#E6007E]"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-xs font-semibold text-slate-600 mb-1">Düğün Tarihi</label>
-                    <input
-                      type="date"
-                      value={offerData.weddingDate}
-                      onChange={(e) => setOfferData({ ...offerData, weddingDate: e.target.value })}
-                      className="w-full p-2.5 border border-slate-200 rounded-xl text-xs focus:outline-none focus:border-[#E6007E]"
-                    />
-                  </div>
-                  <button
-                    type="submit"
-                    disabled={isSubmittingOffer}
-                    className="w-full bg-[#E6007E] text-white py-3 rounded-xl font-bold text-xs hover:bg-pink-700 transition shadow-md disabled:opacity-50 mt-2"
-                  >
-                    {isSubmittingOffer ? 'Gönderiliyor...' : 'Fiyat Teklifi Gönder'}
-                  </button>
-                </form>
+              <button
+                onClick={() => setIsModalOpen(true)}
+                className="w-full bg-[#E6007E] hover:bg-pink-700 text-white font-bold text-xs py-3.5 rounded-xl transition shadow-lg flex items-center justify-center gap-2"
+              >
+                <span>💬</span>
+                <span>Ücretsiz Fiyat Teklifi Al</span>
+              </button>
+
+              {vendor.phone && (
+                <a
+                  href={`https://wa.me/${vendor.phone.replace(/\D/g, '')}?text=${encodeURIComponent(`Merhaba ${vendor.name}, WedyPlan üzerinden ulaşmıştım. Fiyatlarınız hakkında bilgi alabilir miyim?`)}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-full bg-[#25D366] hover:bg-emerald-600 text-white font-bold text-xs py-3.5 rounded-xl transition shadow flex items-center justify-center gap-2 block text-center"
+                >
+                  <span>📱</span>
+                  <span>WhatsApp ile Sor</span>
+                </a>
               )}
             </div>
           </div>
         </div>
       </div>
+
+      {/* Teklif Alma Modalı */}
+      {isModalOpen && (
+        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl max-w-md w-full p-6 space-y-4 shadow-2xl relative animate-in zoom-in-95 duration-200">
+            <button
+              onClick={() => setIsModalOpen(false)}
+              className="absolute top-4 right-4 text-slate-400 hover:text-slate-700 font-bold text-lg"
+            >
+              ✕
+            </button>
+
+            <h3 className="text-lg font-bold text-[#4A154B]">{vendor.name} - Teklif Al</h3>
+            <p className="text-xs text-slate-500">Bilgilerinizi girin, firma size özel fiyat teklifi hazırlasın.</p>
+
+            <form onSubmit={handleSendRequest} className="space-y-3">
+              <input
+                type="text"
+                required
+                placeholder="Adınız Soyadınız"
+                value={requestForm.fullName}
+                onChange={(e) => setRequestForm({ ...requestForm, fullName: e.target.value })}
+                className="w-full p-3 border border-slate-200 rounded-xl text-xs focus:outline-none focus:border-[#E6007E]"
+              />
+              <input
+                type="tel"
+                required
+                placeholder="Telefon Numaranız (05XX...)"
+                value={requestForm.phone}
+                onChange={(e) => setRequestForm({ ...requestForm, phone: e.target.value })}
+                className="w-full p-3 border border-slate-200 rounded-xl text-xs focus:outline-none focus:border-[#E6007E]"
+              />
+              <input
+                type="date"
+                required
+                value={requestForm.weddingDate}
+                onChange={(e) => setRequestForm({ ...requestForm, weddingDate: e.target.value })}
+                className="w-full p-3 border border-slate-200 rounded-xl text-xs focus:outline-none focus:border-[#E6007E]"
+              />
+              <textarea
+                rows={3}
+                placeholder="Eklemek istediğiniz notlar..."
+                value={requestForm.message}
+                onChange={(e) => setRequestForm({ ...requestForm, message: e.target.value })}
+                className="w-full p-3 border border-slate-200 rounded-xl text-xs focus:outline-none focus:border-[#E6007E]"
+              ></textarea>
+
+              <button
+                type="submit"
+                disabled={isSubmitting}
+                className="w-full bg-[#E6007E] text-white text-xs font-bold py-3.5 rounded-xl hover:bg-pink-700 transition shadow disabled:opacity-50"
+              >
+                {isSubmitting ? 'Gönderiliyor...' : 'Teklif Talebini Gönder'}
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
