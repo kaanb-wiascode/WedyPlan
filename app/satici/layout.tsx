@@ -11,6 +11,7 @@ export default function VendorLayout({ children }: { children: React.ReactNode }
     { href: '/satici', label: 'Genel Bakış', icon: '📊' },
     { href: '/satici/talepler', label: 'Müşteri Talepleri', icon: '📥' },
     { href: '/satici/teklif-hazirla', label: 'Teklif & Dosya Yükle', icon: '📝' },
+    { href: '/satici/finans', label: 'Finans & Alacaklar', icon: '💰' },
     { href: '/satici/rekabet', label: 'Rekabet Analizi', icon: '⚔️' },
     { href: '/satici/paketler', label: 'Paketler & Doping', icon: '🚀' },
   ];
