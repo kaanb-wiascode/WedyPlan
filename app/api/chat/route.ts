@@ -12,30 +12,26 @@ export async function POST(req: Request) {
       );
     }
 
-    // 1. DÜZELTME: TAMAMEN YENİLENMİŞ VE KISITLANMIŞ SİSTEM BEYNİ
-    const systemPrompt = `Sen WedyPlan'ın VIP Düğün Asistanısın (WedyAI Concierge).
-Kullanıcı Adı: ${userContext?.name || 'Selin & Kaan'} (Bütçe: ${userContext?.budget})
+    const systemPrompt = `
+Sen WedyPlan'ın VIP Düğün Asistanısın (WedyAI Concierge).
+Kullanıcı Adı: ${userContext?.name || 'Selin & Kaan'} (Düğün Tarihi: ${userContext?.weddingDate || '15 Ağustos 2026'}, Bütçe: ${userContext?.budget || '350.000 TL'})
 
-MANTIK VE SOHBET KURALLARI (KESİNLİKLE UY):
-1. DOĞAL İNSAN GİBİ KONUŞ: Kullanıcı sana tavsiye, fikir veya soru soruyorsa (Örn: "Bütçe olarak ne önerirsin?", "Ne yapalım?"), SADECE akıcı ve mantıklı bir METİN cevabı ver.
-2. HAFIZA: Önceki mesajları oku. Kullanıcı YENİ soru sorduysa ESKİ KONUYU BIRAK ve sadece yeni soruya odaklan. Eski işlemleri asla tekrarlama.
-3. ARAÇ (TOOL) KULLANIMI KISITLAMASI:
-   - Kullanıcı AÇIKÇA "Renk paleti oluştur", "Konsept çiz" demediği sürece ASLA 'generate_theme_board' aracını kullanma!
-   - Kullanıcı AÇIKÇA "Bütçeme 5000 TL ekle" demediği sürece ASLA 'add_budget_item' aracını kullanma!
-4. Eğer bir işlem (tool) yaparsan, cevabını kısa tut (Örn: "İsteğiniz üzerine renk paleti oluşturuldu.").`;
-
-    // 2. DÜZELTME: Sohbet geçmişindeki olası boşlukları doldurup "LLM Looping" hatasını engelliyoruz
-    const safeMessages = messages.map((m: any) => ({
-      role: m.role,
-      content: m.content || 'Bir önceki işlem başarıyla ekrana çizildi.'
-    }));
+MANTIK VE SOHBET KURALLARI:
+1. İNSAN GİBİ SOHBET ET: Genel sorularda, tavsiyelerde sadece akıcı metin yanıtı ver.
+2. YALNIZCA KULLANICI AÇIKÇA İSTEDİĞİNDE İLGİLİ ARAÇLARI (TOOLS) ÇALIŞTIR:
+   - Bütçeye harcama eklemek istenirse: 'add_budget_item'
+   - Renk paleti / konsept istenirse: 'generate_theme_board'
+   - Mekan veya tedarikçi önerisi istenirse: 'recommend_vendors'
+   - Düğün günü akışı / zaman çizelgesi istenirse: 'generate_timeline'
+   - Davetli oturma düzeni veya LCV durumu istenirse: 'manage_guests'
+    `;
 
     const tools = [
       {
         type: 'function',
         function: {
           name: 'add_budget_item',
-          description: 'YALNIZCA KULLANICI BÜTÇEYE HARCAMA EKLEMEK İSTEDİĞİNDE KULLAN.',
+          description: 'Bütçeye yeni harcama kalemi ekler.',
           parameters: {
             type: 'object',
             properties: {
@@ -51,7 +47,7 @@ MANTIK VE SOHBET KURALLARI (KESİNLİKLE UY):
         type: 'function',
         function: {
           name: 'generate_theme_board',
-          description: 'YALNIZCA KULLANICI GÖRSEL BİR RENK PALETİ VEYA KONSEPT TABLOSU İSTEDİĞİNDE KULLAN.',
+          description: 'Düğün konsepti ve renk paleti oluşturur.',
           parameters: {
             type: 'object',
             properties: {
@@ -60,6 +56,77 @@ MANTIK VE SOHBET KURALLARI (KESİNLİKLE UY):
               colors: { type: 'array', items: { type: 'string' } }
             },
             required: ['themeName', 'description', 'colors']
+          }
+        }
+      },
+      {
+        type: 'function',
+        function: {
+          name: 'recommend_vendors',
+          description: 'Kullanıcının kriterlerine uygun onaylı mekan veya tedarikçileri listeler.',
+          parameters: {
+            type: 'object',
+            properties: {
+              category: { type: 'string', description: 'Örn: Düğün Mekanı, Fotoğrafçı, Müzik' },
+              vendors: {
+                type: 'array',
+                items: {
+                  type: 'object',
+                  properties: {
+                    name: { type: 'string' },
+                    location: { type: 'string' },
+                    priceRange: { type: 'string' },
+                    rating: { type: 'number' },
+                    imageUrl: { type: 'string' }
+                  },
+                  required: ['name', 'location', 'priceRange', 'rating']
+                }
+              }
+            },
+            required: ['category', 'vendors']
+          }
+        }
+      },
+      {
+        type: 'function',
+        function: {
+          name: 'generate_timeline',
+          description: 'Düğün günü için saat saat akış ve zaman çizelgesi oluşturur.',
+          parameters: {
+            type: 'object',
+            properties: {
+              title: { type: 'string' },
+              schedule: {
+                type: 'array',
+                items: {
+                  type: 'object',
+                  properties: {
+                    time: { type: 'string' },
+                    activity: { type: 'string' },
+                    note: { type: 'string' }
+                  },
+                  required: ['time', 'activity']
+                }
+              }
+            },
+            required: ['title', 'schedule']
+          }
+        }
+      },
+      {
+        type: 'function',
+        function: {
+          name: 'manage_guests',
+          description: 'Davetli listesi ve masa düzeni durumunu günceller.',
+          parameters: {
+            type: 'object',
+            properties: {
+              actionSummary: { type: 'string' },
+              confirmedCount: { type: 'number' },
+              pendingCount: { type: 'number' },
+              tableNote: { type: 'string' }
+            },
+            required: ['actionSummary']
           }
         }
       }
@@ -75,11 +142,11 @@ MANTIK VE SOHBET KURALLARI (KESİNLİKLE UY):
         model: 'llama-3.3-70b-versatile',
         messages: [
           { role: 'system', content: systemPrompt },
-          ...safeMessages, // Temizlenmiş geçmiş
+          ...messages,
         ],
         tools: tools,
         tool_choice: 'auto',
-        temperature: 0.5, // 3. DÜZELTME: Robotik döngüyü kırmak için yaratıcılık artırıldı (0.2 -> 0.5)
+        temperature: 0.4,
       }),
     });
 
@@ -96,57 +163,39 @@ MANTIK VE SOHBET KURALLARI (KESİNLİKLE UY):
     let responseText = choice?.content || '';
     let actionExecuted = null;
 
-    // Kaçak Fonksiyon Yakalayıcı 
+    // 1. Kaçak Fonksiyon Yakalayıcı (Regex Parse)
     const regex = /<function=(\w+)>([\s\S]*?)(?:<\/function>|$)/;
     const match = responseText.match(regex);
 
     if (match) {
       const fnName = match[1];
-      const fnArgsStr = match[2].trim();
-      
+      const fnArgsStr = match[2].trim().replace(/<\/function>$/, '');
       try {
-        const cleanJson = fnArgsStr.replace(/<\/function>$/, '');
-        const fnArgs = JSON.parse(cleanJson);
-        
-        if (fnName === 'add_budget_item') {
-          actionExecuted = { type: 'BUDGET_ADDED', data: { ...fnArgs, amount: Number(fnArgs.amount) || 0 } };
-        } else if (fnName === 'generate_theme_board') {
-          actionExecuted = { type: 'THEME_GENERATED', data: fnArgs };
-        }
+        const fnArgs = JSON.parse(fnArgsStr);
+        actionExecuted = processToolAction(fnName, fnArgs);
         responseText = responseText.replace(regex, '').trim();
       } catch (e) {
-        console.error("Regex parse hatası:", e);
+        console.error('Regex parse error:', e);
       }
     } 
-    // Normal Fonksiyon Yakalayıcı
+    // 2. Standart Tool Calling
     else if (choice?.tool_calls && choice.tool_calls.length > 0) {
       const toolCall = choice.tool_calls[0];
       const fnName = toolCall.function.name;
-      
       let fnArgs: any = {};
       try {
-        fnArgs = typeof toolCall.function.arguments === 'string' 
-          ? JSON.parse(toolCall.function.arguments) 
+        fnArgs = typeof toolCall.function.arguments === 'string'
+          ? JSON.parse(toolCall.function.arguments)
           : toolCall.function.arguments;
       } catch (e) {
-        console.error('Args parse hatası:', e);
+        console.error('Args parse error:', e);
       }
 
-      if (fnName === 'add_budget_item') {
-        const parsedAmount = Number(fnArgs.amount) || 0;
-        actionExecuted = { type: 'BUDGET_ADDED', data: { ...fnArgs, amount: parsedAmount } };
-        if (!responseText) responseText = `${fnArgs.category} harcaması (${parsedAmount.toLocaleString('tr-TR')} TL) bütçenize eklendi.`;
-      } else if (fnName === 'generate_theme_board') {
-        actionExecuted = { type: 'THEME_GENERATED', data: fnArgs };
-        if (!responseText) responseText = `Sizin için "${fnArgs.themeName}" konsepti ve renk paleti oluşturuldu.`;
-      }
+      actionExecuted = processToolAction(fnName, fnArgs);
     }
 
-    // Metin tamamen boş gelirse koruma
     if (!responseText.trim() && actionExecuted) {
-       responseText = actionExecuted.type === 'THEME_GENERATED' 
-         ? "İşte sizin için hazırladığım renk paleti ve konsept önerisi: ✨"
-         : "İşleminiz başarıyla gerçekleştirildi. ✨";
+      responseText = 'İstediğiniz işlem başarıyla gerçekleştirildi. ✨';
     }
 
     return NextResponse.json({ text: responseText, action: actionExecuted });
@@ -157,4 +206,24 @@ MANTIK VE SOHBET KURALLARI (KESİNLİKLE UY):
       { status: 500 }
     );
   }
+}
+
+// Yardımcı İşlem Eşleştirici
+function processToolAction(fnName: string, fnArgs: any) {
+  if (fnName === 'add_budget_item') {
+    return { type: 'BUDGET_ADDED', data: { ...fnArgs, amount: Number(fnArgs.amount) || 0 } };
+  }
+  if (fnName === 'generate_theme_board') {
+    return { type: 'THEME_GENERATED', data: fnArgs };
+  }
+  if (fnName === 'recommend_vendors') {
+    return { type: 'VENDORS_RECOMMENDED', data: fnArgs };
+  }
+  if (fnName === 'generate_timeline') {
+    return { type: 'TIMELINE_GENERATED', data: fnArgs };
+  }
+  if (fnName === 'manage_guests') {
+    return { type: 'GUESTS_MANAGED', data: fnArgs };
+  }
+  return null;
 }
