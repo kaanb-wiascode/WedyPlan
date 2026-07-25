@@ -110,7 +110,7 @@ export default function WedyAIAssistantPage() {
           <span>WedyAI Düğün Motoru v2.0</span>
         </div>
         <h1 className="text-[32px] font-medium tracking-tight text-[#111111]">
-          Akıllı Planlama Asistanı
+          Akıllı Planlama Asistanı (TEST)
         </h1>
         <p className="text-[14px] text-[#666666]">
           Sorularınızı sorun, anında uzman tavsiyeleri ve bütçe analizleri alın.
@@ -212,4 +212,4 @@ export default function WedyAIAssistantPage() {
 
     </div>
   );
-}
+}   
