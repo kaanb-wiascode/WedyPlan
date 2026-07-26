@@ -1,26 +1,83 @@
-@layer utilities {
-  /* Apple iOS Liquid Glass Temel Kartı */
-  .glass-card {
-    @apply bg-white/35 backdrop-blur-3xl border border-white/80 shadow-[0_20px_50px_rgba(0,0,0,0.03)];
-  }
+@import "tailwindcss";
 
-  /* Ana Cam Buton */
-  .glass-btn-primary {
-    @apply bg-white/70 hover:bg-white/95 backdrop-blur-2xl border border-white/90 text-[#1D1D1F] font-semibold shadow-sm hover:scale-[1.02] active:scale-95 transition-all duration-300;
-  }
+/* 🌟 Apple iOS Liquid Glass - Pure CSS Custom Classes (Zero PostCSS Build Errors) */
 
-  /* İkincil Cam Buton */
-  .glass-btn-secondary {
-    @apply bg-white/30 hover:bg-white/60 backdrop-blur-xl border border-white/60 text-[#2C2C2E] shadow-sm active:scale-95 transition-all duration-300;
-  }
+.glass-card {
+  background-color: rgba(255, 255, 255, 0.35);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(255, 255, 255, 0.8);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.03);
+}
 
-  /* Altın Akzent Cam Buton */
-  .glass-btn-gold {
-    @apply bg-[#D4AF37]/25 hover:bg-[#D4AF37]/40 backdrop-blur-2xl border border-[#D4AF37]/50 text-[#1D1D1F] font-semibold shadow-[0_10px_30px_rgba(212,175,55,0.18)] hover:scale-[1.02] active:scale-95 transition-all duration-300;
-  }
+.glass-btn-primary {
+  background-color: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.9);
+  color: #1D1D1F;
+  font-weight: 600;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
 
-  /* Cam Form Elemanları */
-  .glass-input {
-    @apply bg-white/40 focus:bg-white/75 backdrop-blur-xl border border-white/80 rounded-2xl text-[#1D1D1F] outline-none shadow-inner transition-all duration-300;
-  }
+.glass-btn-primary:hover {
+  background-color: rgba(255, 255, 255, 0.95);
+  transform: scale(1.02);
+}
+
+.glass-btn-primary:active {
+  transform: scale(0.95);
+}
+
+.glass-btn-secondary {
+  background-color: rgba(255, 255, 255, 0.3);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  color: #2C2C2E;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.glass-btn-secondary:hover {
+  background-color: rgba(255, 255, 255, 0.6);
+}
+
+.glass-btn-secondary:active {
+  transform: scale(0.95);
+}
+
+.glass-btn-gold {
+  background-color: rgba(212, 175, 55, 0.25);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(212, 175, 55, 0.5);
+  color: #1D1D1F;
+  font-weight: 600;
+  box-shadow: 0 10px 30px rgba(212, 175, 55, 0.18);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.glass-btn-gold:hover {
+  background-color: rgba(212, 175, 55, 0.4);
+  transform: scale(1.02);
+}
+
+.glass-btn-gold:active {
+  transform: scale(0.95);
+}
+
+.glass-input {
+  background-color: rgba(255, 255, 255, 0.4);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.8);
+  border-radius: 1rem;
+  color: #1D1D1F;
+  outline: none;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.glass-input:focus {
+  background-color: rgba(255, 255, 255, 0.75);
 }
