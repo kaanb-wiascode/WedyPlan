@@ -1,25 +1,26 @@
-@import "tailwindcss";
+@layer utilities {
+  /* Apple iOS Liquid Glass Temel Kartı */
+  .glass-card {
+    @apply bg-white/35 backdrop-blur-3xl border border-white/80 shadow-[0_20px_50px_rgba(0,0,0,0.03)];
+  }
 
-:root {
-  --background: #fdfbfd;
-  --foreground: #4a154b;
-  --wedy-purple: #4a154b;
-  --wedy-pink: #e6007e;
-  --wedy-cream: #fdfbfd;
-}
+  /* Ana Cam Buton */
+  .glass-btn-primary {
+    @apply bg-white/70 hover:bg-white/95 backdrop-blur-2xl border border-white/90 text-[#1D1D1F] font-semibold shadow-sm hover:scale-[1.02] active:scale-95 transition-all duration-300;
+  }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --color-wedy-purple: var(--wedy-purple);
-  --color-wedy-pink: var(--wedy-pink);
-  --color-wedy-cream: var(--wedy-cream);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
+  /* İkincil Cam Buton */
+  .glass-btn-secondary {
+    @apply bg-white/30 hover:bg-white/60 backdrop-blur-xl border border-white/60 text-[#2C2C2E] shadow-sm active:scale-95 transition-all duration-300;
+  }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: var(--font-geist-sans), system-ui, sans-serif;
+  /* Altın Akzent Cam Buton */
+  .glass-btn-gold {
+    @apply bg-[#D4AF37]/25 hover:bg-[#D4AF37]/40 backdrop-blur-2xl border border-[#D4AF37]/50 text-[#1D1D1F] font-semibold shadow-[0_10px_30px_rgba(212,175,55,0.18)] hover:scale-[1.02] active:scale-95 transition-all duration-300;
+  }
+
+  /* Cam Form Elemanları */
+  .glass-input {
+    @apply bg-white/40 focus:bg-white/75 backdrop-blur-xl border border-white/80 rounded-2xl text-[#1D1D1F] outline-none shadow-inner transition-all duration-300;
+  }
 }
