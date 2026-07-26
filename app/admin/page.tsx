@@ -7,10 +7,11 @@ import {
   getDocs,
   addDoc,
   deleteDoc,
+  updateDoc,
   doc,
   serverTimestamp,
 } from 'firebase/firestore';
-import { db } from '../../lib/firebase';
+import { db } from '@/lib/firebase';
 
 interface Vendor {
   id: string;
@@ -23,6 +24,7 @@ interface Vendor {
   images?: string[];
   description: string;
   phone: string;
+  isFeatured?: boolean;
 }
 
 interface Request {
@@ -35,97 +37,11 @@ interface Request {
   createdAt?: any;
 }
 
-const DEMO_VENDORS = [
-  {
-    name: 'Bosphorus Palace Kır Bahçesi',
-    category: 'Kır Bahçesi',
-    city: 'İstanbul',
-    price: '95.000 TL',
-    rating: 4.9,
-    phone: '05321112233',
-    imageUrl: 'https://images.unsplash.com/photo-1519167758481-83f550bb49b3?w=800',
-    images: [
-      'https://images.unsplash.com/photo-1519167758481-83f550bb49b3?w=1200',
-      'https://images.unsplash.com/photo-1511285560929-80b456fea0bc?w=1200',
-      'https://images.unsplash.com/photo-1519225421980-715cb0215aed?w=1200',
-    ],
-    description: 'Boğaz manzarası eşliğinde 1000 kişilik yemekli ve yemeksiz kır düğünü organizasyonları için hayallerinizdeki mekan.',
-  },
-  {
-    name: 'Ege Esintisi Düğün Salonu',
-    category: 'Düğün Salonu',
-    city: 'İzmir',
-    price: '75.000 TL',
-    rating: 4.8,
-    phone: '05332223344',
-    imageUrl: 'https://images.unsplash.com/photo-1545232979-fbf4d284f32d?w=800',
-    images: [
-      'https://images.unsplash.com/photo-1545232979-fbf4d284f32d?w=1200',
-      'https://images.unsplash.com/photo-1465495976277-4387d4b0b4c6?w=1200',
-    ],
-    description: 'İzmir Bayraklı’da yüksek tavanlı, kolonsuz modern mimarisi ve lüks ikramlarıyla unutulmaz anlar sunuyoruz.',
-  },
-  {
-    name: 'Art & Motion Wedding Photography',
-    category: 'Fotoğrafçı',
-    city: 'Ankara',
-    price: '25.000 TL',
-    rating: 5.0,
-    phone: '05343334455',
-    imageUrl: 'https://images.unsplash.com/photo-1537633552985-df8429e8048b?w=800',
-    images: [
-      'https://images.unsplash.com/photo-1537633552985-df8429e8048b?w=1200',
-      'https://images.unsplash.com/photo-1583939003579-730e3918a45a?w=1200',
-    ],
-    description: 'Düğün hikayesi, dış çekim ve drone çekimleriyle en özel gününüzü sinematik ve doğal karelerle ölümsüzleştiriyoruz.',
-  },
-  {
-    name: 'Haute Couture Gelinlik & Modaevi',
-    category: 'Gelinlik',
-    city: 'İstanbul',
-    price: '35.000 TL',
-    rating: 4.9,
-    phone: '05354445566',
-    imageUrl: 'https://images.unsplash.com/photo-1594552072238-b8a33785b261?w=800',
-    images: [
-      'https://images.unsplash.com/photo-1594552072238-b8a33785b261?w=1200',
-    ],
-    description: 'Kişiye özel tasarım gelinlikler, A kesim, helen ve prenses modeller ile gelinlerimizin ışıltısını ortaya çıkarıyoruz.',
-  },
-  {
-    name: 'Dream Events Organizasyon',
-    category: 'Organizasyon',
-    city: 'Bursa',
-    price: '40.000 TL',
-    rating: 4.7,
-    phone: '05365556677',
-    imageUrl: 'https://images.unsplash.com/photo-1465495976277-4387d4b0b4c6?w=800',
-    images: [
-      'https://images.unsplash.com/photo-1465495976277-4387d4b0b4c6?w=1200',
-    ],
-    description: 'Masa süslemesinden sahne ışıklandırmasına, karşılama ekibinden gelin yoluna kadar tüm detayları kusursuz tasarlıyoruz.',
-  },
-  {
-    name: 'Ritmi Hisset Live Orchestra & DJ',
-    category: 'Müzik & DJ',
-    city: 'İstanbul',
-    price: '30.000 TL',
-    rating: 5.0,
-    phone: '05376667788',
-    imageUrl: 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=800',
-    images: [
-      'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=1200',
-    ],
-    description: 'Geniş repertuvarlı canlı orkestra performansı ve enerjik DJ konseptiyle düğün eğlencenizi zirveye taşıyoruz.',
-  },
-];
-
 export default function AdminPage() {
   const [vendors, setVendors] = useState<Vendor[]>([]);
   const [requests, setRequests] = useState<Request[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<'vendors' | 'requests'>('vendors');
-  const [isSeeding, setIsSeeding] = useState(false);
 
   // Form State
   const [formData, setFormData] = useState({
@@ -136,19 +52,18 @@ export default function AdminPage() {
     phone: '',
     description: '',
     imageUrl: '',
+    isFeatured: false,
   });
 
   // Verileri Çek
   const fetchData = async () => {
     setLoading(true);
     try {
-      // Firmaları Çek
       const vendorSnap = await getDocs(collection(db, 'vendors'));
       const vendorList: Vendor[] = [];
       vendorSnap.forEach((d) => vendorList.push({ id: d.id, ...d.data() } as Vendor));
       setVendors(vendorList);
 
-      // Talepleri Çek
       const reqSnap = await getDocs(collection(db, 'requests'));
       const reqList: Request[] = [];
       reqSnap.forEach((d) => reqList.push({ id: d.id, ...d.data() } as Request));
@@ -163,6 +78,22 @@ export default function AdminPage() {
   useEffect(() => {
     fetchData();
   }, []);
+
+  // Sponsor / Öne Çıkar Durumunu Değiştir (Toggle)
+  const handleToggleFeatured = async (vendor: Vendor) => {
+    try {
+      const docRef = doc(db, 'vendors', vendor.id);
+      const newStatus = !vendor.isFeatured;
+      await updateDoc(docRef, { isFeatured: newStatus });
+
+      setVendors((prev) =>
+        prev.map((v) => (v.id === vendor.id ? { ...v, isFeatured: newStatus } : v))
+      );
+    } catch (error) {
+      console.error('Sponsorluk değiştirme hatası:', error);
+      alert('Sponsorluk durumu güncellenemedi.');
+    }
+  };
 
   // Manuel Firma Ekleme
   const handleAddVendor = async (e: React.FormEvent) => {
@@ -183,6 +114,7 @@ export default function AdminPage() {
         phone: '',
         description: '',
         imageUrl: '',
+        isFeatured: false,
       });
       fetchData();
     } catch (error) {
@@ -202,27 +134,6 @@ export default function AdminPage() {
     }
   };
 
-  // Tek Tıkla Örnek Demo Veri Yükleyici
-  const handleSeedData = async () => {
-    if (!confirm('Veritabanına 6 adet kaliteli örnek firma verisi yüklensin mi?')) return;
-    setIsSeeding(true);
-    try {
-      for (const item of DEMO_VENDORS) {
-        await addDoc(collection(db, 'vendors'), {
-          ...item,
-          createdAt: serverTimestamp(),
-        });
-      }
-      alert('🎉 6 adet örnek firma başarıyla veritabanına yüklendi!');
-      fetchData();
-    } catch (error) {
-      console.error('Demo veri yükleme hatası:', error);
-      alert('Demo veriler yüklenirken bir hata oluştu.');
-    } finally {
-      setIsSeeding(false);
-    }
-  };
-
   return (
     <div className="min-h-screen bg-[#FDFBFD] text-slate-800">
       {/* Navbar */}
@@ -239,27 +150,19 @@ export default function AdminPage() {
       </nav>
 
       <div className="max-w-6xl mx-auto px-4 py-8 space-y-6">
-        {/* Üst Yönetim Kartı & Demo Veri Yükleme Butonu */}
+        {/* Üst Yönetim Kartı */}
         <div className="bg-white p-6 rounded-3xl border border-purple-100 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-4">
           <div>
             <h1 className="text-xl font-extrabold text-[#4A154B]">Sistem Admin Paneli</h1>
-            <p className="text-xs text-slate-500">Tüm firmaları ve gelen kullanıcı taleplerini buradan denetleyebilirsiniz.</p>
+            <p className="text-xs text-slate-500">Firmaların öne çıkarılma durumlarını ve gelen teklif taleplerini yönetin.</p>
           </div>
-          <button
-            onClick={handleSeedData}
-            disabled={isSeeding}
-            className="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold px-5 py-3 rounded-2xl shadow transition disabled:opacity-50 flex items-center gap-2 whitespace-nowrap"
-          >
-            <span>✨</span>
-            <span>{isSeeding ? 'Yükleniyor...' : 'Örnek Demo Verileri Yükle'}</span>
-          </button>
         </div>
 
         {/* Sekme Butonları */}
         <div className="flex gap-3 border-b border-purple-100 pb-2">
           <button
             onClick={() => setActiveTab('vendors')}
-            className={`text-xs font-bold px-4 py-2 rounded-xl transition ${
+            className={`text-xs font-bold px-4 py-2 rounded-xl transition cursor-pointer ${
               activeTab === 'vendors' ? 'bg-[#4A154B] text-white' : 'bg-white text-slate-600 border border-slate-200'
             }`}
           >
@@ -267,7 +170,7 @@ export default function AdminPage() {
           </button>
           <button
             onClick={() => setActiveTab('requests')}
-            className={`text-xs font-bold px-4 py-2 rounded-xl transition ${
+            className={`text-xs font-bold px-4 py-2 rounded-xl transition cursor-pointer ${
               activeTab === 'requests' ? 'bg-[#4A154B] text-white' : 'bg-white text-slate-600 border border-slate-200'
             }`}
           >
@@ -341,9 +244,20 @@ export default function AdminPage() {
                   onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                   className="w-full p-2.5 border border-slate-200 rounded-xl text-xs focus:outline-none focus:border-[#E6007E]"
                 ></textarea>
+
+                <label className="flex items-center gap-2 text-xs font-bold text-[#4A154B] cursor-pointer pt-1">
+                  <input
+                    type="checkbox"
+                    checked={formData.isFeatured}
+                    onChange={(e) => setFormData({ ...formData, isFeatured: e.target.checked })}
+                    className="accent-amber-500 w-4 h-4"
+                  />
+                  <span>👑 Öne Çıkan / Sponsorlu İlan Yap</span>
+                </label>
+
                 <button
                   type="submit"
-                  className="w-full bg-[#E6007E] text-white text-xs font-bold py-3 rounded-xl hover:bg-pink-700 transition"
+                  className="w-full bg-[#E6007E] text-white text-xs font-bold py-3 rounded-xl hover:bg-pink-700 transition cursor-pointer"
                 >
                   Kaydet ve Yayınla
                 </button>
@@ -355,20 +269,14 @@ export default function AdminPage() {
               {loading ? (
                 <p className="text-xs text-slate-400 py-8 text-center">Yükleniyor...</p>
               ) : vendors.length === 0 ? (
-                <div className="bg-white p-8 rounded-3xl border border-purple-100 text-center space-y-3">
-                  <p className="text-xs text-slate-500">Henüz hiç firma bulunmuyor.</p>
-                  <button
-                    onClick={handleSeedData}
-                    className="bg-emerald-600 text-white text-xs font-bold px-4 py-2 rounded-xl"
-                  >
-                    ✨ Hemen 6 Adet Örnek Firma Yükle
-                  </button>
-                </div>
+                <p className="text-xs text-slate-400 py-8 text-center">Henüz firma yok.</p>
               ) : (
                 vendors.map((v) => (
                   <div
                     key={v.id}
-                    className="bg-white p-4 rounded-2xl border border-purple-100 shadow-sm flex items-center justify-between gap-4"
+                    className={`bg-white p-4 rounded-2xl border shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4 ${
+                      v.isFeatured ? 'border-amber-300 bg-amber-50/20' : 'border-purple-100'
+                    }`}
                   >
                     <div className="flex items-center gap-3">
                       <img
@@ -377,19 +285,40 @@ export default function AdminPage() {
                         className="w-14 h-14 rounded-xl object-cover bg-slate-100"
                       />
                       <div>
-                        <span className="text-[10px] font-bold bg-purple-100 text-[#4A154B] px-2 py-0.5 rounded">
-                          {v.category}
-                        </span>
-                        <h3 className="text-xs font-bold text-slate-800 mt-0.5">{v.name}</h3>
+                        <div className="flex items-center gap-2">
+                          <span className="text-[10px] font-bold bg-purple-100 text-[#4A154B] px-2 py-0.5 rounded">
+                            {v.category}
+                          </span>
+                          {v.isFeatured && (
+                            <span className="text-[10px] font-bold bg-amber-100 text-amber-800 px-2 py-0.5 rounded flex items-center gap-1">
+                              👑 Sponsorlu
+                            </span>
+                          )}
+                        </div>
+                        <h3 className="text-xs font-bold text-slate-800 mt-1">{v.name}</h3>
                         <p className="text-[11px] text-slate-500">📍 {v.city} • 💰 {v.price}</p>
                       </div>
                     </div>
-                    <button
-                      onClick={() => handleDeleteVendor(v.id)}
-                      className="text-xs font-bold text-red-500 hover:bg-red-50 p-2 rounded-lg transition"
-                    >
-                      Sil
-                    </button>
+
+                    <div className="flex items-center gap-2 self-end sm:self-center">
+                      <button
+                        onClick={() => handleToggleFeatured(v)}
+                        className={`text-xs font-bold px-3 py-1.5 rounded-lg border transition cursor-pointer ${
+                          v.isFeatured
+                            ? 'bg-amber-100 text-amber-800 border-amber-300 hover:bg-amber-200'
+                            : 'bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100'
+                        }`}
+                      >
+                        {v.isFeatured ? '👑 Sponsorlu' : '☆ Öne Çıkar'}
+                      </button>
+
+                      <button
+                        onClick={() => handleDeleteVendor(v.id)}
+                        className="text-xs font-bold text-red-500 hover:bg-red-50 p-1.5 rounded-lg transition cursor-pointer"
+                      >
+                        Sil
+                      </button>
+                    </div>
                   </div>
                 ))
               )}
