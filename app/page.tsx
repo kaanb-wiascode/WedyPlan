@@ -1,118 +1,159 @@
-import React from 'react';
+'use client';
+
+import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { ShieldCheck, Calculator, Users, Globe, ChevronRight } from 'lucide-react';
-import { APP_CONFIG } from '@/lib/constants';
-import { GlassButton } from '@/components/atoms/GlassButton';
-import { GlassCard } from '@/components/atoms/GlassCard';
-import { HeroSearchGlass } from '@/components/organisms/HeroSearchGlass';
-import { ThemeSectionWrapper } from '@/components/molecules/ThemeSectionWrapper';
+import { collection, getDocs } from 'firebase/firestore';
+import { db } from '@/lib/firebase';
+import { PublicNavbar } from '@/components/public/PublicNavbar';
+import { PublicVendorCard, PublicVendor } from '@/components/public/PublicVendorCard';
+import { Search, Sparkles, Building2, Camera, Music, Scissors, Heart, ShieldCheck } from 'lucide-react';
 
-export const metadata = {
-  title: `${APP_CONFIG.BRAND_NAME} | ${APP_CONFIG.MARKETING_SLOGAN}`,
-  description: 'Türkiye\'nin ilk yapay zeka destekli, şeffaf ve stressiz düğün planlama platformu.',
-};
+export default function HomePage() {
+  const [featuredVendors, setFeaturedVendors] = useState<PublicVendor[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [searchCity, setSearchCity] = useState('');
+  const [searchCategory, setSearchCategory] = useState('');
 
-export default function WedyPlanHomePage() {
+  useEffect(() => {
+    const fetchVendors = async () => {
+      try {
+        const snap = await getDocs(collection(db, 'vendors'));
+        const list: PublicVendor[] = [];
+        snap.forEach((d) => list.push({ id: d.id, ...d.data() } as PublicVendor));
+        setFeaturedVendors(list);
+      } catch (err) {
+        console.error('Ana sayfa verileri alınamadı:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchVendors();
+  }, []);
+
+  const categories = [
+    { title: 'Düğün Salonları', icon: Building2, count: '120+ Mekan', href: '/firmalar?category=Düğün+Salonu' },
+    { title: 'Kır Bahçeleri', icon: Heart, count: '85+ Bahçe', href: '/firmalar?category=Kır+Bahçesi' },
+    { title: 'Fotoğrafçılar', icon: Camera, count: '200+ Stüdyo', href: '/firmalar?category=Fotoğrafçı' },
+    { title: 'Müzik & Orkestra', icon: Music, count: '90+ Ekip', href: '/firmalar?category=Müzik+%26+DJ' },
+    { title: 'Gelinlik & Moda', icon: Scissors, count: '150+ Modaevi', href: '/firmalar?category=Gelinlik' },
+  ];
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#F8F9FB] via-[#F1F3F6] to-[#E9ECF0] text-[#1D1D1F] font-sans selection:bg-[#D4AF37]/30 pb-20 relative overflow-hidden">
-      
-      {/* Pure CSS Arka Plan Işık Efektleri */}
-      <div className="fixed -top-40 -left-40 w-[650px] h-[650px] bg-[#D4AF37]/15 rounded-full blur-[150px] pointer-events-none -z-10" aria-hidden="true" />
-      <div className="fixed top-1/3 -right-40 w-[700px] h-[700px] bg-rose-200/25 rounded-full blur-[170px] pointer-events-none -z-10" aria-hidden="true" />
-      
-      {/* Header (Server Side Rendered) */}
-      <header className="sticky top-0 z-50 bg-white/30 backdrop-blur-3xl border-b border-white/60">
-        <div className="max-w-[1300px] mx-auto px-6 h-20 flex items-center justify-between">
-          <Link href="/" className="font-serif text-2xl font-bold tracking-tight text-[#1D1D1F]" aria-label="Ana Sayfaya Git">
-            {APP_CONFIG.BRAND_NAME}<span className="text-[#D4AF37]">.</span>
-          </Link>
-          <nav className="hidden lg:flex items-center gap-1.5 bg-white/30 backdrop-blur-2xl p-1.5 rounded-full border border-white/80 shadow-sm" aria-label="Ana Menü">
-            <Link href="/mekanlar" className="px-5 py-2.5 rounded-full hover:bg-white/70 text-[13px] font-medium transition-colors">Onaylı Mekanlar</Link>
-            <Link href="/firmalar" className="px-5 py-2.5 rounded-full hover:bg-white/70 text-[13px] font-medium transition-colors">VIP Tedarikçiler</Link>
-            <Link href="/kampanyalar" className="px-5 py-2.5 rounded-full hover:bg-white/70 text-[13px] font-bold text-red-600 transition-colors">Erken Rezervasyon</Link>
-          </nav>
-          <Link href="/cift/ai-asistan" passHref>
-            <GlassButton variant="gold">Yapay Zeka Asistanı</GlassButton>
-          </Link>
-        </div>
-      </header>
+    <div className="min-h-screen bg-[#FDFBFD] text-[#1D1D1F]">
+      <PublicNavbar />
 
-      {/* Hero Section */}
-      <section className="relative pt-16 pb-16 px-6 text-center space-y-6">
-        <div className="inline-flex items-center gap-2 px-5 py-2 bg-white/50 backdrop-blur-2xl border border-white/80 rounded-full text-[12px] font-semibold text-[#1D1D1F]">
-          <ShieldCheck className="w-4 h-4 text-[#D4AF37]" />
-          <span>Şeffaf Fiyatlar. Sıfır Sürpriz Maliyet.</span>
+      {/* Hero Alanı */}
+      <section className="relative pt-12 pb-20 px-6 md:px-12 max-w-7xl mx-auto text-center space-y-8">
+        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-pink-50 border border-pink-200 text-[#E6007E] text-[12px] font-bold shadow-xs">
+          <Sparkles className="w-4 h-4" /> Türkiye'nin En Akıllı Düğün Pazaryeri & WedyAI
         </div>
-        
-        <h1 className="text-[44px] sm:text-[60px] md:text-[72px] font-serif tracking-tight text-[#1D1D1F] leading-[1.08] max-w-[900px] mx-auto">
-          Hayalinizdeki Düğünü <br />
-          <span className="bg-gradient-to-r from-[#1D1D1F] via-[#B8952B] to-[#D4AF37] bg-clip-text text-transparent italic">
-            Yapay Zeka Şeffaflığıyla
-          </span> Planlayın
+
+        <h1 className="text-[36px] sm:text-[54px] md:text-[64px] font-serif font-normal leading-[1.1] text-[#1D1D1F] max-w-4xl mx-auto">
+          Hayalinizdeki Düğünü <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#E6007E] to-purple-600 font-semibold">Yapay Zeka</span> İle Planlayın.
         </h1>
-        <p className="text-[16px] md:text-[18px] text-[#6E6E73] max-w-[620px] mx-auto font-light leading-relaxed">
-          Stres dolu Excel dosyalarını çöpe atın. Mekanları karşılaştırın, bütçenizi yönetin ve kusursuz günü WedyAI asistanınızla inşa edin.
+
+        <p className="text-[15px] sm:text-[18px] text-[#6E6E73] max-w-2xl mx-auto leading-relaxed">
+          En seçkin düğün salonları, kır bahçeleri ve fotoğrafçılardan anında fiyat teklifi alın, kaporadan gün takibine kadar her şeyi WedyPlan ile yönetin.
         </p>
 
-        {/* Client Component: Doğrudan Import */}
-        <HeroSearchGlass />
+        {/* Arama Kutusu */}
+        <div className="max-w-3xl mx-auto bg-white/80 backdrop-blur-2xl p-3 rounded-[28px] border border-pink-100 shadow-xl shadow-pink-500/5 flex flex-col sm:flex-row items-center gap-2">
+          <div className="flex-1 w-full px-4 py-2 border-b sm:border-b-0 sm:border-r border-slate-100 text-left">
+            <span className="text-[10px] font-bold text-[#86868B] uppercase block">Ne Arıyorsunuz?</span>
+            <select
+              value={searchCategory}
+              onChange={(e) => setSearchCategory(e.target.value)}
+              className="w-full text-[13px] font-semibold text-[#1D1D1F] bg-transparent outline-none cursor-pointer"
+            >
+              <option value="">Tüm Kategoriler</option>
+              <option value="Düğün Salonu">Düğün Salonu</option>
+              <option value="Kır Bahçesi">Kır Bahçesi</option>
+              <option value="Fotoğrafçı">Fotoğrafçı</option>
+              <option value="Gelinlik">Gelinlik</option>
+            </select>
+          </div>
+
+          <div className="flex-1 w-full px-4 py-2 text-left">
+            <span className="text-[10px] font-bold text-[#86868B] uppercase block">Şehir</span>
+            <input
+              type="text"
+              placeholder="Örn: İstanbul, İzmir..."
+              value={searchCity}
+              onChange={(e) => setSearchCity(e.target.value)}
+              className="w-full text-[13px] font-semibold text-[#1D1D1F] bg-transparent outline-none placeholder:text-slate-400"
+            />
+          </div>
+
+          <Link
+            href={`/firmalar?category=${encodeURIComponent(searchCategory)}&city=${encodeURIComponent(searchCity)}`}
+            className="w-full sm:w-auto bg-[#E6007E] text-white px-8 py-3.5 rounded-[20px] font-bold text-[13px] hover:bg-pink-700 transition flex items-center justify-center gap-2 shadow-md shadow-pink-200 cursor-pointer"
+          >
+            <Search className="w-4 h-4" /> Firmaları Bul
+          </Link>
+        </div>
       </section>
 
-      {/* Tema Seçici Section */}
-      <section className="py-10 max-w-[1300px] mx-auto px-6">
-        <ThemeSectionWrapper />
-      </section>
-
-      {/* Planlama Araçları Workspace */}
-      <section className="py-16 max-w-[1300px] mx-auto px-6 space-y-8">
-        <div className="text-center md:text-left space-y-2">
-          <h2 className="text-[32px] md:text-[36px] font-serif text-[#1D1D1F]">Planlama Merkezine Hoş Geldiniz</h2>
-          <p className="text-[14px] text-[#6E6E73]">İhtiyacınız olan tüm profesyonel araçlar tek bir şeffaf panelde.</p>
+      {/* Kategoriler */}
+      <section className="py-12 px-6 md:px-12 max-w-7xl mx-auto space-y-6">
+        <div className="text-center space-y-1">
+          <h2 className="text-[24px] font-serif font-semibold text-[#1D1D1F]">Popüler Kategoriler</h2>
+          <p className="text-[13px] text-[#6E6E73]">Düğününüz için ihtiyacınız olan tüm hizmet sağlayıcılar</p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {[
-            {
-              href: '/cift/butce',
-              icon: Calculator,
-              title: 'Akıllı Bütçe Yönetimi',
-              desc: 'Giderlerinizi otomatik kategorize edin, aşım uyarılarıyla bütçenizi güvenceye alın.',
-              cta: 'Bütçe Planını Gör'
-            },
-            {
-              href: '/cift/davetliler',
-              icon: Users,
-              title: 'Davetli & Oturma Düzeni',
-              desc: 'LCV yanıtlarını dijital toplayın, sürükle-bırak ile masa düzenini saniyeler içinde kurun.',
-              cta: 'Listeni Yönet'
-            },
-            {
-              href: '/cift/dijital-davetiye',
-              icon: Globe,
-              title: 'Dijital Davetiye (RSVP)',
-              desc: 'Çevre dostu, mobil uyumlu ve şık tasarım şablonlarıyla kendi düğün sitenizi yayınlayın.',
-              cta: 'Siteni Tasarla'
-            }
-          ].map((tool, idx) => (
-            <Link key={idx} href={tool.href} className="group block focus:outline-none focus-visible:ring-2 focus-visible:ring-black/20 rounded-[32px]">
-              <GlassCard interactive as="article" className="h-full p-8 space-y-5">
-                <div className="w-14 h-14 rounded-[20px] bg-[#D4AF37]/15 text-[#D4AF37] flex items-center justify-center group-hover:bg-[#D4AF37] group-hover:text-white transition-all duration-300">
-                  <tool.icon className="w-7 h-7" />
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
+          {categories.map((cat, idx) => {
+            const Icon = cat.icon;
+            return (
+              <Link
+                key={idx}
+                href={cat.href}
+                className="bg-white p-6 rounded-[24px] border border-slate-100 hover:border-pink-200 hover:shadow-md transition text-center space-y-3 group cursor-pointer"
+              >
+                <div className="w-12 h-12 rounded-2xl bg-pink-50 text-[#E6007E] mx-auto flex items-center justify-center group-hover:scale-110 transition duration-300">
+                  <Icon className="w-6 h-6" />
                 </div>
                 <div>
-                  <h3 className="font-serif text-[22px] font-medium mb-2">{tool.title}</h3>
-                  <p className="text-[14px] text-[#6E6E73] leading-relaxed">{tool.desc}</p>
+                  <h3 className="font-bold text-[14px] text-[#1D1D1F]">{cat.title}</h3>
+                  <span className="text-[11px] text-[#86868B]">{cat.count}</span>
                 </div>
-                <div className="pt-2">
-                  <span className="inline-flex items-center gap-1.5 text-[13px] font-bold text-[#1D1D1F] bg-white/50 px-4 py-2 rounded-full border border-white/80 group-hover:bg-white transition-colors">
-                    {tool.cta} <ChevronRight className="w-4 h-4 text-[#D4AF37]" />
-                  </span>
-                </div>
-              </GlassCard>
-            </Link>
-          ))}
+              </Link>
+            );
+          })}
         </div>
       </section>
+
+      {/* Öne Çıkan Firmalar */}
+      <section className="py-12 px-6 md:px-12 max-w-7xl mx-auto space-y-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <h2 className="text-[24px] font-serif font-semibold text-[#1D1D1F]">Öne Çıkan & Sponsorlu İlanlar</h2>
+            <p className="text-[13px] text-[#6E6E73]">WedyPlan onaylı yüksek puanlı mekanlar ve ekipler</p>
+          </div>
+          <Link href="/firmalar" className="text-[12px] font-bold text-[#E6007E] hover:underline">
+            Tümünü İncele →
+          </Link>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+          {loading ? (
+            <p className="col-span-3 text-center text-xs text-slate-400 py-8">Firmalar yükleniyor...</p>
+          ) : featuredVendors.length === 0 ? (
+            <p className="col-span-3 text-center text-xs text-slate-400 py-8">Henüz kayıtlı firma yok.</p>
+          ) : (
+            featuredVendors.map((vendor) => (
+              <PublicVendorCard key={vendor.id} vendor={vendor} />
+            ))
+          )}
+        </div>
+      </section>
+
+      {/* Footer */}
+      <footer className="border-t border-slate-200 bg-white mt-20 py-12 px-6 md:px-12 text-center text-[12px] text-[#86868B]">
+        <div className="flex items-center justify-center gap-2 mb-2 font-serif font-bold text-[16px] text-[#1D1D1F]">
+          <ShieldCheck className="w-5 h-5 text-[#E6007E]" /> WedyPlan Platform
+        </div>
+        <p>© 2026 WedyPlan Inc. Tüm hakları saklıdır. Yapay Zeka Destekli Düğün İşletim Sistemi.</p>
+      </footer>
     </div>
   );
 }

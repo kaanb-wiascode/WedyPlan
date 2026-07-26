@@ -1,23 +1,27 @@
-import React from 'react';
-import WedyAiWidget from '@/components/WedyAiWidget';
-import './globals.css'; // Varsa mevcut CSS importun
+import type { Metadata } from "next";
+import { Inter, Playfair_Display } from "next/font/google";
+import "./globals.css";
+import { AuthProvider } from "@/context/AuthContext";
 
-export const metadata = {
-  title: 'WedyPlan - Düğün Planlama Platformu',
-  description: 'VIP Düğün ve Organizasyon Asistanı',
+const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });
+const playfair = Playfair_Display({ subsets: ["latin"], variable: "--font-serif" });
+
+export const metadata: Metadata = {
+  title: "WedyPlan — Akıllı Düğün Pazaryeri & WOS",
+  description: "Yapay Zeka Destekli Düğün Planlama ve İşletim Sistemi",
 };
 
 export default function RootLayout({
   children,
-}: {
+}: Readonly<{
   children: React.ReactNode;
-}) {
+}>) {
   return (
-    <html lang="tr">
-      <body>
-        {children}
-        {/* Yüzen Akıllı Asistan Widget'ı */}
-        <WedyAiWidget />
+    <html lang="tr" className={`${inter.variable} ${playfair.variable}`}>
+      <body className="font-sans antialiased bg-[#FDFBFD]">
+        <AuthProvider>
+          {children}
+        </AuthProvider>
       </body>
     </html>
   );
