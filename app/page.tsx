@@ -1,25 +1,11 @@
 import React from 'react';
 import Link from 'next/link';
-import dynamic from 'next/dynamic';
 import { ShieldCheck, Calculator, Users, Globe, ChevronRight } from 'lucide-react';
-import { APP_CONFIG, THEME_PALETTES } from '@/lib/constants';
+import { APP_CONFIG } from '@/lib/constants';
 import { GlassButton } from '@/components/atoms/GlassButton';
 import { GlassCard } from '@/components/atoms/GlassCard';
-
-// 🚀 Lazy Load Edilen Ağır Organizma ve Moleküller (Performans Optimizasyonu)
-const HeroSearchGlass = dynamic(() => import('@/components/organisms/HeroSearchGlass').then(mod => mod.HeroSearchGlass), { 
-  ssr: false, 
-  loading: () => <div className="h-[280px] w-full max-w-[950px] mx-auto bg-white/20 backdrop-blur-xl animate-pulse rounded-[40px] mt-12 border border-white/40" /> 
-});
-
-const ThemeSelectorClient = dynamic(() => import('@/components/molecules/ThemeSelector').then(mod => mod.ThemeSelector), { ssr: false });
-
-// 🎬 Client State Wrapper (Sadece Theme State'ini yönetmek için ufak bir ada bileşeni)
-function ThemeSectionWrapper() {
-  'use client';
-  const [activeTheme, setActiveTheme] = React.useState<keyof typeof THEME_PALETTES>('boho');
-  return <ThemeSelectorClient activeTheme={activeTheme} onSelectTheme={setActiveTheme} />;
-}
+import { HeroSearchGlass } from '@/components/organisms/HeroSearchGlass';
+import { ThemeSectionWrapper } from '@/components/molecules/ThemeSectionWrapper';
 
 export const metadata = {
   title: `${APP_CONFIG.BRAND_NAME} | ${APP_CONFIG.MARKETING_SLOGAN}`,
@@ -30,11 +16,11 @@ export default function WedyPlanHomePage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#F8F9FB] via-[#F1F3F6] to-[#E9ECF0] text-[#1D1D1F] font-sans selection:bg-[#D4AF37]/30 pb-20 relative overflow-hidden">
       
-      {/* Şeffaf Derinlik Veren Arka Plan Elementleri (Pure CSS) */}
+      {/* Pure CSS Arka Plan Işık Efektleri */}
       <div className="fixed -top-40 -left-40 w-[650px] h-[650px] bg-[#D4AF37]/15 rounded-full blur-[150px] pointer-events-none -z-10" aria-hidden="true" />
       <div className="fixed top-1/3 -right-40 w-[700px] h-[700px] bg-rose-200/25 rounded-full blur-[170px] pointer-events-none -z-10" aria-hidden="true" />
       
-      {/* Header (Server Tarafında Render Edilir) */}
+      {/* Header (Server Side Rendered) */}
       <header className="sticky top-0 z-50 bg-white/30 backdrop-blur-3xl border-b border-white/60">
         <div className="max-w-[1300px] mx-auto px-6 h-20 flex items-center justify-between">
           <Link href="/" className="font-serif text-2xl font-bold tracking-tight text-[#1D1D1F]" aria-label="Ana Sayfaya Git">
@@ -68,16 +54,16 @@ export default function WedyPlanHomePage() {
           Stres dolu Excel dosyalarını çöpe atın. Mekanları karşılaştırın, bütçenizi yönetin ve kusursuz günü WedyAI asistanınızla inşa edin.
         </p>
 
-        {/* Client Component Load */}
+        {/* Client Component: Doğrudan Import */}
         <HeroSearchGlass />
       </section>
 
-      {/* Tema Seçici */}
+      {/* Tema Seçici Section */}
       <section className="py-10 max-w-[1300px] mx-auto px-6">
         <ThemeSectionWrapper />
       </section>
 
-      {/* Planlama Araçları (Workspace) */}
+      {/* Planlama Araçları Workspace */}
       <section className="py-16 max-w-[1300px] mx-auto px-6 space-y-8">
         <div className="text-center md:text-left space-y-2">
           <h2 className="text-[32px] md:text-[36px] font-serif text-[#1D1D1F]">Planlama Merkezine Hoş Geldiniz</h2>
