@@ -1,7 +1,14 @@
-export type AiProviderType = 'OPENAI' | 'GEMINI' | 'CLAUDE' | 'LOCAL_LLM';
+export type AiProviderType =
+  | 'OPENAI'
+  | 'AZURE_OPENAI'
+  | 'GEMINI'
+  | 'CLAUDE'
+  | 'LOCAL_LLM'
+  | 'LOCAL_OLLAMA';
 
 export interface AiGenerationOptions {
   provider?: AiProviderType;
+  providerOverride?: AiProviderType;
   modelOverride?: string;
   temperature?: number;
   maxTokens?: number;
@@ -10,6 +17,7 @@ export interface AiGenerationOptions {
   jsonSchema?: Record<string, unknown>;
   userId?: string;
   portalContext?: string;
+  bypassPiiMasking?: boolean;
 }
 
 export interface AiTextResult {
@@ -17,6 +25,17 @@ export interface AiTextResult {
   providerUsed: AiProviderType;
   modelUsed: string;
   tokensUsed: { prompt: number; completion: number; total: number };
+  executionMs: number;
+}
+
+export interface AiExecutionResult {
+  content: string;
+  providerUsed: AiProviderType;
+  modelUsed: string;
+  promptTokens: number;
+  completionTokens: number;
+  totalTokens: number;
+  estimatedCostUsd: number;
   executionMs: number;
 }
 
@@ -35,9 +54,15 @@ export interface VendorMatchResult {
   suggestedNegotiationPoint?: string;
 }
 
+export interface BudgetItemExpense {
+  category: string;
+  amount: number;
+  isPaid: boolean;
+}
+
 export interface BudgetAnalysisRequest {
   totalBudget: number;
-  allocatedExpenses: { category: string; amount: number; isPaid: boolean }[];
+  allocatedExpenses: BudgetItemExpense[];
   guestCount: number;
   city: string;
 }
@@ -90,4 +115,27 @@ export interface DocumentReaderResult {
   };
   confidenceScore: number; // 0-100
   riskFlags: string[];
+}
+
+export interface ContractAnalysisRequest {
+  contractTextOrOcr: string;
+  vendorCategory?: string;
+  agreedPriceTotal?: number;
+  userId?: string;
+}
+
+export interface ContractAnalysisResult {
+  summary: string;
+  overallRiskScore: number;
+  agreedPriceExtracted?: number;
+  depositAmountExtracted?: number;
+  cancellationPolicySummary: string;
+  riskFlags: {
+    clauseTitle: string;
+    description: string;
+    riskLevel: 'HIGH' | 'MEDIUM' | 'LOW';
+    mitigationAdvice: string;
+  }[];
+  hiddenCostWarnings: string[];
+  missingStandardClauses: string[];
 }

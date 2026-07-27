@@ -1,4 +1,4 @@
-import { TimelineGenerationRequest, TimelineGenerationResult } from '@/types/ai-core';
+import { TimelineGenerationRequest, TimelineGenerationResult } from '../../../types/ai-core';
 
 export class TimelineGeneratorEngine {
   /**

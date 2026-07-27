@@ -1,0 +1,119 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum AiProviderType {
+  OPENAI
+  AZURE_OPENAI
+  GEMINI
+  CLAUDE
+  LOCAL_OLLAMA
+}
+
+enum MessageRole {
+  SYSTEM
+  USER
+  ASSISTANT
+  FUNCTION
+}
+
+model AiProviderConfig {
+  id           String         @id @default(uuid())
+  provider     AiProviderType @unique
+  isActive     Boolean        @default(true)
+  priorityOrder Int           @default(1)
+  apiKeyEnvName String        // e.g. "OPENAI_API_KEY", "AZURE_OPENAI_KEY"
+  baseUrlOverride String?
+  defaultModel String
+  fallbackProvider AiProviderType?
+  
+  updatedAt    DateTime       @updatedAt
+}
+
+model AiPromptTemplate {
+  id           String   @id @default(uuid())
+  code         String   // e.g. "CONTRACT_ANALYZER_V1", "VENDOR_MATCH_V2"
+  version      Int      @default(1)
+  systemPrompt String
+  userTemplate String
+  isActive     Boolean  @default(true)
+  
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@unique([code, version])
+  @@index([code, isActive])
+}
+
+model AiConversation {
+  id            String         @id @default(uuid())
+  userId        String
+  portalContext String
+  title         String?
+  providerUsed  AiProviderType @default(OPENAI)
+  modelName     String
+  totalTokens   Int            @default(0)
+  totalCostUsd  Float          @default(0.0)
+  
+  messages      AiMessage[]
+
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+
+  @@index([userId, portalContext])
+}
+
+model AiMessage {
+  id             String         @id @default(uuid())
+  conversationId String
+  role           MessageRole
+  content        String
+  tokensUsed     Int            @default(0)
+  metadata       Json?
+  
+  conversation   AiConversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+
+  createdAt      DateTime       @default(now())
+
+  @@index([conversationId])
+}
+
+model AiMemoryStore {
+  id          String   @id @default(uuid())
+  userId      String
+  key         String   // e.g. "preferred_style", "budget_limit"
+  value       String
+  category    String   // "PREFERENCE" | "CONSTRAINT" | "FACT"
+  confidence  Float    @default(1.0)
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([userId, key])
+  @@index([userId])
+}
+
+model AiTokenUsageLog {
+  id               String         @id @default(uuid())
+  userId           String?
+  portalContext    String?
+  provider         AiProviderType
+  modelName        String
+  promptTokens     Int
+  completionTokens Int
+  totalTokens      Int
+  estimatedCostUsd Float
+  executionMs      Int
+  isSuccess        Boolean        @default(true)
+  errorMessage     String?
+  
+  createdAt        DateTime       @default(now())
+
+  @@index([userId, createdAt])
+  @@index([provider, isSuccess])
+}

@@ -1,0 +1,130 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum ConversationType {
+  COUPLE_VENDOR
+  VENDOR_STAFF
+  VENDOR_ADMIN
+  CUSTOMER_SUPPORT
+  AI_USER
+}
+
+enum ParticipantRole {
+  OWNER
+  MEMBER
+  SUPPORT_AGENT
+  SYSTEM_BOT
+}
+
+enum MessageType {
+  TEXT
+  IMAGE
+  DOCUMENT
+  VOICE_NOTE
+  SYSTEM_ALERT
+}
+
+enum MessageDeliveryStatus {
+  SENT
+  DELIVERED
+  READ
+  FAILED
+}
+
+model Conversation {
+  id               String                    @id @default(uuid())
+  type             ConversationType
+  title            String?
+  relatedEntityId  String?                   // Offer ID, Booking ID, or Support Ticket ID
+  isArchived       Boolean                   @default(false)
+  isPinned         Boolean                   @default(false)
+  lastMessageAt    DateTime                  @default(now())
+  
+  participants     ConversationParticipant[]
+  messages         Message[]
+
+  createdAt        DateTime                  @default(now())
+  updatedAt        DateTime                  @updatedAt
+
+  @@index([type, isArchived])
+  @@index([lastMessageAt])
+}
+
+model ConversationParticipant {
+  id             String          @id @default(uuid())
+  conversationId String
+  userId         String
+  role           ParticipantRole @default(MEMBER)
+  unreadCount    Int             @default(0)
+  lastReadAt     DateTime?
+  isMuted        Boolean         @default(false)
+
+  conversation   Conversation    @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+
+  @@unique([conversationId, userId])
+  @@index([userId])
+}
+
+model Message {
+  id             String                @id @default(uuid())
+  conversationId String
+  senderUserId   String
+  type           MessageType           @default(TEXT)
+  bodyText       String
+  deliveryStatus MessageDeliveryStatus @default(SENT)
+  isSpamFlagged  Boolean               @default(false)
+  
+  attachments    MessageAttachment[]
+  reactions      MessageReaction[]
+
+  conversation   Conversation          @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+
+  createdAt      DateTime              @default(now())
+  updatedAt      DateTime              @updatedAt
+
+  @@index([conversationId, createdAt])
+  @@index([senderUserId])
+}
+
+model MessageAttachment {
+  id           String      @id @default(uuid())
+  messageId    String
+  mediaAssetId String      // Reference to Enterprise Media Asset
+  fileUrl      String
+  fileName     String
+  fileSizeBytes Int
+  mimeType     String
+
+  message      Message     @relation(fields: [messageId], references: [id], onDelete: Cascade)
+}
+
+model MessageReaction {
+  id        String   @id @default(uuid())
+  messageId String
+  userId    String
+  emoji     String   // e.g. "👍", "❤️", "🎉"
+
+  message   Message  @relation(fields: [messageId], references: [id], onDelete: Cascade)
+
+  @@unique([messageId, userId, emoji])
+}
+
+model SpamFlagLog {
+  id          String   @id @default(uuid())
+  messageId   String
+  senderUserId String
+  reason      String
+  flaggedText String
+  createdAt   DateTime @default(now())
+
+  @@index([senderUserId])
+}

@@ -9,7 +9,6 @@ export interface ILlmProviderAdapter {
 class OpenAIAdapter implements ILlmProviderAdapter {
   async generateText(options: AiGenerationOptions): Promise<AiTextResult> {
     const startTime = Date.now();
-    // Integration point for OpenAI Official SDK (openai.chat.completions.create)
     return {
       content: `[OpenAI ${AI_CONFIG.MODELS.OPENAI.TEXT}] ${options.userPrompt}`,
       providerUsed: 'OPENAI',
@@ -20,7 +19,6 @@ class OpenAIAdapter implements ILlmProviderAdapter {
   }
 
   async generateStructuredJson<T>(options: AiGenerationOptions): Promise<T> {
-    // Uses OpenAI response_format: { type: "json_object" }
     const textResult = await this.generateText(options);
     return JSON.parse(textResult.content) as T;
   }
@@ -29,7 +27,6 @@ class OpenAIAdapter implements ILlmProviderAdapter {
 class GeminiAdapter implements ILlmProviderAdapter {
   async generateText(options: AiGenerationOptions): Promise<AiTextResult> {
     const startTime = Date.now();
-    // Integration point for @google/generative-ai SDK
     return {
       content: `[Gemini ${AI_CONFIG.MODELS.GEMINI.TEXT}] ${options.userPrompt}`,
       providerUsed: 'GEMINI',
@@ -48,7 +45,6 @@ class GeminiAdapter implements ILlmProviderAdapter {
 class ClaudeAdapter implements ILlmProviderAdapter {
   async generateText(options: AiGenerationOptions): Promise<AiTextResult> {
     const startTime = Date.now();
-    // Integration point for @anthropic-ai/sdk
     return {
       content: `[Claude ${AI_CONFIG.MODELS.CLAUDE.TEXT}] ${options.userPrompt}`,
       providerUsed: 'CLAUDE',
@@ -68,13 +64,15 @@ export class AiProviderFactory {
   static getAdapter(provider: AiProviderType = AI_CONFIG.DEFAULT_PROVIDER): ILlmProviderAdapter {
     switch (provider) {
       case 'OPENAI':
+      case 'AZURE_OPENAI':
         return new OpenAIAdapter();
       case 'GEMINI':
         return new GeminiAdapter();
       case 'CLAUDE':
         return new ClaudeAdapter();
       case 'LOCAL_LLM':
-        return new OpenAIAdapter(); // Fallback adapter
+      case 'LOCAL_OLLAMA':
+        return new OpenAIAdapter();
       default:
         return new OpenAIAdapter();
     }

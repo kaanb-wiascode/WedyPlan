@@ -1,0 +1,166 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum PortalScope {
+  PUBLIC
+  COUPLE
+  VENDOR
+  ADMIN
+}
+
+enum UserAccountStatus {
+  PENDING_VERIFICATION
+  ACTIVE
+  SUSPENDED
+  LOCKED
+  DELETED
+}
+
+enum AuditActionType {
+  LOGIN_SUCCESS
+  LOGIN_FAILED
+  TOKEN_REFRESHED
+  PASSWORD_RESET_REQUESTED
+  PASSWORD_RESET_COMPLETED
+  EMAIL_VERIFIED
+  ROLE_GRANTED
+  SESSION_REVOKED
+  SECURITY_ALERT
+}
+
+model IdentityUser {
+  id                  String            @id @default(uuid())
+  email               String            @unique
+  passwordHash        String?           // Argon2id Hash
+  fullName            String
+  phoneNumber         String?           @unique
+  avatarUrl           String?
+  status              UserAccountStatus @default(PENDING_VERIFICATION)
+  isEmailVerified     Boolean           @default(false)
+  emailVerifiedAt     DateTime?
+  
+  // Relations
+  securityProfile     UserSecurityProfile?
+  roles               UserRoleAssignment[]
+  sessions            UserSession[]
+  oauthAccounts       OAuthIdentity[]
+  auditLogs           AuditLog[]
+
+  createdAt           DateTime          @default(now())
+  updatedAt           DateTime          @updatedAt
+
+  @@index([email])
+  @@index([phoneNumber])
+}
+
+model UserSecurityProfile {
+  id                   String       @id @default(uuid())
+  userId               String       @unique
+  failedLoginAttempts  Int          @default(0)
+  lockedUntil          DateTime?
+  lastPasswordChangeAt DateTime     @default(now())
+  isTwoFactorEnabled   Boolean      @default(false)
+  twoFactorSecret      String?
+  
+  user                 IdentityUser @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model IdentityRole {
+  id          String               @id @default(uuid())
+  code        String               @unique // e.g., "SUPER_ADMIN", "VENDOR_MANAGER", "COUPLE"
+  name        String
+  description String?
+  isSystem    Boolean              @default(false)
+  portal      PortalScope
+  
+  permissions RolePermissionMap[]
+  users       UserRoleAssignment[]
+
+  createdAt   DateTime             @default(now())
+}
+
+model IdentityPermission {
+  id          String              @id @default(uuid())
+  code        String              @unique // e.g., "wedding:budget:write", "vendor:leads:read"
+  category    String
+  description String?
+  
+  roles       RolePermissionMap[]
+
+  createdAt   DateTime            @default(now())
+}
+
+model RolePermissionMap {
+  roleId       String
+  permissionId String
+
+  role         IdentityRole       @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  permission   IdentityPermission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+
+  @@id([roleId, permissionId])
+}
+
+model UserRoleAssignment {
+  userId     String
+  roleId     String
+  portal     PortalScope
+
+  user       IdentityUser @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role       IdentityRole @relation(fields: [roleId], references: [id], onDelete: Cascade)
+
+  @@id([userId, roleId, portal])
+}
+
+model UserSession {
+  id                String       @id @default(uuid())
+  userId            String
+  tokenFamily       String       // Grouping ID for rotation tracking
+  refreshTokenHash  String       @unique
+  ipAddress         String
+  userAgent         String
+  deviceFingerprint String?
+  portalContext     PortalScope
+  isRevoked         Boolean      @default(false)
+  expiresAt         DateTime
+  lastActiveAt      DateTime     @default(now())
+  createdAt         DateTime     @default(now())
+
+  user              IdentityUser @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, isRevoked])
+  @@index([tokenFamily])
+}
+
+model OAuthIdentity {
+  id                String       @id @default(uuid())
+  userId            String
+  provider          String       // "google", "apple", "microsoft"
+  providerAccountId String
+  email             String
+  metadata          Json?
+
+  user              IdentityUser @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model AuditLog {
+  id          String          @id @default(uuid())
+  userId      String?
+  action      AuditActionType
+  ipAddress   String
+  userAgent   String
+  metadata    Json?
+  createdAt   DateTime        @default(now())
+
+  user        IdentityUser?   @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([userId, action])
+  @@index([createdAt])
+}

@@ -1,0 +1,102 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum AuditActionCategory {
+  AUTHENTICATION
+  PERMISSION_CHANGE
+  PAYMENT
+  CONTRACT
+  SUBSCRIPTION
+  VENDOR_UPDATE
+  CUSTOMER_UPDATE
+  AI_REQUEST
+  MESSAGING
+  DOCUMENT
+  CAMPAIGN
+  SUPPORT_TICKET
+  SYSTEM_ERROR
+  API_REQUEST
+}
+
+enum AuditSeverity {
+  INFO
+  WARNING
+  ERROR
+  CRITICAL
+}
+
+model AuditLog {
+  id               String              @id @default(uuid())
+  correlationId    String              @index
+  category         AuditActionCategory
+  action           String              // e.g. "CONTRACT_SIGNED", "USER_LOGIN_FAILED"
+  severity         AuditSeverity       @default(INFO)
+  
+  // Actor Info
+  actorUserId      String?
+  actorRole        String?
+  actorIpAddress   String?
+  actorUserAgent   String?
+  
+  // Target Entity Info
+  targetEntity     String?             // e.g. "Contract", "PaymentTransaction"
+  targetEntityId   String?             
+  
+  // State Diff
+  beforeStateJson  Json?
+  afterStateJson   Json?
+  diffJson         Json?
+  
+  metadata         Json?
+
+  createdAt        DateTime            @default(now())
+
+  @@index([category, createdAt])
+  @@index([actorUserId, createdAt])
+  @@index([targetEntity, targetEntityId])
+}
+
+model UserActivityLog {
+  id               String              @id @default(uuid())
+  userId           String              @index
+  portalContext    String
+  action           String              // e.g. "VIEWED_OFFER", "SAVED_VENDOR"
+  summary          String
+  targetEntityId   String?
+  ipAddress        String?
+  
+  createdAt        DateTime            @default(now())
+
+  @@index([userId, portalContext, createdAt])
+}
+
+model SystemPerformanceMetric {
+  id               String   @id @default(uuid())
+  correlationId    String?
+  endpointPath     String
+  httpMethod       String
+  statusCode       Int
+  executionMs      Int
+  dbQueryTimeMs    Int?
+  memoryUsageMb    Float?
+  
+  createdAt        DateTime @default(now())
+
+  @@index([endpointPath, createdAt])
+  @@index([executionMs])
+}
+
+model AuditRetentionPolicy {
+  id               String              @id @default(uuid())
+  category         AuditActionCategory @unique
+  retentionDays    Int                 @default(365)
+  autoArchive      Boolean             @default(true)
+  
+  updatedAt        DateTime            @updatedAt
+}

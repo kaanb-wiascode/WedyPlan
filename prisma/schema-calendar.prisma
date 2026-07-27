@@ -1,0 +1,138 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum CalendarOwnerType {
+  COUPLE
+  VENDOR
+  ADMIN
+  SYSTEM
+}
+
+enum EventCategory {
+  WEDDING_DAY
+  MEETING
+  TASTING_SESSION
+  PROVA
+  INSTALLATION
+  PAYMENT_DUE
+  PERSONAL_BLOCKED
+}
+
+enum EventStatus {
+  CONFIRMED
+  TENTATIVE
+  CANCELLED
+}
+
+enum RecurrenceFrequency {
+  NONE
+  DAILY
+  WEEKLY
+  MONTHLY
+  YEARLY
+}
+
+enum GuestRsvpStatus {
+  PENDING
+  ACCEPTED
+  DECLINED
+}
+
+model CalendarEvent {
+  id                   String               @id @default(uuid())
+  ownerId              String
+  ownerType            CalendarOwnerType
+  category             EventCategory
+  status               EventStatus          @default(CONFIRMED)
+  title                String
+  description          String?
+  location             String?
+  timezone             String               @default("Europe/Istanbul")
+  
+  // Time Parameters (ISO UTC)
+  startTime            DateTime
+  endTime              DateTime
+  isAllDay             Boolean              @default(false)
+  
+  // Travel & Setup Buffer Times (in Minutes)
+  travelBufferBeforeMin Int                  @default(0)
+  travelBufferAfterMin  Int                  @default(0)
+  
+  // Recurrence
+  recurrenceFreq       RecurrenceFrequency  @default(NONE)
+  recurrenceUntil      DateTime?
+  
+  // Metadata
+  relatedEntityId      String?              // Offer ID, Contract ID, or Booking ID
+  isPrivate            Boolean              @default(false)
+
+  guests               CalendarEventGuest[]
+
+  createdAt            DateTime             @default(now())
+  updatedAt            DateTime             @updatedAt
+
+  @@index([ownerId, ownerType])
+  @@index([startTime, endTime])
+  @@index([status])
+}
+
+model CalendarWorkingHours {
+  id               String            @id @default(uuid())
+  ownerId          String
+  dayOfWeek        Int               // 0 = Sunday, 1 = Monday ... 6 = Saturday
+  startTimeStr     String            // "09:00"
+  endTimeStr       String            // "18:00"
+  slotDurationMin  Int               @default(60)
+  isWorkingDay     Boolean           @default(true)
+
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+
+  @@unique([ownerId, dayOfWeek])
+}
+
+model CalendarBlockedDate {
+  id          String            @id @default(uuid())
+  ownerId     String
+  ownerType   CalendarOwnerType
+  startDate   DateTime
+  endDate     DateTime
+  reason      String?
+
+  createdAt   DateTime          @default(now())
+
+  @@index([ownerId, startDate, endDate])
+}
+
+model CalendarEventGuest {
+  id          String            @id @default(uuid())
+  eventId     String
+  email       String
+  fullName    String?
+  rsvpStatus  GuestRsvpStatus   @default(PENDING)
+
+  event       CalendarEvent     @relation(fields: [eventId], references: [id], onDelete: Cascade)
+
+  @@unique([eventId, email])
+}
+
+model ExternalCalendarSync {
+  id                 String            @id @default(uuid())
+  ownerId            String
+  provider           String            // "GOOGLE", "APPLE", "OUTLOOK"
+  externalCalendarId String
+  accessToken        String
+  refreshToken       String?
+  lastSyncedAt       DateTime?
+
+  createdAt          DateTime          @default(now())
+  updatedAt          DateTime          @updatedAt
+
+  @@unique([ownerId, provider])
+}

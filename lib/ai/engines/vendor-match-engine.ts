@@ -1,11 +1,10 @@
-import { VendorMatchCriteria, VendorMatchResult } from '@/types/ai-core';
+import { VendorMatchCriteria, VendorMatchResult } from '../../../types/ai-core';
 
 export class VendorMatchEngine {
   /**
    * Matches vendors based on query analysis and scoring
    */
   static async executeMatch(criteria: VendorMatchCriteria): Promise<VendorMatchResult[]> {
-    // In production, uses embeddings + vector cosine similarity search
     return [
       {
         vendorId: 'v-101',

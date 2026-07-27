@@ -1,0 +1,162 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum AccessScope {
+  SYSTEM
+  ORGANIZATION
+  PORTAL
+  MODULE
+  ROUTE
+  API
+  UI
+  FIELD
+}
+
+enum AccessAction {
+  VIEW
+  CREATE
+  UPDATE
+  DELETE
+  APPROVE
+  REJECT
+  EXPORT
+  IMPORT
+  ASSIGN
+  TRANSFER
+  ARCHIVE
+  RESTORE
+  MANAGE
+}
+
+enum SubscriptionTier {
+  FREE
+  STARTER
+  PROFESSIONAL
+  ENTERPRISE
+}
+
+model PermissionGroup {
+  id          String       @id @default(uuid())
+  code        String       @unique // e.g. "BUDGET_MODULE", "CRM_LEADS"
+  name        String
+  description String?
+  permissions Permission[]
+  createdAt   DateTime     @default(now())
+}
+
+model Permission {
+  id              String            @id @default(uuid())
+  code            String            @unique // e.g. "wedding:budget:update", "vendor:contract:approve"
+  groupId         String?
+  scope           AccessScope
+  action          AccessAction
+  resource        String            // e.g. "budget_item", "lead", "contract"
+  description     String?
+  isCustom        Boolean           @default(false)
+  
+  group           PermissionGroup?  @relation(fields: [groupId], references: [id], onDelete: SetNull)
+  roles           RolePermission[]
+  directUsers     UserDirectPermission[]
+  tierPermissions SubscriptionTierPermission[]
+
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+
+  @@index([scope, action, resource])
+}
+
+model Role {
+  id          String            @id @default(uuid())
+  code        String            @unique // e.g. "VENDOR_OWNER", "SUPPORT", "COUPLE"
+  name        String
+  description String?
+  isSystem    Boolean           @default(false)
+  
+  // Role Hierarchy (Parent - Child Relationships)
+  parents     RoleInheritance[] @relation("ChildRoles")
+  children    RoleInheritance[] @relation("ParentRoles")
+  
+  permissions RolePermission[]
+  
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+}
+
+model RoleInheritance {
+  parentId    String
+  childId     String
+
+  parent      Role     @relation("ParentRoles", fields: [parentId], references: [id], onDelete: Cascade)
+  child       Role     @relation("ChildRoles", fields: [childId], references: [id], onDelete: Cascade)
+
+  @@id([parentId, childId])
+}
+
+model RolePermission {
+  roleId       String
+  permissionId String
+
+  role         Role       @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  permission   Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+
+  @@id([roleId, permissionId])
+}
+
+model UserDirectPermission {
+  id           String     @id @default(uuid())
+  userId       String
+  permissionId String
+  isGranted    Boolean    @default(true) // true = grant, false = explicit deny
+  expiresAt    DateTime?  // Temporary permission expiration
+  reason       String?
+
+  permission   Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+
+  createdAt    DateTime   @default(now())
+
+  @@index([userId, expiresAt])
+}
+
+model SubscriptionTierPermission {
+  id           String           @id @default(uuid())
+  tier         SubscriptionTier
+  permissionId String
+
+  permission   Permission       @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+
+  @@unique([tier, permissionId])
+}
+
+model FeatureFlag {
+  id          String   @id @default(uuid())
+  key         String   @unique // e.g. "ai_budget_optimizer_v2", "whatsapp_auto_reply"
+  name        String
+  isEnabled   Boolean  @default(false)
+  rulesJson   Json?    // Targeting rules (e.g. specific organization IDs or percentages)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model AccessAuditLog {
+  id             String       @id @default(uuid())
+  userId         String?
+  action         AccessAction
+  resource       String
+  permissionCode String?
+  isAllowed      Boolean
+  portalContext  String?
+  organizationId String?
+  reason         String?
+  ipAddress      String?
+  userAgent      String?
+  createdAt      DateTime     @default(now())
+
+  @@index([userId, isAllowed])
+  @@index([createdAt])
+}

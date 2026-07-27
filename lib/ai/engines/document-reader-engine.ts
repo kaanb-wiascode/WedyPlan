@@ -1,4 +1,4 @@
-import { DocumentReaderRequest, DocumentReaderResult } from '@/types/ai-core';
+import { DocumentReaderRequest, DocumentReaderResult } from '../../../types/ai-core';
 
 export class DocumentReaderEngine {
   /**

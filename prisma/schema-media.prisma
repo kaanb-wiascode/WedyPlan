@@ -1,0 +1,143 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum MediaType {
+  IMAGE
+  VIDEO
+  DOCUMENT
+  AUDIO
+  ARCHIVE
+  ASSET_3D
+}
+
+enum StorageProvider {
+  AMAZON_S3
+  CLOUDFLARE_R2
+  GOOGLE_CLOUD
+  AZURE_BLOB
+  LOCAL_DISK
+}
+
+enum VirusScanStatus {
+  PENDING
+  CLEAN
+  INFECTED
+  SKIPPED
+}
+
+enum AssetAccessLevel {
+  PUBLIC
+  PRIVATE
+  RESTRICTED
+}
+
+model MediaFolder {
+  id           String        @id @default(uuid())
+  ownerId      String
+  name         String
+  slug         String
+  parentId     String?
+  
+  parent       MediaFolder?  @relation("FolderHierarchy", fields: [parentId], references: [id], onDelete: Cascade)
+  subfolders   MediaFolder[] @relation("FolderHierarchy")
+  assets       MediaAsset[]
+
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+
+  @@unique([ownerId, slug, parentId])
+  @@index([ownerId])
+}
+
+model MediaAsset {
+  id               String           @id @default(uuid())
+  ownerId          String
+  folderId         String?
+  type             MediaType
+  originalFileName String
+  fileExtension    String
+  mimeType         String
+  fileSizeBytes    BigInt
+  fileHashSha256   String           @index
+  perceptualHash   String?
+  accessLevel      AssetAccessLevel @default(PUBLIC)
+  storageProvider  StorageProvider  @default(AMAZON_S3)
+  storageBucket    String
+  storageKey       String           @unique
+  
+  // CDN and Variant URLs
+  cdnUrl           String
+  avifUrl          String?
+  webpUrl          String?
+  thumbnailUrl     String?
+  responsiveUrls   Json?            // { sm: string, md: string, lg: string, xl: string }
+  
+  // Metadata & Security
+  width            Int?
+  height           Int?
+  durationSeconds  Float?
+  scanStatus       VirusScanStatus  @default(PENDING)
+  versionNumber    Int              @default(1)
+  
+  isDeleted        Boolean          @default(false)
+  deletedAt        DateTime?
+
+  folder           MediaFolder?     @relation(fields: [folderId], references: [id], onDelete: SetNull)
+  versions         MediaVersion[]
+  tags             MediaAssetTag[]
+
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
+
+  @@index([ownerId, isDeleted])
+  @@index([type, mimeType])
+}
+
+model MediaVersion {
+  id           String     @id @default(uuid())
+  assetId      String
+  versionNumber Int
+  storageKey   String
+  cdnUrl       String
+  fileSizeBytes BigInt
+  createdById  String
+
+  asset        MediaAsset @relation(fields: [assetId], references: [id], onDelete: Cascade)
+
+  createdAt    DateTime   @default(now())
+
+  @@unique([assetId, versionNumber])
+}
+
+model MediaTag {
+  id        String          @id @default(uuid())
+  name      String          @unique
+  assets    MediaAssetTag[]
+}
+
+model MediaAssetTag {
+  assetId   String
+  tagId     String
+
+  asset     MediaAsset      @relation(fields: [assetId], references: [id], onDelete: Cascade)
+  tag       MediaTag        @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([assetId, tagId])
+}
+
+model StorageQuota {
+  id               String   @id @default(uuid())
+  ownerId          String   @unique
+  allocatedBytes   BigInt   // e.g. 5GB = 5368709120 Bytes
+  usedBytes        BigInt   @default(0)
+  fileCount        Int      @default(0)
+  updatedAt        DateTime @updatedAt
+
+  @@index([ownerId])
+}

@@ -1,0 +1,156 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum NotificationChannel {
+  EMAIL
+  SMS
+  WHATSAPP
+  PUSH_MOBILE
+  BROWSER_PUSH
+  IN_APP
+  VOICE_CALL
+}
+
+enum NotificationCategory {
+  AUTHENTICATION
+  SECURITY
+  WEDDING_PLANNING
+  VENDOR_LEADS
+  OFFERS
+  CONTRACTS
+  PAYMENTS
+  INVOICES
+  CALENDAR
+  CAMPAIGNS
+  SUPPORT
+  MARKETING
+  AI
+  SYSTEM
+}
+
+enum NotificationPriority {
+  LOW
+  NORMAL
+  HIGH
+  URGENT
+}
+
+enum NotificationStatus {
+  UNSEEN
+  SEEN
+  READ
+  DISMISSED
+  ARCHIVED
+}
+
+enum JobDeliveryState {
+  QUEUED
+  PROCESSING
+  SENT
+  FAILED
+  SCHEDULED
+  DEFERRED_QUIET_HOURS
+}
+
+model UniversalNotification {
+  id              String               @id @default(uuid())
+  userId          String
+  category        NotificationCategory
+  priority        NotificationPriority @default(NORMAL)
+  title           String
+  body            String
+  actionUrl       String?
+  imageUrl        String?
+  status          NotificationStatus   @default(UNSEEN)
+  seenAt          DateTime?
+  readAt          DateTime?
+  dismissedAt     DateTime?
+  archivedAt      DateTime?
+  batchGroupId    String?
+  metadata        Json?
+  
+  deliveryLogs    NotificationDeliveryLog[]
+
+  createdAt       DateTime             @default(now())
+  updatedAt       DateTime             @updatedAt
+
+  @@index([userId, status])
+  @@index([category, priority])
+  @@index([createdAt])
+}
+
+model NotificationTemplateI18n {
+  id              String               @id @default(uuid())
+  code            String               // e.g. "OFFER_RECEIVED", "PAYMENT_REMINDER"
+  locale          String               // "tr", "en", "de"
+  category        NotificationCategory
+  subjectTemplate String?
+  bodyTemplate    String
+  actionUrlTemplate String?
+
+  createdAt       DateTime             @default(now())
+  updatedAt       DateTime             @updatedAt
+
+  @@unique([code, locale])
+  @@index([code])
+}
+
+model NotificationChannelPreference {
+  id               String               @id @default(uuid())
+  userId           String
+  category         NotificationCategory
+  channel          NotificationChannel
+  isEnabled        Boolean              @default(true)
+  quietHoursStart  String?              // "22:00"
+  quietHoursEnd    String?              // "08:00"
+  timezone         String               @default("Europe/Istanbul")
+
+  updatedAt        DateTime             @updatedAt
+
+  @@unique([userId, category, channel])
+  @@index([userId])
+}
+
+model NotificationQueueJob {
+  id              String               @id @default(uuid())
+  userId          String
+  channel         NotificationChannel
+  category        NotificationCategory
+  priority        NotificationPriority
+  state           JobDeliveryState     @default(QUEUED)
+  payloadJson     Json
+  scheduledFor    DateTime             @default(now())
+  attemptCount    Int                  @default(0)
+  maxRetries      Int                  @default(3)
+  lastErrorMessage String?
+  
+  createdAt       DateTime             @default(now())
+  updatedAt       DateTime             @updatedAt
+
+  @@index([state, scheduledFor])
+  @@index([userId])
+}
+
+model NotificationDeliveryLog {
+  id               String               @id @default(uuid())
+  notificationId   String?
+  userId           String
+  channel          NotificationChannel
+  externalMessageId String?
+  deliveryState    JobDeliveryState
+  executionMs      Int
+  errorMessage     String?
+  
+  notification     UniversalNotification? @relation(fields: [notificationId], references: [id], onDelete: Cascade)
+
+  createdAt        DateTime             @default(now())
+
+  @@index([userId, channel])
+  @@index([createdAt])
+}

@@ -1,0 +1,178 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum PaymentProvider {
+  IYZICO
+  PAYTR
+  STRIPE
+  PAYPAL
+  APPLE_PAY
+  GOOGLE_PAY
+}
+
+enum PaymentStatus {
+  PENDING
+  AUTHORIZED
+  SUCCESS
+  FAILED
+  REFUNDED
+  PARTIALLY_REFUNDED
+  DISPUTED
+}
+
+enum PaymentType {
+  SUBSCRIPTION
+  MARKETPLACE_BOOKING
+  LEAD_PURCHASE
+  FEATURED_LISTING
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  PAST_DUE
+  CANCELED
+  UNPAID
+  TRIALING
+}
+
+enum Currency {
+  TRY
+  USD
+  EUR
+  GBP
+}
+
+model PaymentTransaction {
+  id                    String            @id @default(uuid())
+  userId                String
+  organizationId        String?
+  type                  PaymentType
+  provider              PaymentProvider
+  providerTransactionId String?           @unique
+  idempotencyKey        String            @unique
+  
+  // Amounts in Decimals (TRY/USD)
+  grossAmount           Decimal           @db.Decimal(12, 2)
+  platformCommission    Decimal           @db.Decimal(12, 2) @default(0.00)
+  vendorNetAmount       Decimal           @db.Decimal(12, 2) @default(0.00)
+  taxAmount             Decimal           @db.Decimal(12, 2) @default(0.00)
+  currency              Currency          @default(TRY)
+  
+  status                PaymentStatus     @default(PENDING)
+  failureReason         String?
+  metadata              Json?
+  
+  invoice               Invoice?
+
+  createdAt             DateTime          @default(now())
+  updatedAt             DateTime          @updatedAt
+
+  @@index([userId, status])
+  @@index([provider, providerTransactionId])
+  @@index([createdAt])
+}
+
+model SubscriptionPlan {
+  id            String             @id @default(uuid())
+  code          String             @unique // e.g. "VENDOR_PRO_MONTHLY", "COUPLE_PREMIUM"
+  name          String
+  price         Decimal            @db.Decimal(12, 2)
+  currency      Currency           @default(TRY)
+  billingCycle  String             // "MONTHLY" | "YEARLY"
+  featuresJson  Json?
+  isActive      Boolean            @default(true)
+  
+  subscriptions UserSubscription[]
+
+  createdAt     DateTime           @default(now())
+}
+
+model UserSubscription {
+  id                   String             @id @default(uuid())
+  userId               String
+  planId               String
+  provider             PaymentProvider
+  providerSubId        String?            @unique
+  cardToken            String?
+  status               SubscriptionStatus @default(ACTIVE)
+  currentPeriodStart   DateTime
+  currentPeriodEnd     DateTime
+  cancelAtPeriodEnd    Boolean            @default(false)
+  failedRetryCount     Int                @default(0)
+
+  plan                 SubscriptionPlan   @relation(fields: [planId], references: [id])
+
+  createdAt            DateTime           @default(now())
+  updatedAt            DateTime           @updatedAt
+
+  @@index([userId, status])
+}
+
+model Invoice {
+  id               String             @id @default(uuid())
+  transactionId    String             @unique
+  invoiceNumber    String             @unique // e.g. "WED2026-0001042"
+  userId           String
+  taxNumber        String?
+  taxOffice        String?
+  billingAddress   String
+  subTotal         Decimal            @db.Decimal(12, 2)
+  taxTotal         Decimal            @db.Decimal(12, 2)
+  grandTotal       Decimal            @db.Decimal(12, 2)
+  pdfUrl           String?
+  
+  transaction      PaymentTransaction @relation(fields: [transactionId], references: [id])
+  items            InvoiceItem[]
+
+  createdAt        DateTime           @default(now())
+}
+
+model InvoiceItem {
+  id          String   @id @default(uuid())
+  invoiceId   String
+  description String
+  quantity    Int      @default(1)
+  unitPrice   Decimal  @db.Decimal(12, 2)
+  taxRatePercent Int   @default(20)
+  totalAmount Decimal  @db.Decimal(12, 2)
+
+  invoice     Invoice  @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+}
+
+model CommissionRule {
+  id                  String   @id @default(uuid())
+  vendorCategoryCode  String   @unique // e.g. "VENUE", "PHOTOGRAPHY"
+  commissionRatePercent Decimal @db.Decimal(5, 2) // e.g. 10.00 = %10
+  updatedAt           DateTime @updatedAt
+}
+
+model Coupon {
+  id               String    @id @default(uuid())
+  code             String    @unique // e.g. "WEDY2026"
+  discountPercent  Decimal?  @db.Decimal(5, 2)
+  discountAmount   Decimal?  @db.Decimal(12, 2)
+  maxUses          Int       @default(100)
+  currentUses      Int       @default(0)
+  expiresAt        DateTime?
+  isActive         Boolean   @default(true)
+}
+
+model WebhookLog {
+  id            String          @id @default(uuid())
+  provider      PaymentProvider
+  eventId       String          @unique
+  eventType     String
+  payloadJson   Json
+  isProcessed   Boolean         @default(false)
+  processedAt   DateTime?
+
+  createdAt     DateTime        @default(now())
+
+  @@index([provider, eventId])
+}

@@ -7,70 +7,108 @@ generator client {
   provider = "prisma-client-js"
 }
 
-enum SearchDomain {
-  GLOBAL
+enum SearchDomainSource {
   VENDOR
-  WEDDING
-  CUSTOMER
+  COUPLE
+  USER
+  ORGANIZATION
   CONTRACT
+  PAYMENT
   DOCUMENT
+  CAMPAIGN
+  MESSAGE
+  SUPPORT_TICKET
+  REVIEW
+  CATEGORY
+  ARTICLE
+  FAQ
+  AI_KNOWLEDGE_BASE
 }
 
-enum IndexStatus {
+enum IndexSyncStatus {
   PENDING
   INDEXED
   FAILED
+  STALE
+}
+
+model SearchIndexRegistry {
+  id               String             @id @default(uuid())
+  entityType       SearchDomainSource
+  entityId         String
+  documentTitle    String
+  documentContent  String
+  keywords         String[]
+  vectorEmbedding  Float[]            // OpenAI text-embedding-3 1536 dimension
+  syncStatus       IndexSyncStatus    @default(PENDING)
+  popularityScore  Float              @default(1.0)
+  organizationId   String?
+  ownerUserId      String?
+  isPublic         Boolean            @default(true)
+  metadata         Json?
+  
+  indexedAt        DateTime           @default(now())
+  updatedAt        DateTime           @updatedAt
+
+  @@unique([entityType, entityId])
+  @@index([entityType, isPublic])
+  @@index([syncStatus])
+}
+
+model SearchSynonym {
+  id               String             @id @default(uuid())
+  term             String             @unique // e.g. "kır bahçesi"
+  synonyms         String[]           // ["açık hava mekanı", "botanik bahçe", "kır düğünü"]
+  isBiDirectional  Boolean            @default(true)
+  createdAt        DateTime           @default(now())
+}
+
+model TrendingSearchTopic {
+  id               String             @id @default(uuid())
+  keyword          String             @unique
+  searchCount      Int                @default(1)
+  category         SearchDomainSource @default(VENDOR)
+  isPromoted       Boolean            @default(false)
+  updatedAt        DateTime           @updatedAt
+
+  @@index([searchCount, isPromoted])
 }
 
 model SearchHistory {
-  id           String       @id @default(uuid())
-  userId       String
-  portalContext String
-  queryText    String
-  domain       SearchDomain @default(GLOBAL)
-  resultCount  Int          @default(0)
-  createdAt    DateTime     @default(now())
+  id               String             @id @default(uuid())
+  userId           String
+  portalContext    String
+  queryText        String
+  domainSource     SearchDomainSource @default(VENDOR)
+  resultCount      Int                @default(0)
+  createdAt        DateTime           @default(now())
 
   @@index([userId, createdAt])
 }
 
-model SavedSearch {
-  id           String       @id @default(uuid())
-  userId       String
-  title        String
-  domain       SearchDomain
-  filterParams Json         // Stored search payload and filters
-  notifyOnMatch Boolean     @default(false)
-  createdAt    DateTime     @default(now())
-  updatedAt    DateTime     @updatedAt
+model SavedSearchQuery {
+  id               String             @id @default(uuid())
+  userId           String
+  title            String
+  queryText        String
+  filtersJson      Json?
+  notifyOnMatches  Boolean            @default(false)
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @updatedAt
 
-  @@index([userId, domain])
+  @@index([userId])
 }
 
 model SearchAnalyticsLog {
-  id           String       @id @default(uuid())
-  queryText    String
-  domain       SearchDomain
-  executionMs  Int
-  resultCount  Int
-  clickedResultId String?
-  userId       String?
-  createdAt    DateTime     @default(now())
+  id               String             @id @default(uuid())
+  queryText        String
+  domainSource     SearchDomainSource
+  executionMs      Int
+  resultCount      Int
+  clickedEntityId  String?
+  userId           String?
+  createdAt        DateTime           @default(now())
 
-  @@index([queryText, domain])
+  @@index([queryText, domainSource])
   @@index([createdAt])
-}
-
-model SearchIndexQueue {
-  id           String       @id @default(uuid())
-  entityType   String       // e.g. "Vendor", "Contract", "Document"
-  entityId     String
-  operation    String       // "UPSERT" | "DELETE"
-  status       IndexStatus  @default(PENDING)
-  attemptCount Int          @default(0)
-  errorMessage String?
-  createdAt    DateTime     @default(now())
-  updatedAt    DateTime     @updatedAt
-
-  @@index([status, createdAt])
 }

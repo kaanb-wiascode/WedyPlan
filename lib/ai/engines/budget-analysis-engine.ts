@@ -1,11 +1,14 @@
-import { BudgetAnalysisRequest, BudgetAnalysisResult } from '@/types/ai-core';
+import { BudgetAnalysisRequest, BudgetAnalysisResult, BudgetItemExpense } from '@/types/ai-core';
 
 export class BudgetAnalysisEngine {
   /**
    * Analyzes couple budget, detects risks and recommends optimizations
    */
   static analyze(request: BudgetAnalysisRequest): BudgetAnalysisResult {
-    const totalSpent = request.allocatedExpenses.reduce((acc, curr) => acc + curr.amount, 0);
+    const totalSpent = request.allocatedExpenses.reduce(
+      (acc: number, curr: BudgetItemExpense) => acc + curr.amount,
+      0
+    );
     const overflow = totalSpent - request.totalBudget;
 
     let status: 'HEALTHY' | 'AT_RISK' | 'OVER_BUDGET' = 'HEALTHY';
