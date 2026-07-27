@@ -1,0 +1,103 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum NotificationChannel {
+  IN_APP
+  EMAIL
+  SMS
+  WHATSAPP
+  PUSH
+  BROWSER
+}
+
+enum NotificationPriority {
+  LOW
+  NORMAL
+  HIGH
+  URGENT
+}
+
+enum NotificationCategory {
+  TRANSACTIONAL
+  MARKETING
+  SYSTEM
+  WEDDING_REMINDER
+  CRM_LEAD
+  SECURITY
+}
+
+enum DeliveryStatus {
+  PENDING
+  QUEUED
+  SENT
+  DELIVERED
+  READ
+  FAILED
+}
+
+model NotificationTemplate {
+  id          String              @id @default(uuid())
+  code        String              @unique // e.g. "OFFER_RECEIVED_COUPLE"
+  category    NotificationCategory
+  channel     NotificationChannel
+  subject     String?             // For Email / Push titles
+  bodyTemplate String             // Template with placeholders {{coupleName}}, {{vendorName}}
+  isActive    Boolean             @default(true)
+  createdAt   DateTime            @default(now())
+  updatedAt   DateTime            @updatedAt
+
+  @@index([code, channel])
+}
+
+model NotificationPreference {
+  id          String              @id @default(uuid())
+  userId      String
+  category    NotificationCategory
+  channel     NotificationChannel
+  isEnabled   Boolean             @default(true)
+  updatedAt   DateTime            @updatedAt
+
+  @@unique([userId, category, channel])
+  @@index([userId])
+}
+
+model InAppNotification {
+  id          String               @id @default(uuid())
+  userId      String
+  title       String
+  message     String
+  category    NotificationCategory
+  priority    NotificationPriority @default(NORMAL)
+  actionUrl   String?
+  isRead      Boolean              @default(false)
+  readAt      DateTime?
+  metadata    Json?
+  createdAt   DateTime             @default(now())
+
+  @@index([userId, isRead])
+}
+
+model NotificationLog {
+  id             String              @id @default(uuid())
+  userId         String
+  templateCode   String
+  channel        NotificationChannel
+  priority       NotificationPriority
+  recipientTarget String             // Email, Phone, Device Token
+  status         DeliveryStatus      @default(PENDING)
+  attemptCount   Int                 @default(0)
+  errorMessage   String?
+  deliveredAt    DateTime?
+  readAt         DateTime?
+  metadata       Json?
+  createdAt      DateTime            @default(now())
+
+  @@index([userId, status])
+  @@index([createdAt])
+}

@@ -1,0 +1,108 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum PortalType {
+  PUBLIC
+  COUPLE
+  VENDOR
+  ADMIN
+}
+
+enum GlobalUserStatus {
+  ACTIVE
+  SUSPENDED
+  PENDING_VERIFICATION
+}
+
+model User {
+  id                String           @id @default(uuid())
+  email             String           @unique
+  passwordHash      String?
+  fullName          String
+  phone             String?          @unique
+  avatarUrl         String?
+  status            GlobalUserStatus @default(PENDING_VERIFICATION)
+  isEmailVerified   Boolean          @default(false)
+  isTwoFactorActive Boolean          @default(false)
+  twoFactorSecret   String?
+  
+  // Relations
+  profiles          PortalProfile[]
+  sessions          Session[]
+  oauthAccounts     OAuthAccount[]
+  
+  createdAt         DateTime         @default(now())
+  updatedAt         DateTime         @updatedAt
+
+  @@index([email])
+}
+
+model PortalProfile {
+  id           String     @id @default(uuid())
+  userId       String
+  portal       PortalType
+  isPrimary    Boolean    @default(false)
+  
+  // Granular Role & Membership Context
+  roles        Role[]     @relation("ProfileRoles")
+  
+  user         User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt    DateTime   @default(now())
+
+  @@unique([userId, portal])
+}
+
+model Role {
+  id          String          @id @default(uuid())
+  name        String          @unique // e.g. "COUPLE_OWNER", "VENDOR_FINANCE", "ADMIN_SUPER"
+  portal      PortalType
+  description String?
+  permissions Permission[]    @relation("RolePermissions")
+  profiles    PortalProfile[] @relation("ProfileRoles")
+}
+
+model Permission {
+  id          String   @id @default(uuid())
+  code        String   @unique // e.g. "wedding:budget:write", "vendor:offers:approve"
+  description String?
+  roles       Role[]   @relation("RolePermissions")
+}
+
+model Session {
+  id             String    @id @default(uuid())
+  userId         String
+  portalContext  PortalType
+  refreshTokenHash String  @unique
+  ipAddress      String
+  userAgent      String
+  deviceOs       String?
+  browser        String?
+  isRevoked      Boolean   @default(false)
+  expiresAt      DateTime
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  user           User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, portalContext])
+}
+
+model OAuthAccount {
+  id                String   @id @default(uuid())
+  userId            String
+  provider          String   // "google" | "apple"
+  providerAccountId String
+  accessToken       String?
+  refreshToken      String?
+  expiresAt         Int?
+  
+  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
