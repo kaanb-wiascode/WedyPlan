@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Plus_Jakarta_Sans, Cormorant_Garamond } from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from "@/context/AuthContext";
+import { Navbar } from "@/components/layout/Navbar"; // 👈 Navbar içe aktarıldı
 
 // Modern, kurumsal ve okunabilirliği yüksek gövde fontu
 const sansFont = Plus_Jakarta_Sans({ 
@@ -54,7 +55,8 @@ export default function RootLayout({
     <html lang="tr" className={`${sansFont.variable} ${serifFont.variable}`}>
       <body className="font-sans antialiased bg-[#F5F4F0] text-[#111111] selection:bg-[#111111] selection:text-[#F5F4F0]">
         <AuthProvider>
-          {children}
+          <Navbar /> {/* 👈 Logomuzu ve menümüzü ekrana basan ana bileşen */}
+          <main>{children}</main>
         </AuthProvider>
       </body>
     </html>
