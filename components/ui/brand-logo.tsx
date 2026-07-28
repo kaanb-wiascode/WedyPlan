@@ -16,11 +16,11 @@ export function BrandLogo({
   className = "" 
 }: BrandLogoProps) {
 
-  // Genişlik ve Yükseklik Haritası
+  // Boyutlandırma Haritası
   const dimensions = {
     sm: { width: 130, height: 34 },
     md: { width: 170, height: 44 },
-    lg: { width: 230, height: 60 },
+    lg: { width: 220, height: 58 },
   }[size];
 
   const iconDimensions = {
@@ -29,21 +29,12 @@ export function BrandLogo({
     lg: { width: 56, height: 56 },
   }[size];
 
-  // Portala ve Varyasyona Göre Logo Yolu Belirleme
+  // SVG Yolu Belirleme
   const getLogoPath = () => {
-    // Eğer ikon isteniyorsa genel ikona veya porta ikonuna yönlendir
     if (variant === "icon") {
-      return `/assets/branding/logo-icon.svg`;
+      return "/assets/branding/logo-icon.svg";
     }
 
-    // Beyaz / Koyu Zemin varyasyonu isteniyorsa
-    if (variant === "white") {
-      return portal === "main" 
-        ? "/assets/branding/logo-white.svg" 
-        : `/assets/branding/logo-${portal}-white.svg`;
-    }
-
-    // Portal logoları
     switch (portal) {
       case "couple":
         return "/assets/branding/logo-couple.svg";
@@ -51,8 +42,6 @@ export function BrandLogo({
         return "/assets/branding/logo-vendor.svg";
       case "marketplace":
         return "/assets/branding/logo-marketplace.svg";
-      case "admin":
-        return "/assets/branding/logo-admin.svg";
       default:
         return "/assets/branding/logo-main.svg";
     }
@@ -68,7 +57,7 @@ export function BrandLogo({
         width={currentDimensions.width}
         height={currentDimensions.height}
         priority
-        className="object-contain cursor-pointer transition-all hover:opacity-90"
+        className="object-contain cursor-pointer transition-all hover:opacity-90 h-9 w-auto"
       />
     </div>
   );
