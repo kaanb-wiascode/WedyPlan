@@ -23,7 +23,6 @@ export function analyzeCiCdPipelinesAndRisk(): CiCdAIAnalysisResult {
     ],
     pipelineOptimizationAdvice: [
       {
-        stage: "Container Build",
         stage: "Docker Multi-Stage Caching",
         advice: "Next.js standalone build katmanı BuildKit cache kancasıyla saniyelere düşürüldü.",
         timeSavingSeconds: 45,
