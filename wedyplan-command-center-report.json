@@ -1,0 +1,219 @@
+{
+  "timestamp": "2026-07-28T14:48:17.551Z",
+  "platform": "WedyPlan Enterprise Platform Command Center",
+  "environment": "production",
+  "primaryRegion": "eu-central-1 (Frankfurt)",
+  "secondaryDRRegion": "eu-west-1 (Ireland)",
+  "globalHealthStatus": "OPERATIONAL_HEALTHY",
+  "unifiedDashboardDomains": [
+    {
+      "domain": "Infrastructure",
+      "status": "HEALTHY",
+      "activePods": 342,
+      "cpuUtil": "42%"
+    },
+    {
+      "domain": "AI Platform",
+      "status": "HEALTHY",
+      "activeModels": 18,
+      "tokenRPS": "1,240"
+    },
+    {
+      "domain": "Marketplace",
+      "status": "HEALTHY",
+      "activeListings": 14200,
+      "activeBookings": 840
+    },
+    {
+      "domain": "Couple Portal",
+      "status": "HEALTHY",
+      "activeSessions": 8420,
+      "p95LatencyMs": 112
+    },
+    {
+      "domain": "Vendor Portal",
+      "status": "HEALTHY",
+      "activeVendors": 3120,
+      "p95LatencyMs": 124
+    },
+    {
+      "domain": "Admin Portal",
+      "status": "HEALTHY",
+      "activeOperators": 24,
+      "auditLogSync": "ACTIVE"
+    },
+    {
+      "domain": "Authentication",
+      "status": "HEALTHY",
+      "authSuccessRate": "99.98%",
+      "activeTenants": 12400
+    },
+    {
+      "domain": "Payments",
+      "status": "HEALTHY",
+      "stripeWebhookLagMs": 8,
+      "dailyGMVUSD": "$482,000"
+    },
+    {
+      "domain": "Search",
+      "status": "HEALTHY",
+      "vectorSearchP95Ms": 14,
+      "elasticIndexHealth": "GREEN"
+    },
+    {
+      "domain": "Notifications",
+      "status": "HEALTHY",
+      "pushSuccessRate": "99.8%"
+    },
+    {
+      "domain": "Observability",
+      "status": "HEALTHY",
+      "traceIngestionRPS": "48,000",
+      "alertState": "ZERO_P1"
+    },
+    {
+      "domain": "Security",
+      "status": "HEALTHY",
+      "threatScore": "0.00/10",
+      "WAFBlockedReqs24h": 1420
+    },
+    {
+      "domain": "DevOps",
+      "status": "HEALTHY",
+      "activePipelines": 4,
+      "deploymentStatus": "STABLE"
+    },
+    {
+      "domain": "SRE",
+      "status": "HEALTHY",
+      "errorBudgetRemaining": "99.2%",
+      "mttrAvgSec": 42
+    },
+    {
+      "domain": "FinOps",
+      "status": "HEALTHY",
+      "dailyRunRateUSD": "$388.00",
+      "budgetCapVariance": "-12%"
+    },
+    {
+      "domain": "MLOps",
+      "status": "HEALTHY",
+      "championChallengerRatio": "90/10",
+      "driftAlerts": 0
+    }
+  ],
+  "executiveKPIs": [
+    {
+      "kpi": "Availability",
+      "current": "99.992% Uptime",
+      "target": ">= 99.990%",
+      "status": "OPTIMAL"
+    },
+    {
+      "kpi": "Performance",
+      "current": "P95 118ms Latency",
+      "target": "< 150ms",
+      "status": "OPTIMAL"
+    },
+    {
+      "kpi": "Revenue",
+      "current": "$482,000 USD Daily GMV",
+      "target": "> $400,000 USD",
+      "status": "OPTIMAL"
+    },
+    {
+      "kpi": "Growth",
+      "current": "+18.4% MoM New Couples/Vendors",
+      "target": "> +15.0%",
+      "status": "OPTIMAL"
+    },
+    {
+      "kpi": "Infrastructure Cost",
+      "current": "$8,990 USD / Month",
+      "target": "< $11,000 USD",
+      "status": "OPTIMAL"
+    },
+    {
+      "kpi": "AI Cost",
+      "current": "$2,850 USD / Month",
+      "target": "< $4,000 USD",
+      "status": "OPTIMAL"
+    },
+    {
+      "kpi": "Security Score",
+      "current": "99.8 / 100 Health Score",
+      "target": ">= 95.0",
+      "status": "OPTIMAL"
+    },
+    {
+      "kpi": "Customer Satisfaction",
+      "current": "4.92 / 5.0 (Couple CSAT)",
+      "target": ">= 4.80",
+      "status": "OPTIMAL"
+    },
+    {
+      "kpi": "Vendor Satisfaction",
+      "current": "4.86 / 5.0 (Vendor CSAT)",
+      "target": ">= 4.70",
+      "status": "OPTIMAL"
+    }
+  ],
+  "operationalControls": [
+    {
+      "control": "Incident Management",
+      "status": "AUTOMATED_TRIAGE_READY",
+      "activeP1Count": 0,
+      "activeP2Count": 0
+    },
+    {
+      "control": "Release Management",
+      "status": "CANARY_GATE_ACTIVE",
+      "activeRollout": "v2.8.4-couple-portal"
+    },
+    {
+      "control": "Capacity Planning",
+      "status": "AUTO_SCALER_ACTIVE",
+      "maxSurgeHeadroom": "180%"
+    },
+    {
+      "control": "Global Search",
+      "status": "INDEXED",
+      "searchableEntities": "1.4M Nodes"
+    },
+    {
+      "control": "Platform Health",
+      "status": "ALL_SYSTEMS_GO",
+      "overallHealthIndex": "100%"
+    },
+    {
+      "control": "Maintenance Engine",
+      "status": "NO_SCHEDULED_LOCKDOWN",
+      "nextWindow": "Sunday 03:00 UTC"
+    },
+    {
+      "control": "Disaster Recovery",
+      "status": "HOT_STANDBY_READY",
+      "RPO": "0s",
+      "RTO": "< 180s"
+    }
+  ],
+  "aiExecutiveQuerySample": {
+    "query": "Summarize current health across Couple Portal, Vendor Portal and Stripe Payments.",
+    "answer": "All 6 portals are operating at peak efficiency. Peak traffic observed in Couple Portal (8,420 concurrent users). Zero active P1/P2 incidents. Stripe payout latency is stable at 8ms.",
+    "confidence": "99.8%"
+  },
+  "aiExecutiveBriefing": {
+    "date": "2026-07-28",
+    "summaryHeader": "WedyPlan Platform Operational Status: PERFECT (100% Availability)",
+    "highlights": [
+      "Global Availability: 99.992% across all 6 portals.",
+      "Daily Financial GMV: $482,000 USD (+12% vs 7-day avg).",
+      "AI Token Burn Efficiency: 96.8% token utilization ($95/day avg).",
+      "Zero Security Incidents; WAF automatically blocked 1,420 malicious probes."
+    ]
+  },
+  "aiRiskAndOptimizationForecast": {
+    "riskForecast": "\u001b[32m✅ LOW RISK PROFILE: Weather/Seasonal surge predicted for Q3 peak booking weekend. Compute capacity headroom verified at 180%.\u001b[39m",
+    "recommendation": "Promote Challenger model v2.5.0-rc1 in Vendor Matchmaker to Champion state (Will yield +3.2% F1 Score and -$310/mo savings)."
+  }
+}

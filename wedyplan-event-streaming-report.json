@@ -1,0 +1,139 @@
+{
+  "timestamp": "2026-07-28T14:32:40.228Z",
+  "platform": "WedyPlan Event Streaming Platform Engine",
+  "brokerTechnology": "Apache Kafka / Redpanda Cluster",
+  "schemaRegistry": "Confluent Schema Registry (Avro / Protobuf)",
+  "eventDomains": [
+    {
+      "type": "User Events",
+      "sampleTopic": "wedyplan.users.v1",
+      "consumers": [
+        "Couple Portal",
+        "Public Platform",
+        "Audit Log"
+      ]
+    },
+    {
+      "type": "Vendor Events",
+      "sampleTopic": "wedyplan.vendors.v2",
+      "consumers": [
+        "Vendor Portal",
+        "AI Matching Engine"
+      ]
+    },
+    {
+      "type": "Payment Events",
+      "sampleTopic": "wedyplan.payments.v1",
+      "consumers": [
+        "Billing Engine",
+        "Vendor Payouts",
+        "Audit Log"
+      ]
+    },
+    {
+      "type": "Booking Events",
+      "sampleTopic": "wedyplan.bookings.v1",
+      "consumers": [
+        "Couple Portal",
+        "Vendor Business OS",
+        "Notifications"
+      ]
+    },
+    {
+      "type": "Contract Events",
+      "sampleTopic": "wedyplan.contracts.v1",
+      "consumers": [
+        "Legal Engine",
+        "Vendor Portal"
+      ]
+    },
+    {
+      "type": "Notification Events",
+      "sampleTopic": "wedyplan.notifications.v1",
+      "consumers": [
+        "Push Gateway",
+        "Email Engine",
+        "SMS Provider"
+      ]
+    },
+    {
+      "type": "AI Events",
+      "sampleTopic": "wedyplan.ai.analytics.v1",
+      "consumers": [
+        "AI Intelligence Platform",
+        "Data Lakehouse"
+      ]
+    },
+    {
+      "type": "Audit Events",
+      "sampleTopic": "wedyplan.audit.security.v1",
+      "consumers": [
+        "Security Compliance Center",
+        "Admin Portal"
+      ]
+    }
+  ],
+  "capabilities": [
+    {
+      "name": "Publish",
+      "status": "HEALTHY",
+      "throughput": "45,000 msg/sec"
+    },
+    {
+      "name": "Subscribe",
+      "status": "HEALTHY",
+      "activeConsumerGroups": 38
+    },
+    {
+      "name": "Replay",
+      "status": "HEALTHY",
+      "maxRetentionDays": 30
+    },
+    {
+      "name": "Dead Letter Queue (DLQ)",
+      "status": "HEALTHY",
+      "autoRetryPolicies": "Exponential Backoff"
+    },
+    {
+      "name": "Schema Registry",
+      "status": "HEALTHY",
+      "activeSchemas": 124
+    },
+    {
+      "name": "Event Versioning",
+      "status": "HEALTHY",
+      "compatibilityMode": "BACKWARD_TRANSITIVE"
+    }
+  ],
+  "aiAnalysis": {
+    "totalEventsProcessed24h": "18.4M",
+    "averageConsumerLagMs": 14,
+    "schemaViolationsPrevented": 0,
+    "anomaliesDetected": [
+      {
+        "topic": "wedyplan.payments.v1",
+        "issue": "Slight surge in duplicate event headers during Stripe webhook retry; idempotency filter auto-applied."
+      }
+    ]
+  },
+  "aiFailurePredictions": [
+    {
+      "consumerGroup": "cg-vendor-notification-push",
+      "riskLevel": "MEDIUM",
+      "prediction": "High probability of consumer lag spike during upcoming weekend peak booking hours.",
+      "recommendedAction": "Pre-scale consumer pod count from 3 to 8 instances."
+    }
+  ],
+  "aiTrafficOptimizations": [
+    {
+      "topicGroup": "High-Throughput User & Booking Topics",
+      "optimization": "Enabled zstd compression algorithm; reduced broker network IO by ~38%.",
+      "impact": "BANDWIDTH_OPTIMIZED"
+    },
+    {
+      "topicGroup": "DLQ & Retry Topics",
+      "optimization": "Dynamic batch size adjustment applied based on consumer backpressure feedback loop.",
+      "impact": "LATENCY_REDUCED"
+    }
+  ]
+}

@@ -1,0 +1,75 @@
+{
+  "timestamp": "2026-07-28T14:34:07.200Z",
+  "platform": "WedyPlan Unified Analytics Infrastructure",
+  "environment": "production",
+  "portalsAnalyzed": [
+    "Public Platform",
+    "Couple Portal",
+    "Vendor Portal",
+    "WedyPlan Admin Portal",
+    "Shared Platform Infrastructure",
+    "AI Intelligence Platform"
+  ],
+  "aiTrendAnalysis": {
+    "growthTrendMoM": "+22.4%",
+    "topCategory": "Venue & Photography Vendors",
+    "insight": "Couple engagement on Vendor Booking Portal spikes between 19:00 - 22:00 local time on Sundays."
+  },
+  "aiForecasting": {
+    "forecastedGMV": "$14.8M",
+    "predictedPeakRPS": "3,400 Requests/Sec",
+    "vendorCapacityWarning": "Venue bookings predicted to hit 92% capacity in top 5 metro areas by late Q3."
+  },
+  "aiAnomalies": [
+    {
+      "metricName": "couple.budget.calculator.error_rate",
+      "severity": "LOW",
+      "anomaly": "1.8% temporary error rate spike during liquid glass UI hydration on legacy iOS webview.",
+      "autoAction": "Fallback edge cache route activated."
+    }
+  ],
+  "componentsDetail": [
+    {
+      "component": "Real-time Analytics",
+      "techStack": "Apache Flink / Kafka Streams",
+      "scope": "Live RSVP & Booking Streaming",
+      "status": "HEALTHY"
+    },
+    {
+      "component": "Batch Analytics",
+      "techStack": "Apache Spark / dbt Core",
+      "scope": "Nightly Financial & Growth Aggregations",
+      "status": "HEALTHY"
+    },
+    {
+      "component": "OLAP Engine",
+      "techStack": "ClickHouse / Apache Pinot",
+      "scope": "Sub-Second Multi-Tenant Queries",
+      "status": "HEALTHY"
+    },
+    {
+      "component": "BI Integration",
+      "techStack": "Apache Superset / Tableau Connector",
+      "scope": "Admin & Executive Dashboards",
+      "status": "HEALTHY"
+    },
+    {
+      "component": "Metrics Store",
+      "techStack": "Cube.js / MetricFlow",
+      "scope": "Unified Semantic Layer & Definitions",
+      "status": "HEALTHY"
+    },
+    {
+      "component": "Time Series Database",
+      "techStack": "TimescaleDB / InfluxDB",
+      "scope": "Telemetry, Latency & Traffic Metrics",
+      "status": "HEALTHY"
+    },
+    {
+      "component": "Reporting Engine",
+      "techStack": "WedyPlan PDF/Excel Report Service",
+      "scope": "Vendor Payouts & Couple Budget Statements",
+      "status": "HEALTHY"
+    }
+  ]
+}

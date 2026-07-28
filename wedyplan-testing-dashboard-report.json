@@ -1,0 +1,134 @@
+{
+  "timestamp": "2026-07-28T14:27:32.836Z",
+  "platform": "WedyPlan Enterprise Testing Platform",
+  "environment": "staging",
+  "portalsTested": [
+    "Public Platform",
+    "Couple Portal",
+    "Vendor Portal",
+    "WedyPlan Admin Portal",
+    "Shared Platform Infrastructure",
+    "AI Intelligence Platform"
+  ],
+  "summary": {
+    "totalLayersTested": 11,
+    "passedLayers": 10,
+    "failedLayers": 1,
+    "qualityGateStatus": "PASSED"
+  },
+  "coverageReport": {
+    "overallCoverage": "88.4%",
+    "differentialCoverage": "94.2%",
+    "passedQualityGate": true,
+    "message": "\u001b[32m✅ Quality Gate PASSED: Coverage meets WedyPlan enterprise standard.\u001b[39m"
+  },
+  "flakyQuarantine": {
+    "flakyCount": 1,
+    "quarantinedTests": [
+      {
+        "testId": "TEST-E2E-01",
+        "portal": "Couple Portal",
+        "flakinessScore": 0.24,
+        "status": "QUARANTINED"
+      }
+    ]
+  },
+  "aiFailureAnalysis": [
+    {
+      "layer": "API",
+      "scope": "All Portals",
+      "rootCause": "[AI RCA] Network latency spike exceeded SLA (200ms) during multi-tenant token verification on All Portals.",
+      "suggestedFix": "Increase timeout threshold to 3500ms for ephemeral staging environments or enable Redis token caching."
+    }
+  ],
+  "detailedResults": [
+    {
+      "layer": "Unit",
+      "tool": "Jest / Vitest",
+      "scope": "All Portals",
+      "status": "PASSED",
+      "durationMs": 442,
+      "critical": true
+    },
+    {
+      "layer": "Integration",
+      "tool": "Testcontainers / Node.js",
+      "scope": "Shared Platform Infrastructure",
+      "status": "PASSED",
+      "durationMs": 1105,
+      "critical": true
+    },
+    {
+      "layer": "Contract",
+      "tool": "Pact.js",
+      "scope": "Vendor & Couple Portals",
+      "status": "PASSED",
+      "durationMs": 994,
+      "critical": true
+    },
+    {
+      "layer": "API",
+      "tool": "Playwright API",
+      "scope": "All Portals",
+      "status": "FAILED",
+      "durationMs": 752,
+      "critical": true
+    },
+    {
+      "layer": "E2E",
+      "tool": "Playwright E2E",
+      "scope": "Couple & Vendor Portals",
+      "status": "PASSED",
+      "durationMs": 483,
+      "critical": true
+    },
+    {
+      "layer": "Visual Regression",
+      "tool": "Applitools / Percy",
+      "scope": "Public Platform & Couple Portal",
+      "status": "PASSED",
+      "durationMs": 1422,
+      "critical": false
+    },
+    {
+      "layer": "Accessibility",
+      "tool": "axe-core",
+      "scope": "Public & Couple Portals",
+      "status": "PASSED",
+      "durationMs": 1500,
+      "critical": true
+    },
+    {
+      "layer": "Performance",
+      "tool": "k6",
+      "scope": "Shared Platform Infrastructure",
+      "status": "PASSED",
+      "durationMs": 267,
+      "critical": false
+    },
+    {
+      "layer": "Load",
+      "tool": "Locust",
+      "scope": "Public Platform & API Gateway",
+      "status": "PASSED",
+      "durationMs": 1014,
+      "critical": false
+    },
+    {
+      "layer": "Chaos",
+      "tool": "Chaos Mesh",
+      "scope": "Shared Platform Infrastructure",
+      "status": "PASSED",
+      "durationMs": 1495,
+      "critical": false
+    },
+    {
+      "layer": "Security",
+      "tool": "Trivy / SonarQube",
+      "scope": "All Portals & AI Platform",
+      "status": "PASSED",
+      "durationMs": 1144,
+      "critical": true
+    }
+  ]
+}

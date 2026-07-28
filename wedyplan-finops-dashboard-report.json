@@ -1,0 +1,142 @@
+{
+  "timestamp": "2026-07-28T14:40:09.768Z",
+  "platform": "WedyPlan Enterprise FinOps Platform",
+  "environment": "production",
+  "budgetCapUSD": 15000,
+  "currentRunRateUSD": 11840,
+  "costCentersDetail": [
+    {
+      "center": "Infrastructure",
+      "provider": "AWS EKS / EC2 Nodes",
+      "monthlyCostUSD": 3420,
+      "trend": "+4%"
+    },
+    {
+      "center": "AI Providers",
+      "provider": "OpenAI / Anthropic / Local GPU",
+      "monthlyCostUSD": 2850,
+      "trend": "+12%"
+    },
+    {
+      "center": "Storage",
+      "provider": "AWS S3 / Glacier / EBS",
+      "monthlyCostUSD": 1120,
+      "trend": "-2%"
+    },
+    {
+      "center": "Databases",
+      "provider": "RDS PostgreSQL / Timescale / Redis",
+      "monthlyCostUSD": 1840,
+      "trend": "0%"
+    },
+    {
+      "center": "Networking",
+      "provider": "Egress / Cloudflare CDN",
+      "monthlyCostUSD": 620,
+      "trend": "+1%"
+    },
+    {
+      "center": "CDN",
+      "provider": "Cloudflare Enterprise",
+      "monthlyCostUSD": 450,
+      "trend": "0%"
+    },
+    {
+      "center": "Monitoring",
+      "provider": "Datadog / Prometheus Cloud",
+      "monthlyCostUSD": 510,
+      "trend": "+3%"
+    },
+    {
+      "center": "Security",
+      "provider": "Vault / HashiCorp / WAF",
+      "monthlyCostUSD": 380,
+      "trend": "0%"
+    },
+    {
+      "center": "Messaging",
+      "provider": "Twilio / WhatsApp / SendGrid",
+      "monthlyCostUSD": 410,
+      "trend": "+8%"
+    },
+    {
+      "center": "Third Party APIs",
+      "provider": "Stripe / Maps / Plaid",
+      "monthlyCostUSD": 240,
+      "trend": "+5%"
+    }
+  ],
+  "allocationBreakdown": [
+    {
+      "dimension": "Per Tenant",
+      "costSharePercent": "38%",
+      "topConsumer": "Vendor Business OS Power Users"
+    },
+    {
+      "dimension": "Per Portal",
+      "costSharePercent": "28%",
+      "topConsumer": "Couple Portal & AI Assistant"
+    },
+    {
+      "dimension": "Per Environment",
+      "costSharePercent": "18%",
+      "topConsumer": "Production (82%) vs Staging (18%)"
+    },
+    {
+      "dimension": "Per Team",
+      "costSharePercent": "8%",
+      "topConsumer": "Core AI & Search Engineering Team"
+    },
+    {
+      "dimension": "Per Feature",
+      "costSharePercent": "5%",
+      "topConsumer": "Real-time Guest RSVP & Liquid Glass Sync"
+    },
+    {
+      "dimension": "Per AI Agent",
+      "costSharePercent": "3%",
+      "topConsumer": "Vendor Matching & Concierge Agent"
+    }
+  ],
+  "aiForecastAndAlerts": {
+    "forecast30DaysUSD": "$12,450",
+    "forecast90DaysUSD": "$14,200",
+    "budgetUtilization": "78.9% of $15,000 Cap",
+    "alertStatus": "\u001b[32m✅ BUDGET HEALTHY: Current run-rate remains safely below monthly threshold.\u001b[39m"
+  },
+  "aiWasteAndRightsizing": [
+    {
+      "resource": "AWS RDS PostgreSQL Read Replica (Staging)",
+      "wasteType": "OVER_PROVISIONED_INSTANCE",
+      "suggestion": "Downsize instance type from db.r6g.xlarge to db.r6g.large.",
+      "monthlySavingsUSD": 380
+    },
+    {
+      "resource": "Unattached EBS Volumes in eu-central-1",
+      "wasteType": "ORPHANED_STORAGE",
+      "suggestion": "Delete 4 orphaned 200GB gp3 EBS volumes.",
+      "monthlySavingsUSD": 96
+    },
+    {
+      "resource": "EKS Worker Node Group (Nightly Idle)",
+      "wasteType": "IDLE_COMPUTE_HOURS",
+      "suggestion": "Enable Karpenter cluster auto-scaler to scale down to 1 node between 01:00-06:00 UTC.",
+      "monthlySavingsUSD": 420
+    }
+  ],
+  "aiRoiAnalysis": [
+    {
+      "featureOrAgent": "Vendor Matchmaker AI Agent",
+      "monthlyCostUSD": 840,
+      "businessValueGenerated": "$18,400 GMV in Vendor Bookings",
+      "roiRatio": "21.9x ROI"
+    },
+    {
+      "featureOrAgent": "Couple Budget Auto-Planner",
+      "monthlyCostUSD": 420,
+      "businessValueGenerated": "+34% Couple Retention & Activation",
+      "roiRatio": "HIGH_STRATEGIC_VALUE"
+    }
+  ],
+  "totalMonthlyPotentialSavingsUSD": 896
+}

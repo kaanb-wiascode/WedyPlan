@@ -1,0 +1,117 @@
+{
+  "timestamp": "2026-07-28T14:35:18.228Z",
+  "platform": "WedyPlan Unified Enterprise Feature Store",
+  "environment": "production",
+  "onlineStoreTech": "Redis Cluster / Feast Online (Sub-5ms Latency)",
+  "offlineStoreTech": "Apache Iceberg / Parquet on S3 (Batch Training)",
+  "mlFeatureCatalog": "WedyPlan ML Feature Catalog v2",
+  "componentsDetail": [
+    {
+      "component": "Feature Registry",
+      "techStack": "Feast / Hopsworks Registry",
+      "status": "HEALTHY"
+    },
+    {
+      "component": "Feature Versioning",
+      "techStack": "Semantic Versioning Engine",
+      "status": "HEALTHY"
+    },
+    {
+      "component": "Online Store",
+      "techStack": "Redis Cluster (Low Latency)",
+      "status": "HEALTHY"
+    },
+    {
+      "component": "Offline Store",
+      "techStack": "Parquet / Delta Lake on AWS S3",
+      "status": "HEALTHY"
+    },
+    {
+      "component": "Feature Lineage",
+      "techStack": "OpenLineage / DataHub",
+      "status": "HEALTHY"
+    },
+    {
+      "component": "Validation",
+      "techStack": "Great Expectations ML Rules",
+      "status": "HEALTHY"
+    },
+    {
+      "component": "Monitoring",
+      "techStack": "Evidently AI / Prometheus",
+      "status": "HEALTHY"
+    }
+  ],
+  "featureGroups": [
+    {
+      "entity": "Couple",
+      "featureGroup": "couple_budget_behavior_v1",
+      "features": [
+        "avg_category_spend",
+        "budget_utilization_ratio",
+        "vendor_interaction_score"
+      ]
+    },
+    {
+      "entity": "Vendor",
+      "featureGroup": "vendor_matchability_v2",
+      "features": [
+        "response_rate_24h",
+        "booking_conversion_30d",
+        "review_sentiment_score"
+      ]
+    },
+    {
+      "entity": "Booking",
+      "featureGroup": "booking_cancellation_risk_v1",
+      "features": [
+        "time_to_wedding_days",
+        "payment_installment_delay_count",
+        "deposit_status"
+      ]
+    }
+  ],
+  "aiDiscoveryResults": {
+    "totalFeaturesInCatalog": 312,
+    "discoveredRelevantFeatures": [
+      {
+        "modelTarget": "Vendor Recommendation Engine",
+        "suggestedFeature": "vendor_matchability_v2.review_sentiment_score",
+        "similarity": "96.4%"
+      },
+      {
+        "modelTarget": "Couple Budget AI Assistant",
+        "suggestedFeature": "couple_budget_behavior_v1.budget_utilization_ratio",
+        "similarity": "98.1%"
+      }
+    ]
+  },
+  "aiQualityReport": {
+    "overallQualityScore": "99.1%",
+    "driftStatus": "NO_CRITICAL_DRIFT",
+    "qualityAudit": [
+      {
+        "feature": "vendor_matchability_v2.response_rate_24h",
+        "nullPercentage": "0.02%",
+        "distributionEntropy": "NORMAL"
+      },
+      {
+        "feature": "booking_cancellation_risk_v1.payment_installment_delay_count",
+        "nullPercentage": "0.00%",
+        "distributionEntropy": "STABLE"
+      }
+    ]
+  },
+  "aiReuseSuggestions": [
+    {
+      "recommendation": "Consolidate 'vendor_lead_response_time' from Vendor Portal pipeline into central 'vendor_matchability_v2' feature group.",
+      "savings": "Avoids 1.2M redundant online Redis writes per day.",
+      "impact": "HIGH_EFFICIENCY"
+    },
+    {
+      "recommendation": "Reuse 'couple_budget_behavior_v1' embeddings directly in Guest RSVP Prediction AI model.",
+      "savings": "Eliminates duplicate pipeline transformation cost by ~28%.",
+      "impact": "COST_REDUCED"
+    }
+  ]
+}
