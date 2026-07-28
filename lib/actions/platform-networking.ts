@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { updateDnsRecordSchema, UpdateDnsRecordInput, createVpnTunnelSchema, CreateVpnTunnelInput } from "@/lib/validations/platform-networking";
 import { getNetworkStatusSnapshot } from "@/lib/platform-networking/dns-tls-manager";
-import { analyzeNetworkHealthAndSecurity } from "@/lib/platform-networking/topology-analyzer";
+import { analyzePlatformNetworkTopology } from "@/lib/platform-networking/topology-analyzer";
 
 export async function updateDnsRecordAction(data: UpdateDnsRecordInput) {
   const validation = updateDnsRecordSchema.safeParse(data);
@@ -41,7 +41,7 @@ export async function triggerCertificateRenewalAction() {
 export async function generateNetworkingDashboardDataAction() {
   try {
     const network = getNetworkStatusSnapshot();
-    const analysis = analyzeNetworkHealthAndSecurity();
+    const analysis = analyzePlatformNetworkTopology();
 
     return {
       success: true,
