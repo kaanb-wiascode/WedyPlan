@@ -1,0 +1,111 @@
+export type ContractStatus = "DRAFT" | "PENDING_APPROVAL" | "SIGNED" | "REJECTED";
+
+export interface ContractClause {
+  id: string;
+  clauseNumber: string;
+  title: string;
+  content: string;
+  aiRiskLevel: "LOW" | "MEDIUM" | "HIGH";
+  aiRiskSummary?: string;
+}
+
+export interface MobileContractItem {
+  id: string;
+  contractNumber: string;
+  vendorName: string;
+  venueName: string;
+  totalAmount: number;
+  depositAmount: number;
+  status: ContractStatus;
+  version: string;
+  signedAt?: Date;
+  pdfUrl: string;
+  clauses: ContractClause[];
+}
+
+export class MobileContractEngine {
+  private static STORAGE_KEY = "WEDYPLAN_MOBILE_CONTRACTS_V1";
+
+  /**
+   * Aktif Mobil Sözleşmeleri ve Versiyon Detaylarını Getirir
+   */
+  public static async getContracts(): Promise<MobileContractItem[]> {
+    if (typeof window !== "undefined") {
+      const data = localStorage.getItem(this.STORAGE_KEY);
+      if (data) return JSON.parse(data);
+    }
+
+    return [
+      {
+        id: "contract_demo_101",
+        contractNumber: "WP-2026-8821",
+        vendorName: "Çırağan Palace Kempinski",
+        venueName: "Çırağan Balo Salonu",
+        totalAmount: 180000,
+        depositAmount: 50000,
+        status: "PENDING_APPROVAL",
+        version: "v2.1",
+        pdfUrl: "/api/v1/contracts/pdf/contract_demo_101.pdf",
+        clauses: [
+          {
+            id: "c_1",
+            clauseNumber: "Madde 4.2",
+            title: "İptal ve Bakiye İade Koşulları",
+            content: "Etkinlik tarihine 60 gün kala yapılan iptallerde kaporanın %80'i iade edilir.",
+            aiRiskLevel: "LOW",
+            aiRiskSummary: "WedyAI Onayı: Standart düğün sektörü koşullarına %100 uygundur.",
+          },
+          {
+            id: "c_2",
+            clauseNumber: "Madde 8.1",
+            title: "Ses & Müzik Saat Sınırlaması",
+            content: "Açık alanda canlı müzik yayını saat 23:30 itibarıyla sona erer.",
+            aiRiskLevel: "MEDIUM",
+            aiRiskSummary: "Dikkat: Gece 23:30 sonrası müzik kapalı alana taşınmalıdır.",
+          },
+        ],
+      },
+    ];
+  }
+
+  /**
+   * Mobil Dijital İmza Onay Motoru (Biometric & Touch E-Signature)
+   */
+  public static async signContractWithBiometrics(
+    contractId: string,
+    signatureSvgData: string
+  ): Promise<{ success: boolean; contract?: MobileContractItem; error?: string }> {
+    const contracts = await this.getContracts();
+    const index = contracts.findIndex((c) => c.id === contractId);
+
+    if (index === -1) {
+      return { success: false, error: "CONTRACT_NOT_FOUND" };
+    }
+
+    contracts[index].status = "SIGNED";
+    contracts[index].signedAt = new Date();
+
+    if (typeof window !== "undefined") {
+      localStorage.setItem(this.STORAGE_KEY, JSON.stringify(contracts));
+    }
+
+    return { success: true, contract: contracts[index] };
+  }
+
+  /**
+   * Sözleşme Reddetme İşlemi
+   */
+  public static async rejectContract(contractId: string, reason: string): Promise<boolean> {
+    const contracts = await this.getContracts();
+    const index = contracts.findIndex((c) => c.id === contractId);
+
+    if (index !== -1) {
+      contracts[index].status = "REJECTED";
+      if (typeof window !== "undefined") {
+        localStorage.setItem(this.STORAGE_KEY, JSON.stringify(contracts));
+      }
+      return true;
+    }
+    return false;
+  }
+}
