@@ -1,0 +1,65 @@
+"use client";
+
+import React from "react";
+import { motion } from "framer-motion";
+
+export default function CRMHeader({
+  totalCustomers,
+  vipCount,
+  activeCouplesCount,
+  totalRevenue,
+}: {
+  totalCustomers: number;
+  vipCount: number;
+  activeCouplesCount: number;
+  totalRevenue: number;
+}) {
+  return (
+    <div className="max-w-[1600px] mx-auto space-y-6">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+        <div>
+          <div className="flex items-center gap-2">
+            <span className="px-3 py-1 rounded-full text-xs font-semibold bg-indigo-100 text-indigo-700 dark:bg-indigo-950 dark:text-indigo-300">
+              ✦ Enterprise Customer Hub
+            </span>
+            <span className="text-xs text-slate-400">360° Müşteri İlişkileri Portalı</span>
+          </div>
+          <h1 className="text-3xl font-serif font-light mt-1 tracking-tight">Customer Relationship Management</h1>
+        </div>
+
+        <button
+          onClick={() => alert("➕ Yeni Müşteri Ekle Modalı")}
+          className="px-5 py-2.5 rounded-2xl bg-gradient-to-r from-indigo-600 to-purple-600 text-white text-xs font-bold hover:shadow-lg transition flex items-center gap-2"
+        >
+          + Yeni Müşteri Kaydı Ekle
+        </button>
+      </div>
+
+      <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
+        <motion.div whileHover={{ y: -2 }} className="p-5 backdrop-blur-2xl bg-white/70 dark:bg-slate-900/70 border border-white/60 dark:border-slate-800 rounded-3xl shadow-sm">
+          <span className="text-xs text-indigo-600 font-medium uppercase">Toplam Kayıtlı Müşteri</span>
+          <div className="text-2xl font-bold mt-1 text-slate-900 dark:text-slate-100">{totalCustomers} Müşteri</div>
+          <span className="text-[11px] text-slate-400 mt-0.5 block">Tüm Segmentler</span>
+        </motion.div>
+
+        <motion.div whileHover={{ y: -2 }} className="p-5 backdrop-blur-2xl bg-white/70 dark:bg-slate-900/70 border border-white/60 dark:border-slate-800 rounded-3xl shadow-sm">
+          <span className="text-xs text-emerald-600 font-medium uppercase">Aktif Düğün Çiftleri</span>
+          <div className="text-2xl font-bold mt-1 text-emerald-600">{activeCouplesCount} Çift</div>
+          <span className="text-[11px] text-slate-400 mt-0.5 block">Sözleşmesi İmzalı</span>
+        </motion.div>
+
+        <motion.div whileHover={{ y: -2 }} className="p-5 backdrop-blur-2xl bg-white/70 dark:bg-slate-900/70 border border-white/60 dark:border-slate-800 rounded-3xl shadow-sm">
+          <span className="text-xs text-amber-600 font-medium uppercase">VIP Müşteri Portföyü</span>
+          <div className="text-2xl font-bold mt-1 text-amber-600">{vipCount} VIP Çift</div>
+          <span className="text-[11px] text-slate-400 mt-0.5 block">Özel Protokol Hizmeti</span>
+        </motion.div>
+
+        <motion.div whileHover={{ y: -2 }} className="p-5 backdrop-blur-2xl bg-white/70 dark:bg-slate-900/70 border border-white/60 dark:border-slate-800 rounded-3xl shadow-sm">
+          <span className="text-xs text-purple-600 font-medium uppercase">Toplam Müşteri Hacmi</span>
+          <div className="text-2xl font-serif font-bold mt-1 text-purple-600">{totalRevenue.toLocaleString("tr-TR")} ₺</div>
+          <span className="text-[11px] text-slate-400 mt-0.5 block">Kazanılan Portföy Değeri</span>
+        </motion.div>
+      </div>
+    </div>
+  );
+}
