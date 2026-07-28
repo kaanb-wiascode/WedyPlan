@@ -26,9 +26,9 @@ export const HeroSearchGlass: React.FC = () => {
       initial={{ opacity: 0, y: 30 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.6, ease: 'easeOut' }}
-      className="mt-12 bg-white/35 backdrop-blur-3xl border border-white/80 rounded-[40px] p-6 md:p-8 shadow-[0_25px_60px_rgba(0,0,0,0.04)] max-w-[950px] mx-auto text-left space-y-6 relative z-10"
+      className="mt-12 bg-white/60 backdrop-blur-3xl border border-white/90 rounded-[40px] p-6 md:p-8 shadow-[0_25px_60px_rgba(0,0,0,0.03)] max-w-[950px] mx-auto text-left space-y-6 relative z-10"
     >
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pb-6 border-b border-black/[0.05]">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pb-6 border-b border-black/[0.06]">
         {[
           { id: 'city', icon: MapPin, label: 'Bölge Seçin', options: CITIES },
           { id: 'category', icon: Building2, label: 'Mekan Tarzı', options: CATEGORIES },
@@ -40,14 +40,14 @@ export const HeroSearchGlass: React.FC = () => {
           ]},
         ].map((field) => (
           <div key={field.id} className="space-y-2 px-2">
-            <label htmlFor={field.id} className="text-[10px] md:text-[11px] font-bold uppercase tracking-wider text-[#86868B] flex items-center gap-1.5">
-              <field.icon className="w-3.5 h-3.5 text-[#D4AF37]" /> {field.label}
+            <label htmlFor={field.id} className="text-[10px] md:text-[11px] font-bold uppercase tracking-wider text-[#666666] flex items-center gap-1.5 font-sans-corporate">
+              <field.icon className="w-3.5 h-3.5 text-[#111111]" /> {field.label}
             </label>
             <select
               id={field.id}
               value={filters[field.id as keyof typeof filters]}
               onChange={(e) => handleFilterChange(field.id as keyof typeof filters, e.target.value)}
-              className="w-full h-[46px] px-3 bg-white/40 focus:bg-white/70 backdrop-blur-xl border border-white/80 rounded-2xl font-medium text-[14px] text-[#1D1D1F] outline-none cursor-pointer transition-colors shadow-inner"
+              className="w-full h-[46px] px-3 bg-white/50 focus:bg-white/90 backdrop-blur-xl border border-black/10 rounded-2xl font-medium text-[14px] text-[#111111] outline-none cursor-pointer transition-all shadow-inner"
             >
               {field.options.map((opt) => (
                 <option key={opt.value} value={opt.value}>{opt.label}</option>
@@ -60,14 +60,14 @@ export const HeroSearchGlass: React.FC = () => {
       <div className="flex flex-col md:flex-row items-center justify-between gap-8 pt-2 px-2">
         <div className="w-full md:w-3/5 space-y-4">
           <div className="flex justify-between items-center text-[12px] md:text-[13px]">
-            <span className="font-medium text-[#6E6E73] flex items-center gap-1.5">
-              <Calculator className="w-4 h-4 text-[#D4AF37]" /> Toplam Düğün Bütçeniz:
+            <span className="font-medium text-[#555555] flex items-center gap-1.5 font-sans-corporate">
+              <Calculator className="w-4 h-4 text-[#111111]" /> Toplam Düğün Bütçeniz:
             </span>
             <motion.span 
               key={budget}
-              initial={{ scale: 1.1, color: '#D4AF37' }}
-              animate={{ scale: 1, color: '#1D1D1F' }}
-              className="font-mono font-bold text-[15px] md:text-[16px] bg-white/70 backdrop-blur-xl px-4 py-1.5 rounded-full border border-white/90 shadow-sm"
+              initial={{ scale: 1.05 }}
+              animate={{ scale: 1 }}
+              className="font-mono font-bold text-[15px] md:text-[16px] bg-white/80 backdrop-blur-xl px-4 py-1.5 rounded-full border border-black/10 text-[#111111] shadow-sm"
             >
               {budget.toLocaleString('tr-TR')} {APP_CONFIG.CURRENCY}
             </motion.span>
@@ -81,7 +81,7 @@ export const HeroSearchGlass: React.FC = () => {
               step={SEARCH_DEFAULTS.BUDGET_STEP}
               value={budget}
               onChange={(e) => setBudget(Number(e.target.value))}
-              className="w-full h-2 bg-black/10 rounded-full appearance-none cursor-pointer accent-[#D4AF37] focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/50"
+              className="w-full h-2 bg-black/10 rounded-full appearance-none cursor-pointer accent-[#111111] focus:outline-none"
             />
           </div>
         </div>
@@ -90,8 +90,8 @@ export const HeroSearchGlass: React.FC = () => {
           <Link href={`/mekanlar?kategori=${filters.category}&sehir=${filters.city}&butce=${budget}`} passHref>
             <GlassButton 
               variant="primary" 
-              leftIcon={<Sparkles className="w-4 h-4 text-[#D4AF37]" />}
-              className="w-full h-[54px] shadow-[0_15px_30px_rgba(0,0,0,0.06)]"
+              leftIcon={<Sparkles className="w-4 h-4 text-[#F5F4F0]" />}
+              className="w-full h-[54px] !bg-[#111111] !text-[#F5F4F0] rounded-2xl font-medium tracking-wide shadow-lg hover:opacity-90 transition-all"
             >
               Yapay Zeka ile {matchedVenuesCount} Mekan Bul
             </GlassButton>

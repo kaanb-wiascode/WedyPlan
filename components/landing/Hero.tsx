@@ -5,26 +5,25 @@ export function Hero() {
         className="pointer-events-none absolute inset-0 -z-10"
         aria-hidden
       >
-        <div className="absolute -top-24 left-1/2 h-96 w-96 -translate-x-1/2 rounded-full bg-wedy-pink/10 blur-3xl" />
-        <div className="absolute top-32 right-0 h-72 w-72 rounded-full bg-wedy-purple/10 blur-3xl" />
-        <div className="absolute bottom-0 left-0 h-64 w-64 rounded-full bg-wedy-pink/5 blur-3xl" />
+        <div className="absolute -top-24 left-1/2 h-96 w-96 -translate-x-1/2 rounded-full bg-black/5 blur-3xl" />
+        <div className="absolute top-32 right-0 h-72 w-72 rounded-full bg-[#D4AF37]/10 blur-3xl" />
       </div>
 
       <div className="mx-auto max-w-3xl text-center">
-        <p className="mb-4 inline-flex items-center gap-2 rounded-full border border-wedy-purple/10 bg-white/60 px-4 py-1.5 text-sm font-medium text-wedy-purple/80 backdrop-blur-sm">
-          <span className="h-1.5 w-1.5 rounded-full bg-wedy-pink" />
-          Türkiye&apos;nin düğün planlama platformu
+        <p className="mb-4 inline-flex items-center gap-2 rounded-full border border-black/10 bg-white/70 px-4 py-1.5 font-sans-corporate text-xs font-semibold tracking-wider text-[#444444] uppercase backdrop-blur-sm">
+          <span className="h-1.5 w-1.5 rounded-full bg-[#111111]" />
+          Türkiye&apos;nin Akıllı Düğün Platformu
         </p>
 
-        <h1 className="text-4xl font-bold leading-tight tracking-tight text-wedy-purple sm:text-5xl lg:text-6xl">
+        <h1 className="font-serif-editorial text-4xl font-normal leading-tight tracking-tight text-[#111111] sm:text-5xl lg:text-6xl">
           Hayalindeki{" "}
-          <span className="bg-linear-to-r from-wedy-pink to-wedy-purple bg-clip-text text-transparent">
+          <span className="italic font-light">
             Düğünü
           </span>{" "}
-          Planla
+          Planla.
         </h1>
 
-        <p className="mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-wedy-purple/65 sm:text-xl">
+        <p className="mx-auto mt-6 max-w-2xl font-sans-corporate text-lg leading-relaxed text-[#555555] sm:text-xl">
           Mekan, fotoğrafçı, gelinlik ve daha fazlası — hayalinizdeki düğünü
           planlamak için ihtiyacınız olan her şey tek bir yerde.
         </p>

@@ -5,28 +5,28 @@ const categories = [
     title: "Düğün Salonları",
     description: "Şehir merkezinde veya sahil kenarında hayalinizdeki salonu keşfedin.",
     href: "/mekanlar/salon",
-    gradient: "from-wedy-purple/80 to-wedy-purple",
+    gradient: "from-[#222222] to-[#111111]",
     icon: BuildingIcon,
   },
   {
     title: "Kır Düğünü",
     description: "Doğanın kalbinde, romantik açık hava mekanları ve bahçeler.",
     href: "/mekanlar/kir-dugunu",
-    gradient: "from-emerald-600/80 to-emerald-800",
+    gradient: "from-[#333333] to-[#1A1A1A]",
     icon: TreeIcon,
   },
   {
     title: "Fotoğrafçılar",
     description: "Anılarınızı ölümsüzleştirecek profesyonel düğün fotoğrafçıları.",
     href: "/fotografcilar",
-    gradient: "from-wedy-pink/80 to-wedy-pink",
+    gradient: "from-[#222222] to-[#111111]",
     icon: CameraIcon,
   },
   {
     title: "Gelinlikçiler",
     description: "Tarzınıza uygun gelinlik ve aksesuar koleksiyonlarını inceleyin.",
     href: "/gelinlik",
-    gradient: "from-rose-400/80 to-rose-600",
+    gradient: "from-[#333333] to-[#1A1A1A]",
     icon: DressIcon,
   },
 ];
@@ -36,10 +36,10 @@ export function FeaturedCategories() {
     <section className="px-4 py-20 sm:px-6 lg:px-8 lg:py-28">
       <div className="mx-auto max-w-6xl">
         <div className="mb-12 text-center">
-          <h2 className="text-3xl font-bold tracking-tight text-wedy-purple sm:text-4xl">
+          <h2 className="font-serif-editorial text-3xl font-normal tracking-tight text-[#111111] sm:text-4xl">
             Öne Çıkan Kategoriler
           </h2>
-          <p className="mx-auto mt-4 max-w-xl text-wedy-purple/60">
+          <p className="mx-auto mt-4 max-w-xl font-sans-corporate text-sm text-[#666666]">
             Düğününüzün her detayı için en iyi firmaları keşfedin
           </p>
         </div>
@@ -49,25 +49,25 @@ export function FeaturedCategories() {
             <Link
               key={category.href}
               href={category.href}
-              className="group relative overflow-hidden rounded-2xl bg-white shadow-md shadow-wedy-purple/5 transition-all hover:-translate-y-1 hover:shadow-xl hover:shadow-wedy-purple/10"
+              className="group relative overflow-hidden rounded-2xl bg-white border border-black/5 shadow-sm transition-all hover:-translate-y-1 hover:shadow-xl"
             >
               <div
-                className={`flex h-40 items-center justify-center bg-linear-to-br ${category.gradient}`}
+                className={`flex h-40 items-center justify-center bg-gradient-to-br ${category.gradient}`}
               >
-                <category.icon className="h-16 w-16 text-white/90 transition-transform group-hover:scale-110" />
+                <category.icon className="h-14 w-14 text-[#F5F4F0]/90 transition-transform group-hover:scale-110" />
               </div>
 
               <div className="p-5">
-                <h3 className="text-lg font-semibold text-wedy-purple group-hover:text-wedy-pink transition-colors">
+                <h3 className="font-serif-editorial text-xl font-medium text-[#111111]">
                   {category.title}
                 </h3>
-                <p className="mt-2 text-sm leading-relaxed text-wedy-purple/60">
+                <p className="mt-2 font-sans-corporate text-xs leading-relaxed text-[#666666]">
                   {category.description}
                 </p>
-                <span className="mt-4 inline-flex items-center gap-1 text-sm font-medium text-wedy-pink opacity-0 transition-opacity group-hover:opacity-100">
+                <span className="mt-4 inline-flex items-center gap-1 font-sans-corporate text-xs font-semibold text-[#111111] opacity-0 transition-opacity group-hover:opacity-100">
                   Keşfet
                   <svg
-                    className="h-4 w-4 transition-transform group-hover:translate-x-0.5"
+                    className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5"
                     fill="none"
                     viewBox="0 0 24 24"
                     stroke="currentColor"
