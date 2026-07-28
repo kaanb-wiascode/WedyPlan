@@ -1,20 +1,14 @@
 import type { Metadata, Viewport } from "next";
-import { Plus_Jakarta_Sans, Cormorant_Garamond } from "next/font/google";
+import { Inter } from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from "@/context/AuthContext";
 
-// Modern, kurumsal ve okunabilirliği yüksek gövde fontu
-const sansFont = Plus_Jakarta_Sans({ 
+// Apple.com tipi pürüzsüz, modern ve yüksek netlikli gövde/başlık fontu
+const appleFont = Inter({ 
   subsets: ["latin"], 
-  variable: "--font-sans",
-  weight: ["300", "400", "500", "600", "700"]
-});
-
-// Logo ile birebir uyumlu, lüks editorial serif başlık fontu
-const serifFont = Cormorant_Garamond({ 
-  subsets: ["latin"], 
-  variable: "--font-serif",
-  weight: ["400", "500", "600", "700"]
+  variable: "--font-apple",
+  weight: ["300", "400", "500", "600", "700"],
+  display: "swap"
 });
 
 export const viewport: Viewport = {
@@ -51,8 +45,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="tr" className={`${sansFont.variable} ${serifFont.variable}`}>
-      <body className="font-sans antialiased bg-[#F5F4F0] text-[#111111] selection:bg-[#111111] selection:text-[#F5F4F0]">
+    <html lang="tr" className={appleFont.variable}>
+      <body className="font-sans antialiased bg-[#F5F4F0] text-[#1D1D1F] selection:bg-[#111111] selection:text-[#F5F4F0]">
         <AuthProvider>
           {children}
         </AuthProvider>

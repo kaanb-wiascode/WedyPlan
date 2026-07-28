@@ -1,55 +1,56 @@
 @import "tailwindcss";
 
-/* 🌟 WedyPlan Luxury Editorial & Liquid Glass Theme */
+/* 🌟 WedyPlan Luxury Apple Editorial & Liquid Glass Theme */
 
 :root {
   --background: #F5F4F0; /* Soft Ivory Canvas */
-  --foreground: #111111; /* Onyx Black */
+  --foreground: #1D1D1F; /* Apple Signature Charcoal Black */
   --accent-gold: rgba(212, 175, 55, 0.25);
 }
 
-body {
-  background-color: var(--background);
-  color: var(--foreground);
-}
+/* 🍏 Apple SF Pro Standard Font System Integration */
 
-/* 🖋️ Editorial & Corporate Typography Utilities */
+@layer base {
+  body {
+    font-family: var(--font-apple), -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", Helvetica, Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    letter-spacing: -0.011em; /* Apple stili mikro harf aralığı */
+    background-color: var(--background);
+    color: var(--foreground);
+  }
 
-.font-serif-editorial {
-  font-family: var(--font-serif), Georgia, serif;
-  letter-spacing: -0.02em;
-}
+  /* Apple.com Tarzı Sıkı ve Net Başlıklar */
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-apple), -apple-system, BlinkMacSystemFont, "SF Pro Display", sans-serif;
+    letter-spacing: -0.025em; /* Apple dev başlık sıkıştırması */
+    font-weight: 600;
+    color: #1D1D1F;
+  }
 
-.font-sans-corporate {
-  font-family: var(--font-sans), sans-serif;
-  letter-spacing: -0.01em;
-}
-
-/* Sayfa ve Bileşen Başlıkları için Otomatik Editorial Font */
-h1, h2, h3, h4, .heading-editorial {
-  font-family: var(--font-serif), Georgia, serif;
-  font-weight: 500;
-  letter-spacing: -0.02em;
+  h1 {
+    letter-spacing: -0.035em;
+  }
 }
 
 /* 🧊 Apple iOS & Editorial Liquid Glass Classes */
 
 .glass-card {
-  background-color: rgba(255, 255, 255, 0.6);
-  backdrop-filter: blur(24px);
-  -webkit-backdrop-filter: blur(24px);
-  border: 1px solid rgba(255, 255, 255, 0.85);
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.02);
+  background-color: rgba(255, 255, 255, 0.65);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.8);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.03);
 }
 
 .glass-btn-primary {
-  background-color: #111111; /* Logo ile tam uyumlu Mat Siyah */
+  background-color: #111111; /* Mat Siyah */
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   border: 1px solid #111111;
-  color: #F5F4F0; /* Fildişi Yazı */
+  color: #F5F4F0;
   font-weight: 500;
-  letter-spacing: 0.05em;
+  letter-spacing: -0.01em;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
@@ -67,7 +68,7 @@ h1, h2, h3, h4, .heading-editorial {
   background-color: rgba(255, 255, 255, 0.5);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(17, 17, 17, 0.12); /* Zarif ince hatlar */
+  border: 1px solid rgba(17, 17, 17, 0.12);
   color: #111111;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
@@ -78,26 +79,6 @@ h1, h2, h3, h4, .heading-editorial {
 }
 
 .glass-btn-secondary:active {
-  transform: scale(0.97);
-}
-
-.glass-btn-gold {
-  background-color: rgba(212, 175, 55, 0.15);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(212, 175, 55, 0.4);
-  color: #111111;
-  font-weight: 600;
-  box-shadow: 0 10px 30px rgba(212, 175, 55, 0.12);
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.glass-btn-gold:hover {
-  background-color: rgba(212, 175, 55, 0.3);
-  transform: translateY(-1px);
-}
-
-.glass-btn-gold:active {
   transform: scale(0.97);
 }
 
