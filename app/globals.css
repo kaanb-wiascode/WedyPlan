@@ -1,83 +1,118 @@
 @import "tailwindcss";
 
-/* 🌟 Apple iOS Liquid Glass - Pure CSS Custom Classes (Zero PostCSS Build Errors) */
+/* 🌟 WedyPlan Luxury Editorial & Liquid Glass Theme */
+
+:root {
+  --background: #F5F4F0; /* Soft Ivory Canvas */
+  --foreground: #111111; /* Onyx Black */
+  --accent-gold: rgba(212, 175, 55, 0.25);
+}
+
+body {
+  background-color: var(--background);
+  color: var(--foreground);
+}
+
+/* 🖋️ Editorial & Corporate Typography Utilities */
+
+.font-serif-editorial {
+  font-family: var(--font-serif), Georgia, serif;
+  letter-spacing: -0.02em;
+}
+
+.font-sans-corporate {
+  font-family: var(--font-sans), sans-serif;
+  letter-spacing: -0.01em;
+}
+
+/* Sayfa ve Bileşen Başlıkları için Otomatik Editorial Font */
+h1, h2, h3, h4, .heading-editorial {
+  font-family: var(--font-serif), Georgia, serif;
+  font-weight: 500;
+  letter-spacing: -0.02em;
+}
+
+/* 🧊 Apple iOS & Editorial Liquid Glass Classes */
 
 .glass-card {
-  background-color: rgba(255, 255, 255, 0.35);
+  background-color: rgba(255, 255, 255, 0.6);
   backdrop-filter: blur(24px);
   -webkit-backdrop-filter: blur(24px);
-  border: 1px solid rgba(255, 255, 255, 0.8);
-  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.85);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.02);
 }
 
 .glass-btn-primary {
-  background-color: rgba(255, 255, 255, 0.7);
+  background-color: #111111; /* Logo ile tam uyumlu Mat Siyah */
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.9);
-  color: #1D1D1F;
-  font-weight: 600;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03);
+  border: 1px solid #111111;
+  color: #F5F4F0; /* Fildişi Yazı */
+  font-weight: 500;
+  letter-spacing: 0.05em;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .glass-btn-primary:hover {
-  background-color: rgba(255, 255, 255, 0.95);
-  transform: scale(1.02);
+  background-color: #222222;
+  transform: translateY(-1px);
 }
 
 .glass-btn-primary:active {
-  transform: scale(0.95);
+  transform: scale(0.97);
 }
 
 .glass-btn-secondary {
-  background-color: rgba(255, 255, 255, 0.3);
+  background-color: rgba(255, 255, 255, 0.5);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(255, 255, 255, 0.6);
-  color: #2C2C2E;
+  border: 1px solid rgba(17, 17, 17, 0.12); /* Zarif ince hatlar */
+  color: #111111;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .glass-btn-secondary:hover {
-  background-color: rgba(255, 255, 255, 0.6);
+  background-color: rgba(255, 255, 255, 0.85);
+  border-color: rgba(17, 17, 17, 0.3);
 }
 
 .glass-btn-secondary:active {
-  transform: scale(0.95);
+  transform: scale(0.97);
 }
 
 .glass-btn-gold {
-  background-color: rgba(212, 175, 55, 0.25);
+  background-color: rgba(212, 175, 55, 0.15);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(212, 175, 55, 0.5);
-  color: #1D1D1F;
+  border: 1px solid rgba(212, 175, 55, 0.4);
+  color: #111111;
   font-weight: 600;
-  box-shadow: 0 10px 30px rgba(212, 175, 55, 0.18);
+  box-shadow: 0 10px 30px rgba(212, 175, 55, 0.12);
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .glass-btn-gold:hover {
-  background-color: rgba(212, 175, 55, 0.4);
-  transform: scale(1.02);
+  background-color: rgba(212, 175, 55, 0.3);
+  transform: translateY(-1px);
 }
 
 .glass-btn-gold:active {
-  transform: scale(0.95);
+  transform: scale(0.97);
 }
 
 .glass-input {
-  background-color: rgba(255, 255, 255, 0.4);
+  background-color: rgba(255, 255, 255, 0.55);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(255, 255, 255, 0.8);
+  border: 1px solid rgba(17, 17, 17, 0.1);
   border-radius: 1rem;
-  color: #1D1D1F;
+  color: #111111;
   outline: none;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .glass-input:focus {
-  background-color: rgba(255, 255, 255, 0.75);
+  background-color: rgba(255, 255, 255, 0.9);
+  border-color: rgba(17, 17, 17, 0.4);
 }
