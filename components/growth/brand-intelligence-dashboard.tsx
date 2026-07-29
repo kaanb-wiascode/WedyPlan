@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { ShieldCheck, Sparkles, Radio, Newspaper, Twitter, Instagram, PieChart } from "lucide-react";
+import { ShieldCheck, Sparkles, Radio, Newspaper, MessageSquare, PieChart } from "lucide-react";
 import { BrandIntelligenceEngine, BrandIntelligenceSummary, BrandMention, MentionSource } from "@/lib/growth/brand-intelligence-engine";
 
 export const BrandIntelligenceDashboard: React.FC = () => {
@@ -23,8 +23,8 @@ export const BrandIntelligenceDashboard: React.FC = () => {
   const renderSourceIcon = (src: MentionSource) => {
     switch (src) {
       case "NEWS_MEDIA": return <Newspaper className="w-4 h-4 text-blue-400" />;
-      case "INSTAGRAM": return <Instagram className="w-4 h-4 text-pink-400" />;
-      case "TWITTER": return <Twitter className="w-4 h-4 text-sky-400" />;
+      case "INSTAGRAM": return <MessageSquare className="w-4 h-4 text-pink-400" />;
+      case "TWITTER": return <Radio className="w-4 h-4 text-sky-400" />;
       default: return <Radio className="w-4 h-4 text-emerald-400" />;
     }
   };

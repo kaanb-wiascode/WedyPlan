@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Share2, Sparkles, Instagram, Youtube, CheckCircle2, RefreshCw, Send, ShieldCheck, Flame, Hash, Clock, Plus, BarChart2 } from "lucide-react";
+import { Share2, Sparkles, CheckCircle2, RefreshCw, Send, ShieldCheck, Flame, Hash, Clock, Plus, BarChart2, Video, Globe } from "lucide-react";
 import { SocialGrowthEngine, SocialMediaPost, UgcProofItem, SocialPlatform } from "@/lib/growth/social-growth-engine";
 
 export const SocialGrowthCenter: React.FC = () => {

@@ -60,7 +60,6 @@ export class GrowthCommandEngine {
         id: "ins_102",
         category: "FORECAST",
         headline: "30 Günlük GMV Tahmin Raporu",
-        category: "FORECAST",
         description: "Yaz dönemi rezervasyon piki ve Escrow kapora tamamlanma hızı sayesinde önümüzdeki 30 günde GMV hedefi aşılacaktır.",
         actionableStep: "Yüksek hacimli otel zincirleri için B2B Escrow limitini artırın.",
         projectedGmvImpact: "₺22.5M TL Hedeflenen GMV",
