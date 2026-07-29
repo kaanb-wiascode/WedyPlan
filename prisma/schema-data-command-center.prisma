@@ -1,0 +1,13 @@
+// Executive Data Command Center Metrics
+model ExecutiveDataMetrics {
+  id                    String   @id @default(cuid())
+  roleView              String   // CEO, CTO, CIO, CDO, CFO, AI_DIRECTOR
+  enterpriseHealthScore Float    // 0 - 100
+  activeRiskIndex       Float    // 0 - 100
+  subsystemStatus       Json     // Status map of Data Lake, Streaming, Quality, Feature Store, etc.
+  strategicInsights     Json     // Array of Strategic Insights
+  optimizationRecs     Json     // Array of Optimization Recommendations
+  updatedAt             DateTime @updatedAt
+
+  @@map("executive_data_metrics")
+}

@@ -1,6 +1,13 @@
-import React from "react";
-import AdminCentralIntelligenceClient from "@/components/admin/central-intelligence/AdminCentralIntelligenceClient";
+import { getExecutiveDataDashboardAction } from '@/lib/actions/admin-data-command-center';
+import { ExecutiveDataCommandClient } from '@/components/admin/central-intelligence/ExecutiveDataCommandClient';
 
-export default function AdminCentralIntelligencePage() {
-  return <AdminCentralIntelligenceClient />;
+export const metadata = {
+  title: 'Enterprise Data Command Center | WedyPlan Admin',
+  description: 'Executive control center for the entire enterprise data ecosystem.',
+};
+
+export default async function ExecutiveDataCommandPage() {
+  const response = await getExecutiveDataDashboardAction('CEO');
+
+  return <ExecutiveDataCommandClient initialData={response.data} />;
 }
