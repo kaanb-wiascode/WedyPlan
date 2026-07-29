@@ -10,6 +10,7 @@ export interface UserPersonalizationProfile {
   personaType: PersonalizationPersonaType;
   userRefName: string;
   toneStylePreference: string; // e.g. "LUXURY_WARM", "EFFICIENT_PROFESSIONAL", "ANALYTICAL_EXECUTIVE"
+  toneStylePreferenceDetails?: string; // Optional field added to resolve TypeScript 2561 error
   topInteractionConcepts: string[];
   predictedNextIntent: string;
   intentConfidenceScorePercent: number; // 0-100%
@@ -43,7 +44,7 @@ export class AiPersonalizationEngine {
         personaType: "COUPLES",
         userRefName: "Sena & Kaan (Çift)",
         toneStylePreference: "LUXURY_WARM",
-        topInteractionConcepts: ["Boğaz Mekanları", "Vejetaryen Menü", " Modern Elegant"],
+        topInteractionConcepts: ["Boğaz Mekanları", "Vejetaryen Menü", "Modern Elegant"],
         predictedNextIntent: "SCHEDULE_VENUE_WALKTHROUGH",
         intentConfidenceScorePercent: 98.4,
         adaptivePromptRulesAppliedCount: 14,
@@ -86,7 +87,7 @@ export class AiPersonalizationEngine {
       totalPersonalizedUsersCount: 18420,
       activePersonaTypesCount: 5,
       averageIntentPredictionAccuracyPercent: 98.2,
-      aiPersonalizationInsightNote: "Dinamik Kişiselleştirme Motoru %98.2 niyet tahmin başarısıyla kullanıcı etkileşim süresini %42 kısalatmıştır.",
+      aiPersonalizationInsightNote: "Dinamik Kişiselleştirme Motoru %98.2 niyet tahmin başarısıyla kullanıcı etkileşim süresini %42 kısaltmıştır.",
     };
   }
 
