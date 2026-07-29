@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { CheckCircle2, Sparkles, ShieldCheck, RefreshCw, AlertTriangle, Scale, CheckCheck, Activity } from "lucide-react";
+import { CheckCircle2, Sparkles, ShieldCheck, RefreshCw, AlertTriangle, Scale, CheckCheck, Activity, AlertCircle } from "lucide-react";
 import { ReconciliationEngine, ReconciliationBatchRecord, FinancialClosingSummary, ReconciliationDomain } from "@/lib/fintech/reconciliation-engine";
 
 export const ReconciliationCenter: React.FC = () => {
