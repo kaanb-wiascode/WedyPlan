@@ -1,93 +1,57 @@
-"use client";
-import React from "react";
-import Link from "next/link";
-import { usePathname } from "next/navigation";
+'use client';
 
-export default function CoupleSidebar() {
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
+import { BrandLogo } from '@/components/ui/brand-logo';
+
+const coupleNavItems = [
+  { label: 'Özet Panel', href: '/cift/dashboard', icon: '📊' },
+  { label: 'AI Planlayıcı', href: '/cift/ai-asistan', icon: '✨' },
+  { label: 'Bütçe Yönetimi', href: '/cift/butce', icon: '💰' },
+  { label: 'Davetli Listesi', href: '/cift/davetliler', icon: '💌' },
+  { label: 'Firmalarım', href: '/cift/firmalarim', icon: '🏰' },
+  { label: 'Görevler', href: '/cift/gorevler', icon: '✅' },
+];
+
+export function CoupleSidebar() {
   const pathname = usePathname();
 
-  const menuGroups = [
-    {
-      title: "Genel Bakış & AI",
-      items: [
-        { name: "Executive Dashboard", href: "/couple/dashboard", icon: "📊" },
-        { name: "AI Wedding Insights", href: "/couple/insights", icon: "🧠" },
-        { name: "AI Wedding Planner", href: "/couple/planner", icon: "✨" },
-      ]
-    },
-    {
-      title: "Planlama & Organizasyon",
-      items: [
-        { name: "Timeline Engine", href: "/couple/timeline", icon: "⏳" },
-        { name: "AI Checklist", href: "/couple/checklist", icon: "✅" },
-        { name: "Guest Management", href: "/couple/guests", icon: "👥" },
-        { name: "Invitation & RSVP", href: "/couple/invitations", icon: "💌" },
-      ]
-    },
-    {
-      title: "Finans & Hukuk",
-      items: [
-        { name: "Budget Engine", href: "/couple/budget", icon: "💰" },
-        { name: "Payment Center", href: "/couple/payments", icon: "💳" },
-        { name: "Digital Contracts", href: "/couple/contracts", icon: "✍️" },
-        { name: "Document Vault", href: "/couple/vault", icon: "🗄️" },
-      ]
-    },
-    {
-      title: "Tedarikçi & Keşif",
-      items: [
-        { name: "Vendor Discovery", href: "/couple/vendors", icon: "🔍" },
-        { name: "Smart Offer Requests", href: "/couple/requests", icon: "📨" },
-        { name: "Proposal Comparison", href: "/couple/proposals", icon: "⚖️" },
-        { name: "Messaging Center", href: "/couple/messages", icon: "💬" },
-      ]
-    },
-    {
-      title: "Kişiselleştirme",
-      items: [
-        { name: "Website Builder", href: "/couple/website", icon: "🌐" },
-        { name: "Favorites & Mood", href: "/couple/favorites", icon: "🎨" },
-        { name: "Wedding Profile", href: "/couple/profile", icon: "💍" },
-        { name: "Settings", href: "/couple/settings", icon: "⚙️" },
-      ]
-    }
-  ];
-
   return (
-    <aside className="w-64 h-screen bg-slate-900 text-slate-300 flex flex-col fixed left-0 top-0 overflow-y-auto hidden md:flex border-r border-slate-800">
-      <div className="p-6">
-        <h2 className="text-xl font-serif font-bold text-white tracking-tight flex items-center gap-2">
-          <span>WedyPlan</span>
-          <span className="text-[10px] bg-rose-500 text-white px-2 py-0.5 rounded-full font-sans uppercase">Couple</span>
-        </h2>
+    <aside className="w-64 min-h-screen bg-white border-r border-[#E8DFD8] p-6 flex flex-col justify-between">
+      <div>
+        {/* Çift Portalı Logosu */}
+        <div className="pb-8 border-b border-[#F0EBE1]">
+          <BrandLogo variant="couple" width={160} height={36} />
+        </div>
+
+        {/* Menü İtemleri */}
+        <nav className="mt-6 space-y-1">
+          {coupleNavItems.map((item) => {
+            const isActive = pathname === item.href;
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all ${
+                  isActive
+                    ? 'bg-[#F9F8F6] text-[#1A1A1A] font-semibold border-l-4 border-[#C5A059]'
+                    : 'text-[#666666] hover:bg-[#FAF9F5] hover:text-[#1A1A1A]'
+                }`}
+              >
+                <span>{item.icon}</span>
+                <span>{item.label}</span>
+              </Link>
+            );
+          })}
+        </nav>
       </div>
 
-      <nav className="flex-1 px-4 space-y-6 pb-8">
-        {menuGroups.map((group, i) => (
-          <div key={i}>
-            <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 ml-2 mb-2 block">
-              {group.title}
-            </span>
-            <div className="space-y-1">
-              {group.items.map((item) => {
-                const isActive = pathname === item.href;
-                return (
-                  <Link
-                    key={item.href}
-                    href={item.href}
-                    className={`flex items-center gap-3 px-3 py-2 rounded-xl text-xs font-medium transition ${
-                      isActive ? "bg-rose-500/10 text-rose-400" : "hover:bg-slate-800 hover:text-white"
-                    }`}
-                  >
-                    <span className="text-sm">{item.icon}</span>
-                    {item.name}
-                  </Link>
-                );
-              })}
-            </div>
-          </div>
-        ))}
-      </nav>
+      <div className="pt-6 border-t border-[#F0EBE1]">
+        <div className="bg-[#F9F8F6] p-4 rounded-2xl text-xs text-[#666666]">
+          <p className="font-semibold text-[#1A1A1A] mb-1">Yardıma mı ihtiyacınız var?</p>
+          <p>AI Düğün Asistanınız 7/24 hizmetinizde.</p>
+        </div>
+      </div>
     </aside>
   );
 }
