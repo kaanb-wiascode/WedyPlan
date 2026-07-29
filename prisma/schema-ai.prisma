@@ -1,56 +1,31 @@
-// MLOps Datasets
-model MlopsDataset {
-  id          String   @id @default(cuid())
-  name        String
-  version     String
-  type        String   // TRAINING, VALIDATION, TEST
-  rowCount    Int
-  featureCount Int
-  qualityScore Float
-  status      String   // READY, PROCESSING, ARCHIVED
-  storagePath String
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  models      MlopsModelDataset[]
+// Predictive Analytics Forecast Models & Results
+model PredictiveForecast {
+  id               String   @id @default(cuid())
+  metricType       String   // REVENUE, BOOKINGS, MARKETPLACE_GROWTH, RETENTION, VENDOR_GROWTH, CASH_FLOW
+  timeframe        String   // MONTHLY, QUARTERLY, ANNUAL
+  forecastValue    Float
+  lowerBound       Float    // Confidence Interval Low
+  upperBound       Float    // Confidence Interval High
+  confidenceScore  Float    // e.g., 0.95 (95%)
+  trendDirection   String   // UPWARD, STABLE, DOWNWARD
+  riskScore        Float    // 0 - 1.0 Risk index
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
 
-  @@map("mlops_datasets")
+  simulations      PredictiveSimulation[]
+
+  @@map("predictive_forecasts")
 }
 
-// MLOps Inference Logs
-model MlopsInferenceLog {
-  id            String   @id @default(cuid())
-  modelId       String
-  modelVersion  String
-  inputSummary  Json
-  outputSummary Json
-  latencyMs     Float
-  driftScore    Float?
-  flagged       Boolean  @default(false)
-  timestamp     DateTime @default(now())
+model PredictiveSimulation {
+  id              String             @id @default(cuid())
+  forecastId      String
+  scenarioName    String             // BULL_CASE, BASE_CASE, BEAR_CASE, CUSTOM
+  growthModifier  Float              // Percentage multiplier (e.g. +15%, -10%)
+  simulatedValue  Float
+  riskLevel       String             // LOW, MEDIUM, HIGH
+  forecast        PredictiveForecast @relation(fields: [forecastId], references: [id], onDelete: Cascade)
+  createdAt       DateTime           @default(now())
 
-  @@index([modelId, timestamp])
-  @@map("mlops_inference_logs")
-}
-
-// MLOps Model Drift & Retraining Triggers
-model MlopsDriftMetric {
-  id              String   @id @default(cuid())
-  modelId         String
-  featureName     String
-  driftScore      Float
-  threshold       Float
-  status          String   // NORMAL, WARNING, CRITICAL
-  retrainTriggered Boolean  @default(false)
-  analyzedAt      DateTime @default(now())
-
-  @@map("mlops_drift_metrics")
-}
-
-model MlopsModelDataset {
-  modelId   String
-  datasetId String
-  dataset   MlopsDataset @relation(fields: [datasetId], references: [id], onDelete: Cascade)
-
-  @@id([modelId, datasetId])
-  @@map("mlops_model_datasets")
+  @@map("predictive_simulations")
 }
