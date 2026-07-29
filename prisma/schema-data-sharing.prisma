@@ -1,0 +1,36 @@
+// Data Sharing Shares & Policies
+model DataSharePolicy {
+  id              String   @id @default(cuid())
+  name            String
+  targetType      String   // INTERNAL_ROLE, PARTNER_VENDOR, EXTERNAL_API
+  targetIdentifier String  // e.g. "ROLE_VENDOR_VIP", "PARTNER_HUB_01"
+  dataScope       String   // e.g. "ANALYTICS_READ_ONLY", "TRANSACTIONS_PARTIAL"
+  sensitivityLevel String  // PUBLIC, INTERNAL, SENSITIVE, CRITICAL
+  status          String   // ACTIVE, SUSPENDED, EXPIRED
+  hasDataContract Boolean  @default(true)
+  expiresAt       DateTime?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  auditLogs       DataShareAuditLog[]
+
+  @@map("data_share_policies")
+}
+
+// Data Share Usage Audit Logs
+model DataShareAuditLog {
+  id              String          @id @default(cuid())
+  policyId        String
+  accessorId      String
+  actionType      String          // EXPORT_CSV, API_QUERY, CONTRACT_VALIDATION
+  recordsAccessed Int
+  riskScore       Float
+  sensitiveDataFlag Boolean       @default(false)
+  ipAddress       String
+  timestamp       DateTime        @default(now())
+
+  policy          DataSharePolicy @relation(fields: [policyId], references: [id], onDelete: Cascade)
+
+  @@index([policyId, timestamp])
+  @@map("data_share_audit_logs")
+}
