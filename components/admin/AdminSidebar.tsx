@@ -21,7 +21,7 @@ import {
   Layers,
   Settings,
   LogOut,
-  ChevronDown,
+  ChevronRight,
   Sparkles,
   BarChart3,
   Search,
@@ -32,7 +32,7 @@ const adminNavGroups = [
   {
     title: 'YÖNETİM & MERKEZ',
     items: [
-      { name: 'Executive Paneli', href: '/admin/dashboard', icon: LayoutDashboard },
+      { name: 'Executive Paneli', href: '/admin', icon: LayoutDashboard },
       { name: 'Admin Copilot', href: '/admin/admin-copilot', icon: Bot, badge: 'PRO' },
       { name: 'Merkezi Yapay Zekâ', href: '/admin/central-intelligence', icon: BrainCircuit },
       { name: 'Çift Yönetimi', href: '/admin/couples', icon: Users },
@@ -74,25 +74,25 @@ export function AdminSidebar() {
   const pathname = usePathname();
 
   return (
-    <aside className="w-80 border-r border-zinc-800 bg-zinc-950 text-zinc-300 flex flex-col justify-between min-h-screen sticky top-0 transition-colors z-30">
-      <div className="p-6 space-y-6 overflow-y-auto max-h-[calc(100vh-90px)] scrollbar-thin scrollbar-thumb-zinc-800">
+    <aside className="w-80 border-r border-zinc-200/80 dark:border-zinc-800/80 bg-white/70 dark:bg-zinc-950/70 backdrop-blur-2xl flex flex-col justify-between min-h-screen sticky top-0 transition-all z-30 shadow-xs font-sans">
+      <div className="p-6 space-y-6 overflow-y-auto max-h-[calc(100vh-90px)] scrollbar-thin scrollbar-thumb-zinc-200 dark:scrollbar-thumb-zinc-800">
         
-        {/* Kurumsal Admin Logosu */}
-        <Link href="/admin/dashboard" className="flex items-center gap-3 px-2 group">
-          <div className="relative w-10 h-10 shrink-0">
+        {/* Executive Admin Logosu */}
+        <Link href="/admin" className="flex items-center gap-3 px-2 group">
+          <div className="relative w-10 h-10 shrink-0 p-1 rounded-2xl bg-gradient-to-tr from-amber-50 to-amber-100/80 dark:from-zinc-900 dark:to-zinc-800 border border-amber-200/60 dark:border-amber-900/30 shadow-xs">
             <Image
               src="/assets/branding/logo-admin.svg"
               alt="WedyPlan Admin Paneli"
               fill
-              className="object-contain transition-transform group-hover:scale-105"
+              className="object-contain p-1 transition-transform group-hover:scale-105"
             />
           </div>
           <div className="flex flex-col">
-            <span className="font-serif font-bold text-lg tracking-tight text-white leading-none">
+            <span className="font-serif font-bold text-lg tracking-tight text-zinc-900 dark:text-white leading-none">
               WedyPlan
             </span>
-            <span className="text-[10px] font-semibold text-amber-400 uppercase tracking-widest mt-1 flex items-center gap-1">
-              <CheckCircle2 className="w-3 h-3 text-amber-400" /> Executive Admin
+            <span className="text-[10px] font-semibold text-amber-600 dark:text-amber-400 uppercase tracking-widest mt-1 flex items-center gap-1">
+              <CheckCircle2 className="w-2.5 h-2.5" /> Executive Control
             </span>
           </div>
         </Link>
@@ -100,11 +100,11 @@ export function AdminSidebar() {
         {/* Gruplandırılmış Menü Yapısı */}
         <div className="space-y-6 pt-2">
           {adminNavGroups.map((group, idx) => (
-            <div key={idx} className="space-y-2">
-              <h3 className="px-3 text-[10px] font-bold text-zinc-500 uppercase tracking-wider">
+            <div key={idx} className="space-y-1.5">
+              <h3 className="px-3 text-[10px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider">
                 {group.title}
               </h3>
-              <div className="space-y-1">
+              <div className="space-y-0.5">
                 {group.items.map((item) => {
                   const isActive = pathname === item.href;
                   const Icon = item.icon;
@@ -115,18 +115,20 @@ export function AdminSidebar() {
                       href={item.href}
                       className={`flex items-center justify-between px-3.5 py-2 rounded-xl text-xs font-medium transition-all group ${
                         isActive
-                          ? 'bg-amber-500/10 text-amber-400 font-semibold border border-amber-500/20'
-                          : 'text-zinc-400 hover:bg-zinc-900 hover:text-zinc-100'
+                          ? 'bg-amber-500/10 text-amber-700 dark:text-amber-400 font-semibold border border-amber-200/60 dark:border-amber-900/30 shadow-xs'
+                          : 'text-zinc-600 dark:text-zinc-400 hover:bg-amber-50/50 dark:hover:bg-zinc-900/50 hover:text-zinc-900 dark:hover:text-zinc-100'
                       }`}
                     >
-                      <div className="flex items-center gap-3">
-                        <Icon className={`w-4 h-4 transition-colors ${isActive ? 'text-amber-400' : 'text-zinc-500 group-hover:text-zinc-300'}`} />
+                      <div className="flex items-center gap-2.5">
+                        <Icon className={`w-4 h-4 transition-colors ${isActive ? 'text-amber-600 dark:text-amber-400' : 'text-zinc-400 group-hover:text-amber-500'}`} />
                         <span>{item.name}</span>
                       </div>
-                      {item.badge && (
-                        <span className="px-1.5 py-0.5 text-[9px] font-bold rounded bg-amber-400 text-zinc-950 uppercase tracking-wider">
+                      {item.badge ? (
+                        <span className="px-1.5 py-0.5 text-[9px] font-bold rounded-md bg-amber-500 text-white dark:text-zinc-950 uppercase tracking-wider shadow-xs">
                           {item.badge}
                         </span>
+                      ) : (
+                        <ChevronRight className={`w-3.5 h-3.5 transition-all ${isActive ? 'opacity-100 text-amber-600 dark:text-amber-400 translate-x-0.5' : 'opacity-0 group-hover:opacity-100 text-zinc-400'}`} />
                       )}
                     </Link>
                   );
@@ -138,14 +140,14 @@ export function AdminSidebar() {
       </div>
 
       {/* Admin Oturum Bilgisi */}
-      <div className="p-4 border-t border-zinc-900 bg-zinc-950/90 flex items-center justify-between">
+      <div className="p-4 m-4 rounded-2xl bg-gradient-to-b from-amber-50/40 to-white/60 dark:from-zinc-900/60 dark:to-zinc-900/30 border border-amber-100 dark:border-zinc-800/80 backdrop-blur-md flex items-center justify-between shadow-xs">
         <div className="flex items-center gap-3 truncate">
-          <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-amber-500 to-rose-500 flex items-center justify-center text-zinc-950 font-bold text-xs shadow-md">
+          <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-amber-400 to-amber-600 flex items-center justify-center text-white dark:text-zinc-950 font-bold text-xs shadow-xs ring-2 ring-white dark:ring-zinc-800">
             KA
           </div>
           <div className="flex flex-col truncate">
-            <span className="text-xs font-semibold text-white truncate">Kaan Atamer</span>
-            <span className="text-[10px] text-zinc-500 truncate">kaanatamer@wiascorp.com</span>
+            <span className="text-xs font-semibold text-zinc-900 dark:text-white truncate">Kaan Atamer</span>
+            <span className="text-[10px] text-amber-600 dark:text-amber-400 font-medium truncate">Süper Admin</span>
           </div>
         </div>
         <button
@@ -154,7 +156,7 @@ export function AdminSidebar() {
             window.location.href = '/giris';
           }}
           title="Oturumu Kapat"
-          className="p-2 rounded-lg text-zinc-400 hover:text-rose-400 hover:bg-rose-500/10 transition-colors"
+          className="p-2 rounded-xl text-zinc-500 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/20 transition-colors cursor-pointer"
         >
           <LogOut className="w-4 h-4" />
         </button>
