@@ -57,7 +57,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* 3. Öne Çıkan Kategoriler (Arka Plan Görselli, Emojisiz) */}
+      {/* 3. Öne Çıkan Kategoriler (Görselli Kartlar) */}
       <section className="py-16 px-6 max-w-7xl mx-auto space-y-10">
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
           <div>
@@ -111,20 +111,21 @@ export default function HomePage() {
             <Link
               key={index}
               href={cat.href}
-              className="relative h-48 rounded-3xl overflow-hidden group shadow-sm hover:shadow-2xl transition-all duration-300 border border-neutral-200/60"
+              className="relative h-48 rounded-3xl overflow-hidden group shadow-sm hover:shadow-2xl transition-all duration-300 border border-neutral-200/60 block"
             >
               {/* Arka Plan Görseli */}
               <Image
                 src={cat.bg}
                 alt={cat.title}
                 fill
+                unoptimized
                 className="object-cover group-hover:scale-110 transition-transform duration-500"
               />
               {/* Şeffaf Karartma Overlay */}
               <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-black/10 group-hover:from-black/90 transition-colors" />
               
               {/* İçerik */}
-              <div className="absolute inset-0 p-4 flex flex-col justify-end text-white text-left space-y-1">
+              <div className="absolute inset-0 p-4 flex flex-col justify-end text-white text-left space-y-1 z-10">
                 <h3 className="font-semibold text-sm leading-tight group-hover:translate-x-1 transition-transform">{cat.title}</h3>
                 <p className="text-[11px] text-neutral-300 font-light">{cat.count}</p>
               </div>
@@ -133,7 +134,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* 4. Popüler Şehirler & Lokasyonlar (Görselli Kartlar) */}
+      {/* 4. Popüler Şehirler & Lokasyonlar */}
       <section className="py-16 bg-neutral-100/60 border-y border-neutral-200/50 px-6">
         <div className="max-w-7xl mx-auto space-y-8">
           <div className="text-center space-y-2">
@@ -170,6 +171,7 @@ export default function HomePage() {
                     src={city.img}
                     alt={city.name}
                     fill
+                    unoptimized
                     className="object-cover group-hover:scale-105 transition-transform duration-500"
                   />
                 </div>
