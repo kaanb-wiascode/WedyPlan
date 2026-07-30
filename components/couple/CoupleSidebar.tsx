@@ -3,84 +3,125 @@
 import React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { 
-  Heart, 
-  LayoutDashboard, 
-  Wallet, 
-  Users, 
-  CheckSquare, 
-  Store, 
+import Image from 'next/image';
+import {
+  LayoutDashboard,
+  Wallet,
+  CheckSquare,
+  Users,
+  Building2,
+  Mail,
   Sparkles,
-  LogOut
+  MessageSquare,
+  CreditCard,
+  Settings,
+  LogOut,
+  ChevronRight,
+  Heart,
+  Calendar
 } from 'lucide-react';
 
-export const CoupleSidebar: React.FC = () => {
+const menuItems = [
+  { name: 'Genel Bakış', href: '/dashboard', icon: LayoutDashboard },
+  { name: 'AI Düğün Asistanı', href: '/ai-planner', icon: Sparkles, badge: 'AI' },
+  { name: 'Bütçe Planlayıcı', href: '/budget', icon: Wallet },
+  { name: 'Görev & Adımlar', href: '/checklist', icon: CheckSquare },
+  { name: 'Davetli & LCV Takibi', href: '/guests', icon: Users },
+  { name: 'Anlaşmalı Firmalar', href: '/vendors', icon: Building2 },
+  { name: 'Dijital Davetiye', href: '/invitations', icon: Mail },
+  { name: 'Mesajlar & Teklifler', href: '/messages', icon: MessageSquare },
+  { name: 'Ödeme Planı', href: '/payments', icon: CreditCard },
+  { name: 'Hesap Ayarları', href: '/settings', icon: Settings },
+];
+
+export function CoupleSidebar() {
   const pathname = usePathname();
 
-  const menuItems = [
-    { label: 'Genel Bakış', href: '/cift', icon: LayoutDashboard },
-    { label: 'Bütçe Planlayıcı', href: '/cift/butce', icon: Wallet },
-    { label: 'Davetliler & Masalar', href: '/cift/davetliler', icon: Users },
-    { label: 'Düğün Görevleri', href: '/cift/gorevler', icon: CheckSquare },
-    { label: 'Firmalarım & Favoriler', href: '/cift/firmalarim', icon: Store },
-  ];
-
   return (
-    <aside className="w-64 bg-white/40 backdrop-blur-3xl border-r border-white/60 p-6 flex flex-col justify-between hidden md:flex shrink-0 min-h-screen">
-      <div className="space-y-8">
-        {/* Logo */}
-        <Link href="/" className="flex items-center gap-2">
-          <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-[#E6007E] to-pink-400 flex items-center justify-center text-white shadow-md shadow-pink-200">
-            <Heart className="w-5 h-5 fill-white" />
+    <aside className="w-72 border-r border-rose-100/60 dark:border-zinc-800/60 bg-white/70 dark:bg-zinc-950/70 backdrop-blur-2xl flex flex-col justify-between min-h-screen sticky top-0 transition-all z-30 shadow-xs">
+      <div className="p-6 space-y-8">
+        
+        {/* Özel Çift Portalı Logosu */}
+        <Link href="/dashboard" className="flex items-center gap-3 px-2 group">
+          <div className="relative w-10 h-10 shrink-0 p-1 rounded-2xl bg-gradient-to-tr from-rose-50 to-rose-100/80 dark:from-zinc-900 dark:to-zinc-800 border border-rose-200/50 dark:border-zinc-700/50 shadow-xs">
+            <Image
+              src="/assets/branding/logo-couple.svg"
+              alt="WedyPlan Çift Portalı"
+              fill
+              className="object-contain p-1.5 transition-transform group-hover:scale-105"
+            />
           </div>
-          <div>
-            <span className="font-serif font-bold text-[18px] text-[#1D1D1F]">WedyPlan</span>
-            <span className="text-[10px] font-semibold text-[#E6007E] block -mt-1">Çift Paneli</span>
+          <div className="flex flex-col">
+            <span className="font-serif font-bold text-lg tracking-tight text-zinc-900 dark:text-white leading-none">
+              WedyPlan
+            </span>
+            <span className="text-[10px] font-semibold text-rose-500 uppercase tracking-widest mt-1 flex items-center gap-1">
+              <Heart className="w-2.5 h-2.5 fill-rose-500" /> Çift Portalı
+            </span>
           </div>
         </Link>
 
-        {/* Menü Linkleri */}
-        <nav className="space-y-1.5">
+        {/* Navigasyon Menüsü */}
+        <nav className="space-y-1">
           {menuItems.map((item) => {
-            const Icon = item.icon;
             const isActive = pathname === item.href;
+            const Icon = item.icon;
 
             return (
               <Link
                 key={item.href}
                 href={item.href}
-                className={`flex items-center gap-3 px-4 py-3 rounded-2xl text-[13px] font-semibold transition-all ${
+                className={`flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-medium transition-all group ${
                   isActive
-                    ? 'bg-gradient-to-r from-pink-500/10 to-purple-500/10 text-[#E6007E] border border-pink-200 shadow-sm'
-                    : 'text-[#6E6E73] hover:bg-white/50 hover:text-[#1D1D1F]'
+                    ? 'bg-rose-500/10 text-rose-600 dark:text-rose-400 font-semibold border border-rose-200/60 dark:border-rose-900/30 shadow-xs'
+                    : 'text-zinc-600 dark:text-zinc-400 hover:bg-rose-50/50 dark:hover:bg-zinc-900/50 hover:text-zinc-900 dark:hover:text-zinc-100'
                 }`}
               >
-                <Icon className={`w-4 h-4 ${isActive ? 'text-[#E6007E]' : 'text-[#86868B]'}`} />
-                <span>{item.label}</span>
+                <div className="flex items-center gap-3">
+                  <Icon className={`w-4 h-4 transition-colors ${isActive ? 'text-rose-500' : 'text-zinc-400 group-hover:text-rose-400'}`} />
+                  <span>{item.name}</span>
+                </div>
+                {item.badge ? (
+                  <span className="px-1.5 py-0.5 text-[9px] font-bold rounded-md bg-rose-500 text-white uppercase tracking-wider shadow-xs">
+                    {item.badge}
+                  </span>
+                ) : (
+                  <ChevronRight className={`w-3.5 h-3.5 transition-all ${isActive ? 'opacity-100 text-rose-500 translate-x-0.5' : 'opacity-0 group-hover:opacity-100 text-zinc-400'}`} />
+                )}
               </Link>
             );
           })}
         </nav>
       </div>
 
-      {/* WedyAI Asistan Rozeti */}
-      <div className="space-y-3">
-        <div className="p-4 rounded-2xl bg-gradient-to-br from-pink-500/10 via-purple-500/10 to-white/50 border border-pink-200/60 backdrop-blur-xl">
-          <div className="flex items-center gap-2 text-[#E6007E] text-[12px] font-bold mb-1">
-            <Sparkles className="w-4 h-4" /> WedyAI Düğün Asistanı
+      {/* Profil Alt Kartı */}
+      <div className="p-4 m-4 rounded-2xl bg-gradient-to-b from-rose-50/40 to-white/60 dark:from-zinc-900/60 dark:to-zinc-900/30 border border-rose-100 dark:border-zinc-800/80 backdrop-blur-md space-y-3 shadow-xs">
+        <div className="flex items-center gap-3">
+          <div className="w-9 h-9 rounded-full bg-gradient-to-tr from-rose-400 to-rose-600 flex items-center justify-center text-white text-xs font-semibold shadow-xs ring-2 ring-white dark:ring-zinc-800">
+            E&M
           </div>
-          <p className="text-[11px] text-[#6E6E73] leading-relaxed">
-            Düğününe 20 gün kaldı! Bütçe ve davetli listen tamamen kontrol altında.
-          </p>
+          <div className="flex flex-col truncate">
+            <span className="text-xs font-semibold text-zinc-900 dark:text-white truncate">
+              Eda & Mert
+            </span>
+            <span className="text-[10px] text-rose-500/90 font-medium flex items-center gap-1 truncate">
+              <Calendar className="w-2.5 h-2.5" /> 15 Eylül 2026
+            </span>
+          </div>
         </div>
-
-        <Link
-          href="/"
-          className="flex items-center gap-2 px-4 py-2 text-[12px] font-semibold text-[#86868B] hover:text-rose-600 transition"
+        <button
+          onClick={() => {
+            localStorage.clear();
+            window.location.href = '/giris';
+          }}
+          className="w-full py-2 px-3 rounded-xl text-xs font-medium text-zinc-600 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/20 transition-all flex items-center justify-center gap-2 border border-transparent hover:border-rose-200/50 cursor-pointer"
         >
-          <LogOut className="w-4 h-4" /> Ana Sayfaya Dön
-        </Link>
+          <LogOut className="w-3.5 h-3.5" />
+          <span>Oturumu Kapat</span>
+        </button>
       </div>
     </aside>
   );
-};
+}
+
+export default CoupleSidebar;
