@@ -1,33 +1,29 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React from 'react';
+import { AdminSidebar } from '@/components/admin/AdminSidebar';
 
 export default function AdminLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    // Tarayıcı tarafında çalıştığı an yükleme durumunu kapatır
-    setMounted(true);
-  }, []);
-
-  if (!mounted) {
-    return (
-      <div className="min-h-screen w-full flex items-center justify-center bg-zinc-950 text-white">
-        <div className="flex flex-col items-center gap-3">
-          <div className="w-8 h-8 border-2 border-rose-500 border-t-transparent rounded-full animate-spin" />
-          <p className="text-xs text-zinc-400 font-medium">Yönetim Paneline Yönlendiriliyorsunuz...</p>
-        </div>
-      </div>
-    );
-  }
-
   return (
-    <div className="min-h-screen bg-zinc-950 text-zinc-100">
-      {children}
+    <div className="flex min-h-screen bg-zinc-50/60 dark:bg-zinc-950 text-zinc-900 dark:text-zinc-100 font-sans">
+      {/* 
+        1. Menü Sol Tarafta Sabit Kalır (Sticky / Fixed)
+        Sayfa değişse bile menü hiçbir şekilde kaybolmaz veya yenilenmez.
+      */}
+      <AdminSidebar />
+
+      {/* 
+        2. Sağ İçerik Alanı
+        Menüde tıkladığın her alt sayfa (Çiftler, Finans, AI Agentlar vb.)
+        menüyü etkilemeden bu dinamik alanın içinde yüklenir.
+      */}
+      <div className="flex-1 flex flex-col min-w-0 min-h-screen overflow-y-auto">
+        {children}
+      </div>
     </div>
   );
 }
