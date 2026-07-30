@@ -10,7 +10,8 @@ import {
   TrendingUp, 
   ShieldAlert, 
   Activity,
-  ArrowUpRight 
+  ArrowUpRight,
+  Bot // <-- Buraya eklendi
 } from 'lucide-react';
 import Link from 'next/link';
 
