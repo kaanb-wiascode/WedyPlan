@@ -1,30 +1,113 @@
-"use server";
+'use server';
 
-import { revalidatePath } from "next/cache";
-import { vendorFilterSchema, VendorFilterFormData } from "@/lib/validations/vendor-discovery";
+import { db } from '@/lib/db';
 
-export async function toggleVendorFavoriteAction(userId: string, vendorId: string) {
+export interface VendorFilterParams {
+  category?: string;
+  city?: string;
+  minPrice?: number;
+  maxPrice?: number;
+  searchQuery?: string;
+  page?: number;
+  limit?: number;
+}
+
+/**
+ * Filtrelere göre gerçek veritabanından tedarikçileri/firmaları getirir.
+ */
+export async function getVendorsAction(params: VendorFilterParams) {
   try {
-    console.log("Toggling favorite vendor " + vendorId + " for user " + userId);
-    revalidatePath("/couple/vendors");
-    return { success: true, message: "Favori durumu güncellendi ✨" };
-  } catch (error) {
-    console.error("Toggle Favorite Error:", error);
-    return { success: false, error: "Favori eklenemedi." };
+    const {
+      category,
+      city,
+      minPrice,
+      maxPrice,
+      searchQuery,
+      page = 1,
+      limit = 12,
+    } = params;
+
+    const skip = (page - 1) * limit;
+
+    // Prisma Where Filtreleri
+    const whereClause: any = {};
+
+    if (category) {
+      whereClause.category = { equals: category, mode: 'insensitive' };
+    }
+
+    if (city) {
+      whereClause.city = { equals: city, mode: 'insensitive' };
+    }
+
+    if (minPrice !== undefined || maxPrice !== undefined) {
+      whereClause.startingPrice = {};
+      if (minPrice !== undefined) whereClause.startingPrice.gte = minPrice;
+      if (maxPrice !== undefined) whereClause.startingPrice.lte = maxPrice;
+    }
+
+    if (searchQuery) {
+      whereClause.OR = [
+        { title: { contains: searchQuery, mode: 'insensitive' } },
+        { description: { contains: searchQuery, mode: 'insensitive' } },
+      ];
+    }
+
+    // Toplam kayıt ve sayfalama verileri (Prisma modelinizdeki PortalProfile / Listing sorguları)
+    const [vendors, totalCount] = await Promise.all([
+      db.portalProfile.findMany({
+        where: {
+          userType: 'VENDOR',
+          ...whereClause,
+        },
+        skip,
+        take: limit,
+        orderBy: { createdAt: 'desc' },
+      }),
+      db.portalProfile.count({
+        where: {
+          userType: 'VENDOR',
+          ...whereClause,
+        },
+      }),
+    ]);
+
+    return {
+      success: true,
+      data: vendors,
+      pagination: {
+        total: totalCount,
+        page,
+        limit,
+        totalPages: Math.ceil(totalCount / limit),
+      },
+    };
+  } catch (error: any) {
+    console.error('❌ getVendorsAction hatası:', error);
+    return {
+      success: false,
+      error: 'Tedarikçiler yüklenirken bir hata oluştu.',
+      data: [],
+    };
   }
 }
 
-export async function calculateAIMatchScoreAction(userId: string, vendorId: string) {
+/**
+ * ID'ye göre tek bir tedarikçinin profil detayını getirir.
+ */
+export async function getVendorByIdAction(vendorId: string) {
   try {
-    return {
-      success: true,
-      matchScore: 96,
-      budgetMatch: 98,
-      styleMatch: 95,
-      availabilityMatch: 100,
-    };
-  } catch (error) {
-    console.error("AI Match Error:", error);
-    return { success: false, matchScore: 80 };
+    const vendor = await db.portalProfile.findUnique({
+      where: { id: vendorId },
+    });
+
+    if (!vendor) {
+      return { success: false, error: 'Tedarikçi bulunamadı.' };
+    }
+
+    return { success: true, data: vendor };
+  } catch (error: any) {
+    console.error('❌ getVendorByIdAction hatası:', error);
+    return { success: false, error: 'Tedarikçi detayı alınamadı.' };
   }
 }

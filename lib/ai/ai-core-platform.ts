@@ -1,63 +1,68 @@
-import { 
-    AiGenerationOptions, 
-    AiTextResult, 
-    VendorMatchCriteria, 
-    VendorMatchResult,
-    BudgetAnalysisRequest,
-    BudgetAnalysisResult,
-    TimelineGenerationRequest,
-    TimelineGenerationResult,
-    DocumentReaderRequest,
-    DocumentReaderResult
-  } from '@/types/ai-core';
-  import { AiProviderFactory } from './providers/provider-abstraction';
-  import { VendorMatchEngine } from './engines/vendor-match-engine';
-  import { BudgetAnalysisEngine } from './engines/budget-analysis-engine';
-  import { TimelineGeneratorEngine } from './engines/timeline-generator-engine';
-  import { DocumentReaderEngine } from './engines/document-reader-engine';
-  
-  export class AiCorePlatform {
-    /**
-     * Universal Text Generation
-     */
-    static async generateText(options: AiGenerationOptions): Promise<AiTextResult> {
-      const adapter = AiProviderFactory.getAdapter(options.provider);
-      return adapter.generateText(options);
+'use server';
+
+interface GenerateAiResponseInput {
+  prompt: string;
+  systemInstruction?: string;
+  temperature?: number;
+}
+
+/**
+ * Groq AI API (Llama-3.3-70b) üzerinden yüksek hızlı yapay zekâ yanıtı üretir.
+ */
+export async function generateAiResponseAction(input: GenerateAiResponseInput) {
+  try {
+    const apiKey = process.env.GROQ_API_KEY;
+
+    if (!apiKey) {
+      throw new Error('GROQ_API_KEY ortam değişkeni tanımlanmamış.');
     }
-  
-    /**
-     * Universal Structured JSON Generation
-     */
-    static async generateStructuredData<T>(options: AiGenerationOptions): Promise<T> {
-      const adapter = AiProviderFactory.getAdapter(options.provider);
-      return adapter.generateStructuredJson<T>(options);
+
+    const messages = [
+      {
+        role: 'system',
+        content:
+          input.systemInstruction ||
+          'Sen WedyPlan düğün platformunun uzman, nazik ve yardımsever yapay zekâ asistanısın. Çiftlere ve tedarikçilere düğün planlama konusunda profesyonel tavsiyeler verirsin.',
+      },
+      {
+        role: 'user',
+        content: input.prompt,
+      },
+    ];
+
+    const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${apiKey}`,
+      },
+      body: JSON.stringify({
+        model: 'llama-3.3-70b-versatile',
+        messages,
+        temperature: input.temperature ?? 0.7,
+        max_tokens: 1024,
+      }),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      console.error('❌ Groq API Hatası:', errorData);
+      throw new Error('AI yanıtı oluşturulurken bir hata meydana geldi.');
     }
-  
-    /**
-     * Dedicated Vendor Matching
-     */
-    static async matchVendors(criteria: VendorMatchCriteria): Promise<VendorMatchResult[]> {
-      return VendorMatchEngine.executeMatch(criteria);
-    }
-  
-    /**
-     * Dedicated Budget Analysis
-     */
-    static analyzeBudget(request: BudgetAnalysisRequest): BudgetAnalysisResult {
-      return BudgetAnalysisEngine.analyze(request);
-    }
-  
-    /**
-     * Dedicated Timeline Schedule Generation
-     */
-    static generateTimeline(request: TimelineGenerationRequest): TimelineGenerationResult {
-      return TimelineGeneratorEngine.generate(request);
-    }
-  
-    /**
-     * Dedicated Contract & Document Structured Extraction
-     */
-    static async readDocument(request: DocumentReaderRequest): Promise<DocumentReaderResult> {
-      return DocumentReaderEngine.extractStructuredData(request);
-    }
+
+    const data = await response.json();
+    const resultText = data.choices?.[0]?.message?.content || 'Yanıt alınamadı.';
+
+    return {
+      success: true,
+      text: resultText,
+    };
+  } catch (error: any) {
+    console.error('❌ generateAiResponseAction hatası:', error);
+    return {
+      success: false,
+      error: error.message || 'AI servisine ulaşılamadı.',
+      text: 'Şu anda yapay zekâ servisine ulaşılamıyor. Lütfen daha sonra tekrar deneyiniz.',
+    };
   }
+}

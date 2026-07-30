@@ -1,63 +1,165 @@
-"use server";
+'use server';
 
-import { revalidatePath } from "next/cache";
-import { createContractSchema, CreateContractInput, updateContractStatusSchema, UpdateContractStatusInput } from "@/lib/validations/vendor-contracts";
+import { db } from '@/lib/db';
+import { revalidatePath } from 'next/cache';
+import { generateAiResponseAction } from '@/lib/ai/ai-core-platform';
 
-export async function createVendorContractAction(vendorId: string, data: CreateContractInput) {
-  const validation = createContractSchema.safeParse(data);
+export interface CreateContractInput {
+  vendorId?: string;
+  coupleId?: string;
+  coupleName?: string;
+  weddingDate?: Date | string;
+  proposalId?: string;
+  title: string;
+  contractTerms?: string;
+  content?: string;
+  expirationDate?: Date | string;
+  depositAmount?: number;
+  totalAmount?: number;
+}
 
-  if (!validation.success) {
-    return { success: false, errors: validation.error.flatten().fieldErrors };
-  }
+export interface ContractRecord {
+  id: string;
+  vendorId: string;
+  coupleId: string;
+  title: string;
+  contractTerms: string;
+  depositAmount: number;
+  totalAmount: number;
+  status: string;
+  signedAt?: Date | null;
+  createdAt: Date;
+}
 
+export interface ContractActionResponse {
+  success: boolean;
+  data?: any;
+  message?: string;
+  error?: string;
+}
+
+export async function getContractsAction(
+  userId: string,
+  role: 'VENDOR' | 'COUPLE'
+): Promise<ContractActionResponse> {
   try {
-    console.log("Creating contract for vendor " + vendorId + ":", validation.data);
-    revalidatePath("/vendor/contracts");
-    return {
-      success: true,
-      message: "Sözleşme taslağı oluşturuldu ve müşteri onayına sunulmaya hazır ✨",
-      contractId: "cnt_" + Date.now(),
-    };
-  } catch (error) {
-    console.error("Create Contract Error:", error);
-    return { success: false, error: "Sözleşme oluşturulamadı." };
+    const contractModel = (db as any).contract || (db as any).vendorContract;
+    let contracts: ContractRecord[] = [];
+
+    if (contractModel) {
+      const whereCondition = role === 'VENDOR' ? { vendorId: userId } : { coupleId: userId };
+      contracts = await contractModel.findMany({
+        where: whereCondition,
+        orderBy: { createdAt: 'desc' },
+      });
+    }
+
+    return { success: true, data: contracts };
+  } catch (error: unknown) {
+    console.error('❌ getContractsAction hatası:', error);
+    return { success: false, error: 'Sözleşmeler yüklenemedi.', data: [] };
   }
 }
 
-export async function updateContractStatusAction(vendorId: string, data: UpdateContractStatusInput) {
-  const validation = updateContractStatusSchema.safeParse(data);
-
-  if (!validation.success) {
-    return { success: false, errors: validation.error.flatten().fieldErrors };
-  }
-
+export async function createContractAction(
+  param1: string | CreateContractInput,
+  param2?: CreateContractInput
+): Promise<ContractActionResponse> {
   try {
-    console.log("Updating contract " + data.contractId + " status to " + data.status);
-    revalidatePath("/vendor/contracts");
-    return { success: true, message: "Sözleşme durumu başarıyla güncellendi ✨" };
-  } catch (error) {
-    console.error("Update Contract Status Error:", error);
-    return { success: false, error: "Sözleşme durumu güncellenemedi." };
+    const contractModel = (db as any).contract || (db as any).vendorContract;
+
+    if (!contractModel) {
+      throw new Error('Sözleşme modeli Prisma şemasında bulunamadı.');
+    }
+
+    let vendorId = '';
+    let payload: CreateContractInput = { title: '' };
+
+    if (typeof param1 === 'string' && param2) {
+      vendorId = param1;
+      payload = param2;
+    } else if (typeof param1 === 'object') {
+      vendorId = param1.vendorId || '';
+      payload = param1;
+    }
+
+    const newContract = await contractModel.create({
+      data: {
+        vendorId: vendorId || payload.vendorId || 'default-vendor',
+        coupleId: payload.coupleId || 'default-couple',
+        proposalId: payload.proposalId || null,
+        title: payload.title,
+        contractTerms: payload.content || payload.contractTerms || 'Standart Sözleşme Koşulları',
+        depositAmount: payload.depositAmount || 0,
+        totalAmount: payload.totalAmount || 0,
+        status: 'PENDING_SIGNATURE',
+      },
+    });
+
+    revalidatePath('/satici/sozlesmeler');
+    revalidatePath('/vendor/contracts');
+    revalidatePath('/cift/contracts');
+
+    return {
+      success: true,
+      data: newContract,
+      message: 'Sözleşme başarıyla oluşturuldu ve çifte iletildi.',
+    };
+  } catch (error: unknown) {
+    console.error('❌ createContractAction hatası:', error);
+    return { success: false, error: 'Sözleşme oluşturulamadı.' };
   }
 }
 
-export async function generateAIContractAnalysisAction(contractContent: string, category: string) {
+export const createVendorContractAction = createContractAction;
+
+export async function signContractAction(contractId: string): Promise<ContractActionResponse> {
   try {
+    const contractModel = (db as any).contract || (db as any).vendorContract;
+
+    if (!contractModel) {
+      throw new Error('Sözleşme modeli Prisma şemasında bulunamadı.');
+    }
+
+    const updated = await contractModel.update({
+      where: { id: contractId },
+      data: {
+        status: 'SIGNED',
+        signedAt: new Date(),
+      },
+    });
+
+    revalidatePath('/satici/sozlesmeler');
+    revalidatePath('/vendor/contracts');
+    revalidatePath('/cift/contracts');
+
     return {
       success: true,
-      complianceScore: 96,
-      riskLevel: "DÜŞÜK RİSK (%4)",
-      plainSummary: "İşbu sözleşme 19 Haziran 2027 tarihindeki 350 kişilik düğün organizasyonunun hizmet şartlarını, %30 kapora ödeme kuralını ve mücbir sebep iptal şartlarını düzenler.",
-      missingClauses: [
-        "Açık hava mekanı için 'Kötü Hava Şartları / Yağmur B Planı İç Mekan Tahsisi' maddesi eklenmesi önerilir.",
-      ],
-      suggestedClauses: [
-        { title: "Mücbir Sebep & Doğal Afet İade Koşulu", category: "HUKUKİ GÜVENCE" },
-        { title: "Ses & Müzik Yayın Saati Sınırı (23:59)", category: "MEVZUAT UYUMU" },
-      ],
+      data: updated,
+      message: 'Sözleşme başarıyla imzalandı.',
     };
-  } catch (error) {
-    console.error("AI Contract Analysis Error:", error);
-    return { success: false, error: "AI sözleşme analizi yapılamadı." };
+  } catch (error: unknown) {
+    console.error('❌ signContractAction hatası:', error);
+    return { success: false, error: 'Sözleşme imzalanamadı.' };
+  }
+}
+
+/**
+ * AI Sözleşme Analiz Aksiyonu (Hem 1 hem 2 parametre çağrısını destekler)
+ */
+export async function generateAIContractAnalysisAction(
+  contractTermsOrTitle: string,
+  category?: string
+) {
+  try {
+    const prompt = category
+      ? `Aşağıdaki "${category}" kategorisindeki "${contractTermsOrTitle}" sözleşmesi metnini incele ve riskli, eksik veya belirsiz maddeleri listeleyerek özet çıkar.`
+      : `Aşağıdaki düğün sözleşmesi metnini incele ve riskli, eksik veya belirsiz maddeleri listeleyerek özet çıkar:\n\n${contractTermsOrTitle}`;
+
+    const aiResponse = await generateAiResponseAction({ prompt });
+    return { success: true, analysis: aiResponse.text };
+  } catch (error: unknown) {
+    console.error('❌ generateAIContractAnalysisAction hatası:', error);
+    return { success: false, error: 'Sözleşme analizi üretilemedi.' };
   }
 }
