@@ -63,11 +63,8 @@ export default function FirmalarPage() {
     <div className="min-h-screen bg-[#FDFBF7] text-neutral-900 font-sans antialiased selection:bg-rose-100 selection:text-rose-900">
       <PublicNavbar mode="public" />
 
-      {/* Header Banner */}
+      {/* Header Banner - Rozet Kaldırıldı */}
       <section className="pt-36 pb-12 px-6 max-w-7xl mx-auto text-center space-y-4">
-        <span className="px-4 py-1.5 rounded-full bg-neutral-900 text-white text-[11px] font-bold tracking-widest uppercase">
-          SEÇKİN FİRMA DİZİNİ
-        </span>
         <h1 className="text-4xl md:text-6xl font-serif tracking-tight text-neutral-900">
           Türkiye’nin En Prestijli Düğün Partnerleri
         </h1>
