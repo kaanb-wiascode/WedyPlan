@@ -1,134 +1,210 @@
-'use client';
+"use client";
 
-import React, { useState } from 'react';
-import Link from 'next/link';
-import AuthCardLayout from '@/components/public/auth/AuthCardLayout';
+import React, { useState } from "react";
 
-export default function KayitPage() {
+const ORG_OPTIONS = [
+  { label: "Düğün", value: "DUGUN" },
+  { label: "Nişan", value: "NISAN" },
+  { label: "Kına", value: "KINA" },
+  { label: "Söz", value: "SOZ" },
+  { label: "Sünnet", value: "SUNNET" },
+  { label: "Baby Shower", value: "BABY_SHOWER" },
+  { label: "Doğum Günü", value: "DOGUM_GUNU" },
+  { label: "Diğer", value: "DIGER" },
+];
+
+export default function CoupleRegisterPage() {
   const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    password: '',
+    brideFirstName: "",
+    brideLastName: "",
+    groomFirstName: "",
+    groomLastName: "",
+    weddingDate: "",
+    organizationType: "DUGUN",
+    organizationDate: "",
+    guestCount: "",
+    phone: "",
+    email: "",
+    address: "",
   });
-  const [loading, setLoading] = useState(false);
-  const [isSent, setIsSent] = useState(false);
-  const [errorMessage, setErrorMessage] = useState('');
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-    setErrorMessage('');
-
-    try {
-      const res = await fetch('/api/v1/register', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
-      });
-
-      const data = await res.json();
-
-      if (res.ok) {
-        // Doğrudan sayfaya fırlatmak yerine "Mail Gönderildi" durumuna geç
-        setIsSent(true);
-      } else {
-        setErrorMessage(data.error || 'Kayıt esnasında bir hata oluştu.');
-      }
-    } catch (err) {
-      setErrorMessage('Ağ hatası oluştu, lütfen tekrar deneyin.');
-    } finally {
-      setLoading(false);
-    }
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
+  ) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  if (isSent) {
-    return (
-      <AuthCardLayout
-        title="E-Postanızı Kontrol Edin"
-        subtitle="Düğün planlamanıza başlamak için son bir adım kaldı."
-      >
-        <div className="text-center space-y-4 py-4">
-          <div className="w-14 h-14 bg-[#111111] text-[#E5E5E5] rounded-full flex items-center justify-center mx-auto text-2xl font-bold">
-            ✉️
-          </div>
-          <p className="text-sm font-semibold text-[#111111]">
-            <span className="font-bold">{formData.email}</span> adresine doğrulama bağlantısı gönderildi.
-          </p>
-          <p className="text-xs text-[#666666] leading-relaxed">
-            Lütfen e-posta kutunuzu (gerekirse Spam/Spam Olmayan klasörünü) kontrol edin ve gelen maildeki bağlantıya tıklayın.
-          </p>
-          <div className="pt-4 border-t border-[#D5D5D5]">
-            <Link
-              href="/giris"
-              className="inline-block bg-[#111111] text-[#E5E5E5] text-xs font-bold px-6 py-2.5 rounded-full hover:bg-[#333333] transition-colors"
-            >
-              Giriş Ekranına Git
-            </Link>
-          </div>
-        </div>
-      </AuthCardLayout>
-    );
-  }
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    console.log("Çift Kayıt Verisi:", formData);
+  };
 
   return (
-    <AuthCardLayout
-      title="Hesap Oluşturun"
-      subtitle="WedyPlan Studio dünyasına katılın ve düğününüzü akıllı asistanınızla planlayın."
-      footerMessage="Zaten hesabınız var mı?"
-      footerLinkText="Giriş Yapın"
-      footerLinkHref="/giris"
-    >
-      <form onSubmit={handleSubmit} className="space-y-4">
-        {errorMessage && (
-          <div className="bg-rose-50 text-rose-700 text-xs p-3 rounded-xl border border-rose-200 text-center">
-            {errorMessage}
+    <div className="min-h-screen bg-gradient-to-br from-rose-50 via-white to-pink-50 py-12 px-4 sm:px-6 lg:px-8 flex items-center justify-center">
+      <div className="max-w-4xl w-full p-8 rounded-2xl shadow-xl border border-rose-100 bg-white/80 backdrop-blur-md">
+        <div className="text-center mb-8">
+          <h1 className="text-3xl font-extrabold text-gray-900">Çift Kayıt Formu</h1>
+          <p className="mt-2 text-sm text-gray-600">
+            Düğün ve organizasyon planlamanızı başlatmak için bilgilerinizi giriniz.
+          </p>
+        </div>
+
+        <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {/* Gelin Adı & Soyadı */}
+          <div className="space-y-2">
+            <label className="text-sm font-medium text-gray-700">Gelin Adı</label>
+            <input
+              type="text"
+              name="brideFirstName"
+              value={formData.brideFirstName}
+              onChange={handleChange}
+              placeholder="Ayşe"
+              required
+              className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:ring-2 focus:ring-rose-400 outline-none transition"
+            />
           </div>
-        )}
+          <div className="space-y-2">
+            <label className="text-sm font-medium text-gray-700">Gelin Soyadı</label>
+            <input
+              type="text"
+              name="brideLastName"
+              value={formData.brideLastName}
+              onChange={handleChange}
+              placeholder="Yılmaz"
+              required
+              className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:ring-2 focus:ring-rose-400 outline-none transition"
+            />
+          </div>
 
-        <div>
-          <label className="block text-xs font-semibold text-[#111111] mb-1">Ad Soyad</label>
-          <input
-            type="text"
-            required
-            placeholder="Örn: Ayşe Yılmaz"
-            value={formData.name}
-            onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-            className="w-full bg-[#EFEFEF] border border-[#D5D5D5] rounded-xl px-4 py-2.5 text-xs text-[#111111] focus:border-[#111111] outline-none transition-colors"
-          />
-        </div>
+          {/* Damat Adı & Soyadı */}
+          <div className="space-y-2">
+            <label className="text-sm font-medium text-gray-700">Damat Adı</label>
+            <input
+              type="text"
+              name="groomFirstName"
+              value={formData.groomFirstName}
+              onChange={handleChange}
+              placeholder="Ahmet"
+              required
+              className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:ring-2 focus:ring-rose-400 outline-none transition"
+            />
+          </div>
+          <div className="space-y-2">
+            <label className="text-sm font-medium text-gray-700">Damat Soyadı</label>
+            <input
+              type="text"
+              name="groomLastName"
+              value={formData.groomLastName}
+              onChange={handleChange}
+              placeholder="Kaya"
+              required
+              className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:ring-2 focus:ring-rose-400 outline-none transition"
+            />
+          </div>
 
-        <div>
-          <label className="block text-xs font-semibold text-[#111111] mb-1">E-Posta Adresi</label>
-          <input
-            type="email"
-            required
-            placeholder="ornek@wedyplan.com"
-            value={formData.email}
-            onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-            className="w-full bg-[#EFEFEF] border border-[#D5D5D5] rounded-xl px-4 py-2.5 text-xs text-[#111111] focus:border-[#111111] outline-none transition-colors"
-          />
-        </div>
+          {/* Düğün Tarihi & Org. Türü */}
+          <div className="space-y-2">
+            <label className="text-sm font-medium text-gray-700">Düğün Tarihi</label>
+            <input
+              type="date"
+              name="weddingDate"
+              value={formData.weddingDate}
+              onChange={handleChange}
+              required
+              className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:ring-2 focus:ring-rose-400 outline-none transition"
+            />
+          </div>
+          <div className="space-y-2">
+            <label className="text-sm font-medium text-gray-700">Organizasyon Türü</label>
+            <select
+              name="organizationType"
+              value={formData.organizationType}
+              onChange={handleChange}
+              className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:ring-2 focus:ring-rose-400 outline-none transition"
+            >
+              {ORG_OPTIONS.map((opt) => (
+                <option key={opt.value} value={opt.value}>
+                  {opt.label}
+                </option>
+              ))}
+            </select>
+          </div>
 
-        <div>
-          <label className="block text-xs font-semibold text-[#111111] mb-1">Şifre</label>
-          <input
-            type="password"
-            required
-            placeholder="••••••••"
-            value={formData.password}
-            onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-            className="w-full bg-[#EFEFEF] border border-[#D5D5D5] rounded-xl px-4 py-2.5 text-xs text-[#111111] focus:border-[#111111] outline-none transition-colors"
-          />
-        </div>
+          {/* Org. Tarihi & Kişi Sayısı */}
+          <div className="space-y-2">
+            <label className="text-sm font-medium text-gray-700">Organizasyon Tarihi</label>
+            <input
+              type="date"
+              name="organizationDate"
+              value={formData.organizationDate}
+              onChange={handleChange}
+              required
+              className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:ring-2 focus:ring-rose-400 outline-none transition"
+            />
+          </div>
+          <div className="space-y-2">
+            <label className="text-sm font-medium text-gray-700">Kişi Sayısı</label>
+            <input
+              type="number"
+              name="guestCount"
+              value={formData.guestCount}
+              onChange={handleChange}
+              placeholder="Örn: 250"
+              required
+              className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:ring-2 focus:ring-rose-400 outline-none transition"
+            />
+          </div>
 
-        <button
-          type="submit"
-          disabled={loading}
-          className="w-full bg-[#111111] text-[#E5E5E5] text-xs font-bold py-3 rounded-xl hover:bg-[#333333] transition-colors disabled:opacity-50 mt-2"
-        >
-          {loading ? 'Hesap Oluşturuluyor...' : 'Ücretsiz Kayıt Ol'}
-        </button>
-      </form>
-    </AuthCardLayout>
+          {/* Telefon & Mail */}
+          <div className="space-y-2">
+            <label className="text-sm font-medium text-gray-700">Telefon</label>
+            <input
+              type="tel"
+              name="phone"
+              value={formData.phone}
+              onChange={handleChange}
+              placeholder="05XX XXX XX XX"
+              required
+              className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:ring-2 focus:ring-rose-400 outline-none transition"
+            />
+          </div>
+          <div className="space-y-2">
+            <label className="text-sm font-medium text-gray-700">E-Posta</label>
+            <input
+              type="email"
+              name="email"
+              value={formData.email}
+              onChange={handleChange}
+              placeholder="ornek@mail.com"
+              required
+              className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:ring-2 focus:ring-rose-400 outline-none transition"
+            />
+          </div>
+
+          {/* Adres */}
+          <div className="md:col-span-2 space-y-2">
+            <label className="text-sm font-medium text-gray-700">Adres</label>
+            <textarea
+              name="address"
+              rows={3}
+              value={formData.address}
+              onChange={handleChange}
+              placeholder="Açık adresinizi giriniz..."
+              required
+              className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:ring-2 focus:ring-rose-400 outline-none transition"
+            />
+          </div>
+
+          <div className="md:col-span-2 mt-4">
+            <button
+              type="submit"
+              className="w-full py-3.5 bg-rose-500 hover:bg-rose-600 text-white font-semibold rounded-xl shadow-lg transition duration-200"
+            >
+              Kaydı Tamamla
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
   );
 }
