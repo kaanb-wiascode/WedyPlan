@@ -30,8 +30,8 @@ export const PublicNavbar: React.FC<PublicNavbarProps> = ({ mode = "public" }) =
           <BrandLogo variant={isVendor ? "vendor" : "default"} />
         </div>
 
-        {/* Orta: Okunabilirliği Artırılmış (text-sm) Menü Bağlantıları */}
-        {!isVendor && (
+        {/* Orta: Okunabilirliği Yüksek (text-sm) Menü Bağlantıları */}
+        {!isVendor ? (
           <div className="hidden lg:flex items-center gap-6 text-sm font-medium text-neutral-800 whitespace-nowrap">
             
             {/* 1. Mekanlar */}
@@ -44,12 +44,12 @@ export const PublicNavbar: React.FC<PublicNavbarProps> = ({ mode = "public" }) =
                 Mekanlar <span className="text-[10px] text-neutral-400">▾</span>
               </Link>
               {activeDropdown === "mekanlar" && (
-                <div className="absolute top-full left-0 w-60 bg-white p-3 rounded-2xl border border-neutral-200 shadow-xl space-y-1 animate-in fade-in slide-in-from-top-2 duration-150">
+                <div className="absolute top-full left-0 w-60 bg-white/95 backdrop-blur-xl p-3 rounded-2xl border border-neutral-200 shadow-xl space-y-1 animate-in fade-in slide-in-from-top-2 duration-150">
                   <div className="text-[10px] font-bold text-neutral-400 uppercase tracking-wider px-2 py-1">Mekan Kategorileri</div>
-                  <Link href="/mekanlar/dugun-salonlari" className="block px-3 py-2 rounded-xl hover:bg-neutral-100 text-xs">Düğün Salonları</Link>
-                  <Link href="/mekanlar/kir-bahceleri" className="block px-3 py-2 rounded-xl hover:bg-neutral-100 text-xs">Kır Düğünü Mekanları</Link>
-                  <Link href="/mekanlar/oteller" className="block px-3 py-2 rounded-xl hover:bg-neutral-100 text-xs">Otel Davet Alanları</Link>
-                  <Link href="/mekanlar/tarihi-mekanlar" className="block px-3 py-2 rounded-xl hover:bg-neutral-100 text-xs">Tarihi Mekanlar & Yalılar</Link>
+                  <Link href="/mekanlar/dugun-salonlari" className="block px-3 py-2 rounded-xl hover:bg-neutral-100 text-xs text-neutral-700 font-medium">Düğün Salonları</Link>
+                  <Link href="/mekanlar/kir-bahceleri" className="block px-3 py-2 rounded-xl hover:bg-neutral-100 text-xs text-neutral-700 font-medium">Kır Düğünü Mekanları</Link>
+                  <Link href="/mekanlar/oteller" className="block px-3 py-2 rounded-xl hover:bg-neutral-100 text-xs text-neutral-700 font-medium">Otel Davet Alanları</Link>
+                  <Link href="/mekanlar/tarihi-mekanlar" className="block px-3 py-2 rounded-xl hover:bg-neutral-100 text-xs text-neutral-700 font-medium">Tarihi Mekanlar & Yalılar</Link>
                 </div>
               )}
             </div>
@@ -64,12 +64,12 @@ export const PublicNavbar: React.FC<PublicNavbarProps> = ({ mode = "public" }) =
                 Firmalar <span className="text-[10px] text-neutral-400">▾</span>
               </Link>
               {activeDropdown === "firmalar" && (
-                <div className="absolute top-full left-0 w-60 bg-white p-3 rounded-2xl border border-neutral-200 shadow-xl space-y-1 animate-in fade-in slide-in-from-top-2 duration-150">
+                <div className="absolute top-full left-0 w-60 bg-white/95 backdrop-blur-xl p-3 rounded-2xl border border-neutral-200 shadow-xl space-y-1 animate-in fade-in slide-in-from-top-2 duration-150">
                   <div className="text-[10px] font-bold text-neutral-400 uppercase tracking-wider px-2 py-1">Hizmet Sağlayıcılar</div>
-                  <Link href="/firmalar/fotografcilar" className="block px-3 py-2 rounded-xl hover:bg-neutral-100 text-xs">Fotoğraf & Video</Link>
-                  <Link href="/firmalar/organizasyon" className="block px-3 py-2 rounded-xl hover:bg-neutral-100 text-xs">Organizasyon & Süsleme</Link>
-                  <Link href="/firmalar/muzik" className="block px-3 py-2 rounded-xl hover:bg-neutral-100 text-xs">Müzik & DJ</Link>
-                  <Link href="/firmalar/kuator" className="block px-3 py-2 rounded-xl hover:bg-neutral-100 text-xs">Gelin Saçı & Makyajı</Link>
+                  <Link href="/firmalar/fotografcilar" className="block px-3 py-2 rounded-xl hover:bg-neutral-100 text-xs text-neutral-700 font-medium">Fotoğraf & Video</Link>
+                  <Link href="/firmalar/organizasyon" className="block px-3 py-2 rounded-xl hover:bg-neutral-100 text-xs text-neutral-700 font-medium">Organizasyon & Süsleme</Link>
+                  <Link href="/firmalar/muzik" className="block px-3 py-2 rounded-xl hover:bg-neutral-100 text-xs text-neutral-700 font-medium">Müzik & DJ</Link>
+                  <Link href="/firmalar/kuator" className="block px-3 py-2 rounded-xl hover:bg-neutral-100 text-xs text-neutral-700 font-medium">Gelin Saçı & Makyajı</Link>
                 </div>
               )}
             </div>
@@ -84,10 +84,10 @@ export const PublicNavbar: React.FC<PublicNavbarProps> = ({ mode = "public" }) =
                 Moda <span className="text-[10px] text-neutral-400">▾</span>
               </Link>
               {activeDropdown === "moda" && (
-                <div className="absolute top-full left-0 w-60 bg-white p-3 rounded-2xl border border-neutral-200 shadow-xl space-y-1 animate-in fade-in slide-in-from-top-2 duration-150">
+                <div className="absolute top-full left-0 w-60 bg-white/95 backdrop-blur-xl p-3 rounded-2xl border border-neutral-200 shadow-xl space-y-1 animate-in fade-in slide-in-from-top-2 duration-150">
                   <div className="text-[10px] font-bold text-neutral-400 uppercase tracking-wider px-2 py-1">Gelinlik & Damatlık</div>
-                  <Link href="/gelinlik-modelleri" className="block px-3 py-2 rounded-xl hover:bg-neutral-100 text-xs">Gelinlik Modelleri</Link>
-                  <Link href="/damatlik-modelleri" className="block px-3 py-2 rounded-xl hover:bg-neutral-100 text-xs">Damatlık Modelleri</Link>
+                  <Link href="/gelinlik-modelleri" className="block px-3 py-2 rounded-xl hover:bg-neutral-100 text-xs text-neutral-700 font-medium">Gelinlik Modelleri</Link>
+                  <Link href="/damatlik-modelleri" className="block px-3 py-2 rounded-xl hover:bg-neutral-100 text-xs text-neutral-700 font-medium">Damatlık Modelleri</Link>
                   <Link href="/gelinlik-kampanyalari" className="block px-3 py-2 rounded-xl hover:bg-rose-50 text-rose-700 text-xs font-semibold">Moda Fırsatları</Link>
                 </div>
               )}
@@ -103,11 +103,11 @@ export const PublicNavbar: React.FC<PublicNavbarProps> = ({ mode = "public" }) =
                 Çeyiz <span className="text-[10px] text-neutral-400">▾</span>
               </Link>
               {activeDropdown === "ceyiz" && (
-                <div className="absolute top-full left-0 w-60 bg-white p-3 rounded-2xl border border-neutral-200 shadow-xl space-y-1 animate-in fade-in slide-in-from-top-2 duration-150">
+                <div className="absolute top-full left-0 w-60 bg-white/95 backdrop-blur-xl p-3 rounded-2xl border border-neutral-200 shadow-xl space-y-1 animate-in fade-in slide-in-from-top-2 duration-150">
                   <div className="text-[10px] font-bold text-neutral-400 uppercase tracking-wider px-2 py-1">E-Ticaret & Katalog</div>
-                  <Link href="/ceyiz/mutfak" className="block px-3 py-2 rounded-xl hover:bg-neutral-100 text-xs">Mutfak Grubu</Link>
-                  <Link href="/ceyiz/ev-tekstili" className="block px-3 py-2 rounded-xl hover:bg-neutral-100 text-xs">Ev Tekstili</Link>
-                  <Link href="/ceyiz/elektronik" className="block px-3 py-2 rounded-xl hover:bg-neutral-100 text-xs">Küçük Ev Aletleri</Link>
+                  <Link href="/ceyiz/mutfak" className="block px-3 py-2 rounded-xl hover:bg-neutral-100 text-xs text-neutral-700 font-medium">Mutfak Grubu</Link>
+                  <Link href="/ceyiz/ev-tekstili" className="block px-3 py-2 rounded-xl hover:bg-neutral-100 text-xs text-neutral-700 font-medium">Ev Tekstili</Link>
+                  <Link href="/ceyiz/elektronik" className="block px-3 py-2 rounded-xl hover:bg-neutral-100 text-xs text-neutral-700 font-medium">Küçük Ev Aletleri</Link>
                   <Link href="/ceyiz/firsatlari" className="block px-3 py-2 rounded-xl hover:bg-amber-50 text-amber-700 text-xs font-semibold">Çeyiz Paketleri</Link>
                 </div>
               )}
@@ -128,9 +128,25 @@ export const PublicNavbar: React.FC<PublicNavbarProps> = ({ mode = "public" }) =
               Araçlar
             </Link>
           </div>
+        ) : (
+          /* B2B / Firma Katıl Menü Baglantıları */
+          <div className="hidden lg:flex items-center gap-8 text-sm font-medium text-neutral-700">
+            <Link href="#cozumler" className="hover:text-black transition-colors">
+              Çözümler & Modüller
+            </Link>
+            <Link href="#neden-wedyplan" className="hover:text-black transition-colors">
+              Neden WedyPlan?
+            </Link>
+            <Link href="#paketler" className="hover:text-black transition-colors">
+              Paketler
+            </Link>
+            <Link href="#referanslar" className="hover:text-black transition-colors">
+              Başarı Hikayeleri
+            </Link>
+          </div>
         )}
 
-        {/* Sağ: Arama & Butonlar */}
+        {/* Sağ: Arama & Dumanlı Cam Butonlar */}
         <div className="flex items-center gap-3 shrink-0">
           {!isVendor && (
             <form onSubmit={handleSearch} className="hidden xl:flex items-center bg-neutral-100/90 px-3.5 py-2 rounded-full border border-neutral-200/80 focus-within:ring-2 focus-within:ring-rose-500/20">
@@ -147,22 +163,38 @@ export const PublicNavbar: React.FC<PublicNavbarProps> = ({ mode = "public" }) =
             </form>
           )}
 
-          {/* Teklif Al Butonu */}
-          {!isVendor && (
-            <Link
-              href="/hizli-teklif"
-              className="px-4 py-2 text-xs font-semibold text-rose-700 bg-rose-50 hover:bg-rose-100 border border-rose-200/80 rounded-full transition-all whitespace-nowrap"
-            >
-              Teklif Al
-            </Link>
+          {/* Teklif Al / Başvur Butonları */}
+          {!isVendor ? (
+            <>
+              <Link
+                href="/hizli-teklif"
+                className="px-4 py-2 text-xs font-semibold text-rose-700 bg-rose-50 hover:bg-rose-100 border border-rose-200/80 rounded-full transition-all whitespace-nowrap"
+              >
+                Teklif Al
+              </Link>
+              <Link
+                href="/giris"
+                className="px-5 py-2 text-xs font-semibold text-white bg-neutral-800/90 hover:bg-neutral-900 backdrop-blur-md border border-neutral-700/50 rounded-full transition-all shadow-sm whitespace-nowrap"
+              >
+                Giriş Yap
+              </Link>
+            </>
+          ) : (
+            <>
+              <Link
+                href="/giris"
+                className="px-5 py-2 text-xs font-medium text-neutral-700 hover:text-black transition-colors"
+              >
+                Firma Girişi
+              </Link>
+              <Link
+                href="/firma-katil/onboarding"
+                className="px-5 py-2 text-xs font-semibold text-white bg-neutral-800/90 hover:bg-neutral-900 backdrop-blur-md border border-neutral-700/50 rounded-full transition-all shadow-sm whitespace-nowrap"
+              >
+                Hemen Ücretsiz Başvurun →
+              </Link>
+            </>
           )}
-
-          <Link
-            href="/giris"
-            className="px-5 py-2 text-xs font-semibold text-white bg-neutral-900 hover:bg-neutral-800 rounded-full transition-all shadow-sm whitespace-nowrap"
-          >
-            Giriş Yap
-          </Link>
         </div>
       </nav>
     </header>

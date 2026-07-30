@@ -18,7 +18,6 @@ interface AiRecommendationProps {
 }
 
 export const AiRecommendationCard: React.FC<AiRecommendationProps> = ({
-  queryPrompt,
   resultCount,
   items,
 }) => {
@@ -55,8 +54,8 @@ export const AiRecommendationCard: React.FC<AiRecommendationProps> = ({
     <div className="w-full space-y-4">
       <div className="flex items-center justify-between px-2">
         <div className="flex items-center gap-2">
-          <span className="w-2 h-2 rounded-full bg-neutral-900 animate-pulse" />
-          <h3 className="text-xs font-bold tracking-widest text-neutral-900 uppercase">
+          <span className="w-2 h-2 rounded-full bg-neutral-700 animate-pulse" />
+          <h3 className="text-xs font-bold tracking-widest text-neutral-800 uppercase">
             Öne Çıkarılan Seçkin Tavsiyeler
           </h3>
         </div>
@@ -70,10 +69,10 @@ export const AiRecommendationCard: React.FC<AiRecommendationProps> = ({
           <Link
             key={item.id}
             href={`/firma/${item.id}`}
-            className="group relative p-3.5 rounded-2xl bg-neutral-900 text-white border border-neutral-800 hover:border-neutral-700 shadow-xl transition-all duration-300 flex items-center gap-4"
+            className="group relative p-3.5 rounded-2xl bg-neutral-800/80 backdrop-blur-xl text-white border border-neutral-700/60 hover:bg-neutral-800 hover:border-neutral-500/80 shadow-lg transition-all duration-300 flex items-center gap-4"
           >
             {/* Görsel */}
-            <div className="relative w-16 h-16 rounded-xl overflow-hidden shrink-0">
+            <div className="relative w-16 h-16 rounded-xl overflow-hidden shrink-0 border border-white/10">
               <Image
                 src={item.imageUrl}
                 alt={item.name}
@@ -85,19 +84,19 @@ export const AiRecommendationCard: React.FC<AiRecommendationProps> = ({
 
             {/* İçerik */}
             <div className="flex-1 min-w-0 space-y-1">
-              <span className="inline-block px-2 py-0.5 rounded-full bg-white/10 backdrop-blur-md text-[9px] font-semibold text-neutral-300 border border-white/10">
+              <span className="inline-block px-2 py-0.5 rounded-full bg-white/10 backdrop-blur-md text-[9px] font-semibold text-neutral-200 border border-white/10">
                 %{item.matchScore} Uyum
               </span>
               <h4 className="font-serif font-bold text-sm text-white truncate group-hover:text-neutral-200 transition-colors">
                 {item.name}
               </h4>
-              <p className="text-[11px] text-neutral-400 truncate">
+              <p className="text-[11px] text-neutral-300/80 truncate">
                 {item.location} • ★ {item.rating}
               </p>
             </div>
 
             {/* Ok İkonu */}
-            <div className="w-8 h-8 rounded-full bg-white/10 border border-white/10 flex items-center justify-center text-white shrink-0 group-hover:bg-white group-hover:text-black transition-all text-xs">
+            <div className="w-8 h-8 rounded-full bg-white/10 border border-white/10 flex items-center justify-center text-white shrink-0 group-hover:bg-white group-hover:text-neutral-900 transition-all text-xs">
               →
             </div>
           </Link>
