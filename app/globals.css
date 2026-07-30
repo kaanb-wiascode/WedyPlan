@@ -1,6 +1,6 @@
 @tailwind base;
-@style utilities;
 @tailwind components;
+@tailwind utilities;
 
 :root {
   /* Logo görselindeki orijinal sıcak stüdyo gri tonu */
