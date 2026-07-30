@@ -3,6 +3,7 @@ import { db } from '@/lib/db';
 import argon2 from 'argon2';
 
 export const dynamic = 'force-dynamic';
+export const revalidate = 0;
 
 export async function GET() {
   try {
