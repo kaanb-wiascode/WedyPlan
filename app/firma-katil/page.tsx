@@ -1,131 +1,108 @@
-"use client";
+import React from "react";
+import PublicNavbar from "@/components/public/PublicNavbar";
 
-import React, { useState } from "react";
-
-export default function VendorRegisterPage() {
-  const [formData, setFormData] = useState({
-    companyName: "",
-    category: "mekan",
-    authorizedName: "",
-    phone: "",
-    email: "",
-    address: "",
-  });
-
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
-  ) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    console.log("Firma Kayıt Verisi:", formData);
-  };
-
+export default function FirmaKatilPage() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-rose-50 via-white to-pink-50 py-12 px-4 sm:px-6 lg:px-8 flex items-center justify-center">
-      <div className="max-w-4xl w-full p-8 rounded-2xl shadow-xl border border-rose-100 bg-white/80 backdrop-blur-md">
-        <div className="text-center mb-8">
-          <h1 className="text-3xl font-extrabold text-gray-900">Firma Katılım Formu</h1>
-          <p className="mt-2 text-sm text-gray-600">
-            Hizmetlerinizi binlerce çiftle buluşturmak için firmanızı hemen kaydedin.
+    <div className="min-h-screen bg-[#FDFBF7] text-neutral-900 antialiased selection:bg-rose-100 selection:text-rose-900">
+      {/* Güncellenmiş B2B Menü */}
+      <PublicNavbar mode="vendor" />
+
+      {/* Hero Section - Ana Sayfa ile Uyumlu Modern Tipografi */}
+      <section className="relative pt-36 pb-20 md:pt-44 md:pb-32 px-4 overflow-hidden">
+        <div className="max-w-5xl mx-auto text-center space-y-6">
+          {/* Badge */}
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-rose-50 border border-rose-200/60 text-xs font-semibold text-rose-700 shadow-sm">
+            <span>✨ WedyPlan Partner Ekosistemi & WOS</span>
+          </div>
+
+          {/* Başlık */}
+          <h1 className="text-4xl md:text-6xl lg:text-7xl font-serif tracking-tight leading-[1.15]">
+            Sadece Müşteri Bulmayın. <br />
+            <span className="italic bg-gradient-to-r from-rose-600 via-amber-600 to-amber-500 bg-clip-text text-transparent">
+              Düğün İşletmenizi Dijitalleştirin.
+            </span>
+          </h1>
+
+          {/* Açıklama */}
+          <p className="max-w-2xl mx-auto text-base md:text-lg text-neutral-600 font-normal leading-relaxed">
+            Binlerce evlenecek çiftle anında buluşun; kaporadan çakışmasız saat
+            slotu takvimine ve e-imza sözleşmelere kadar tüm operasyonunuzu tek
+            platformdan yönetin.
           </p>
+
+          {/* CTA Buton */}
+          <div className="pt-4">
+            <a
+              href="#basvuru"
+              className="inline-flex items-center gap-3 px-8 py-4 text-base font-medium text-white bg-neutral-900 hover:bg-neutral-800 rounded-full transition-all shadow-xl hover:shadow-2xl hover:-translate-y-0.5"
+            >
+              Hemen Ücretsiz Başvurun
+              <span className="text-lg">→</span>
+            </a>
+          </div>
         </div>
+      </section>
 
-        <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="space-y-2">
-            <label className="text-sm font-medium text-gray-700">Firma / Marka Adı</label>
-            <input
-              type="text"
-              name="companyName"
-              value={formData.companyName}
-              onChange={handleChange}
-              placeholder="Örn: Masal Düğün Salonu"
-              required
-              className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:ring-2 focus:ring-rose-400 outline-none transition"
-            />
+      {/* Başarı Hikayeleri - Bento / Glassmorphism Kart Tasarımı */}
+      <section id="referanslar" className="py-20 bg-neutral-900 text-white relative">
+        <div className="max-w-7xl mx-auto px-6 space-y-12">
+          <div className="text-center space-y-3">
+            <span className="text-xs font-bold tracking-widest text-amber-400 uppercase">
+              BAŞARI HİKAYELERİ
+            </span>
+            <h2 className="text-3xl md:text-5xl font-serif">
+              Partnerlerimiz Neler Söyledi?
+            </h2>
           </div>
 
-          <div className="space-y-2">
-            <label className="text-sm font-medium text-gray-700">Hizmet Kategorisi</label>
-            <select
-              name="category"
-              value={formData.category}
-              onChange={handleChange}
-              className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:ring-2 focus:ring-rose-400 outline-none transition"
-            >
-              <option value="mekan">Mekan / Düğün Salonu</option>
-              <option value="fotograf">Fotoğraf & Video</option>
-              <option value="organizasyon">Organizasyon</option>
-              <option value="gelinlik">Gelinlik & Moda</option>
-              <option value="muzik">Müzik & DJ</option>
-              <option value="diger">Diğer</option>
-            </select>
-          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {/* Kart 1 */}
+            <div className="p-8 rounded-3xl bg-white/5 border border-white/10 backdrop-blur-xl hover:border-white/20 transition-all space-y-4">
+              <div className="flex items-center gap-1 text-amber-400 text-sm">
+                ★★★★★
+              </div>
+              <p className="text-neutral-300 text-sm leading-relaxed">
+                "WedyPlan sayesinde rezervasyon takvimimiz %40 oranında doldu. 
+                Otomatik teklif ve e-sözleşme modülü işimizi muazzam kolaylaştırdı."
+              </p>
+              <div className="pt-4 border-t border-white/10">
+                <h4 className="font-semibold text-white">Grand Bosphorus Davet</h4>
+                <p className="text-xs text-neutral-400">İstanbul — Düğün Salonu</p>
+              </div>
+            </div>
 
-          <div className="space-y-2">
-            <label className="text-sm font-medium text-gray-700">Yetkili Adı Soyadı</label>
-            <input
-              type="text"
-              name="authorizedName"
-              value={formData.authorizedName}
-              onChange={handleChange}
-              placeholder="Ahmet Yılmaz"
-              required
-              className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:ring-2 focus:ring-rose-400 outline-none transition"
-            />
-          </div>
+            {/* Kart 2 */}
+            <div className="p-8 rounded-3xl bg-white/5 border border-white/10 backdrop-blur-xl hover:border-white/20 transition-all space-y-4">
+              <div className="flex items-center gap-1 text-amber-400 text-sm">
+                ★★★★★
+              </div>
+              <p className="text-neutral-300 text-sm leading-relaxed">
+                "Çiftlerle mesajlaşma ve depozito ödemelerini tek yerden almak 
+                operasyon maliyetlerimizi yarı yarıya düşürdü."
+              </p>
+              <div className="pt-4 border-t border-white/10">
+                <h4 className="font-semibold text-white">Lumière Photography</h4>
+                <p className="text-xs text-neutral-400">İzmir — Fotoğraf Stüdyosu</p>
+              </div>
+            </div>
 
-          <div className="space-y-2">
-            <label className="text-sm font-medium text-gray-700">Telefon</label>
-            <input
-              type="tel"
-              name="phone"
-              value={formData.phone}
-              onChange={handleChange}
-              placeholder="05XX XXX XX XX"
-              required
-              className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:ring-2 focus:ring-rose-400 outline-none transition"
-            />
+            {/* Kart 3 */}
+            <div className="p-8 rounded-3xl bg-white/5 border border-white/10 backdrop-blur-xl hover:border-white/20 transition-all space-y-4">
+              <div className="flex items-center gap-1 text-amber-400 text-sm">
+                ★★★★★
+              </div>
+              <p className="text-neutral-300 text-sm leading-relaxed">
+                "Gelen talepler doğrudan nitelikli çiftlerden oluşuyor. 
+                Dönüşüm oranlarımız hiç olmadığı kadar yüksek."
+              </p>
+              <div className="pt-4 border-t border-white/10">
+                <h4 className="font-semibold text-white">Green Garden Kır Bahçesi</h4>
+                <p className="text-xs text-neutral-400">Ankara — Kır Mekanı</p>
+              </div>
+            </div>
           </div>
-
-          <div className="space-y-2 md:col-span-2">
-            <label className="text-sm font-medium text-gray-700">E-Posta Adresi</label>
-            <input
-              type="email"
-              name="email"
-              value={formData.email}
-              onChange={handleChange}
-              placeholder="firma@ornek.com"
-              required
-              className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:ring-2 focus:ring-rose-400 outline-none transition"
-            />
-          </div>
-
-          <div className="space-y-2 md:col-span-2">
-            <label className="text-sm font-medium text-gray-700">Firma Adresi</label>
-            <textarea
-              name="address"
-              rows={3}
-              value={formData.address}
-              onChange={handleChange}
-              placeholder="Firma açık adresinizi giriniz..."
-              required
-              className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:ring-2 focus:ring-rose-400 outline-none transition"
-            />
-          </div>
-
-          <div className="md:col-span-2 mt-4">
-            <button
-              type="submit"
-              className="w-full py-3.5 bg-rose-500 hover:bg-rose-600 text-white font-semibold rounded-xl shadow-lg transition duration-200"
-            >
-              Firma Kaydını Tamamla
-            </button>
-          </div>
-        </form>
-      </div>
+        </div>
+      </section>
     </div>
   );
 }
