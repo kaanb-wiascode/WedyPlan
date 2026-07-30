@@ -1,40 +1,32 @@
-import React from "react";
-import Image from "next/image";
-import Link from "next/link";
+'use client';
+
+import React from 'react';
+import Image from 'next/image';
 
 interface BrandLogoProps {
-  variant?: "default" | "vendor" | "admin" | "couple" | "main"; // 👈 "main" eklendi
+  variant?: 'main' | 'admin' | 'couple' | 'vendor' | 'marketplace';
   className?: string;
-  width?: number;
-  height?: number;
 }
 
-export const BrandLogo: React.FC<BrandLogoProps> = ({
-  variant = "default",
-  className = "",
-  width = 140,
-  height = 38,
-}) => {
-  const logoSrcMap = {
-    default: "/assets/branding/logo-main.svg",
-    main: "/assets/branding/logo-main.svg", // 👈 "main" eklendi
-    vendor: "/assets/branding/logo-vendor.svg",
-    admin: "/assets/branding/logo-admin.svg",
-    couple: "/assets/branding/logo-couple.svg",
+export default function BrandLogo({ variant = 'main', className = 'h-10 w-auto' }: BrandLogoProps) {
+  const logoPaths = {
+    main: '/assets/branding/logo-main.svg',
+    admin: '/assets/branding/logo-admin.svg',
+    couple: '/assets/branding/logo-couple.svg',
+    vendor: '/assets/branding/logo-vendor.svg',
+    marketplace: '/assets/branding/logo-marketplace.svg',
   };
 
   return (
-    <Link href="/" className={`inline-flex items-center gap-2 ${className}`}>
+    <div className={`relative inline-block ${className}`}>
       <Image
-        src={logoSrcMap[variant] || logoSrcMap.default}
-        alt="WedyPlan Logo"
-        width={width}
-        height={height}
+        src={logoPaths[variant]}
+        alt={`WedyPlan ${variant}`}
+        width={180}
+        height={48}
+        className="object-contain"
         priority
-        className="h-9 w-auto object-contain"
       />
-    </Link>
+    </div>
   );
-};
-
-export default BrandLogo;
+}

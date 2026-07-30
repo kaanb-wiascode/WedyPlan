@@ -25,7 +25,6 @@ import {
   Sparkles,
   BarChart3,
   Search,
-  CheckCircle2,
 } from 'lucide-react';
 
 const adminNavGroups = [
@@ -77,23 +76,16 @@ export function AdminSidebar() {
     <aside className="w-80 border-r border-zinc-200/80 dark:border-zinc-800/80 bg-white/70 dark:bg-zinc-950/70 backdrop-blur-2xl flex flex-col justify-between min-h-screen sticky top-0 transition-all z-30 shadow-xs font-sans">
       <div className="p-6 space-y-6 overflow-y-auto max-h-[calc(100vh-90px)] scrollbar-thin scrollbar-thumb-zinc-200 dark:scrollbar-thumb-zinc-800">
         
-        {/* Executive Admin Logosu */}
-        <Link href="/admin" className="flex items-center gap-3 px-2 group">
-          <div className="relative w-10 h-10 shrink-0 p-1 rounded-2xl bg-gradient-to-tr from-amber-50 to-amber-100/80 dark:from-zinc-900 dark:to-zinc-800 border border-amber-200/60 dark:border-amber-900/30 shadow-xs">
+        {/* Özel Admin Logosu */}
+        <Link href="/admin" className="block px-2 group">
+          <div className="relative w-52 h-12">
             <Image
               src="/assets/branding/logo-admin.svg"
-              alt="WedyPlan Admin Paneli"
+              alt="WedyPlan Executive Admin"
               fill
-              className="object-contain p-1 transition-transform group-hover:scale-105"
+              className="object-contain object-left transition-transform group-hover:scale-102"
+              priority
             />
-          </div>
-          <div className="flex flex-col">
-            <span className="font-serif font-bold text-lg tracking-tight text-zinc-900 dark:text-white leading-none">
-              WedyPlan
-            </span>
-            <span className="text-[10px] font-semibold text-amber-600 dark:text-amber-400 uppercase tracking-widest mt-1 flex items-center gap-1">
-              <CheckCircle2 className="w-2.5 h-2.5" /> Executive Control
-            </span>
           </div>
         </Link>
 

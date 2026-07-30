@@ -17,47 +17,39 @@ import {
   Settings,
   LogOut,
   ChevronRight,
-  Heart,
   Calendar
 } from 'lucide-react';
 
 const menuItems = [
-  { name: 'Genel Bakış', href: '/cift/dashboard', icon: LayoutDashboard },
-  { name: 'AI Düğün Asistanı', href: '/cift/ai-asistan', icon: Sparkles, badge: 'AI' },
-  { name: 'Bütçe Planlayıcı', href: '/cift/butce', icon: Wallet },
-  { name: 'Görev & Adımlar', href: '/cift/gorevler', icon: CheckSquare },
-  { name: 'Davetli & LCV Takibi', href: '/cift/davetliler', icon: Users },
-  { name: 'Anlaşmalı Firmalar', href: '/cift/firmalarim', icon: Building2 },
-  { name: 'Dijital Davetiye', href: '/cift/dijital-davetiye', icon: Mail },
-  { name: 'Mesajlar & Teklifler', href: '/cift/messages', icon: MessageSquare },
-  { name: 'Ödeme Planı', href: '/cift/odeme', icon: CreditCard },
-  { name: 'Hesap Ayarları', href: '/cift/settings', icon: Settings },
+  { name: 'Genel Bakış', href: '/dashboard', icon: LayoutDashboard },
+  { name: 'AI Düğün Asistanı', href: '/ai-planner', icon: Sparkles, badge: 'AI' },
+  { name: 'Bütçe Planlayıcı', href: '/budget', icon: Wallet },
+  { name: 'Görev & Adımlar', href: '/checklist', icon: CheckSquare },
+  { name: 'Davetli & LCV Takibi', href: '/guests', icon: Users },
+  { name: 'Anlaşmalı Firmalar', href: '/vendors', icon: Building2 },
+  { name: 'Dijital Davetiye', href: '/invitations', icon: Mail },
+  { name: 'Mesajlar & Teklifler', href: '/messages', icon: MessageSquare },
+  { name: 'Ödeme Planı', href: '/payments', icon: CreditCard },
+  { name: 'Hesap Ayarları', href: '/settings', icon: Settings },
 ];
 
 export function CoupleSidebar() {
   const pathname = usePathname();
 
   return (
-    <aside className="w-72 border-r border-rose-100/60 dark:border-zinc-800/60 bg-white/70 dark:bg-zinc-950/70 backdrop-blur-2xl flex flex-col justify-between min-h-screen sticky top-0 transition-all z-30 shadow-sm">
+    <aside className="w-72 border-r border-rose-100/60 dark:border-zinc-800/60 bg-white/70 dark:bg-zinc-950/70 backdrop-blur-2xl flex flex-col justify-between min-h-screen sticky top-0 transition-all z-30 shadow-xs">
       <div className="p-6 space-y-8">
         
         {/* Özel Çift Portalı Logosu */}
-        <Link href="/cift/dashboard" className="flex items-center gap-3 px-2 group">
-          <div className="relative w-10 h-10 shrink-0 p-1 rounded-2xl bg-gradient-to-tr from-rose-50 to-rose-100/80 dark:from-zinc-900 dark:to-zinc-800 border border-rose-200/50 dark:border-zinc-700/50 shadow-sm">
+        <Link href="/dashboard" className="block px-2 group">
+          <div className="relative w-48 h-12">
             <Image
               src="/assets/branding/logo-couple.svg"
               alt="WedyPlan Çift Portalı"
               fill
-              className="object-contain p-1.5 transition-transform group-hover:scale-105"
+              className="object-contain object-left transition-transform group-hover:scale-102"
+              priority
             />
-          </div>
-          <div className="flex flex-col">
-            <span className="font-serif font-bold text-lg tracking-tight text-zinc-900 dark:text-white leading-none">
-              WedyPlan
-            </span>
-            <span className="text-[10px] font-semibold text-rose-500 uppercase tracking-widest mt-1 flex items-center gap-1">
-              <Heart className="w-2.5 h-2.5 fill-rose-500" /> Çift Portalı
-            </span>
           </div>
         </Link>
 
@@ -97,7 +89,7 @@ export function CoupleSidebar() {
       {/* Profil Alt Kartı */}
       <div className="p-4 m-4 rounded-2xl bg-gradient-to-b from-rose-50/40 to-white/60 dark:from-zinc-900/60 dark:to-zinc-900/30 border border-rose-100 dark:border-zinc-800/80 backdrop-blur-md space-y-3 shadow-xs">
         <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-full bg-gradient-to-tr from-rose-400 to-rose-600 flex items-center justify-center text-white text-xs font-semibold shadow-sm ring-2 ring-white dark:ring-zinc-800">
+          <div className="w-9 h-9 rounded-full bg-gradient-to-tr from-rose-400 to-rose-600 flex items-center justify-center text-white text-xs font-semibold shadow-xs ring-2 ring-white dark:ring-zinc-800">
             E&M
           </div>
           <div className="flex flex-col truncate">
@@ -114,7 +106,7 @@ export function CoupleSidebar() {
             localStorage.clear();
             window.location.href = '/giris';
           }}
-          className="w-full py-2 px-3 rounded-xl text-xs font-medium text-zinc-600 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/20 transition-all flex items-center justify-center gap-2 border border-transparent hover:border-rose-200/50"
+          className="w-full py-2 px-3 rounded-xl text-xs font-medium text-zinc-600 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/20 transition-all flex items-center justify-center gap-2 border border-transparent hover:border-rose-200/50 cursor-pointer"
         >
           <LogOut className="w-3.5 h-3.5" />
           <span>Oturumu Kapat</span>
