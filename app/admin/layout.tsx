@@ -10,6 +10,7 @@ export default function AdminLayout({
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
+    // Tarayıcı tarafında çalıştığı an yükleme durumunu kapatır
     setMounted(true);
   }, []);
 
@@ -18,7 +19,7 @@ export default function AdminLayout({
       <div className="min-h-screen w-full flex items-center justify-center bg-zinc-950 text-white">
         <div className="flex flex-col items-center gap-3">
           <div className="w-8 h-8 border-2 border-rose-500 border-t-transparent rounded-full animate-spin" />
-          <p className="text-xs text-zinc-400 font-medium">Yönetim Paneli Açılıyor...</p>
+          <p className="text-xs text-zinc-400 font-medium">Yönetim Paneline Yönlendiriliyorsunuz...</p>
         </div>
       </div>
     );
