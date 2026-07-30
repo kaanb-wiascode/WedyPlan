@@ -24,8 +24,9 @@
     "zustand": "^5.0.14"
   },
   "devDependencies": {
+    "@prisma/config": "^7.9.1",
     "@tailwindcss/postcss": "^4",
-    "@types/node": "^20",
+    "@types/node": "^20.19.43",
     "@types/nodemailer": "^8.0.1",
     "@types/react": "^19",
     "@types/react-dom": "^19",
