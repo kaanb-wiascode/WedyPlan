@@ -28,11 +28,14 @@ export const CoupleRegisterSchema = z.object({
 
 export type CoupleRegisterInput = z.infer<typeof CoupleRegisterSchema>;
 
-// Onboarding Action'larının beklediği tam şema ve tipler
-export const fullOnboardingSchema = CoupleRegisterSchema.extend({
-  // İhtiyaç halinde ek onboarding adımları buraya eklenebilir
-  partnerEmail: z.string().email().optional(),
+// Onboarding bileşenlerinin geriye dönük uyumluluğu için genişletilmiş şema
+export const fullOnboardingSchema = CoupleRegisterSchema.partial().extend({
+  relationshipStatus: z.string().optional(),
+  partnerName: z.string().optional(),
+  partnerEmail: z.string().email().optional().or(z.literal("")),
   budget: z.coerce.number().optional(),
+  city: z.string().optional(),
+  style: z.string().optional(),
 });
 
 export type OnboardingFormData = z.infer<typeof fullOnboardingSchema>;
