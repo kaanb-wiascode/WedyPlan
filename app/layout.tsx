@@ -1,16 +1,10 @@
 import type { Metadata } from "next";
-import { Plus_Jakarta_Sans, Playfair_Display } from "next/font/google";
+import { Inter } from "next/font/google";
 import "./globals.css";
 
-const sans = Plus_Jakarta_Sans({
-  subsets: ["latin"],
-  variable: "--font-sans",
-  display: "swap",
-});
-
-const serif = Playfair_Display({
-  subsets: ["latin"],
-  variable: "--font-serif",
+const inter = Inter({
+  subsets: ["latin", "latin-ext"],
+  variable: "--font-apple",
   display: "swap",
 });
 
@@ -25,7 +19,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="tr" className={`${sans.variable} ${serif.variable}`}>
+    <html lang="tr" className={inter.variable}>
       <body className="bg-[#FDFBF7] text-neutral-900 font-sans antialiased selection:bg-rose-100 selection:text-rose-900">
         {children}
       </body>
