@@ -1,99 +1,21 @@
-@import "tailwindcss";
-
-/* 🌟 WedyPlan Luxury Apple Editorial & Liquid Glass Theme */
+@tailwind base;
+@style utilities;
+@tailwind components;
 
 :root {
-  --background: #F5F4F0; /* Soft Ivory Canvas */
-  --foreground: #1D1D1F; /* Apple Signature Charcoal Black */
-  --accent-gold: rgba(212, 175, 55, 0.25);
+  /* Logo görselindeki orijinal sıcak stüdyo gri tonu */
+  --background-studio: #E5E5E5;
+  --background-card: #EFEFEF;
+  --text-primary: #111111;
+  --text-secondary: #666666;
+  --accent-gold: #C5A059;
 }
 
-/* 🍏 Apple SF Pro Standard Font System Integration */
-
-@layer base {
-  body {
-    font-family: var(--font-apple), -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", Helvetica, Arial, sans-serif;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-    letter-spacing: -0.011em; /* Apple stili mikro harf aralığı */
-    background-color: var(--background);
-    color: var(--foreground);
-  }
-
-  /* Apple.com Tarzı Sıkı ve Net Başlıklar */
-  h1, h2, h3, h4, h5, h6 {
-    font-family: var(--font-apple), -apple-system, BlinkMacSystemFont, "SF Pro Display", sans-serif;
-    letter-spacing: -0.025em; /* Apple dev başlık sıkıştırması */
-    font-weight: 600;
-    color: #1D1D1F;
-  }
-
-  h1 {
-    letter-spacing: -0.035em;
-  }
-}
-
-/* 🧊 Apple iOS & Editorial Liquid Glass Classes */
-
-.glass-card {
-  background-color: rgba(255, 255, 255, 0.65);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.8);
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.03);
-}
-
-.glass-btn-primary {
-  background-color: #111111; /* Mat Siyah */
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border: 1px solid #111111;
-  color: #F5F4F0;
-  font-weight: 500;
-  letter-spacing: -0.01em;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.glass-btn-primary:hover {
-  background-color: #222222;
-  transform: translateY(-1px);
-}
-
-.glass-btn-primary:active {
-  transform: scale(0.97);
-}
-
-.glass-btn-secondary {
-  background-color: rgba(255, 255, 255, 0.5);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(17, 17, 17, 0.12);
-  color: #111111;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.glass-btn-secondary:hover {
-  background-color: rgba(255, 255, 255, 0.85);
-  border-color: rgba(17, 17, 17, 0.3);
-}
-
-.glass-btn-secondary:active {
-  transform: scale(0.97);
-}
-
-.glass-input {
-  background-color: rgba(255, 255, 255, 0.55);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(17, 17, 17, 0.1);
-  border-radius: 1rem;
-  color: #111111;
-  outline: none;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.glass-input:focus {
-  background-color: rgba(255, 255, 255, 0.9);
-  border-color: rgba(17, 17, 17, 0.4);
+body {
+  background-color: var(--background-studio);
+  color: var(--text-primary);
+  /* Apple.com San Francisco & SF Pro font hiyerarşisi */
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }

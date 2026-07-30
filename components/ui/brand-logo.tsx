@@ -29,30 +29,45 @@ const defaultHrefs: Record<LogoVariant, string> = {
   icon: '/',
 };
 
+// Canva Min. 40px Standartlarına Göre Hassas Piksel Haritası
+const defaultDimensions: Record<LogoVariant, { width: number; height: number; maxHClass: string }> = {
+  main:        { width: 180, height: 40, maxHClass: 'max-h-[40px]' }, // 180x40 px
+  couple:      { width: 190, height: 42, maxHClass: 'max-h-[42px]' }, // 190x42 px
+  vendor:      { width: 190, height: 42, maxHClass: 'max-h-[42px]' }, // 190x42 px
+  admin:       { width: 175, height: 40, maxHClass: 'max-h-[40px]' }, // 175x40 px
+  marketplace: { width: 180, height: 40, maxHClass: 'max-h-[40px]' }, // 180x40 px
+  icon:        { width: 40,  height: 40, maxHClass: 'max-h-[40px]' }, // 40x40 px
+};
+
 export function BrandLogo({
   variant = 'main',
-  width = 180,
-  height = 40,
+  width,
+  height,
   className = '',
   href,
 }: BrandLogoProps) {
   const logoSrc = logoPaths[variant];
   const targetHref = href ?? defaultHrefs[variant];
+  const dimensions = defaultDimensions[variant];
+
+  const finalWidth = width ?? dimensions.width;
+  const finalHeight = height ?? dimensions.height;
 
   const logoImage = (
     <Image
       src={logoSrc}
       alt={`WedyPlan ${variant.toUpperCase()} Logo`}
-      width={width}
-      height={height}
-      className={`h-auto w-auto object-contain ${className}`}
+      width={finalWidth}
+      height={finalHeight}
+      // bg-transparent ve object-contain ile kesin şeffaflık ve taşmayan piksel kontrolü
+      className={`bg-transparent w-auto h-auto object-contain ${dimensions.maxHClass} ${className}`}
       priority
     />
   );
 
   if (targetHref) {
     return (
-      <Link href={targetHref} className="inline-block transition-opacity hover:opacity-90">
+      <Link href={targetHref} className="inline-flex items-center bg-transparent transition-opacity hover:opacity-85">
         {logoImage}
       </Link>
     );
