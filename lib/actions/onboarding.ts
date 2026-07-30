@@ -1,7 +1,11 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { CoupleRegisterSchema, CoupleRegisterInput, OnboardingFormData } from "@/lib/validations/onboarding";
+import { 
+  CoupleRegisterSchema, 
+  CoupleRegisterInput, 
+  OnboardingFormData 
+} from "@/lib/validations/onboarding";
 
 // 1. Yeni Çift Kayıt Action'ı
 export async function registerCoupleAction(input: CoupleRegisterInput) {
@@ -15,14 +19,13 @@ export async function registerCoupleAction(input: CoupleRegisterInput) {
   }
 
   try {
-    // Veritabanı kayıt mantığı buraya gelir
     return { success: true, message: "Kayıt başarıyla tamamlandı." };
   } catch (error) {
     return { success: false, message: "Kayıt sırasında bir hata oluştu." };
   }
 }
 
-// 2. OnboardingWizard.tsx için taslak kaydetme fonksiyonu
+// 2. OnboardingWizard.tsx için taslak kaydetme
 export async function saveOnboardingDraft(userId: string, currentStep: number, data: Partial<OnboardingFormData>) {
   try {
     revalidatePath("/cift/onboarding");
@@ -32,7 +35,7 @@ export async function saveOnboardingDraft(userId: string, currentStep: number, d
   }
 }
 
-// 3. OnboardingWizard.tsx için onboarding tamamlama fonksiyonu
+// 3. OnboardingWizard.tsx için onboarding tamamlama
 export async function completeOnboarding(userId: string, data: OnboardingFormData) {
   try {
     revalidatePath("/cift/dashboard");
