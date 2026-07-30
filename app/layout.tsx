@@ -1,42 +1,22 @@
-import type { Metadata, Viewport } from "next";
-import { Inter } from "next/font/google";
+import type { Metadata } from "next";
+import { Plus_Jakarta_Sans, Playfair_Display } from "next/font/google";
 import "./globals.css";
-import { AuthProvider } from "@/context/AuthContext";
 
-// Apple.com tipi pürüzsüz, modern ve yüksek netlikli gövde/başlık fontu
-const appleFont = Inter({ 
-  subsets: ["latin"], 
-  variable: "--font-apple",
-  weight: ["300", "400", "500", "600", "700"],
-  display: "swap"
+const sans = Plus_Jakarta_Sans({
+  subsets: ["latin"],
+  variable: "--font-sans",
+  display: "swap",
 });
 
-export const viewport: Viewport = {
-  themeColor: '#111111',
-  width: 'device-width',
-  initialScale: 1,
-  maximumScale: 1,
-};
+const serif = Playfair_Display({
+  subsets: ["latin"],
+  variable: "--font-serif",
+  display: "swap",
+});
 
 export const metadata: Metadata = {
-  title: {
-    default: "WedyPlan — Wedding Studio & Intelligent WOS",
-    template: "%s | WedyPlan",
-  },
-  description: "Yapay Zeka Destekli Lüks Düğün Planlama ve İşletim Sistemi. Düğün salonları, organizasyon, bütçe yönetimi ve WedyAI desteği.",
-  openGraph: {
-    title: "WedyPlan — Wedding Studio & Intelligent WOS",
-    description: "Hayalinizdeki düğünü yapay zeka ile planlayın, kaporadan gün takibine kadar her şeyi tek yerden yönetin.",
-    url: "https://wedyplan.com",
-    siteName: "WedyPlan",
-    locale: "tr_TR",
-    type: "website",
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: "WedyPlan — Wedding Studio & Intelligent WOS",
-    description: "Yapay Zeka Destekli Düğün Planlama ve İşletim Sistemi",
-  },
+  title: "WedyPlan — Düğün Planlama & İşletme Yönetim Platformu",
+  description: "Düğün mekanları, fotoğrafçılar ve organizasyon firmaları ile evlenecek çiftleri buluşturan akıllı platform.",
 };
 
 export default function RootLayout({
@@ -45,11 +25,9 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="tr" className={appleFont.variable}>
-      <body className="font-sans antialiased bg-[#F5F4F0] text-[#1D1D1F] selection:bg-[#111111] selection:text-[#F5F4F0]">
-        <AuthProvider>
-          {children}
-        </AuthProvider>
+    <html lang="tr" className={`${sans.variable} ${serif.variable}`}>
+      <body className="bg-[#FDFBF7] text-neutral-900 font-sans antialiased selection:bg-rose-100 selection:text-rose-900">
+        {children}
       </body>
     </html>
   );
