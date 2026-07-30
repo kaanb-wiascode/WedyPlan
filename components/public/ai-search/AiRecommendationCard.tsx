@@ -5,6 +5,8 @@ import Image from "next/image";
 import Link from "next/link";
 
 interface AiRecommendationProps {
+  queryPrompt?: string;
+  resultCount?: number;
   items?: Array<{
     id: string;
     name: string;
@@ -15,7 +17,11 @@ interface AiRecommendationProps {
   }>;
 }
 
-export const AiRecommendationCard: React.FC<AiRecommendationProps> = ({ items }) => {
+export const AiRecommendationCard: React.FC<AiRecommendationProps> = ({
+  queryPrompt,
+  resultCount,
+  items,
+}) => {
   const defaultItems = [
     {
       id: "1",
@@ -55,7 +61,7 @@ export const AiRecommendationCard: React.FC<AiRecommendationProps> = ({ items })
           </h3>
         </div>
         <span className="text-[11px] text-neutral-400 font-medium">
-          Yüksek Uyum Skorlu İşletmeler
+          {resultCount ? `${resultCount} Sonuç İçinden Yüksek Uyum Skorlular` : "Yüksek Uyum Skorlu İşletmeler"}
         </span>
       </div>
 
