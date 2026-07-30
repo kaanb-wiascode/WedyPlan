@@ -9,12 +9,14 @@
     "lint": "next lint",
     "prisma:merge": "node scripts/merge-prisma.js",
     "prisma:generate": "npm run prisma:merge && npx prisma generate",
-    "prisma:db-push": "npm run prisma:merge && npx prisma db push"
+    "prisma:db-push": "npm run prisma:merge && npx prisma db push",
+    "db:seed": "prisma db seed"
   },
   "dependencies": {
     "@prisma/client": "^7.9.1",
     "@vercel/analytics": "^2.0.1",
     "argon2": "^0.45.1",
+    "bcryptjs": "^3.0.3",
     "dotenv": "^17.4.2",
     "firebase": "^12.16.0",
     "framer-motion": "^12.42.2",
@@ -29,6 +31,7 @@
   "devDependencies": {
     "@prisma/config": "^7.9.1",
     "@tailwindcss/postcss": "^4",
+    "@types/bcryptjs": "^2.4.6",
     "@types/node": "^20.19.43",
     "@types/nodemailer": "^8.0.1",
     "@types/react": "^19",
@@ -37,6 +40,10 @@
     "eslint-config-next": "16.2.11",
     "prisma": "^7.9.1",
     "tailwindcss": "^4",
+    "tsx": "^4.23.1",
     "typescript": "^5"
+  },
+  "prisma": {
+    "seed": "npx tsx prisma/seed.ts"
   }
 }
