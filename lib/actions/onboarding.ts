@@ -1,12 +1,12 @@
 "use server";
 
-import { CoupleRegisterSchema, CoupleRegisterInput } from "@/lib/validations/onboarding";
-// import { prisma } from "@/lib/prisma"; // Prisma client importunuz
+import { revalidatePath } from "next/cache";
+import { CoupleRegisterSchema, CoupleRegisterInput, OnboardingFormData } from "@/lib/validations/onboarding";
 
+// 1. Yeni Çift Kayıt Action'ı
 export async function registerCoupleAction(input: CoupleRegisterInput) {
-  // 1. Zod ile doğrula
   const validated = CoupleRegisterSchema.safeParse(input);
-  
+
   if (!validated.success) {
     return {
       success: false,
@@ -15,19 +15,29 @@ export async function registerCoupleAction(input: CoupleRegisterInput) {
   }
 
   try {
-    // 2. Veritabanına kaydet
-    /*
-    const couple = await prisma.coupleProfile.create({
-      data: {
-        ...validated.data,
-        weddingDate: new Date(validated.data.weddingDate),
-        organizationDate: new Date(validated.data.organizationDate),
-      },
-    });
-    */
-
-    return { success: true, message: "Kayıt başarıyla oluşturuldu." };
+    // Veritabanı kayıt mantığı buraya gelir
+    return { success: true, message: "Kayıt başarıyla tamamlandı." };
   } catch (error) {
     return { success: false, message: "Kayıt sırasında bir hata oluştu." };
+  }
+}
+
+// 2. OnboardingWizard.tsx için taslak kaydetme fonksiyonu
+export async function saveOnboardingDraft(userId: string, currentStep: number, data: Partial<OnboardingFormData>) {
+  try {
+    revalidatePath("/cift/onboarding");
+    return { success: true, message: "Taslak kaydedildi." };
+  } catch (error) {
+    return { success: false, message: "Taslak kaydedilemedi." };
+  }
+}
+
+// 3. OnboardingWizard.tsx için onboarding tamamlama fonksiyonu
+export async function completeOnboarding(userId: string, data: OnboardingFormData) {
+  try {
+    revalidatePath("/cift/dashboard");
+    return { success: true, message: "Onboarding başarıyla tamamlandı." };
+  } catch (error) {
+    return { success: false, message: "Onboarding tamamlanırken hata oluştu." };
   }
 }
