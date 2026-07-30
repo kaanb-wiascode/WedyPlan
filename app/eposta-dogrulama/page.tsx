@@ -37,7 +37,7 @@ function EpostaDogrulamaContent() {
     <div className="min-h-screen bg-[#E5E5E5] flex flex-col justify-center items-center p-4">
       <div className="bg-[#EFEFEF] border border-[#D5D5D5] p-8 rounded-3xl max-w-md w-full text-center space-y-6 shadow-sm">
         <div className="flex justify-center">
-          <BrandLogo variant="main" width={180} height={40} />
+        <BrandLogo variant="default" width={180} height={40} />
         </div>
 
         {status === 'loading' && (

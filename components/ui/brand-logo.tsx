@@ -3,17 +3,21 @@ import Image from "next/image";
 import Link from "next/link";
 
 interface BrandLogoProps {
-  variant?: "default" | "vendor" | "admin" | "couple";
+  variant?: "default" | "vendor" | "admin" | "couple" | "main"; // 👈 "main" eklendi
   className?: string;
+  width?: number;
+  height?: number;
 }
 
 export const BrandLogo: React.FC<BrandLogoProps> = ({
   variant = "default",
   className = "",
+  width = 140,
+  height = 38,
 }) => {
-  // Pembe daireli eski logo kaldırıldı, yerine temanın şık ve modern SVG logoları bağlandı.
   const logoSrcMap = {
     default: "/assets/branding/logo-main.svg",
+    main: "/assets/branding/logo-main.svg", // 👈 "main" eklendi
     vendor: "/assets/branding/logo-vendor.svg",
     admin: "/assets/branding/logo-admin.svg",
     couple: "/assets/branding/logo-couple.svg",
@@ -24,8 +28,8 @@ export const BrandLogo: React.FC<BrandLogoProps> = ({
       <Image
         src={logoSrcMap[variant] || logoSrcMap.default}
         alt="WedyPlan Logo"
-        width={140}
-        height={38}
+        width={width}
+        height={height}
         priority
         className="h-9 w-auto object-contain"
       />

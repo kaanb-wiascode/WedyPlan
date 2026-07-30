@@ -1,5 +1,5 @@
 import React from "react";
-import PublicNavbar from "@/components/public/PublicNavbar";
+import { PublicNavbar } from "@/components/public/PublicNavbar";
 
 export default function FirmaKatilPage() {
   return (
