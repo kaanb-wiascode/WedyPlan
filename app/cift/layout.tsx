@@ -1,6 +1,6 @@
 import React from 'react';
 import { CoupleSidebar } from '@/components/couple/CoupleSidebar';
-import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
+import ProtectedRoute from '@/components/auth/ProtectedRoute';
 import { Heart } from 'lucide-react';
 
 export default function CoupleLayout({ children }: { children: React.ReactNode }) {

@@ -7,11 +7,10 @@ interface ProtectedRouteProps {
   allowedRoles?: string[];
 }
 
-export default function ProtectedRoute({ children }: ProtectedRouteProps) {
+export function ProtectedRoute({ children }: ProtectedRouteProps) {
   const [isReady, setIsReady] = useState(false);
 
   useEffect(() => {
-    // İstemci tarafında yüklendiği an kilitlenmeyi kır ve içeriği göster
     setIsReady(true);
   }, []);
 
@@ -28,3 +27,5 @@ export default function ProtectedRoute({ children }: ProtectedRouteProps) {
 
   return <>{children}</>;
 }
+
+export default ProtectedRoute;
