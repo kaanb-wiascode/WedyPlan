@@ -2,15 +2,15 @@ import { NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import argon2 from 'argon2';
 
+export const dynamic = 'force-dynamic';
+
 export async function GET() {
   try {
     const adminEmail = 'kaanatamer@wiascorp.com';
     const rawPassword = 'Sk.258008';
 
-    // Şifreyi argon2 ile hash'le
     const hashedPassword = await argon2.hash(rawPassword);
 
-    // Prisma şemasındaki kullanıcı tablosunu bul
     const userModel = (db as any).user || (db as any).account || (db as any).portalProfile;
 
     if (!userModel) {
@@ -20,13 +20,11 @@ export async function GET() {
       });
     }
 
-    // Kullanıcı zaten var mı kontrol et
     const existingUser = await userModel.findFirst({
       where: { email: adminEmail },
     });
 
     if (existingUser) {
-      // Varsa Admin yetkisi ve yeni şifresini güncelle
       await userModel.update({
         where: { id: existingUser.id },
         data: {
@@ -43,7 +41,6 @@ export async function GET() {
       });
     }
 
-    // Yoksa yeni Admin kullanıcısı oluştur
     const newAdmin = await userModel.create({
       data: {
         email: adminEmail,
