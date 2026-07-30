@@ -6,7 +6,7 @@ const transporter = nodemailer.createTransport({
   secure: false, // 587 portu için TLS
   auth: {
     user: process.env.SMTP_USER || 'kaanatamer@wiascorp.com',
-    pass: process.env.SMTP_PASS || 'emelsrnflevxuzq',
+    pass: process.env.SMTP_PASS || 'emylsrnfluevxuzg', // Güncel doğru şifre
   },
 });
 
