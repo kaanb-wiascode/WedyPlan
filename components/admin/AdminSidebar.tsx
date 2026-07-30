@@ -1,8 +1,6 @@
 'use client';
 
 import React from 'react';
-import Link from 'next/link';
-import { usePathname } from 'next/navigation';
 import Image from 'next/image';
 import {
   LayoutDashboard,
@@ -27,58 +25,82 @@ import {
   Search,
 } from 'lucide-react';
 
-const adminNavGroups = [
+export type AdminTab = 
+  | 'executive'
+  | 'copilot'
+  | 'central-ai'
+  | 'couples'
+  | 'vendors'
+  | 'ai-agents'
+  | 'ai-workflows'
+  | 'ai-search'
+  | 'ai-rag'
+  | 'ai-guardrails'
+  | 'finance'
+  | 'revenue'
+  | 'marketplace'
+  | 'subscriptions'
+  | 'monitoring'
+  | 'infrastructure'
+  | 'networking'
+  | 'mlops'
+  | 'system-config';
+
+interface AdminSidebarProps {
+  activeTab: AdminTab;
+  setActiveTab: (tab: AdminTab) => void;
+}
+
+const adminNavGroups: { title: string; items: { id: AdminTab; name: string; icon: any; badge?: string }[] }[] = [
   {
     title: 'YÖNETİM & MERKEZ',
     items: [
-      { name: 'Executive Paneli', href: '/admin', icon: LayoutDashboard },
-      { name: 'Admin Copilot', href: '/admin/admin-copilot', icon: Bot, badge: 'PRO' },
-      { name: 'Merkezi Yapay Zekâ', href: '/admin/central-intelligence', icon: BrainCircuit },
-      { name: 'Çift Yönetimi', href: '/admin/couples', icon: Users },
-      { name: 'Tedarikçi Yönetimi', href: '/admin/vendors', icon: Store },
+      { id: 'executive', name: 'Executive Paneli', icon: LayoutDashboard },
+      { id: 'copilot', name: 'Admin Copilot', icon: Bot, badge: 'PRO' },
+      { id: 'central-ai', name: 'Merkezi Yapay Zekâ', icon: BrainCircuit },
+      { id: 'couples', name: 'Çift Yönetimi', icon: Users },
+      { id: 'vendors', name: 'Tedarikçi Yönetimi', icon: Store },
     ],
   },
   {
     title: 'YAPAY ZEKÂ & AGENT MERKEZİ',
     items: [
-      { name: 'AI Agent Kayıtları', href: '/admin/ai-agents', icon: Sparkles },
-      { name: 'AI İş Akışları', href: '/admin/ai-workflows', icon: Sliders },
-      { name: 'Arama Ops & Vektör', href: '/admin/ai-search', icon: Search },
-      { name: 'RAG & Bilgi Deposu', href: '/admin/ai-rag', icon: Layers },
-      { name: 'AI Guardrails', href: '/admin/ai-guardrails', icon: ShieldCheck },
+      { id: 'ai-agents', name: 'AI Agent Kayıtları', icon: Sparkles },
+      { id: 'ai-workflows', name: 'AI İş Akışları', icon: Sliders },
+      { id: 'ai-search', name: 'Arama Ops & Vektör', icon: Search },
+      { id: 'ai-rag', name: 'RAG & Bilgi Deposu', icon: Layers },
+      { id: 'ai-guardrails', name: 'AI Guardrails', icon: ShieldCheck },
     ],
   },
   {
     title: 'FİNANS & PAZAR YERİ',
     items: [
-      { name: 'Finansal Genel Bakış', href: '/admin/finance', icon: Wallet },
-      { name: 'Komisyon & Gelir', href: '/admin/revenue', icon: BarChart3 },
-      { name: 'Pazar Yeri Kuralları', href: '/admin/marketplace', icon: Store },
-      { name: 'Abonelik Paketleri', href: '/admin/subscriptions', icon: FileText },
+      { id: 'finance', name: 'Finansal Genel Bakış', icon: Wallet },
+      { id: 'revenue', name: 'Komisyon & Gelir', icon: BarChart3 },
+      { id: 'marketplace', name: 'Pazar Yeri Kuralları', icon: Store },
+      { id: 'subscriptions', name: 'Abonelik Paketleri', icon: FileText },
     ],
   },
   {
     title: 'SİSTEM & ALTYAPI (DEVOPS)',
     items: [
-      { name: 'Sistem Durumu & SLA', href: '/admin/monitoring', icon: Activity },
-      { name: 'Sunucu Altyapısı', href: '/admin/infrastructure', icon: Server },
-      { name: 'Ağ & Servis Mesh', href: '/admin/platform-networking', icon: Network },
-      { name: 'MLOps & Veri Akışı', href: '/admin/ai-mlops', icon: Cpu },
-      { name: 'Sistem Ayarları', href: '/admin/system-config', icon: Settings },
+      { id: 'monitoring', name: 'Sistem Durumu & SLA', icon: Activity },
+      { id: 'infrastructure', name: 'Sunucu Altyapısı', icon: Server },
+      { id: 'networking', name: 'Ağ & Servis Mesh', icon: Network },
+      { id: 'mlops', name: 'MLOps & Veri Akışı', icon: Cpu },
+      { id: 'system-config', name: 'Sistem Ayarları', icon: Settings },
     ],
   },
 ];
 
-export function AdminSidebar() {
-  const pathname = usePathname();
-
+export function AdminSidebar({ activeTab, setActiveTab }: AdminSidebarProps) {
   return (
-    <aside className="w-80 border-r border-zinc-200/80 dark:border-zinc-800/80 bg-white/70 dark:bg-zinc-950/70 backdrop-blur-2xl flex flex-col justify-between min-h-screen sticky top-0 transition-all z-30 shadow-xs font-sans">
+    <aside className="w-80 border-r border-zinc-200/80 dark:border-zinc-800/80 bg-white/80 dark:bg-zinc-950/80 backdrop-blur-2xl flex flex-col justify-between min-h-screen sticky top-0 transition-all z-30 shadow-xs font-sans">
       <div className="p-6 space-y-6 overflow-y-auto max-h-[calc(100vh-90px)] scrollbar-thin scrollbar-thumb-zinc-200 dark:scrollbar-thumb-zinc-800">
         
         {/* Özel Admin Logosu */}
-        <Link href="/admin" className="block px-2 group">
-          <div className="relative w-52 h-12">
+        <button onClick={() => setActiveTab('executive')} className="block px-2 group cursor-pointer text-left">
+          <div className="relative w-48 h-12">
             <Image
               src="/assets/branding/logo-admin.svg"
               alt="WedyPlan Executive Admin"
@@ -87,7 +109,7 @@ export function AdminSidebar() {
               priority
             />
           </div>
-        </Link>
+        </button>
 
         {/* Gruplandırılmış Menü Yapısı */}
         <div className="space-y-6 pt-2">
@@ -98,16 +120,16 @@ export function AdminSidebar() {
               </h3>
               <div className="space-y-0.5">
                 {group.items.map((item) => {
-                  const isActive = pathname === item.href;
+                  const isActive = activeTab === item.id;
                   const Icon = item.icon;
 
                   return (
-                    <Link
-                      key={item.href}
-                      href={item.href}
-                      className={`flex items-center justify-between px-3.5 py-2 rounded-xl text-xs font-medium transition-all group ${
+                    <button
+                      key={item.id}
+                      onClick={() => setActiveTab(item.id)}
+                      className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-2xl text-xs font-medium transition-all group cursor-pointer ${
                         isActive
-                          ? 'bg-amber-500/10 text-amber-700 dark:text-amber-400 font-semibold border border-amber-200/60 dark:border-amber-900/30 shadow-xs'
+                          ? 'bg-amber-500/10 text-amber-800 dark:text-amber-400 font-semibold border border-amber-200/80 dark:border-amber-900/40 shadow-xs'
                           : 'text-zinc-600 dark:text-zinc-400 hover:bg-amber-50/50 dark:hover:bg-zinc-900/50 hover:text-zinc-900 dark:hover:text-zinc-100'
                       }`}
                     >
@@ -122,7 +144,7 @@ export function AdminSidebar() {
                       ) : (
                         <ChevronRight className={`w-3.5 h-3.5 transition-all ${isActive ? 'opacity-100 text-amber-600 dark:text-amber-400 translate-x-0.5' : 'opacity-0 group-hover:opacity-100 text-zinc-400'}`} />
                       )}
-                    </Link>
+                    </button>
                   );
                 })}
               </div>
@@ -137,7 +159,7 @@ export function AdminSidebar() {
           <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-amber-400 to-amber-600 flex items-center justify-center text-white dark:text-zinc-950 font-bold text-xs shadow-xs ring-2 ring-white dark:ring-zinc-800">
             KA
           </div>
-          <div className="flex flex-col truncate">
+          <div className="flex flex-col truncate text-left">
             <span className="text-xs font-semibold text-zinc-900 dark:text-white truncate">Kaan Atamer</span>
             <span className="text-[10px] text-amber-600 dark:text-amber-400 font-medium truncate">Süper Admin</span>
           </div>
