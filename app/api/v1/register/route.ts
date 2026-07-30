@@ -14,20 +14,21 @@ export async function POST(request: Request) {
       );
     }
 
-    // 1. Güvenli, benzersiz 32 baytlık doğrulama token'ı üretimi
     const verificationToken = crypto.randomBytes(32).toString('hex');
 
-    // 2. Google SMTP Üzerinden E-Posta Gönderimi
+    // Google SMTP üzerinden mail gönderimi
     await sendVerificationEmail(email, verificationToken);
 
     return NextResponse.json({
       success: true,
       message: 'Kayıt başarılı! Doğrulama bağlantısı e-posta adresinize gönderildi.',
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Kayıt/E-posta Hatası:', error);
+    
+    // Gerçek hatayı ekranda görüp teşhis etmek için hatayı yanıt mesajına ekliyoruz:
     return NextResponse.json(
-      { error: 'Kayıt esnasında veya doğrulama e-postası gönderilirken bir hata oluştu.' },
+      { error: `Mail Gönderim Hatası: ${error?.message || 'Bilinmeyen hata'}` },
       { status: 500 }
     );
   }
