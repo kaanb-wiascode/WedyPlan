@@ -2,20 +2,25 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  /* Logo görselindeki orijinal sıcak stüdyo gri tonu */
-  --background-studio: #E5E5E5;
-  --background-card: #EFEFEF;
-  --text-primary: #111111;
-  --text-secondary: #666666;
-  --accent-gold: #C5A059;
-}
+@layer base {
+  :root {
+    --background-studio: #E5E5E5;
+    --background-card: #EFEFEF;
+    --text-primary: #111111;
+    --text-secondary: #666666;
+    --accent-gold: #C5A059;
+  }
 
-body {
-  background-color: var(--background-studio);
-  color: var(--text-primary);
-  /* Apple.com San Francisco & SF Pro font hiyerarşisi */
-  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+  body {
+    background-color: #E5E5E5;
+    color: #111111;
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* Bozulmayı önlemek için varsayılan border renklerini sabitleyelim */
+  *, ::before, ::after {
+    border-color: #D5D5D5;
+  }
 }
