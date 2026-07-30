@@ -1,87 +1,129 @@
-'use client';
+"use client";
 
-import React from 'react';
-import { motion } from 'framer-motion';
-import { Star, MapPin, Phone, Sparkles } from 'lucide-react';
+import React from "react";
+import Image from "next/image";
+import Link from "next/link";
 
-export interface PublicVendor {
+interface PublicVendorCardProps {
   id: string;
   name: string;
   category: string;
-  city: string;
+  location: string;
+  capacity?: string;
   price: string;
-  rating: number | string;
+  rating: number;
+  reviewsCount: number;
   imageUrl: string;
-  description: string;
-  phone: string;
-  isFeatured?: boolean;
+  matchScore?: number;
+  isVerified?: boolean;
+  tags?: string[];
 }
 
-interface PublicVendorCardProps {
-  vendor: PublicVendor;
-  onSelectVendorForQuote?: (vendor: PublicVendor) => void;
-}
-
-export const PublicVendorCard: React.FC<PublicVendorCardProps> = ({ vendor, onSelectVendorForQuote }) => {
+export const PublicVendorCard: React.FC<PublicVendorCardProps> = ({
+  id,
+  name,
+  category,
+  location,
+  capacity,
+  price,
+  rating,
+  reviewsCount,
+  imageUrl,
+  matchScore = 98,
+  isVerified = true,
+  tags = ["Boğaz Manzarası", "Özel Menü", "Cam Salon"],
+}) => {
   return (
-    <motion.div
-      whileHover={{ y: -4 }}
-      className={`bg-white rounded-[24px] overflow-hidden border shadow-sm hover:shadow-md transition-all flex flex-col justify-between ${
-        vendor.isFeatured ? 'border-amber-300 ring-2 ring-amber-100' : 'border-slate-100'
-      }`}
-    >
-      <div>
-        <div className="relative h-48 w-full bg-slate-100 overflow-hidden">
-          <img
-            src={vendor.imageUrl || 'https://images.unsplash.com/photo-1519167758481-83f550bb49b3?auto=format&fit=crop&w=600&q=80'}
-            alt={vendor.name}
-            className="w-full h-full object-cover hover:scale-105 transition duration-500"
-          />
-          <div className="absolute top-3 left-3 flex items-center gap-2">
-            <span className="text-[10px] font-bold bg-white/90 backdrop-blur-md text-[#1D1D1F] px-2.5 py-1 rounded-full shadow-sm">
-              {vendor.category}
+    <div className="group bg-white/90 backdrop-blur-xl rounded-[28px] border border-neutral-200/80 shadow-md hover:shadow-2xl transition-all duration-300 overflow-hidden flex flex-col justify-between">
+      {/* Görsel Alanı ve Cam Rozetler */}
+      <div className="relative h-64 w-full overflow-hidden">
+        <Image
+          src={imageUrl}
+          alt={name}
+          fill
+          unoptimized
+          className="object-cover group-hover:scale-105 transition-transform duration-500"
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/20" />
+
+        {/* Sol Üst: Lüks Cam Stili Uyum Rozeti (Renksiz / Koyu Cam) */}
+        <div className="absolute top-4 left-4 flex items-center gap-2">
+          {matchScore && (
+            <span className="px-3 py-1.5 rounded-full bg-black/50 backdrop-blur-md border border-white/20 text-[11px] font-semibold text-white tracking-wide">
+              %{matchScore} Uyum
             </span>
-            {vendor.isFeatured && (
-              <span className="text-[10px] font-bold bg-amber-500 text-white px-2.5 py-1 rounded-full shadow-sm flex items-center gap-1">
-                👑 Öne Çıkan
+          )}
+          {isVerified && (
+            <span className="px-3 py-1.5 rounded-full bg-white/80 backdrop-blur-md text-[11px] font-medium text-neutral-900 shadow-sm">
+              Onaylı
+            </span>
+          )}
+        </div>
+
+        {/* Sağ Üst: Favori Butonu */}
+        <button className="absolute top-4 right-4 w-9 h-9 rounded-full bg-black/40 backdrop-blur-md border border-white/20 flex items-center justify-center text-white hover:bg-white hover:text-black transition-all">
+          ♡
+        </button>
+
+        {/* Sağ Alt: Puan Glass Badge */}
+        <div className="absolute bottom-4 right-4 px-3 py-1 rounded-full bg-black/60 backdrop-blur-md border border-white/20 text-xs font-semibold text-white flex items-center gap-1">
+          <span className="text-amber-400">★</span>
+          <span>{rating}</span>
+          <span className="text-neutral-400 font-normal">({reviewsCount})</span>
+        </div>
+      </div>
+
+      {/* Kart Gövde Bilgileri */}
+      <div className="p-6 space-y-4">
+        <div>
+          <span className="text-[10px] font-bold tracking-widest text-neutral-400 uppercase">
+            {category}
+          </span>
+          <h3 className="text-xl font-serif font-bold text-neutral-900 mt-1 leading-snug group-hover:text-rose-950 transition-colors">
+            {name}
+          </h3>
+          <p className="text-xs text-neutral-500 mt-1">
+            {location} {capacity ? `• Max ${capacity}` : ""}
+          </p>
+        </div>
+
+        {/* Etiketler (Nötr Cam Butonları) */}
+        {tags && tags.length > 0 && (
+          <div className="flex flex-wrap gap-1.5">
+            {tags.map((tag, idx) => (
+              <span
+                key={idx}
+                className="px-2.5 py-1 rounded-lg bg-neutral-100/80 text-[11px] font-medium text-neutral-600 border border-neutral-200/50"
+              >
+                {tag}
               </span>
-            )}
+            ))}
           </div>
-          <div className="absolute bottom-3 right-3 bg-white/90 backdrop-blur-md px-2.5 py-1 rounded-full text-[11px] font-bold text-amber-700 border border-amber-200 flex items-center gap-1">
-            <Star className="w-3.5 h-3.5 fill-amber-500 text-amber-500" /> {vendor.rating || '4.8'}
+        )}
+
+        {/* Alt Fiyat ve Aksiyon */}
+        <div className="pt-4 border-t border-neutral-100 flex items-center justify-between">
+          <div>
+            <span className="block text-[10px] font-bold tracking-wider text-neutral-400 uppercase">
+              Başlangıç
+            </span>
+            <span className="text-lg font-serif font-bold text-neutral-900">
+              {price}
+            </span>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <Link
+              href={`/firma/${id}`}
+              className="px-5 py-2.5 rounded-full bg-neutral-900 hover:bg-neutral-800 text-xs font-semibold text-white transition-all shadow-md"
+            >
+              İncele →
+            </Link>
           </div>
         </div>
-
-        <div className="p-5 space-y-2">
-          <h3 className="font-bold text-[17px] text-[#1D1D1F] line-clamp-1">{vendor.name}</h3>
-          <div className="flex items-center gap-3 text-[12px] text-[#6E6E73]">
-            <span className="flex items-center gap-1"><MapPin className="w-3.5 h-3.5 text-[#E6007E]" /> {vendor.city}</span>
-            <span>•</span>
-            <span className="font-semibold text-[#1D1D1F]">{vendor.price}</span>
-          </div>
-          <p className="text-[12px] text-[#86868B] line-clamp-2 leading-relaxed">{vendor.description}</p>
-        </div>
       </div>
-
-      <div className="p-5 pt-0 flex items-center gap-2">
-        {onSelectVendorForQuote && (
-          <button
-            onClick={() => onSelectVendorForQuote(vendor)}
-            className="flex-1 bg-gradient-to-r from-pink-500 to-purple-600 text-white text-[12px] font-bold py-2.5 rounded-xl hover:opacity-95 transition flex items-center justify-center gap-1.5 shadow-sm shadow-pink-200 cursor-pointer"
-          >
-            <Sparkles className="w-3.5 h-3.5" /> WedyAI İle Teklif Al
-          </button>
-        )}
-        {vendor.phone && (
-          <a
-            href={`tel:${vendor.phone}`}
-            className="p-2.5 rounded-xl border border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100 transition"
-            title="Ara"
-          >
-            <Phone className="w-4 h-4" />
-          </a>
-        )}
-      </div>
-    </motion.div>
+    </div>
   );
 };
+
+export default PublicVendorCard;

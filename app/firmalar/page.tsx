@@ -1,198 +1,103 @@
-'use client';
+import React from "react";
+import PublicNavbar from "@/components/public/PublicNavbar";
+import PublicVendorCard from "@/components/public/PublicVendorCard";
+import AiRecommendationCard from "@/components/public/ai-search/AiRecommendationCard";
 
-import React, { useState, useEffect, Suspense } from 'react';
-import { useSearchParams } from 'next/navigation';
-import { PublicNavbar } from '@/components/public/PublicNavbar';
-import { PublicFooter } from '@/components/public/homepage/PublicFooter';
-import { ListingHero } from '@/components/public/vendor-listing/ListingHero';
-import { AiRecommendedVendors } from '@/components/public/vendor-listing/AiRecommendedVendors';
-import { FilterBar } from '@/components/public/vendor-listing/FilterBar';
-import { VendorListingCard } from '@/components/public/vendor-listing/VendorListingCard';
-import { MapView } from '@/components/public/vendor-listing/MapView';
-import { CompareDrawer } from '@/components/public/vendor-listing/CompareDrawer';
-import { ListingSkeleton } from '@/components/public/vendor-listing/ListingSkeleton';
-import { VENDOR_LISTING_DATABASE } from '@/lib/data/vendor-listing-data';
-import { VendorListingItem, VendorListingFilterState } from '@/types/vendor-listing';
-import { Sparkles, RotateCcw } from 'lucide-react';
-
-function VendorListingContent() {
-  const searchParams = useSearchParams();
-  const initialCategory = searchParams.get('category') || '';
-  const initialCity = searchParams.get('city') || '';
-
-  const [vendors] = useState<VendorListingItem[]>(VENDOR_LISTING_DATABASE);
-  const [viewMode, setViewMode] = useState<'GRID' | 'MAP'>('GRID');
-  const [isLoading, setIsLoading] = useState(false);
-
-  // Filters State
-  const [filters, setFilters] = useState<VendorListingFilterState>({
-    searchQuery: '',
-    category: initialCategory,
-    city: initialCity,
-    minPrice: 0,
-    maxPrice: 500000,
-    minRating: 0,
-    availabilityOnly: false,
-    verifiedOnly: false,
-    sortBy: 'RECOMMENDED'
-  });
-
-  // State: Selected Compare & Saved Favorites
-  const [comparedVendors, setComparedVendors] = useState<VendorListingItem[]>([]);
-  const [savedVendorIds, setSavedVendorIds] = useState<string[]>([]);
-
-  // Infinite Scroll / Load More State
-  const [visibleCount, setVisibleCount] = useState(6);
-
-  const handleToggleCompare = (vendor: VendorListingItem) => {
-    if (comparedVendors.find((v) => v.id === vendor.id)) {
-      setComparedVendors(comparedVendors.filter((v) => v.id !== vendor.id));
-    } else {
-      if (comparedVendors.length >= 3) {
-        alert('En fazla 3 firmayı aynı anda karşılaştırabilirsiniz.');
-        return;
-      }
-      setComparedVendors([...comparedVendors, vendor]);
-    }
-  };
-
-  const handleToggleSave = (vendorId: string) => {
-    if (savedVendorIds.includes(vendorId)) {
-      setSavedVendorIds(savedVendorIds.filter((id) => id !== vendorId));
-    } else {
-      setSavedVendorIds([...savedVendorIds, vendorId]);
-    }
-  };
-
-  const handleResetFilters = () => {
-    setFilters({
-      searchQuery: '',
-      category: '',
-      city: '',
-      minPrice: 0,
-      maxPrice: 500000,
-      minRating: 0,
-      availabilityOnly: false,
-      verifiedOnly: false,
-      sortBy: 'RECOMMENDED'
-    });
-  };
-
-  // Filter & Sort Logic
-  const filteredVendors = vendors.filter((v) => {
-    if (filters.searchQuery) {
-      const q = filters.searchQuery.toLowerCase();
-      const matchName = v.name.toLowerCase().includes(q);
-      const matchDistrict = v.district.toLowerCase().includes(q);
-      if (!matchName && !matchDistrict) return false;
-    }
-    if (filters.category && v.categorySlug !== filters.category) return false;
-    if (filters.city && v.city !== filters.city) return false;
-    if (filters.availabilityOnly && !v.isAvailable) return false;
-    if (filters.verifiedOnly && !v.isVerified) return false;
-    return true;
-  }).sort((a, b) => {
-    if (filters.sortBy === 'PRICE_LOW') return a.startingPrice - b.startingPrice;
-    if (filters.sortBy === 'PRICE_HIGH') return b.startingPrice - a.startingPrice;
-    if (filters.sortBy === 'RATING') return b.rating - a.rating;
-    return b.aiMatchScore - a.aiMatchScore;
-  });
-
-  const recommendedVendors = vendors.filter((v) => v.isFeatured || v.aiMatchScore >= 95);
-
-  const visibleVendors = filteredVendors.slice(0, visibleCount);
+export default function FirmalarPage() {
+  const vendors = [
+    {
+      id: "1",
+      name: "Luxe Kır Bahçesi & Balo Salonu",
+      category: "DÜĞÜN SALONU & KIR BAHÇESİ",
+      location: "Beykoz, İstanbul",
+      capacity: "600 Kişi",
+      price: "250.000 ₺",
+      rating: 4.95,
+      reviewsCount: 142,
+      imageUrl: "https://images.unsplash.com/photo-1519167758481-83f550bb49b3?q=80&w=800&auto=format&fit=crop",
+      matchScore: 98,
+      tags: ["Boğaz Manzarası", "Michelin Menü", "Cam Salon"],
+    },
+    {
+      id: "2",
+      name: "Maison de Blanc Haute Couture",
+      category: "GELİNLİK & MODA EVİ",
+      location: "Nişantaşı, İstanbul",
+      capacity: "Kişiye Özel",
+      price: "85.000 ₺",
+      rating: 4.96,
+      reviewsCount: 88,
+      imageUrl: "https://images.unsplash.com/photo-1594552072238-b8a33785b261?q=80&w=800&auto=format&fit=crop",
+      matchScore: 96,
+      tags: ["Özel Tasarım", "İthal Dantel", "Prova Hizmeti"],
+    },
+    {
+      id: "3",
+      name: "Lumière Cinema & Photography",
+      category: "FOTOĞRAF & VİDEO STÜDYO",
+      location: "Kadıköy, İstanbul",
+      capacity: "Tüm Gün",
+      price: "45.000 ₺",
+      rating: 4.92,
+      reviewsCount: 114,
+      imageUrl: "https://images.unsplash.com/photo-1537633552985-df8429e8048b?q=80&w=800&auto=format&fit=crop",
+      matchScore: 95,
+      tags: ["Drone Çekimi", "Belgesel Düğün", "4K Klip"],
+    },
+    {
+      id: "4",
+      name: "Grand Bosphorus Palace",
+      category: "TARİHİ YALI & DAVET",
+      location: "Üsküdar, İstanbul",
+      capacity: "800 Kişi",
+      price: "400.000 ₺",
+      rating: 4.98,
+      reviewsCount: 210,
+      imageUrl: "https://images.unsplash.com/photo-1544077960-604201fe74bc?q=80&w=800&auto=format&fit=crop",
+      matchScore: 99,
+      tags: ["Deniz Ulaşımı", "Tarihi Doku", "Valet"],
+    },
+  ];
 
   return (
-    <div className="min-h-screen bg-[#FAF8F5] text-[#1D1D1F] selection:bg-[#E6007E] selection:text-white pb-20 overflow-hidden relative">
-      <PublicNavbar />
+    <div className="min-h-screen bg-[#FDFBF7] text-neutral-900 font-sans antialiased selection:bg-rose-100 selection:text-rose-900">
+      <PublicNavbar mode="public" />
 
-      <main className="space-y-6">
-        {/* 1. Hero */}
-        <ListingHero
-          searchQuery={filters.searchQuery}
-          onSearchChange={(q) => setFilters({ ...filters, searchQuery: q })}
-          totalCount={filteredVendors.length}
-        />
+      {/* Header Banner */}
+      <section className="pt-36 pb-12 px-6 max-w-7xl mx-auto text-center space-y-4">
+        <span className="px-4 py-1.5 rounded-full bg-neutral-900 text-white text-[11px] font-bold tracking-widest uppercase">
+          SEÇKİN FİRMA DİZİNİ
+        </span>
+        <h1 className="text-4xl md:text-6xl font-serif tracking-tight text-neutral-900">
+          Türkiye’nin En Prestijli Düğün Partnerleri
+        </h1>
+        <p className="text-neutral-600 text-sm md:text-base max-w-2xl mx-auto font-normal">
+          Tüm hizmet sağlayıcıları tarafsız değerlendirmeler, özel fiyatlar ve yüksek uyum skorları ile inceleyin.
+        </p>
+      </section>
 
-        {/* 2. AI Recommended Vendors */}
-        <AiRecommendedVendors recommendedVendors={recommendedVendors} />
+      {/* AI Önerileri Şeridi */}
+      <section className="px-6 max-w-7xl mx-auto mb-12">
+        <AiRecommendationCard />
+      </section>
 
-        {/* 3. Sticky Filter Bar */}
-        <FilterBar
-          filters={filters}
-          onChangeFilter={(updated) => setFilters({ ...filters, ...updated })}
-          onResetFilters={handleResetFilters}
-          viewMode={viewMode}
-          onToggleViewMode={(m) => setViewMode(m)}
-        />
-
-        {/* 4. Content Area: Grid vs Map */}
-        <div className="max-w-7xl mx-auto px-4 sm:px-8 pt-2">
-          {isLoading ? (
-            <ListingSkeleton />
-          ) : visibleVendors.length === 0 ? (
-            <div className="bg-white/50 backdrop-blur-2xl border border-white p-12 rounded-[36px] text-center space-y-4 max-w-xl mx-auto">
-              <Sparkles className="w-8 h-8 text-[#E6007E] mx-auto" />
-              <h3 className="font-serif font-bold text-[22px]">Filtrelere Uygun Firma Bulunamadı</h3>
-              <p className="text-[13px] text-[#6E6E73]">
-                Seçtiğiniz kriterlerle eşleşen işletme bulunamadı. Filtreleri sıfırlayarak tekrar arayabilirsiniz.
-              </p>
-              <button
-                onClick={handleResetFilters}
-                className="bg-[#1D1D1F] text-white text-[12px] font-bold px-6 py-3 rounded-full inline-flex items-center gap-2 cursor-pointer"
-              >
-                <RotateCcw className="w-4 h-4" /> Filtreleri Sıfırla
-              </button>
-            </div>
-          ) : viewMode === 'GRID' ? (
-            <div className="space-y-10">
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                {visibleVendors.map((vendor) => (
-                  <VendorListingCard
-                    key={vendor.id}
-                    vendor={vendor}
-                    isCompared={!!comparedVendors.find((v) => v.id === vendor.id)}
-                    onToggleCompare={handleToggleCompare}
-                    isSaved={savedVendorIds.includes(vendor.id)}
-                    onToggleSave={handleToggleSave}
-                  />
-                ))}
-              </div>
-
-              {/* Infinite Scroll / Load More Trigger */}
-              {visibleCount < filteredVendors.length && (
-                <div className="text-center pt-4">
-                  <button
-                    onClick={() => setVisibleCount((prev) => prev + 6)}
-                    className="bg-white/80 hover:bg-white border border-white text-[#1D1D1F] font-bold text-[13px] px-8 py-3.5 rounded-full shadow-xs transition cursor-pointer"
-                  >
-                    Daha Fazla Firma Göster ({filteredVendors.length - visibleCount} Kaldı)
-                  </button>
-                </div>
-              )}
-            </div>
-          ) : (
-            <MapView vendors={filteredVendors} />
-          )}
+      {/* Ana Listeleme */}
+      <section className="pb-28 px-6 max-w-7xl mx-auto space-y-8">
+        <div className="flex items-center justify-between pb-4 border-b border-neutral-200">
+          <span className="text-xs font-bold tracking-wider text-neutral-400 uppercase">
+            Sıralama: En Yüksek Puanlılar
+          </span>
+          <span className="text-xs text-neutral-500 font-medium">
+            4 Seçkin Firma Listeleniyor
+          </span>
         </div>
-      </main>
 
-      {/* 5. Compare Sticky Drawer */}
-      <CompareDrawer
-        selectedVendors={comparedVendors}
-        onRemoveVendor={(id) => setComparedVendors(comparedVendors.filter((v) => v.id !== id))}
-        onClearAll={() => setComparedVendors([])}
-      />
-
-      <PublicFooter />
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-8">
+          {vendors.map((vendor) => (
+            <PublicVendorCard key={vendor.id} {...vendor} />
+          ))}
+        </div>
+      </section>
     </div>
-  );
-}
-
-export default function VendorListingPage() {
-  return (
-    <Suspense fallback={<div className="p-12 text-center text-xs text-slate-400">Firma Kataloğu Yükleniyor...</div>}>
-      <VendorListingContent />
-    </Suspense>
   );
 }
