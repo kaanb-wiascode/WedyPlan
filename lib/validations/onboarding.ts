@@ -11,6 +11,7 @@ export const OrganizationTypeEnum = z.enum([
   "DIGER",
 ]);
 
+// Çift Kayıt Şeması
 export const CoupleRegisterSchema = z.object({
   brideFirstName: z.string().min(2, "Gelin adı en az 2 karakter olmalıdır"),
   brideLastName: z.string().min(2, "Gelin soyadı en az 2 karakter olmalıdır"),
@@ -26,3 +27,12 @@ export const CoupleRegisterSchema = z.object({
 });
 
 export type CoupleRegisterInput = z.infer<typeof CoupleRegisterSchema>;
+
+// Onboarding Action'larının beklediği tam şema ve tipler
+export const fullOnboardingSchema = CoupleRegisterSchema.extend({
+  // İhtiyaç halinde ek onboarding adımları buraya eklenebilir
+  partnerEmail: z.string().email().optional(),
+  budget: z.coerce.number().optional(),
+});
+
+export type OnboardingFormData = z.infer<typeof fullOnboardingSchema>;
