@@ -1,26 +1,28 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
 
 @layer base {
   :root {
-    --background-studio: #E5E5E5;
-    --background-card: #EFEFEF;
-    --text-primary: #111111;
-    --text-secondary: #666666;
+    --bg-studio: #E5E5E5;
+    --bg-card: #EFEFEF;
+    --text-main: #111111;
+    --text-muted: #666666;
     --accent-gold: #C5A059;
   }
 
+  * {
+    border-color: #D5D5D5;
+  }
+
   body {
-    background-color: #E5E5E5;
-    color: #111111;
+    background-color: var(--bg-studio);
+    color: var(--text-main);
     font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", Arial, sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
+}
 
-  /* Bozulmayı önlemek için varsayılan border renklerini sabitleyelim */
-  *, ::before, ::after {
-    border-color: #D5D5D5;
-  }
+/* Çerçevelerdeki ve inputlardaki pembe/mor bozulmaları engeller */
+input, button, select, textarea {
+  outline: none;
 }
