@@ -19,7 +19,7 @@ export default function SihirliTeklifPage() {
         <div className="bg-white p-8 md:p-12 rounded-3xl border border-neutral-200/80 shadow-2xl space-y-8">
           <div className="text-center space-y-2">
             <span className="text-xs font-bold tracking-widest text-rose-600 uppercase">
-              ⚡ SİHİRLİ FİYAT TEKLİFİ
+              HIZLI TEKLİF FORMU
             </span>
             <h1 className="text-3xl md:text-4xl font-serif text-neutral-900">
               Tek Tıkla Özel Fiyat Teklifleri Alın
@@ -76,7 +76,7 @@ export default function SihirliTeklifPage() {
               <div>
                 <label className="block text-xs font-semibold text-neutral-700 mb-1">Aradığınız İhtiyaçlar</label>
                 <div className="grid grid-cols-2 gap-2 text-xs font-medium text-neutral-700 pt-1">
-                  {["Büyülü Mekanlar", "Düğün Hikayesi & Fotoğraf", "Gelinlik & Şıklık", "Konsept Organizasyon", "Evim & Çeyiz", "Canlı Müzik & DJ"].map((service, i) => (
+                  {["Düğün Mekanları", "Düğün Hikayesi & Fotoğraf", "Gelinlik & Moda", "Organizasyon & Süsleme", "Çeyiz Ürünleri", "Canlı Müzik & DJ"].map((service, i) => (
                     <label key={i} className="flex items-center gap-2 p-3 border border-neutral-200 rounded-xl cursor-pointer hover:bg-rose-50/50">
                       <input type="checkbox" className="accent-rose-600" />
                       <span>{service}</span>
@@ -94,10 +94,10 @@ export default function SihirliTeklifPage() {
             </form>
           ) : (
             <div className="text-center py-10 space-y-4">
-              <div className="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto text-2xl font-bold">
+              <div className="w-12 h-16 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto text-xl font-bold">
                 ✓
               </div>
-              <h3 className="text-2xl font-serif text-neutral-900">Talebiniz Başarıyla Alındı!</h3>
+              <h3 className="text-2xl font-serif text-neutral-900">Talebiniz Başarıyla Alındı</h3>
               <p className="text-xs text-neutral-600 max-w-md mx-auto">
                 Hesabınız otomatik oluşturuldu. Şifreniz e-posta adresinize gönderildi. Firmalardan gelen teklifleri panellerinizden takip edebilirsiniz.
               </p>
