@@ -3,6 +3,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+// Hatanın çözüldüğü satır (Süslü parantez eklendi):
 import RoleGuard from '../../components/RoleGuard';
 import { 
   LayoutDashboard, 

@@ -10,7 +10,8 @@ interface RoleGuardProps {
   allowedRole: 'COUPLE' | 'VENDOR' | 'ADMIN';
 }
 
-export function RoleGuard({ children, allowedRole }: RoleGuardProps) {
+// BURASI DEĞİŞTİ: "export default function" yapıldı
+export default function RoleGuard({ children, allowedRole }: RoleGuardProps) {
   const router = useRouter();
   const { userRole } = useWeddingOS();
 
