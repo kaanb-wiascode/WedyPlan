@@ -18,23 +18,19 @@ import {
   Loader2,
   Calendar,
   Users,
-  MessageSquare,
-  TrendingUp,
   Eye,
-  Plus,
-  ArrowDownRight,
-  ArrowUpRight,
   FileSignature,
-  DollarSign,
-  PieChart,
-  Settings,
-  Upload,
-  Clock,
-  ChevronRight
+  Boxes,
+  Briefcase,
+  Bot,
+  Zap,
+  Layers,
+  Sparkles,
+  QrCode
 } from 'lucide-react';
 
 export default function VendorEnterprisePortal() {
-  const [activeTab, setActiveTab] = useState<'crm' | 'contracts' | 'finance' | 'analytics' | 'storefront'>('crm');
+  const [activeTab, setActiveTab] = useState<'crm' | 'contracts' | 'finance' | 'inventory' | 'team' | 'opportunities' | 'analytics' | 'storefront'>('crm');
 
   // Supabase State'leri
   const [quotes, setQuotes] = useState<any[]>([]);
@@ -48,7 +44,7 @@ export default function VendorEnterprisePortal() {
   ]);
   const [newExpense, setNewExpense] = useState({ title: '', amount: '', category: 'Genel' });
 
-  // Sözleşme Oluşturucu State'leri
+  // Sözleşme State'leri
   const [contracts, setContracts] = useState([
     { id: 'SZ-2026-01', couple: 'Selin & Kaan', date: '15 Ağustos 2026', total: 85000, status: 'IMZALANDI' },
     { id: 'SZ-2026-02', couple: 'Eda & Mert', date: '20 Eylül 2026', total: 60000, status: 'BEKLIYOR' }
@@ -56,12 +52,31 @@ export default function VendorEnterprisePortal() {
   const [isContractModalOpen, setIsContractModalOpen] = useState(false);
   const [newContract, setNewContract] = useState({ couple: '', date: '', amount: '' });
 
+  // Envanter & Stok State'leri
+  const [inventory, setInventory] = useState([
+    { id: '1', name: 'Tiffany Sandalye (Beyaz)', total: 600, reserved: 450, unit: 'Adet' },
+    { id: '2', name: 'Yuvarlak Masalar (10 Kişilik)', total: 60, reserved: 45, unit: 'Adet' },
+    { id: '3', name: 'LED Sahne Robot Işık', total: 12, reserved: 12, unit: 'Takım' }
+  ]);
+
+  // Ekip Üyeleri State'leri
+  const [teamMembers, setTeamMembers] = useState([
+    { id: '1', name: 'Ahmet Yılmaz', role: 'Baş Fotoğrafçı & Şef', phone: '+90 532 000 0000', status: 'MESAIDE' },
+    { id: '2', name: 'Canan Kaya', role: 'Organizasyon Sorumlusu', phone: '+90 533 000 0000', status: 'IZINLI' }
+  ]);
+
+  // Fırsat & İhale Havuzu
+  const [opportunities, setOpportunities] = useState([
+    { id: 'OP-101', title: 'Son Dakika Düğün Salonu Arayışı', couple: 'Burcu & Tolga', date: '12 Ağustos 2026', budget: '₺75,000', city: 'İstanbul' },
+    { id: 'OP-102', title: 'Açık Hava Kır Bahçesi Arayışı', couple: 'Zeynep & Ali', date: '05 Eylül 2026', budget: '₺90,000', city: 'İstanbul' }
+  ]);
+
   // Realtime Akışı
   useEffect(() => {
     fetchQuotes();
 
     const channel = supabase
-      .channel('vendor-portal-realtime')
+      .channel('vendor-portal-realtime-v2')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'quote_requests' }, () => fetchQuotes())
       .subscribe();
 
@@ -124,7 +139,7 @@ export default function VendorEnterprisePortal() {
             </div>
             <div>
               <h2 className="font-serif font-bold text-base tracking-tight">WedyVendor</h2>
-              <span className="text-[10px] font-mono text-zinc-500 font-semibold uppercase">İşletme Portalı</span>
+              <span className="text-[10px] font-mono text-zinc-500 font-semibold uppercase">ERP & İşletme Portalı</span>
             </div>
           </div>
 
@@ -141,12 +156,27 @@ export default function VendorEnterprisePortal() {
               <Wallet className="w-4 h-4" /> Finans, Gelir & Gider
             </button>
 
+            <button onClick={() => setActiveTab('inventory')} className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-2xl text-xs font-semibold transition-all cursor-pointer ${activeTab === 'inventory' ? 'bg-zinc-900 text-white dark:bg-white dark:text-zinc-900 shadow-sm' : 'text-zinc-500 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-zinc-800'}`}>
+              <Boxes className="w-4 h-4" /> Stok & Envanter
+            </button>
+
+            <button onClick={() => setActiveTab('team')} className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-2xl text-xs font-semibold transition-all cursor-pointer ${activeTab === 'team' ? 'bg-zinc-900 text-white dark:bg-white dark:text-zinc-900 shadow-sm' : 'text-zinc-500 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-zinc-800'}`}>
+              <Briefcase className="w-4 h-4" /> Ekip & Görevler
+            </button>
+
+            <button onClick={() => setActiveTab('opportunities')} className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-2xl text-xs font-semibold transition-all cursor-pointer ${activeTab === 'opportunities' ? 'bg-zinc-900 text-white dark:bg-white dark:text-zinc-900 shadow-sm' : 'text-zinc-500 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-zinc-800'}`}>
+              <div className="flex items-center gap-3">
+                <Zap className="w-4 h-4 text-amber-500" /> VIP İhale Havuzu
+              </div>
+              <span className="px-1.5 py-0.5 rounded-md bg-amber-500/10 text-amber-600 text-[10px] font-bold">Yeni</span>
+            </button>
+
             <button onClick={() => setActiveTab('analytics')} className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-2xl text-xs font-semibold transition-all cursor-pointer ${activeTab === 'analytics' ? 'bg-zinc-900 text-white dark:bg-white dark:text-zinc-900 shadow-sm' : 'text-zinc-500 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-zinc-800'}`}>
               <Eye className="w-4 h-4" /> Ziyaretçi & Analitik
             </button>
 
             <button onClick={() => setActiveTab('storefront')} className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-2xl text-xs font-semibold transition-all cursor-pointer ${activeTab === 'storefront' ? 'bg-zinc-900 text-white dark:bg-white dark:text-zinc-900 shadow-sm' : 'text-zinc-500 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-zinc-800'}`}>
-              <Store className="w-4 h-4" /> Vitrin & Paket Yönetimi
+              <Store className="w-4 h-4" /> Vitrin & Paketler
             </button>
           </nav>
         </div>
@@ -169,7 +199,7 @@ export default function VendorEnterprisePortal() {
               <Building2 className="w-4 h-4 text-emerald-500" /> İşletme Portalı
             </div>
             <h1 className="text-2xl sm:text-3xl font-serif font-bold tracking-tight">Grand Çamlıca Kır Bahçesi</h1>
-            <p className="text-xs text-zinc-500">Müşterileri yönetin, sözleşme oluşturun, gelir/giderinizi anlık takip edin.</p>
+            <p className="text-xs text-zinc-500">Müşterileri yönetin, stok takibi yapın, sözleşme oluşturun ve finans süreçlerinizi yürütün.</p>
           </div>
 
           <div className="flex items-center gap-3">
@@ -184,7 +214,7 @@ export default function VendorEnterprisePortal() {
           </div>
         </GlassPanel>
 
-        {/* KONTROL METRİKLERİ */}
+        {/* METRİK KARTLARI */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
           <GlassPanel className="p-5 space-y-2">
             <span className="text-xs text-zinc-500 font-medium">Toplam Görüşme / Teklif</span>
@@ -213,7 +243,7 @@ export default function VendorEnterprisePortal() {
           </GlassPanel>
         </div>
 
-        {/* ==================== 1. MÜŞTERİ GÖRÜŞMELERİ & CRM ==================== */}
+        {/* 1. MÜŞTERİ GÖRÜŞMELERİ & CRM */}
         {activeTab === 'crm' && (
           <GlassPanel className="p-6 sm:p-8 space-y-6 animate-in fade-in duration-300">
             <div className="flex items-center justify-between border-b border-zinc-200/80 dark:border-zinc-800 pb-4">
@@ -271,7 +301,7 @@ export default function VendorEnterprisePortal() {
           </GlassPanel>
         )}
 
-        {/* ==================== 2. SÖZLEŞMELER & DOKÜMANLAR ==================== */}
+        {/* 2. SÖZLEŞMELER */}
         {activeTab === 'contracts' && (
           <GlassPanel className="p-6 sm:p-8 space-y-6 animate-in fade-in duration-300">
             <div className="flex items-center justify-between border-b border-zinc-200/80 dark:border-zinc-800 pb-4">
@@ -309,7 +339,7 @@ export default function VendorEnterprisePortal() {
           </GlassPanel>
         )}
 
-        {/* ==================== 3. FİNANS, GELİR & GİDER TAKİBİ ==================== */}
+        {/* 3. FİNANS GELİR & GİDER */}
         {activeTab === 'finance' && (
           <div className="space-y-6 animate-in fade-in duration-300">
             <GlassPanel className="p-6 sm:p-8 space-y-4">
@@ -332,7 +362,6 @@ export default function VendorEnterprisePortal() {
               </div>
             </GlassPanel>
 
-            {/* GİDER EKLEME FORMU */}
             <GlassPanel className="p-6 space-y-4">
               <h3 className="text-sm font-bold">Etkinlik Masrafı / Gider Kaydı Ekle</h3>
               <form onSubmit={handleAddExpense} className="grid grid-cols-1 sm:grid-cols-4 gap-3">
@@ -366,7 +395,87 @@ export default function VendorEnterprisePortal() {
           </div>
         )}
 
-        {/* ==================== 4. ZİYARETÇİ & ANALİTİK ==================== */}
+        {/* 4. ENVANTER & STOK TAKİBİ */}
+        {activeTab === 'inventory' && (
+          <GlassPanel className="p-6 sm:p-8 space-y-6 animate-in fade-in duration-300">
+            <div className="flex items-center justify-between border-b border-zinc-200/80 dark:border-zinc-800 pb-4">
+              <div>
+                <h2 className="text-xl font-serif font-bold">Stok & Envanter Yönetimi</h2>
+                <p className="text-xs text-zinc-500 mt-1">Masa, sandalye, ses/ışık sistemleri ve zimmetli ekipman stokları.</p>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {inventory.map((item) => (
+                <GlassPanel key={item.id} className="p-5 space-y-2">
+                  <span className="text-xs font-bold text-zinc-400 uppercase tracking-wider">{item.unit} Stoku</span>
+                  <h4 className="font-bold text-base">{item.name}</h4>
+                  <div className="flex justify-between items-center text-xs pt-2 border-t border-zinc-200/60 dark:border-zinc-800">
+                    <span className="text-zinc-500">Mevcut: <strong className="text-zinc-900 dark:text-white">{item.total}</strong></span>
+                    <span className="text-amber-600 font-semibold">Rezerve: {item.reserved}</span>
+                  </div>
+                </GlassPanel>
+              ))}
+            </div>
+          </GlassPanel>
+        )}
+
+        {/* 5. EKİP & GÖREV YÖNETİMİ */}
+        {activeTab === 'team' && (
+          <GlassPanel className="p-6 sm:p-8 space-y-6 animate-in fade-in duration-300">
+            <div className="flex items-center justify-between border-b border-zinc-200/80 dark:border-zinc-800 pb-4">
+              <div>
+                <h2 className="text-xl font-serif font-bold">Ekip Üyeleri & Görev Dağılımı</h2>
+                <p className="text-xs text-zinc-500 mt-1">Düğün günü görevli personel listesi ve mesai durumları.</p>
+              </div>
+            </div>
+
+            <div className="space-y-3">
+              {teamMembers.map((member) => (
+                <GlassPanel key={member.id} className="p-4 flex items-center justify-between">
+                  <div>
+                    <h4 className="font-bold text-sm">{member.name}</h4>
+                    <p className="text-xs text-zinc-500">{member.role} • {member.phone}</p>
+                  </div>
+                  <span className={`text-xs font-bold px-3 py-1 rounded-full ${member.status === 'MESAIDE' ? 'bg-emerald-500/10 text-emerald-600 border border-emerald-200' : 'bg-zinc-100 text-zinc-500'}`}>
+                    {member.status}
+                  </span>
+                </GlassPanel>
+              ))}
+            </div>
+          </GlassPanel>
+        )}
+
+        {/* 6. VIP İHALE HAVUZU */}
+        {activeTab === 'opportunities' && (
+          <GlassPanel className="p-6 sm:p-8 space-y-6 animate-in fade-in duration-300">
+            <div className="flex items-center justify-between border-b border-zinc-200/80 dark:border-zinc-800 pb-4">
+              <div>
+                <h2 className="text-xl font-serif font-bold text-amber-600 dark:text-amber-400">Canlı İhale & Acil Düğün Havuzu</h2>
+                <p className="text-xs text-zinc-500 mt-1">Düğün mekanı/hizmet arayan çiftlerin açtığı canlı ilanlara teklif verin.</p>
+              </div>
+            </div>
+
+            <div className="space-y-3">
+              {opportunities.map((op) => (
+                <GlassPanel key={op.id} className="p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-amber-200/60 dark:border-amber-900/30">
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-2">
+                      <span className="font-mono text-xs font-bold text-amber-600">{op.id}</span>
+                      <h4 className="font-bold text-sm">{op.title}</h4>
+                    </div>
+                    <p className="text-xs text-zinc-500">{op.couple} • {op.city} • Tarih: {op.date} • Bütçe: <strong className="text-zinc-900 dark:text-white">{op.budget}</strong></p>
+                  </div>
+                  <button onClick={() => alert(`${op.couple} çiftine hızlı özel teklifiniz iletildi.`)} className="px-4 py-2 bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold rounded-xl cursor-pointer">
+                    Hızlı Teklif Ver
+                  </button>
+                </GlassPanel>
+              ))}
+            </div>
+          </GlassPanel>
+        )}
+
+        {/* 7. ZİYARETÇİ ANALİTİĞİ */}
         {activeTab === 'analytics' && (
           <GlassPanel className="p-6 sm:p-8 space-y-6 animate-in fade-in duration-300">
             <h2 className="text-xl font-serif font-bold">Ziyaretçi & Trafik Analitiği</h2>
@@ -387,7 +496,7 @@ export default function VendorEnterprisePortal() {
           </GlassPanel>
         )}
 
-        {/* ==================== 5. VİTRİN & PAKET YÖNETİMİ ==================== */}
+        {/* 8. VİTRİN DÜZENLEME */}
         {activeTab === 'storefront' && (
           <GlassPanel className="p-6 sm:p-8 space-y-6 animate-in fade-in duration-300">
             <h2 className="text-xl font-serif font-bold">Vitrin & Paket Düzenleme</h2>
