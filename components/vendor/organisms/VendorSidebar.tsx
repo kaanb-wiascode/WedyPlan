@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import Link from 'next/navigation';
+import Link from 'next/link'; // <-- DÜZELTİLEN SATIR (next/link olmalı)
 import { usePathname } from 'next/navigation';
 import { 
   Store, 
@@ -13,8 +13,6 @@ import {
   MessageSquare, 
   Settings, 
   ShieldCheck,
-  TrendingUp,
-  BarChart3,
   Award
 } from 'lucide-react';
 import { GlassPanel } from '@/components/shared/ui/GlassPanel';
@@ -37,7 +35,7 @@ export function VendorSidebar() {
     <aside className="w-64 border-r border-zinc-200/80 dark:border-zinc-800/80 bg-white/70 dark:bg-zinc-950/70 backdrop-blur-2xl p-6 flex flex-col justify-between hidden lg:flex min-h-screen">
       <div className="space-y-8">
         
-        {/* LOGO / BRANDING (Admin Sidebar ile Aynı) */}
+        {/* LOGO / BRANDING */}
         <div className="flex items-center gap-3 px-2">
           <div className="w-10 h-10 rounded-2xl bg-zinc-900 dark:bg-white flex items-center justify-center text-white dark:text-zinc-900 shadow-md">
             <Store className="w-5 h-5" />
