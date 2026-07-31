@@ -1,38 +1,40 @@
 'use client';
 
 import React from 'react';
-import Link from 'next/link'; // <-- DÜZELTİLEN SATIR (next/link olmalı)
-import { usePathname } from 'next/navigation';
 import { 
-  Store, 
   Building2, 
   FileText, 
   Calendar, 
   Wallet, 
-  Users, 
   MessageSquare, 
   Settings, 
   ShieldCheck,
-  Award
+  Award,
+  Store
 } from 'lucide-react';
 import { GlassPanel } from '@/components/shared/ui/GlassPanel';
 
-export function VendorSidebar() {
-  const pathname = usePathname();
+export type VendorTab = 'overview' | 'leads' | 'subscription' | 'finance' | 'crm' | 'calendar' | 'profile' | 'settings';
 
+interface VendorSidebarProps {
+  activeTab: VendorTab;
+  setActiveTab: (tab: VendorTab) => void;
+}
+
+export function VendorSidebar({ activeTab, setActiveTab }: VendorSidebarProps) {
   const navigation = [
-    { name: 'Dashboard', href: '/vendor/dashboard', icon: Building2 },
-    { name: 'Teklif Talepleri', href: '/vendor/leads', icon: FileText },
-    { name: 'Abonelik & Paketler', href: '/vendor/subscription', icon: Award },
-    { name: 'Finans & Ciro', href: '/vendor/finance', icon: Wallet },
-    { name: 'İletişim & Mesajlar', href: '/vendor/crm', icon: MessageSquare },
-    { name: 'Takvim & Etkinlikler', href: '/vendor/calendar', icon: Calendar },
-    { name: 'Firma Profili', href: '/vendor/profile', icon: Store },
-    { name: 'Ayarlar', href: '/vendor/settings', icon: Settings },
+    { id: 'overview' as VendorTab, name: 'Dashboard', icon: Building2 },
+    { id: 'leads' as VendorTab, name: 'Teklif Talepleri', icon: FileText },
+    { id: 'subscription' as VendorTab, name: 'Abonelik & Paketler', icon: Award },
+    { id: 'finance' as VendorTab, name: 'Finans & Ciro', icon: Wallet },
+    { id: 'crm' as VendorTab, name: 'İletişim & CRM', icon: MessageSquare },
+    { id: 'calendar' as VendorTab, name: 'Takvim & Etkinlikler', icon: Calendar },
+    { id: 'profile' as VendorTab, name: 'Firma Profili', icon: Store },
+    { id: 'settings' as VendorTab, name: 'Ayarlar', icon: Settings },
   ];
 
   return (
-    <aside className="w-64 border-r border-zinc-200/80 dark:border-zinc-800/80 bg-white/70 dark:bg-zinc-950/70 backdrop-blur-2xl p-6 flex flex-col justify-between hidden lg:flex min-h-screen">
+    <aside className="w-64 border-r border-zinc-200/80 dark:border-zinc-800/80 bg-white/70 dark:bg-zinc-950/70 backdrop-blur-2xl p-6 flex flex-col justify-between hidden lg:flex min-h-screen shrink-0">
       <div className="space-y-8">
         
         {/* LOGO / BRANDING */}
@@ -46,16 +48,16 @@ export function VendorSidebar() {
           </div>
         </div>
 
-        {/* MENÜ LİSTESİ */}
+        {/* MENÜ LİSTESİ (Sayfa Yenilenmeden Akıcı Sekme Değiştirir) */}
         <nav className="space-y-1.5">
           {navigation.map((item) => {
-            const isActive = pathname === item.href;
+            const isActive = activeTab === item.id;
             const Icon = item.icon;
 
             return (
-              <Link
-                key={item.name}
-                href={item.href}
+              <button
+                key={item.id}
+                onClick={() => setActiveTab(item.id)}
                 className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-2xl text-xs font-semibold transition-all cursor-pointer ${
                   isActive
                     ? 'bg-zinc-900 text-white dark:bg-white dark:text-zinc-900 shadow-sm'
@@ -64,7 +66,7 @@ export function VendorSidebar() {
               >
                 <Icon className="w-4 h-4" />
                 <span>{item.name}</span>
-              </Link>
+              </button>
             );
           })}
         </nav>
