@@ -1,153 +1,82 @@
+// lib/actions/vendor-proposals.ts
 'use server';
 
 import { db } from '@/lib/db';
 import { revalidatePath } from 'next/cache';
 
-export interface CreateProposalInput {
-  vendorId?: string;
-  coupleId?: string;
-  leadId?: string;
-  coupleName?: string;
-  title: string;
-  totalPrice?: number;
-  discountAmount?: number;
-  taxRatePercentage?: number;
-  currency?: string;
-  validUntil?: Date | string;
-  expirationDate?: Date | string;
-  notes?: string;
-  items?: Array<
-    | { description: string; price: number }
-    | { title: string; quantity: number; unitPrice: number }
-    | Record<string, any>
-  >;
-}
-
-export interface ProposalRecord {
-  id: string;
-  vendorId: string;
-  coupleId: string;
-  title: string;
-  totalPrice: number;
-  currency: string;
-  status: string;
-  validUntil?: Date | null;
-  notes?: string | null;
-  createdAt: Date;
-}
-
-export interface ProposalActionResponse {
-  success: boolean;
-  data?: any;
-  message?: string;
-  error?: string;
-}
-
-export async function getProposalsAction(
-  userId: string,
-  role: 'VENDOR' | 'COUPLE'
-): Promise<ProposalActionResponse> {
+// 1. Satıcının hazırladığı veya çiftin aldığı teklifleri getir
+export async function getProposals(params: { vendorId?: string; coupleId?: string }) {
   try {
-    const proposalModel = (db as any).proposal || (db as any).vendorProposal;
-    let proposals: ProposalRecord[] = [];
+    const proposalModel = (db as any).proposal || (db as any).quote;
 
-    if (proposalModel) {
-      const whereCondition = role === 'VENDOR' ? { vendorId: userId } : { coupleId: userId };
-      proposals = await proposalModel.findMany({
-        where: whereCondition,
-        orderBy: { createdAt: 'desc' },
-      });
+    if (!proposalModel) {
+      return { success: false, error: 'Teklif veritabanı modeli bulunamadı.' };
     }
 
+    const whereClause: any = {};
+    if (params.vendorId) whereClause.vendorId = params.vendorId;
+    if (params.coupleId) whereClause.coupleId = params.coupleId;
+
+    const proposals = await proposalModel.findMany({
+      where: whereClause,
+      orderBy: { createdAt: 'desc' },
+    });
+
     return { success: true, data: proposals };
-  } catch (error: unknown) {
-    console.error('❌ getProposalsAction hatası:', error);
-    return { success: false, error: 'Teklifler yüklenirken bir hata oluştu.', data: [] };
+  } catch (error) {
+    console.error('Teklifler alınırken hata:', error);
+    return { success: false, error: 'Teklifler yüklenemedi.' };
   }
 }
 
-export async function createProposalAction(
-  param1: string | CreateProposalInput,
-  param2?: CreateProposalInput
-): Promise<ProposalActionResponse> {
+// 2. Yeni teklif oluştur
+export async function createProposal(data: {
+  vendorId: string;
+  coupleId?: string;
+  title: string;
+  totalPrice: number;
+  details?: string;
+  validUntil?: string;
+}) {
   try {
-    const proposalModel = (db as any).proposal || (db as any).vendorProposal;
+    const proposalModel = (db as any).proposal || (db as any).quote;
 
     if (!proposalModel) {
-      throw new Error('Teklif modeli Prisma şemasında bulunamadı.');
+      return { success: false, error: 'Teklif veritabanı modeli bulunamadı.' };
     }
-
-    let vendorId = '';
-    let payload: CreateProposalInput = { title: '' };
-
-    if (typeof param1 === 'string' && param2) {
-      vendorId = param1;
-      payload = param2;
-    } else if (typeof param1 === 'object') {
-      vendorId = param1.vendorId || '';
-      payload = param1;
-    }
-
-    const validUntilDate = payload.expirationDate || payload.validUntil;
 
     const newProposal = await proposalModel.create({
       data: {
-        vendorId: vendorId || payload.vendorId || 'default-vendor',
-        coupleId: payload.coupleId || 'default-couple',
-        title: payload.title,
-        totalPrice: payload.totalPrice || 0,
-        currency: payload.currency || 'TRY',
-        validUntil: validUntilDate ? new Date(validUntilDate) : null,
-        notes: payload.notes || '',
+        vendorId: data.vendorId,
+        coupleId: data.coupleId || 'demo-couple',
+        title: data.title,
+        totalPrice: data.totalPrice,
+        details: data.details || '',
         status: 'PENDING',
-        items: payload.items ? JSON.stringify(payload.items) : null,
+        validUntil: data.validUntil ? new Date(data.validUntil) : null,
       },
     });
 
-    revalidatePath('/satici/teklifler');
-    revalidatePath('/vendor/proposals');
+    revalidatePath('/satici/teklif-hazirla');
     revalidatePath('/cift/proposals');
-
-    return {
-      success: true,
-      data: newProposal,
-      message: 'Teklif başarıyla oluşturuldu ve gönderildi.',
-    };
-  } catch (error: unknown) {
-    console.error('❌ createProposalAction hatası:', error);
-    return { success: false, error: 'Teklif oluşturulurken bir hata oluştu.' };
+    return { success: true, data: newProposal, message: 'Teklif başarıyla oluşturuldu.' };
+  } catch (error) {
+    console.error('Teklif oluşturulurken hata:', error);
+    return { success: false, error: 'Teklif gönderilemedi.' };
   }
 }
 
-export const createVendorProposalAction = createProposalAction;
+// 3. Modal Bileşeni İçin Alias (2 veya 1 Parametreli Çağrıları Esnek Destekler)
+export async function createVendorProposalAction(arg1?: any, arg2?: any) {
+  const vendorId = typeof arg1 === 'string' ? arg1 : (arg1?.vendorId || arg2?.vendorId || 'demo-vendor');
+  const data = typeof arg2 === 'object' && arg2 !== null ? arg2 : (typeof arg1 === 'object' && arg1 !== null ? arg1 : {});
 
-export async function updateProposalStatusAction(
-  proposalId: string,
-  status: 'ACCEPTED' | 'REJECTED' | 'REVISED'
-): Promise<ProposalActionResponse> {
-  try {
-    const proposalModel = (db as any).proposal || (db as any).vendorProposal;
-
-    if (!proposalModel) {
-      throw new Error('Teklif modeli Prisma şemasında bulunamadı.');
-    }
-
-    const updated = await proposalModel.update({
-      where: { id: proposalId },
-      data: { status },
-    });
-
-    revalidatePath('/satici/teklifler');
-    revalidatePath('/vendor/proposals');
-    revalidatePath('/cift/proposals');
-
-    return {
-      success: true,
-      data: updated,
-      message: 'Teklif durumu güncellendi.',
-    };
-  } catch (error: unknown) {
-    console.error('❌ updateProposalStatusAction hatası:', error);
-    return { success: false, error: 'Teklif durumu güncellenemedi.' };
-  }
+  return createProposal({
+    vendorId,
+    coupleId: data.coupleId || data.leadId,
+    title: data.title || 'Düğün Hizmet Teklifi',
+    totalPrice: Number(data.totalPrice || data.price || data.amount || 0),
+    details: data.details || data.description || data.notes || '',
+    validUntil: data.validUntil,
+  });
 }

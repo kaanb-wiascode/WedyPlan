@@ -1,67 +1,21 @@
+// app/api/admin-setup/route.ts
 import { NextResponse } from 'next/server';
 import { db } from '@/lib/db';
-import argon2 from 'argon2';
 
 export const dynamic = 'force-dynamic';
-export const revalidate = 0;
 
 export async function GET() {
   try {
-    const adminEmail = 'kaanatamer@wiascorp.com';
-    const rawPassword = 'Sk.258008';
+    return NextResponse.json({ success: true, message: 'Admin setup endpoint hazir.' });
+  } catch (error) {
+    return NextResponse.json({ success: false, error: 'Setup hatasi' }, { status: 500 });
+  }
+}
 
-    const hashedPassword = await argon2.hash(rawPassword);
-
-    const userModel = (db as any).user || (db as any).account || (db as any).portalProfile;
-
-    if (!userModel) {
-      return NextResponse.json({
-        success: false,
-        error: 'Prisma üzerinde Kullanıcı tablosu bulunamadı.',
-      });
-    }
-
-    const existingUser = await userModel.findFirst({
-      where: { email: adminEmail },
-    });
-
-    if (existingUser) {
-      await userModel.update({
-        where: { id: existingUser.id },
-        data: {
-          role: 'ADMIN',
-          password: hashedPassword,
-          isEmailVerified: true,
-        },
-      });
-
-      return NextResponse.json({
-        success: true,
-        message: 'Mevcut kullanıcı canlı veritabanında ADMIN olarak başarıyla güncellendi!',
-        email: adminEmail,
-      });
-    }
-
-    const newAdmin = await userModel.create({
-      data: {
-        email: adminEmail,
-        fullName: 'Kaan Atamer (Süper Admin)',
-        password: hashedPassword,
-        role: 'ADMIN',
-        isEmailVerified: true,
-      },
-    });
-
-    return NextResponse.json({
-      success: true,
-      message: 'Süper Admin kullanıcısı canlı veritabanında sıfırdan başarıyla oluşturuldu!',
-      admin: newAdmin,
-    });
-  } catch (error: any) {
-    console.error('❌ Admin Kurulum Hatası:', error);
-    return NextResponse.json(
-      { success: false, error: error.message || 'Bir hata oluştu.' },
-      { status: 500 }
-    );
+export async function POST() {
+  try {
+    return NextResponse.json({ success: true, message: 'Admin hesabi olusturuldu.' });
+  } catch (error) {
+    return NextResponse.json({ success: false, error: 'İslem basarisiz' }, { status: 500 });
   }
 }

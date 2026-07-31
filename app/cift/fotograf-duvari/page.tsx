@@ -1,259 +1,167 @@
+// app/cift/fotograf-duvari/page.tsx
 'use client';
 
-import React, { useState } from 'react';
-import Link from 'next/link';
-import { 
-  Sparkles, QrCode, Image as ImageIcon, Upload, Play, Heart, 
-  Download, Share2, ShieldCheck, CheckCircle2, Eye, RefreshCw, MessageCircle
-} from 'lucide-react';
-
-interface MediaItem {
-  id: string;
-  author: string;
-  table: string;
-  time: string;
-  url: string;
-  likes: number;
-  caption: string;
-}
+import { useEffect, useState, useTransition } from 'react';
+import {
+  getPhotoWallItems,
+  createPhotoWallItem,
+  deletePhotoWallItem,
+} from '@/lib/actions/photo-wall';
 
 export default function PhotoWallPage() {
-  const [isSlideshowActive, setIsSlideshowActive] = useState(false);
-  const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
-  
-  const [mediaList, setMediaList] = useState<MediaItem[]>([
-    {
-      id: '1',
-      author: 'Ayşe & Ali',
-      table: 'Masa 3',
-      time: '2 dakika önce',
-      url: 'https://images.unsplash.com/photo-1519167758481-83f550bb49b3?auto=format&fit=crop&w=800&q=80',
-      likes: 24,
-      caption: 'Harika bir gece! Çiftimize ömür boyu mutluluklar 🥂'
-    },
-    {
-      id: '2',
-      author: 'Efe Yılmaz',
-      authorTable: 'Masa 7',
-      time: '8 dakika önce',
-      url: 'https://images.unsplash.com/photo-1511285560929-80b456fea0bc?auto=format&fit=crop&w=800&q=80',
-      likes: 18,
-      caption: 'İlk dans anı muhteşemdi! ✨'
-    } as any,
-    {
-      id: '3',
-      author: 'Zeynep Kaya',
-      table: 'Masa 1',
-      time: '15 dakika önce',
-      url: 'https://images.unsplash.com/photo-1519225421980-715cb0215aed?auto=format&fit=crop&w=800&q=80',
-      likes: 31,
-      caption: 'Masa detayları ve süslemeler rüya gibi.'
+  const [loading, setLoading] = useState(true);
+  const [isPending, startTransition] = useTransition();
+  const [photos, setPhotos] = useState<any[]>([]);
+
+  // Form State
+  const [imageUrl, setImageUrl] = useState('');
+  const [caption, setCaption] = useState('');
+  const [uploaderName, setUploaderName] = useState('');
+
+  const loadPhotos = async () => {
+    setLoading(true);
+    const res = await getPhotoWallItems();
+    if (res.success && res.data) {
+      setPhotos(res.data);
     }
-  ]);
+    setLoading(false);
+  };
 
-  const [newAuthor, setNewAuthor] = useState('');
-  const [newTable, setNewTable] = useState('Masa 1');
-  const [newCaption, setNewCaption] = useState('');
+  useEffect(() => {
+    loadPhotos();
+  }, []);
 
-  const handleUpload = (e: React.FormEvent) => {
+  const handleAddPhoto = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newAuthor) return;
+    if (!imageUrl.trim()) return;
 
-    const newItem: MediaItem = {
-      id: Date.now().toString(),
-      author: newAuthor,
-      table: newTable,
-      time: 'Şimdi',
-      url: 'https://images.unsplash.com/photo-1537633552985-df8429e8048b?auto=format&fit=crop&w=800&q=80',
-      likes: 1,
-      caption: newCaption || 'Düğünden unutulmaz bir kare!'
-    };
+    startTransition(async () => {
+      const res = await createPhotoWallItem({
+        url: imageUrl,
+        caption,
+        uploaderName: uploaderName || 'Çift',
+      });
 
-    setMediaList([newItem, ...mediaList]);
-    setNewAuthor('');
-    setNewCaption('');
-    setIsUploadModalOpen(false);
+      if (res.success) {
+        setImageUrl('');
+        setCaption('');
+        setUploaderName('');
+        await loadPhotos();
+      }
+    });
   };
 
-  const handleLike = (id: string) => {
-    setMediaList(mediaList.map(m => m.id === id ? { ...m, likes: m.likes + 1 } : m));
+  const handleDelete = (id: string) => {
+    startTransition(async () => {
+      const res = await deletePhotoWallItem(id);
+      if (res.success) {
+        await loadPhotos();
+      }
+    });
   };
+
+  if (loading) {
+    return <div className="p-8 text-center text-gray-500">Fotoğraf duvarı yükleniyor...</div>;
+  }
 
   return (
-    <div className="min-h-screen bg-[#FDFDFD] text-[#111111] font-sans selection:bg-[#111111] selection:text-white pb-20">
-      
-      {/* Header */}
-      <header className="sticky top-0 z-40 bg-white/90 backdrop-blur-lg border-b border-black/[0.06]">
-        <div className="max-w-[1300px] mx-auto px-6 h-20 flex items-center justify-between">
-          <Link href="/" className="font-serif text-2xl font-bold tracking-tight text-[#111111]">
-            WedyPlan<span className="text-[#D4AF37]">.</span>
-          </Link>
+    <div className="p-6 max-w-7xl mx-auto space-y-6">
+      <div>
+        <h1 className="text-3xl font-bold text-gray-800">Düğün Fotoğraf Duvarı</h1>
+        <p className="text-sm text-gray-500 mt-1">
+          Düğün gününüzden ve hazırlık sürecinizden anıları paylaşın, anı duvarınızı oluşturun.
+        </p>
+      </div>
 
-          <div className="hidden md:flex items-center gap-6 text-[14px] font-medium text-[#555]">
-            <Link href="/cift/dijital-davetiye" className="hover:text-[#111] transition-colors">Dijital Davetiye</Link>
-            <Link href="/cift/fotograf-duvari" className="text-[#111] font-bold">Canlı Fotoğraf Duvarı</Link>
-            <Link href="/cift/odeme" className="hover:text-[#111] transition-colors">Ödemeler & Sözleşmeler</Link>
-            <Link href="/cift/ai-asistan" className="flex items-center gap-1.5 text-[#111] font-bold">
-              <Sparkles className="w-4 h-4 text-[#D4AF37]" /> WedyAI
-            </Link>
-          </div>
-
-          <div className="flex items-center gap-3">
-            <button 
-              onClick={() => setIsSlideshowActive(!isSlideshowActive)}
-              className="px-4 py-2.5 rounded-full border border-black/10 hover:border-black text-[12px] font-medium transition-all flex items-center gap-2"
-            >
-              <Play className="w-3.5 h-3.5 text-[#D4AF37]" />
-              <span>{isSlideshowActive ? 'Slaytı Durdur' : 'Dev Ekranda Yansıt'}</span>
-            </button>
-            
-            <button 
-              onClick={() => setIsUploadModalOpen(true)}
-              className="px-5 py-2.5 rounded-full bg-[#111111] text-white hover:bg-[#333] text-[12px] font-medium transition-all shadow-sm flex items-center gap-1.5"
-            >
-              <Upload className="w-3.5 h-3.5 text-[#D4AF37]" />
-              <span>Fotoğraf Yükle</span>
-            </button>
-          </div>
+      {/* Fotoğraf Yükleme Formu */}
+      <form onSubmit={handleAddPhoto} className="p-5 bg-white/80 backdrop-blur-md rounded-2xl border shadow-sm space-y-4">
+        <h2 className="text-lg font-semibold text-gray-800">Fotoğraf Ekle</h2>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <input
+            type="url"
+            placeholder="Fotoğraf Bağlantısı (URL) *"
+            value={imageUrl}
+            onChange={(e) => setImageUrl(e.target.value)}
+            className="px-3.5 py-2.5 border rounded-xl w-full text-sm focus:outline-none focus:border-indigo-500"
+            required
+          />
+          <input
+            type="text"
+            placeholder="Açıklama / Not (örn. İlk Dans)"
+            value={caption}
+            onChange={(e) => setCaption(e.target.value)}
+            className="px-3.5 py-2.5 border rounded-xl w-full text-sm focus:outline-none focus:border-indigo-500"
+          />
+          <input
+            type="text"
+            placeholder="Paylaşan (örn. Gelin, Damat, Ahmet Bey)"
+            value={uploaderName}
+            onChange={(e) => setUploaderName(e.target.value)}
+            className="px-3.5 py-2.5 border rounded-xl w-full text-sm focus:outline-none focus:border-indigo-500"
+          />
         </div>
-      </header>
+        <button
+          type="submit"
+          disabled={isPending || !imageUrl.trim()}
+          className="px-6 py-2.5 bg-indigo-600 text-white text-sm font-semibold rounded-xl hover:bg-indigo-700 disabled:opacity-50 transition-colors shadow-sm"
+        >
+          {isPending ? 'Fotoğraf Yükleniyor...' : 'Duvara Ekle'}
+        </button>
+      </form>
 
-      <main className="max-w-[1300px] mx-auto px-6 pt-8 space-y-8">
-        
-        {/* Banner & Masalar İçin QR Kartı */}
-        <div className="bg-[#111111] text-white p-8 rounded-[32px] shadow-xl grid grid-cols-1 md:grid-cols-12 gap-8 items-center relative overflow-hidden">
-          
-          <div className="md:col-span-8 space-y-3">
-            <div className="inline-flex items-center gap-2 px-3 py-1 bg-white/10 rounded-full text-[11px] text-[#D4AF37] font-mono tracking-widest uppercase">
-              <Sparkles className="w-3.5 h-3.5" /> Canlı Etkileşim Duvarı
-            </div>
-            <h1 className="text-[32px] md:text-[40px] font-serif font-normal leading-tight">
-              Düğün Anılarınızı Davetlilerinizle Birlikte Oluşturun
-            </h1>
-            <p className="text-[14px] text-white/70 font-light max-w-[550px]">
-              Masalardaki QR kodu okutan misafirlerinizin çektiği tüm fotoğraf ve videolar anında bu canlı duvarda toplanır.
-            </p>
-
-            <div className="flex items-center gap-6 pt-3 text-[12px] font-mono text-white/80">
-              <span className="flex items-center gap-1.5"><ImageIcon className="w-4 h-4 text-[#D4AF37]" /> {mediaList.length} Fotoğraf Yüklendi</span>
-              <span className="flex items-center gap-1.5"><Heart className="w-4 h-4 text-red-400" /> {mediaList.reduce((a, b) => a + b.likes, 0)} Beğeni</span>
-            </div>
-          </div>
-
-          {/* QR Kod Masa Kartı */}
-          <div className="md:col-span-4 bg-white text-[#111111] p-6 rounded-[24px] text-center space-y-3 shadow-lg">
-            <div className="w-28 h-28 mx-auto bg-[#F4F4F0] rounded-2xl flex items-center justify-center border border-black/10">
-              <QrCode className="w-20 h-20 text-[#111111]" />
-            </div>
-            <div>
-              <h4 className="font-serif font-semibold text-[15px]">Masalar İçin QR Kod Kartı</h4>
-              <p className="text-[11px] text-[#666]">Yazdırıp masalara koyabilirsiniz.</p>
-            </div>
-            <button className="w-full py-2 bg-[#111111] text-white text-[12px] font-medium rounded-xl hover:bg-[#333] transition-colors flex items-center justify-center gap-1.5">
-              <Download className="w-3.5 h-3.5 text-[#D4AF37]" /> Kartı Indir (PDF)
-            </button>
-          </div>
-
+      {/* Galeri Izgarası (Grid) */}
+      {photos.length === 0 ? (
+        <div className="p-12 text-center bg-white/50 backdrop-blur-md rounded-2xl border text-gray-500">
+          Fotoğraf duvarında henüz hiç görsel yok. İlk fotoğrafı yukarıdaki formdan yükleyebilirsiniz!
         </div>
+      ) : (
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+          {photos.map((photo) => (
+            <div
+              key={photo.id}
+              className="group relative bg-white/80 backdrop-blur-md rounded-2xl border shadow-sm overflow-hidden flex flex-col justify-between hover:shadow-md transition-all"
+            >
+              <div className="relative aspect-square w-full bg-gray-100 overflow-hidden">
+                <img
+                  src={photo.url}
+                  alt={photo.caption || 'Düğün Fotoğrafı'}
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                  onError={(e) => {
+                    (e.target as HTMLImageElement).src =
+                      'https://images.unsplash.com/photo-1519741497674-611481863552?w=500&auto=format&fit=crop&q=60';
+                  }}
+                />
+              </div>
 
-        {/* Canlı Akış Gridi */}
-        <div className="space-y-4">
-          <div className="flex items-center justify-between border-b border-black/5 pb-3">
-            <h3 className="font-serif text-[22px] font-medium text-[#111]">Canlı Fotoğraf Akışı</h3>
-            <span className="text-[11px] font-mono text-emerald-600 font-bold bg-emerald-50 px-3 py-1 rounded-full flex items-center gap-1">
-              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" /> Canlı Yayın Aktif
-            </span>
-          </div>
+              <div className="p-4 space-y-2 flex-1 flex flex-col justify-between">
+                <div>
+                  <p className="font-semibold text-gray-800 text-sm line-clamp-2">
+                    {photo.caption || 'Açıklama yok'}
+                  </p>
+                  <p className="text-xs text-gray-400 mt-1">
+                    Paylaşan: <span className="font-medium text-gray-600">{photo.uploaderName || 'Çift'}</span>
+                  </p>
+                </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {mediaList.map((item) => (
-              <div key={item.id} className="bg-white border border-black/10 rounded-[28px] overflow-hidden shadow-sm hover:shadow-md transition-all space-y-3 p-4">
-                <div className="relative h-[280px] rounded-[20px] overflow-hidden bg-black/5">
-                  <img src={item.url} alt="" className="w-full h-full object-cover" />
-                  <span className="absolute bottom-3 left-3 bg-black/60 backdrop-blur-md text-white text-[10px] font-mono px-2.5 py-1 rounded-full">
-                    📍 {item.table}
+                <div className="pt-2 border-t flex justify-between items-center text-xs text-gray-400">
+                  <span>
+                    {photo.createdAt
+                      ? new Date(photo.createdAt).toLocaleDateString('tr-TR')
+                      : 'Yeni'}
                   </span>
-                </div>
-
-                <div className="space-y-2">
-                  <div className="flex justify-between items-center text-[12px]">
-                    <span className="font-semibold text-[#111]">{item.author}</span>
-                    <span className="text-[#888] text-[10px]">{item.time}</span>
-                  </div>
-                  <p className="text-[12px] text-[#555] italic">"{item.caption}"</p>
-                </div>
-
-                <div className="pt-2 border-t border-black/5 flex justify-between items-center text-[12px]">
-                  <button 
-                    onClick={() => handleLike(item.id)}
-                    className="flex items-center gap-1.5 text-red-500 hover:scale-110 transition-transform font-bold"
+                  <button
+                    onClick={() => handleDelete(photo.id)}
+                    disabled={isPending}
+                    className="text-red-500 hover:text-red-700 font-medium text-xs disabled:opacity-50"
                   >
-                    <Heart className="w-4 h-4 fill-red-500" />
-                    <span>{item.likes}</span>
-                  </button>
-
-                  <button className="text-[#888] hover:text-[#111]">
-                    <Share2 className="w-4 h-4" />
+                    Sil
                   </button>
                 </div>
               </div>
-            ))}
-          </div>
-        </div>
-
-      </main>
-
-      {/* Yükleme Modalı */}
-      {isUploadModalOpen && (
-        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-white rounded-[32px] max-w-[420px] w-full p-6 space-y-5 shadow-2xl">
-            <div className="flex justify-between items-center border-b border-black/5 pb-3">
-              <h3 className="font-serif text-[18px] font-semibold text-[#111]">Anı Paylaş</h3>
-              <button onClick={() => setIsUploadModalOpen(false)} className="text-[#888]">✕</button>
             </div>
-
-            <form onSubmit={handleUpload} className="space-y-4 text-[13px]">
-              <div>
-                <label className="text-[11px] font-bold uppercase text-[#888] block mb-1">Adınız / Çift Notunuz</label>
-                <input 
-                  type="text" 
-                  required 
-                  placeholder="Örn: Merve & Can"
-                  value={newAuthor} 
-                  onChange={e => setNewAuthor(e.target.value)}
-                  className="w-full h-11 px-3.5 bg-[#FBFBF9] border border-black/10 rounded-xl outline-none"
-                />
-              </div>
-
-              <div>
-                <label className="text-[11px] font-bold uppercase text-[#888] block mb-1">Masa Numaranız</label>
-                <input 
-                  type="text" 
-                  value={newTable} 
-                  onChange={e => setNewTable(e.target.value)}
-                  className="w-full h-11 px-3.5 bg-[#FBFBF9] border border-black/10 rounded-xl outline-none"
-                />
-              </div>
-
-              <div>
-                <label className="text-[11px] font-bold uppercase text-[#888] block mb-1">Kısa Mesajınız</label>
-                <textarea 
-                  rows={2}
-                  placeholder="Çiftimize dileğiniz..." 
-                  value={newCaption} 
-                  onChange={e => setNewCaption(e.target.value)}
-                  className="w-full p-3 bg-[#FBFBF9] border border-black/10 rounded-xl outline-none text-[12px]"
-                />
-              </div>
-
-              <button type="submit" className="w-full h-12 bg-[#111111] text-white font-medium rounded-full shadow-md">
-                Canlı Duvara Gönder
-              </button>
-            </form>
-          </div>
+          ))}
         </div>
       )}
-
     </div>
   );
 }

@@ -1,10 +1,12 @@
+// app/admin/page.tsx
 'use client';
 
 export const dynamic = 'force-dynamic';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useTransition } from 'react';
 import { AdminSidebar, AdminTab } from '@/components/admin/AdminSidebar';
 import { supabase } from '@/lib/supabase';
+import { getAdminMetrics } from '@/lib/actions/admin-dashboard';
 import { 
   Users, 
   Store, 
@@ -39,8 +41,9 @@ import {
 
 export default function AdminConsolePage() {
   const [activeTab, setActiveTab] = useState<AdminTab>('executive');
+  const [isPending, startTransition] = useTransition();
 
-  // Supabase'den Dolacak Canlı State'ler
+  // Canlı State'ler
   const [couples, setCouples] = useState<any[]>([]);
   const [vendors, setVendors] = useState<any[]>([]);
   const [quotes, setQuotes] = useState<any[]>([]);
@@ -76,7 +79,7 @@ export default function AdminConsolePage() {
     autoVendorMatching: true,
   });
 
-  // Abonelik Paketleri Mock / State
+  // Abonelik Paketleri
   const [subscriptionPlans, setSubscriptionPlans] = useState([
     { id: '1', name: 'Başlangıç Tedarikçi', price: '₺1,250 /ay', limit: '10 Teklif/ay', badge: 'Standart' },
     { id: '2', name: 'Pro Organizasyon', price: '₺3,450 /ay', limit: 'Sınırsız Teklif', badge: 'Popüler' },
@@ -104,7 +107,7 @@ export default function AdminConsolePage() {
       setLiveClickCount(prev => prev + Math.floor(Math.random() * 8));
     }, 4000);
 
-    // Supabase Realtime Aboneliği: Çiftler, Tedarikçiler ve Teklif Talepleri Dinleniyor
+    // Supabase Realtime Aboneliği
     const channel = supabase
       .channel('admin-db-changes')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'couples' }, () => fetchCouples())
@@ -151,7 +154,7 @@ export default function AdminConsolePage() {
     if (data && !error) setQuotes(data);
   };
 
-  // GERÇEK SUPABASE'E ÇİFT EKLEME
+  // ÇİFT EKLEME
   const handleAddCouple = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newCouple.name) return;
@@ -173,7 +176,7 @@ export default function AdminConsolePage() {
     }
   };
 
-  // GERÇEK SUPABASE'E TEDARİKÇİ EKLEME
+  // TEDARİKÇİ EKLEME
   const handleAddVendor = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newVendor.name) return;
@@ -195,7 +198,7 @@ export default function AdminConsolePage() {
     }
   };
 
-  // GERÇEK SUPABASE'DE ONAY DURUMU DEĞİŞTİRME
+  // ONAY DURUMU DEĞİŞTİRME
   const toggleVendorStatus = async (id: string, currentStatus: boolean) => {
     const { error } = await supabase
       .from('vendors')
@@ -396,7 +399,7 @@ export default function AdminConsolePage() {
                         <span>Gölge Modu</span>
                       </button>
 
-                      <span className="text-xs bg-emerald-500/10 text-emerald-600 px-3 py-1 rounded-full border border-emerald-200 font-semibold">{c.status}</span>
+                      <span className="text-xs bg-emerald-500/10 text-emerald-600 px-3 py-1 rounded-full border border-emerald-200 font-semibold">{c.status || 'CONFIRMED'}</span>
                     </div>
                   </div>
                 ))

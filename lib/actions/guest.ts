@@ -1,162 +1,124 @@
+// lib/actions/guest.ts
 'use server';
 
 import { db } from '@/lib/db';
+import { getActiveCoupleId } from '@/lib/auth/session';
 import { revalidatePath } from 'next/cache';
 
-export interface CreateGuestInput {
-  userId: string;
-  fullName: string;
-  email?: string;
-  phone?: string;
-  group?: string; // Aile, Arkadaş, İş Vb.
-  plusOne?: boolean;
-  tableNumber?: string;
-  status?: 'PENDING' | 'ACCEPTED' | 'DECLINED';
-}
-
-export interface GuestRecord {
-  id: string;
-  userId: string;
-  fullName: string;
-  email?: string | null;
-  phone?: string | null;
-  group?: string | null;
-  plusOne?: boolean;
-  tableNumber?: string | null;
-  status: string;
-  createdAt?: Date;
-}
-
-/**
- * Kullanıcıya/Çifte ait tüm davetlileri ve LCV durum istatistiklerini getirir.
- */
-export async function getGuestsAction(userId: string) {
+// 1. Çiftin tüm davetlilerini getir
+export async function getGuests(coupleId?: string) {
   try {
-    const guestModel = (db as any).guest || (db as any).guestListItem || (db as any).coupleGuest;
+    const activeCoupleId = await getActiveCoupleId(coupleId);
+    const guestModel = (db as any).guest;
 
-    let guests: GuestRecord[] = [];
-
-    if (guestModel) {
-      guests = await guestModel.findMany({
-        where: { userId },
-        orderBy: { createdAt: 'desc' },
-      });
+    if (!guestModel) {
+      return { success: false, error: 'Davetli veritabanı modeli bulunamadı.' };
     }
 
-    const acceptedCount = guests.filter((g: GuestRecord) => g.status === 'ACCEPTED').length;
-    const declinedCount = guests.filter((g: GuestRecord) => g.status === 'DECLINED').length;
-    const pendingCount = guests.filter((g: GuestRecord) => g.status === 'PENDING' || !g.status).length;
+    const guests = await guestModel.findMany({
+      where: { coupleId: activeCoupleId },
+      orderBy: { createdAt: 'desc' },
+    });
+
+    const totalGuests = guests.length;
+    const attendingCount = guests.filter((g: any) => g.status === 'ATTENDING').length;
+    const declinedCount = guests.filter((g: any) => g.status === 'DECLINED').length;
+    const pendingCount = guests.filter((g: any) => g.status === 'PENDING' || !g.status).length;
 
     return {
       success: true,
       data: {
         guests,
         stats: {
-          total: guests.length,
-          accepted: acceptedCount,
-          declined: declinedCount,
-          pending: pendingCount,
+          totalGuests,
+          attendingCount,
+          declinedCount,
+          pendingCount,
         },
       },
     };
-  } catch (error: unknown) {
-    console.error('❌ getGuestsAction hatası:', error);
-    return {
-      success: false,
-      error: 'Davetli listesi yüklenirken bir hata oluştu.',
-      data: { guests: [], stats: { total: 0, accepted: 0, declined: 0, pending: 0 } },
-    };
+  } catch (error) {
+    console.error('Davetliler çekilirken hata:', error);
+    return { success: false, error: 'Davetli listesi alınamadı.' };
   }
 }
 
-/**
- * Yeni davetli ekler.
- */
-export async function createGuestAction(input: CreateGuestInput) {
+// 2. Yeni davetli ekle
+export async function createGuest(data: {
+  coupleId?: string;
+  fullName: string;
+  email?: string;
+  phone?: string;
+  group?: string;
+  plusOne?: boolean;
+}) {
   try {
-    const guestModel = (db as any).guest || (db as any).guestListItem || (db as any).coupleGuest;
+    const activeCoupleId = await getActiveCoupleId(data.coupleId);
+    const guestModel = (db as any).guest;
 
     if (!guestModel) {
-      throw new Error('Davetli modeli Prisma şemasında bulunamadı.');
+      return { success: false, error: 'Davetli veritabanı modeli bulunamadı.' };
     }
 
     const newGuest = await guestModel.create({
       data: {
-        userId: input.userId,
-        fullName: input.fullName,
-        email: input.email || null,
-        phone: input.phone || null,
-        group: input.group || 'Genel',
-        plusOne: input.plusOne || false,
-        tableNumber: input.tableNumber || null,
-        status: input.status || 'PENDING',
+        coupleId: activeCoupleId,
+        fullName: data.fullName,
+        email: data.email || null,
+        phone: data.phone || null,
+        group: data.group || 'Genel',
+        plusOne: data.plusOne || false,
+        status: 'PENDING',
       },
     });
 
     revalidatePath('/cift/davetliler');
-    revalidatePath('/guests');
-
     return { success: true, data: newGuest };
-  } catch (error: unknown) {
-    console.error('❌ createGuestAction hatası:', error);
-    return { success: false, error: 'Davetli eklenirken bir hata oluştu.' };
+  } catch (error) {
+    console.error('Davetli eklenirken hata:', error);
+    return { success: false, error: 'Davetli eklenemedi.' };
   }
 }
 
-/**
- * Davetlinin LCV durumunu (Katılıyor / Katılmıyor / Beklemede) ve masa numarasını günceller.
- */
-export async function updateGuestStatusAction(
-  guestId: string,
-  status: 'PENDING' | 'ACCEPTED' | 'DECLINED',
-  tableNumber?: string
-) {
+// 3. Davetli LCV (RSVP) Durumunu Güncelle
+export async function updateGuestStatus(id: string, status: 'ATTENDING' | 'DECLINED' | 'PENDING') {
   try {
-    const guestModel = (db as any).guest || (db as any).guestListItem || (db as any).coupleGuest;
+    const guestModel = (db as any).guest;
 
     if (!guestModel) {
-      throw new Error('Davetli modeli Prisma şemasında bulunamadı.');
+      return { success: false, error: 'Davetli veritabanı modeli bulunamadı.' };
     }
 
     const updated = await guestModel.update({
-      where: { id: guestId },
-      data: {
-        status,
-        ...(tableNumber !== undefined && { tableNumber }),
-      },
+      where: { id },
+      data: { status },
     });
 
     revalidatePath('/cift/davetliler');
-    revalidatePath('/guests');
-
     return { success: true, data: updated };
-  } catch (error: unknown) {
-    console.error('❌ updateGuestStatusAction hatası:', error);
-    return { success: false, error: 'Davetli durumu güncellenemedi.' };
+  } catch (error) {
+    console.error('Davetli durumu güncellenirken hata:', error);
+    return { success: false, error: 'Durum güncellenemedi.' };
   }
 }
 
-/**
- * Davetliyi siler.
- */
-export async function deleteGuestAction(guestId: string) {
+// 4. Davetli Sil
+export async function deleteGuest(id: string) {
   try {
-    const guestModel = (db as any).guest || (db as any).guestListItem || (db as any).coupleGuest;
+    const guestModel = (db as any).guest;
 
     if (!guestModel) {
-      throw new Error('Davetli modeli Prisma şemasında bulunamadı.');
+      return { success: false, error: 'Davetli veritabanı modeli bulunamadı.' };
     }
 
     await guestModel.delete({
-      where: { id: guestId },
+      where: { id },
     });
 
     revalidatePath('/cift/davetliler');
-    revalidatePath('/guests');
-
     return { success: true };
-  } catch (error: unknown) {
-    console.error('❌ deleteGuestAction hatası:', error);
+  } catch (error) {
+    console.error('Davetli silinirken hata:', error);
     return { success: false, error: 'Davetli silinemedi.' };
   }
 }

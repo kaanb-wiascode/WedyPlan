@@ -1,103 +1,246 @@
+// app/cift/davetliler/page.tsx
 'use client';
 
-import React, { useState } from 'react';
-import { MOCK_GUESTS } from '@/lib/couple-constants';
-import { Users, UserPlus, CheckCircle2, XCircle, Clock, Check, X } from 'lucide-react';
+import { useEffect, useState, useTransition } from 'react';
+import {
+  getGuests,
+  createGuest,
+  updateGuestStatus,
+  deleteGuest,
+} from '@/lib/actions/guest';
 
-export default function CoupleGuestsPage() {
-  const [guests] = useState(MOCK_GUESTS || []);
+const DEMO_COUPLE_ID = 'demo-couple-123';
 
-  const confirmedCount = guests.filter(g => g.status === 'CONFIRMED').length;
-  const declinedCount = guests.filter(g => g.status === 'DECLINED').length;
-  const waitingCount = guests.filter(g => g.status === 'WAITING').length;
+export default function DavetlilerPage() {
+  const [loading, setLoading] = useState(true);
+  const [isPending, startTransition] = useTransition();
+
+  const [guestData, setGuestData] = useState<{
+    guests: any[];
+    stats: {
+      totalGuests: number;
+      attendingCount: number;
+      declinedCount: number;
+      pendingCount: number;
+    };
+  }>({
+    guests: [],
+    stats: { totalGuests: 0, attendingCount: 0, declinedCount: 0, pendingCount: 0 },
+  });
+
+  // Form State
+  const [fullName, setFullName] = useState('');
+  const [email, setEmail] = useState('');
+  const [phone, setPhone] = useState('');
+  const [group, setGroup] = useState('Genel');
+  const [plusOne, setPlusOne] = useState(false);
+
+  // Verileri yükle
+  const loadData = async () => {
+    setLoading(true);
+    const res = await getGuests(DEMO_COUPLE_ID);
+    if (res.success && res.data) {
+      setGuestData(res.data);
+    }
+    setLoading(false);
+  };
+
+  useEffect(() => {
+    loadData();
+  }, []);
+
+  // Yeni Davetli Ekle
+  const handleAddGuest = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!fullName) return;
+
+    startTransition(async () => {
+      const res = await createGuest({
+        coupleId: DEMO_COUPLE_ID,
+        fullName,
+        email,
+        phone,
+        group,
+        plusOne,
+      });
+
+      if (res.success) {
+        setFullName('');
+        setEmail('');
+        setPhone('');
+        setPlusOne(false);
+        await loadData();
+      }
+    });
+  };
+
+  // LCV (RSVP) Durumunu Güncelle
+  const handleStatusChange = (id: string, status: 'ATTENDING' | 'DECLINED' | 'PENDING') => {
+    startTransition(async () => {
+      const res = await updateGuestStatus(id, status);
+      if (res.success) {
+        await loadData();
+      }
+    });
+  };
+
+  // Davetli Sil
+  const handleDelete = (id: string) => {
+    startTransition(async () => {
+      const res = await deleteGuest(id);
+      if (res.success) {
+        await loadData();
+      }
+    });
+  };
+
+  if (loading) {
+    return <div className="p-8 text-center text-gray-500">Davetli listesi yükleniyor...</div>;
+  }
 
   return (
-    <div className="p-6 sm:p-8 lg:p-10 space-y-8 max-w-[1200px] mx-auto font-sans">
-      
-      {/* Soft Görsel Arka Plan Işığı */}
-      <div className="fixed top-0 right-0 w-[500px] h-[500px] bg-rose-200/20 dark:bg-rose-900/10 rounded-full blur-[120px] pointer-events-none -z-10" />
+    <div className="p-6 max-w-6xl mx-auto space-y-6">
+      <div>
+        <h1 className="text-3xl font-bold text-gray-800">Davetli Listesi & LCV Yönetimi</h1>
+        <p className="text-sm text-gray-500 mt-1">Düğününüze katılacak davetlileri ve katılım durumlarını takip edin.</p>
+      </div>
 
-      {/* Üst Başlık */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white/70 dark:bg-zinc-900/50 p-6 rounded-3xl border border-rose-100/80 dark:border-zinc-800/80 backdrop-blur-xl shadow-xs">
-        <div>
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-rose-500/10 border border-rose-200/60 dark:border-rose-900/30 rounded-full text-[11px] font-semibold text-rose-600 dark:text-rose-400 mb-2">
-            <Users className="w-3.5 h-3.5" /> Dijital LCV & Davetli Takibi
-          </div>
-          <h1 className="text-2xl sm:text-3xl font-serif font-bold text-zinc-900 dark:text-white">
-            Davetliler & Masalar
-          </h1>
-          <p className="text-xs sm:text-sm text-zinc-500 dark:text-zinc-400 mt-1">
-            Davetlilerinizin katılım durumunu görün ve masa oturma düzenini organize edin.
-          </p>
+      {/* İstatistik Kartları */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+        <div className="p-4 bg-white/70 backdrop-blur-md rounded-xl border shadow-sm">
+          <p className="text-xs text-gray-500 uppercase font-semibold">Toplam Davetli</p>
+          <p className="text-2xl font-bold text-gray-800">{guestData.stats.totalGuests}</p>
         </div>
+        <div className="p-4 bg-white/70 backdrop-blur-md rounded-xl border shadow-sm">
+          <p className="text-xs text-gray-500 uppercase font-semibold">Katılıyor</p>
+          <p className="text-2xl font-bold text-emerald-600">{guestData.stats.attendingCount}</p>
+        </div>
+        <div className="p-4 bg-white/70 backdrop-blur-md rounded-xl border shadow-sm">
+          <p className="text-xs text-gray-500 uppercase font-semibold">Katılamıyor</p>
+          <p className="text-2xl font-bold text-rose-600">{guestData.stats.declinedCount}</p>
+        </div>
+        <div className="p-4 bg-white/70 backdrop-blur-md rounded-xl border shadow-sm">
+          <p className="text-xs text-gray-500 uppercase font-semibold">Cevap Bekleniyor</p>
+          <p className="text-2xl font-bold text-amber-600">{guestData.stats.pendingCount}</p>
+        </div>
+      </div>
 
-        <button className="bg-rose-500 hover:bg-rose-600 text-white text-xs font-semibold px-5 py-3 rounded-2xl transition-all flex items-center justify-center gap-2 shadow-sm shadow-rose-500/20 cursor-pointer">
-          <UserPlus className="w-4 h-4" />
-          <span>Yeni Davetli Ekle</span>
+      {/* Davetli Ekleme Formu */}
+      <form onSubmit={handleAddGuest} className="p-5 bg-white/80 rounded-xl border space-y-4">
+        <h2 className="text-lg font-semibold text-gray-800">Yeni Davetli Ekle</h2>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <input
+            type="text"
+            placeholder="Ad Soyad"
+            value={fullName}
+            onChange={(e) => setFullName(e.target.value)}
+            className="px-3 py-2 border rounded-lg w-full text-sm"
+            required
+          />
+          <input
+            type="email"
+            placeholder="E-posta (Opsiyonel)"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            className="px-3 py-2 border rounded-lg w-full text-sm"
+          />
+          <input
+            type="tel"
+            placeholder="Telefon (Opsiyonel)"
+            value={phone}
+            onChange={(e) => setPhone(e.target.value)}
+            className="px-3 py-2 border rounded-lg w-full text-sm"
+          />
+          <select
+            value={group}
+            onChange={(e) => setGroup(e.target.value)}
+            className="px-3 py-2 border rounded-lg w-full text-sm"
+          >
+            <option value="Genel">Genel</option>
+            <option value="Aile">Aile</option>
+            <option value="Arkadas">Arkadaş</option>
+            <option value="Is">İş Çevresi</option>
+          </select>
+          <label className="flex items-center space-x-2 text-sm text-gray-700">
+            <input
+              type="checkbox"
+              checked={plusOne}
+              onChange={(e) => setPlusOne(e.target.checked)}
+              className="rounded text-indigo-600"
+            />
+            <span>+1 (Yanında Misafir Getirecek)</span>
+          </label>
+        </div>
+        <button
+          type="submit"
+          disabled={isPending}
+          className="px-6 py-2 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-700 disabled:opacity-50"
+        >
+          {isPending ? 'Ekleme yapılıyor...' : 'Davetliyi Kaydet'}
         </button>
-      </div>
-
-      {/* LCV Metrikleri */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
-        <div className="bg-white/80 dark:bg-zinc-900/60 backdrop-blur-xl border border-zinc-200/70 dark:border-zinc-800 p-5 rounded-2xl shadow-xs flex items-center gap-4">
-          <div className="p-3 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 rounded-xl">
-            <CheckCircle2 className="w-6 h-6" />
-          </div>
-          <div>
-            <span className="text-xl font-serif font-bold text-zinc-900 dark:text-white block">{confirmedCount} Kişi</span>
-            <span className="text-xs text-emerald-600 dark:text-emerald-400 font-medium">Katılım Teyit Edildi</span>
-          </div>
-        </div>
-
-        <div className="bg-white/80 dark:bg-zinc-900/60 backdrop-blur-xl border border-zinc-200/70 dark:border-zinc-800 p-5 rounded-2xl shadow-xs flex items-center gap-4">
-          <div className="p-3 bg-amber-500/10 text-amber-600 dark:text-amber-400 rounded-xl">
-            <Clock className="w-6 h-6" />
-          </div>
-          <div>
-            <span className="text-xl font-serif font-bold text-zinc-900 dark:text-white block">{waitingCount} Kişi</span>
-            <span className="text-xs text-amber-600 dark:text-amber-400 font-medium">Yanıt Bekleniyor</span>
-          </div>
-        </div>
-
-        <div className="bg-white/80 dark:bg-zinc-900/60 backdrop-blur-xl border border-zinc-200/70 dark:border-zinc-800 p-5 rounded-2xl shadow-xs flex items-center gap-4">
-          <div className="p-3 bg-rose-500/10 text-rose-600 dark:text-rose-400 rounded-xl">
-            <XCircle className="w-6 h-6" />
-          </div>
-          <div>
-            <span className="text-xl font-serif font-bold text-zinc-900 dark:text-white block">{declinedCount} Kişi</span>
-            <span className="text-xs text-rose-600 dark:text-rose-400 font-medium">Gelemiyor</span>
-          </div>
-        </div>
-      </div>
+      </form>
 
       {/* Davetli Tablosu */}
-      <div className="bg-white/80 dark:bg-zinc-900/60 backdrop-blur-xl border border-zinc-200/70 dark:border-zinc-800 p-6 sm:p-8 rounded-3xl shadow-xs space-y-5">
-        <h3 className="font-serif text-lg font-bold text-zinc-900 dark:text-white">Davetli Listesi</h3>
-
-        <div className="space-y-3">
-          {guests.map((g: any) => (
-            <div key={g.id} className="bg-zinc-50/80 dark:bg-zinc-800/40 p-4 rounded-2xl border border-zinc-200/60 dark:border-zinc-700/60 flex items-center justify-between gap-4 transition-colors hover:bg-rose-50/30">
-              <div>
-                <div className="flex items-center gap-2">
-                  <h4 className="font-semibold text-sm text-zinc-900 dark:text-white">{g.fullName}</h4>
-                  <span className="text-[10px] font-mono bg-zinc-200/60 dark:bg-zinc-700 px-2 py-0.5 rounded-md text-zinc-600 dark:text-zinc-300">{g.group}</span>
-                  {g.plusOne && <span className="text-[10px] font-bold bg-rose-500/10 text-rose-600 dark:text-rose-400 px-2 py-0.5 rounded-md border border-rose-200/50">+1 Var</span>}
-                </div>
-                <span className="text-xs text-zinc-500 dark:text-zinc-400 mt-1 block">Atanan Masa: {g.tableNumber || 'Atanmadı'}</span>
-              </div>
-
-              <span className={`text-xs font-semibold px-3 py-1 rounded-full border flex items-center gap-1.5 ${
-                g.status === 'CONFIRMED'
-                  ? 'bg-emerald-500/10 text-emerald-600 border-emerald-200/60 dark:border-emerald-900/30'
-                  : g.status === 'WAITING'
-                  ? 'bg-amber-500/10 text-amber-600 border-amber-200/60 dark:border-amber-900/30'
-                  : 'bg-rose-500/10 text-rose-600 border-rose-200/60 dark:border-rose-900/30'
-              }`}>
-                {g.status === 'CONFIRMED' ? <><Check className="w-3.5 h-3.5" /> Katılıyor</> : g.status === 'WAITING' ? <><Clock className="w-3.5 h-3.5" /> Bekliyor</> : <><X className="w-3.5 h-3.5" /> Katılamıyor</>}
-              </span>
-            </div>
-          ))}
-        </div>
+      <div className="bg-white/80 rounded-xl border overflow-hidden shadow-sm">
+        <table className="w-full text-left border-collapse">
+          <thead>
+            <tr className="bg-gray-50/80 border-b text-xs uppercase font-semibold text-gray-500">
+              <th className="p-3">Ad Soyad</th>
+              <th className="p-3">Grup</th>
+              <th className="p-3">İletişim</th>
+              <th className="p-3">Yanında Misafir</th>
+              <th className="p-3">LCV Durumu</th>
+              <th className="p-3 text-right">İşlem</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y text-sm">
+            {guestData.guests.length === 0 ? (
+              <tr>
+                <td colSpan={6} className="p-6 text-center text-gray-500">
+                  Henüz bir davetli eklenmedi.
+                </td>
+              </tr>
+            ) : (
+              guestData.guests.map((guest) => (
+                <tr key={guest.id} className="hover:bg-gray-50/50">
+                  <td className="p-3 font-medium text-gray-800">{guest.fullName}</td>
+                  <td className="p-3 text-gray-500">{guest.group || 'Genel'}</td>
+                  <td className="p-3 text-gray-500">
+                    <div>{guest.phone || '-'}</div>
+                    <div className="text-xs text-gray-400">{guest.email || ''}</div>
+                  </td>
+                  <td className="p-3 text-gray-500">{guest.plusOne ? 'Evet (+1)' : 'Hayır'}</td>
+                  <td className="p-3">
+                    <select
+                      value={guest.status || 'PENDING'}
+                      onChange={(e) =>
+                        handleStatusChange(
+                          guest.id,
+                          e.target.value as 'ATTENDING' | 'DECLINED' | 'PENDING'
+                        )
+                      }
+                      disabled={isPending}
+                      className="px-2 py-1 text-xs border rounded-md font-medium bg-white"
+                    >
+                      <option value="PENDING">Bekliyor</option>
+                      <option value="ATTENDING">Katılıyor</option>
+                      <option value="DECLINED">Katılamıyor</option>
+                    </select>
+                  </td>
+                  <td className="p-3 text-right">
+                    <button
+                      onClick={() => handleDelete(guest.id)}
+                      disabled={isPending}
+                      className="text-red-500 hover:text-red-700 text-xs font-medium disabled:opacity-50"
+                    >
+                      Sil
+                    </button>
+                  </td>
+                </tr>
+              ))
+            )}
+          </tbody>
+        </table>
       </div>
     </div>
   );

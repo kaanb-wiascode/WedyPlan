@@ -1,3 +1,4 @@
+// lib/actions/vendor-discovery.ts
 'use server';
 
 import { db } from '@/lib/db';
@@ -5,109 +6,71 @@ import { db } from '@/lib/db';
 export interface VendorFilterParams {
   category?: string;
   city?: string;
-  minPrice?: number;
-  maxPrice?: number;
-  searchQuery?: string;
-  page?: number;
+  search?: string;
   limit?: number;
 }
 
-/**
- * Filtrelere göre gerçek veritabanından tedarikçileri/firmaları getirir.
- */
-export async function getVendorsAction(params: VendorFilterParams) {
+// 1. Veritabanından filtrelenmiş satıcı/firma listesini getir
+export async function getVendors(params?: VendorFilterParams) {
   try {
-    const {
-      category,
-      city,
-      minPrice,
-      maxPrice,
-      searchQuery,
-      page = 1,
-      limit = 12,
-    } = params;
+    const vendorModel = (db as any).vendor || (db as any).firm;
 
-    const skip = (page - 1) * limit;
+    if (!vendorModel) {
+      return { success: false, error: 'Satıcı veritabanı modeli bulunamadı.' };
+    }
 
-    // Prisma Where Filtreleri
     const whereClause: any = {};
 
-    if (category) {
-      whereClause.category = { equals: category, mode: 'insensitive' };
+    if (params?.category && params.category !== 'ALL') {
+      whereClause.category = params.category;
     }
 
-    if (city) {
-      whereClause.city = { equals: city, mode: 'insensitive' };
+    if (params?.city && params.city !== 'ALL') {
+      whereClause.city = {
+        contains: params.city,
+        mode: 'insensitive',
+      };
     }
 
-    if (minPrice !== undefined || maxPrice !== undefined) {
-      whereClause.startingPrice = {};
-      if (minPrice !== undefined) whereClause.startingPrice.gte = minPrice;
-      if (maxPrice !== undefined) whereClause.startingPrice.lte = maxPrice;
-    }
-
-    if (searchQuery) {
+    if (params?.search) {
       whereClause.OR = [
-        { title: { contains: searchQuery, mode: 'insensitive' } },
-        { description: { contains: searchQuery, mode: 'insensitive' } },
+        { name: { contains: params.search, mode: 'insensitive' } },
+        { description: { contains: params.search, mode: 'insensitive' } },
       ];
     }
 
-    // Toplam kayıt ve sayfalama verileri (Prisma modelinizdeki PortalProfile / Listing sorguları)
-    const [vendors, totalCount] = await Promise.all([
-      db.portalProfile.findMany({
-        where: {
-          userType: 'VENDOR',
-          ...whereClause,
-        },
-        skip,
-        take: limit,
-        orderBy: { createdAt: 'desc' },
-      }),
-      db.portalProfile.count({
-        where: {
-          userType: 'VENDOR',
-          ...whereClause,
-        },
-      }),
-    ]);
+    const vendors = await vendorModel.findMany({
+      where: whereClause,
+      take: params?.limit || 20,
+      orderBy: { createdAt: 'desc' },
+    });
 
     return {
       success: true,
       data: vendors,
-      pagination: {
-        total: totalCount,
-        page,
-        limit,
-        totalPages: Math.ceil(totalCount / limit),
-      },
     };
-  } catch (error: any) {
-    console.error('❌ getVendorsAction hatası:', error);
-    return {
-      success: false,
-      error: 'Tedarikçiler yüklenirken bir hata oluştu.',
-      data: [],
-    };
+  } catch (error) {
+    console.error('Satıcılar çekilirken hata:', error);
+    return { success: false, error: 'Satıcı listesi yüklenemedi.' };
   }
 }
 
-/**
- * ID'ye göre tek bir tedarikçinin profil detayını getirir.
- */
-export async function getVendorByIdAction(vendorId: string) {
+// 2. Tekil satıcı detayını getir
+export async function getVendorById(id: string) {
   try {
-    const vendor = await db.portalProfile.findUnique({
-      where: { id: vendorId },
+    const vendorModel = (db as any).vendor || (db as any).firm;
+
+    const vendor = await vendorModel.findUnique({
+      where: { id },
     });
 
     if (!vendor) {
-      return { success: false, error: 'Tedarikçi bulunamadı.' };
+      return { success: false, error: 'Firma bulunamadı.' };
     }
 
     return { success: true, data: vendor };
-  } catch (error: any) {
-    console.error('❌ getVendorByIdAction hatası:', error);
-    return { success: false, error: 'Tedarikçi detayı alınamadı.' };
+  } catch (error) {
+    console.error('Firma detayı alınırken hata:', error);
+    return { success: false, error: 'Firma bilgisi alınamadı.' };
   }
 }

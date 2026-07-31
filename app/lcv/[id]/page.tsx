@@ -1,85 +1,212 @@
+// app/lcv/[id]/page.tsx
 'use client';
 
-import React, { useState, use } from 'react';
-import Link from 'next/link';
-import { Check, Heart } from 'lucide-react';
+import { useEffect, useState, useTransition, use } from 'react';
+import { getPublicInvitation, submitPublicRsvp } from '@/lib/actions/invitation';
 
-export default function PremiumRSVPPage({ params }: { params: Promise<{ id: string }> }) {
-  const { id } = use(params);
+export default function PublicRsvpPage({ params }: { params: Promise<{ id: string }> }) {
+  const resolvedParams = use(params);
+  const [loading, setLoading] = useState(true);
+  const [isPending, startTransition] = useTransition();
   const [submitted, setSubmitted] = useState(false);
-  const [attending, setAttending] = useState<'yes' | 'no'>('yes');
+  const [errorMessage, setErrorMessage] = useState('');
+
+  const [invitationData, setInvitationData] = useState<{
+    coupleName: string;
+    weddingDate: any;
+    venueName: string;
+    venueAddress: string;
+    message: string;
+    coupleId: string;
+  } | null>(null);
+
+  // Form State
+  const [fullName, setFullName] = useState('');
+  const [phone, setPhone] = useState('');
+  const [status, setStatus] = useState<'ATTENDING' | 'DECLINED'>('ATTENDING');
+  const [plusOne, setPlusOne] = useState(false);
+  const [notes, setNotes] = useState('');
+
+  useEffect(() => {
+    async function load() {
+      setLoading(true);
+      const res = await getPublicInvitation(resolvedParams.id);
+      if (res.success && res.data) {
+        setInvitationData(res.data);
+      }
+      setLoading(false);
+    }
+    load();
+  }, [resolvedParams.id]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    setSubmitted(true);
+    if (!fullName || !invitationData) return;
+
+    setErrorMessage('');
+    startTransition(async () => {
+      const res = await submitPublicRsvp({
+        coupleId: invitationData.coupleId,
+        fullName,
+        phone,
+        status,
+        plusOne,
+        notes,
+      });
+
+      if (res.success) {
+        setSubmitted(true);
+      } else {
+        setErrorMessage(res.error || 'Bir hata oluştu.');
+      }
+    });
   };
 
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-slate-900 flex items-center justify-center p-4 text-white">
+        <p className="text-sm animate-pulse">Davetiye yükleniyor...</p>
+      </div>
+    );
+  }
+
   return (
-    <div className="min-h-screen bg-[#F8F8F7] text-[#111111] font-sans selection:bg-[#7C5CFF] selection:text-white flex items-center justify-center p-6">
-      
-      <div className="w-full max-w-[480px] bg-white rounded-[32px] border border-[rgba(0,0,0,0.06)] p-8 md:p-10 shadow-[0_20px_50px_rgba(0,0,0,0.04)] text-center space-y-8">
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 flex items-center justify-center p-4">
+      <div className="w-full max-w-lg bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl p-6 sm:p-8 text-white shadow-2xl space-y-6">
         
-        <div>
-          <span className="text-[12px] font-medium uppercase tracking-[0.2em] text-[#666666] block mb-2">KATILIM DURUMU (LCV)</span>
-          <h1 className="text-[32px] font-medium tracking-tight text-[#111111]">Selin & Caner</h1>
-          <p className="text-[14px] text-[#666666] mt-2">15 Ağustos 2026 • Bosphorus Palace, İstanbul</p>
+        {/* Davetiye Başlığı & Mesajı */}
+        <div className="text-center space-y-3">
+          <span className="text-xs uppercase tracking-widest text-indigo-300 font-semibold">
+            Düğün Davetiyesi
+          </span>
+          <h1 className="text-3xl font-extrabold bg-gradient-to-r from-rose-200 via-pink-100 to-indigo-200 bg-clip-text text-transparent">
+            {invitationData?.coupleName}
+          </h1>
+          <p className="text-sm text-slate-200 italic leading-relaxed">
+            "{invitationData?.message}"
+          </p>
         </div>
 
+        {/* Detay Bilgileri */}
+        <div className="bg-white/5 border border-white/10 rounded-xl p-4 space-y-2 text-xs text-slate-300 text-center">
+          {invitationData?.weddingDate && (
+            <p className="font-semibold text-rose-300 text-sm">
+              🗓️ {new Date(invitationData.weddingDate).toLocaleDateString('tr-TR', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+              })}
+            </p>
+          )}
+          <p className="font-medium text-slate-200">📍 {invitationData?.venueName}</p>
+          {invitationData?.venueAddress && (
+            <p className="text-slate-400">{invitationData.venueAddress}</p>
+          )}
+        </div>
+
+        {/* LCV Yanıt Formu veya Teşekkür Mesajı */}
         {submitted ? (
-          <div className="py-8 space-y-3">
-            <div className="w-12 h-12 bg-[#1DB954]/10 text-[#1DB954] rounded-full flex items-center justify-center mx-auto">
-              <Check className="w-6 h-6" strokeWidth={2} />
-            </div>
-            <h3 className="text-[20px] font-medium text-[#111111]">Yanıtınız Kaydedildi</h3>
-            <p className="text-[14px] text-[#666666]">Katılım bilginiz çiftimize başarıyla iletildi. Teşekkür ederiz!</p>
+          <div className="p-6 bg-emerald-500/20 border border-emerald-500/30 rounded-xl text-center space-y-2">
+            <h3 className="text-xl font-bold text-emerald-300">Yanıtınız Alındı!</h3>
+            <p className="text-xs text-emerald-100">
+              Katılım durumunuz çiftimize başarıyla iletildi. Bu mutlu günümüzde yanımızda olacağınız için teşekkür ederiz.
+            </p>
           </div>
         ) : (
-          <form onSubmit={handleSubmit} className="space-y-4 text-left">
-            <div>
-              <label className="block text-[13px] font-medium text-[#111111] mb-1.5">Adınız Soyadınız</label>
-              <input 
-                type="text" 
-                required
-                placeholder="Örn: Ahmet Yılmaz"
-                className="w-full h-[48px] px-4 bg-[#F8F8F7] border border-[rgba(0,0,0,0.06)] rounded-[14px] text-[14px] text-[#111111] outline-none focus:border-[#7C5CFF]/30 transition-colors"
-              />
-            </div>
+          <form onSubmit={handleSubmit} className="space-y-4 pt-2">
+            <h2 className="text-sm font-semibold text-slate-200 border-b border-white/10 pb-2">
+              Katılım Durumunuzu Bildirin (LCV)
+            </h2>
 
-            <div>
-              <label className="block text-[13px] font-medium text-[#111111] mb-1.5">Katılım Durumunuz</label>
-              <div className="grid grid-cols-2 gap-3">
+            {errorMessage && (
+              <p className="text-xs text-rose-400 bg-rose-500/10 p-2.5 rounded border border-rose-500/20">
+                {errorMessage}
+              </p>
+            )}
+
+            <div className="space-y-3">
+              <div>
+                <label className="block text-xs text-slate-300 mb-1">Adınız Soyadınız *</label>
+                <input
+                  type="text"
+                  required
+                  placeholder="Ad Soyad"
+                  value={fullName}
+                  onChange={(e) => setFullName(e.target.value)}
+                  className="w-full px-3 py-2 bg-white/5 border border-white/20 rounded-lg text-sm text-white placeholder-slate-400 focus:outline-none focus:border-indigo-400"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs text-slate-300 mb-1">Telefon Numaranız</label>
+                <input
+                  type="tel"
+                  placeholder="05XX XXX XX XX"
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                  className="w-full px-3 py-2 bg-white/5 border border-white/20 rounded-lg text-sm text-white placeholder-slate-400 focus:outline-none focus:border-indigo-400"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-3 pt-1">
                 <button
                   type="button"
-                  onClick={() => setAttending('yes')}
-                  className={`h-[48px] rounded-[14px] text-[14px] font-medium border transition-all ${
-                    attending === 'yes' ? 'border-[#111111] bg-[#111111] text-white' : 'border-[rgba(0,0,0,0.06)] bg-[#F8F8F7] text-[#666666]'
+                  onClick={() => setStatus('ATTENDING')}
+                  className={`py-2.5 rounded-lg text-xs font-semibold border transition-all ${
+                    status === 'ATTENDING'
+                      ? 'bg-emerald-600 border-emerald-400 text-white shadow-lg shadow-emerald-900/50'
+                      : 'bg-white/5 border-white/10 text-slate-300 hover:bg-white/10'
                   }`}
                 >
-                  Katılıyorum
+                  ✓ Katılıyorum
                 </button>
                 <button
                   type="button"
-                  onClick={() => setAttending('no')}
-                  className={`h-[48px] rounded-[14px] text-[14px] font-medium border transition-all ${
-                    attending === 'no' ? 'border-[#111111] bg-[#111111] text-white' : 'border-[rgba(0,0,0,0.06)] bg-[#F8F8F7] text-[#666666]'
+                  onClick={() => setStatus('DECLINED')}
+                  className={`py-2.5 rounded-lg text-xs font-semibold border transition-all ${
+                    status === 'DECLINED'
+                      ? 'bg-rose-600 border-rose-400 text-white shadow-lg shadow-rose-900/50'
+                      : 'bg-white/5 border-white/10 text-slate-300 hover:bg-white/10'
                   }`}
                 >
-                  Katılamıyorum
+                  ✕ Katılamıyorum
                 </button>
+              </div>
+
+              {status === 'ATTENDING' && (
+                <label className="flex items-center space-x-2 text-xs text-slate-300 pt-1 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={plusOne}
+                    onChange={(e) => setPlusOne(e.target.checked)}
+                    className="rounded bg-white/10 border-white/20 text-indigo-500 focus:ring-0"
+                  />
+                  <span>Yanımda +1 Misafir Getireceğim</span>
+                </label>
+              )}
+
+              <div>
+                <label className="block text-xs text-slate-300 mb-1">Çiftimize Notunuz</label>
+                <textarea
+                  rows={2}
+                  placeholder="Tebrik mesajınız veya özel notunuz..."
+                  value={notes}
+                  onChange={(e) => setNotes(e.target.value)}
+                  className="w-full px-3 py-2 bg-white/5 border border-white/20 rounded-lg text-sm text-white placeholder-slate-400 focus:outline-none focus:border-indigo-400"
+                />
               </div>
             </div>
 
-            <button 
+            <button
               type="submit"
-              className="w-full h-[52px] bg-[#7C5CFF] hover:bg-[#6A4FE0] text-white font-medium text-[15px] rounded-[16px] transition-colors shadow-sm pt-0.5"
+              disabled={isPending}
+              className="w-full py-3 bg-gradient-to-r from-indigo-500 to-rose-500 hover:from-indigo-600 hover:to-rose-600 text-white font-semibold text-sm rounded-xl transition-all shadow-lg disabled:opacity-50 mt-2"
             >
-              Yanıtı Gönder
+              {isPending ? 'Yanıtınız Gönderiliyor...' : 'LCV Yanıtını Gönder'}
             </button>
           </form>
         )}
-
       </div>
-
     </div>
   );
 }

@@ -1,46 +1,123 @@
-"use server";
+// lib/actions/vendor-calendar.ts
+'use server';
 
-import { revalidatePath } from "next/cache";
-import { createCalendarEventSchema, CreateCalendarEventInput } from "@/lib/validations/vendor-calendar";
+import { db } from '@/lib/db';
+import { revalidatePath } from 'next/cache';
 
-export async function createVendorCalendarEventAction(vendorId: string, data: CreateCalendarEventInput) {
-  const validation = createCalendarEventSchema.safeParse(data);
-
-  if (!validation.success) {
-    return { success: false, errors: validation.error.flatten().fieldErrors };
-  }
-
+// 1. Satıcının takvim etkinliklerini ve randevularını getir
+export async function getVendorEvents(vendorId?: string) {
   try {
-    console.log("Creating calendar event for vendor " + vendorId + ":", validation.data);
-    revalidatePath("/vendor/calendar");
-    return { success: true, message: "Takvim etkinliği ve lojistik ataması başarıyla kaydedildi ✨" };
+    const calendarModel =
+      (db as any).calendarEvent || (db as any).event || (db as any).booking;
+
+    if (!calendarModel) {
+      return { success: false, error: 'Takvim veritabanı modeli bulunamadı.' };
+    }
+
+    const whereClause = vendorId ? { vendorId } : {};
+
+    const events = await calendarModel.findMany({
+      where: whereClause,
+      orderBy: { eventDate: 'asc' },
+    });
+
+    return {
+      success: true,
+      data: events,
+    };
   } catch (error) {
-    console.error("Create Calendar Event Error:", error);
-    return { success: false, error: "Etkinlik kaydedilemedi." };
+    console.error('Takvim etkinlikleri çekilirken hata:', error);
+    return { success: false, error: 'Takvim verileri yüklenemedi.' };
   }
 }
 
-export async function detectAIConflictAction(vendorId: string) {
+// 2. Yeni takvim etkinliği / randevu ekle
+export async function createVendorEvent(data: {
+  vendorId?: string;
+  title: string;
+  clientName?: string;
+  eventDate: string;
+  eventType?: string;
+  notes?: string;
+}) {
   try {
+    const calendarModel =
+      (db as any).calendarEvent || (db as any).event || (db as any).booking;
+
+    if (!calendarModel) {
+      return { success: false, error: 'Takvim veritabanı modeli bulunamadı.' };
+    }
+
+    const targetDate = new Date(data.eventDate || Date.now());
+
+    // Aynı güne başka bir kesinleşmiş etkinlik var mı kontrolü (Çakışma Önleme)
+    const existingConflict = await calendarModel.findFirst({
+      where: {
+        ...(data.vendorId ? { vendorId: data.vendorId } : {}),
+        eventDate: targetDate,
+      },
+    });
+
+    const newEvent = await calendarModel.create({
+      data: {
+        vendorId: data.vendorId || null,
+        title: data.title || 'Yeni Etkinlik',
+        clientName: data.clientName || 'Belirtilmedi',
+        eventDate: targetDate,
+        eventType: data.eventType || 'Düğün / Organizasyon',
+        notes: data.notes || '',
+        status: existingConflict ? 'WARNING_CONFLICT' : 'CONFIRMED',
+      },
+    });
+
+    revalidatePath('/firma/takvim');
     return {
       success: true,
-      conflictDetected: true,
-      conflicts: [
-        {
-          id: "conf_1",
-          severity: "HIGH",
-          title: "Personel & Lojistik Çakışması",
-          description: "19 Haziran Cumartesi saat 14:00'te hem Bodrum Sunset Venue kurulumuna hem de Çeşme Düğün alanına aynı 'VIP Servis Aracı' atanmış.",
-          solution: "'VIP Servis Aracı 2'yi Çeşme rotasına kaydırarak çakışmayı giderebilirsiniz.",
-        },
-      ],
-      optimizationScore: 91,
-      suggestions: [
-        "Cuma günkü menü tadımı toplantılarını tek bir 3 saatlik blokta toplayarak 2 saatlik personel süresi tasarrufu sağlayabilirsiniz.",
-      ],
+      data: newEvent,
+      hasConflict: !!existingConflict,
     };
   } catch (error) {
-    console.error("AI Conflict Detection Error:", error);
-    return { success: false, error: "AI çakışma analizi yapılamadı." };
+    console.error('Takvim etkinliği eklenirken hata:', error);
+    return { success: false, error: 'Randevu/Etkinlik eklenemedi.' };
   }
+}
+
+// 3. Takvim etkinliğini sil
+export async function deleteVendorEvent(id: string) {
+  try {
+    const calendarModel =
+      (db as any).calendarEvent || (db as any).event || (db as any).booking;
+
+    if (!calendarModel) {
+      return { success: false, error: 'Takvim veritabanı modeli bulunamadı.' };
+    }
+
+    await calendarModel.delete({
+      where: { id },
+    });
+
+    revalidatePath('/firma/takvim');
+    return { success: true };
+  } catch (error) {
+    console.error('Etkinlik silinirken hata:', error);
+    return { success: false, error: 'Etkinlik silinemedi.' };
+  }
+}
+
+// 4. VendorCalendarClient İçin Alias Export (Esnek Parametreli)
+export async function createVendorCalendarEventAction(
+  arg1?: any,
+  arg2?: any
+) {
+  const vendorId = typeof arg1 === 'string' ? arg1 : (arg1?.vendorId || arg2?.vendorId);
+  const data = typeof arg2 === 'object' && arg2 !== null ? arg2 : (typeof arg1 === 'object' && arg1 !== null ? arg1 : {});
+
+  return createVendorEvent({
+    vendorId,
+    title: data.title || data.eventName || 'Yeni Etkinlik',
+    clientName: data.clientName || data.client || 'Müşteri',
+    eventDate: data.eventDate || data.date || new Date().toISOString(),
+    eventType: data.eventType || data.type || 'Düğün',
+    notes: data.notes || '',
+  });
 }
