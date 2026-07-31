@@ -17,11 +17,11 @@ import { GlassPanel } from '@/components/shared/ui/GlassPanel';
 export type VendorTab = 'overview' | 'leads' | 'subscription' | 'finance' | 'crm' | 'calendar' | 'profile' | 'settings';
 
 interface VendorSidebarProps {
-  activeTab: VendorTab;
-  setActiveTab: (tab: VendorTab) => void;
+  activeTab?: VendorTab;
+  setActiveTab?: (tab: VendorTab) => void;
 }
 
-export function VendorSidebar({ activeTab, setActiveTab }: VendorSidebarProps) {
+export function VendorSidebar({ activeTab = 'overview', setActiveTab }: VendorSidebarProps) {
   const navigation = [
     { id: 'overview' as VendorTab, name: 'Dashboard', icon: Building2 },
     { id: 'leads' as VendorTab, name: 'Teklif Talepleri', icon: FileText },
@@ -48,7 +48,7 @@ export function VendorSidebar({ activeTab, setActiveTab }: VendorSidebarProps) {
           </div>
         </div>
 
-        {/* MENÜ LİSTESİ (Sayfa Yenilenmeden Akıcı Sekme Değiştirir) */}
+        {/* MENÜ LİSTESİ */}
         <nav className="space-y-1.5">
           {navigation.map((item) => {
             const isActive = activeTab === item.id;
@@ -57,7 +57,7 @@ export function VendorSidebar({ activeTab, setActiveTab }: VendorSidebarProps) {
             return (
               <button
                 key={item.id}
-                onClick={() => setActiveTab(item.id)}
+                onClick={() => setActiveTab && setActiveTab(item.id)}
                 className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-2xl text-xs font-semibold transition-all cursor-pointer ${
                   isActive
                     ? 'bg-zinc-900 text-white dark:bg-white dark:text-zinc-900 shadow-sm'
