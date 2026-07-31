@@ -33,7 +33,8 @@ import {
   CreditCard,
   ToggleLeft,
   ToggleRight,
-  ShieldAlert
+  ShieldAlert,
+  FileText
 } from 'lucide-react';
 
 export default function AdminConsolePage() {
@@ -42,6 +43,7 @@ export default function AdminConsolePage() {
   // Supabase'den Dolacak Canlı State'ler
   const [couples, setCouples] = useState<any[]>([]);
   const [vendors, setVendors] = useState<any[]>([]);
+  const [quotes, setQuotes] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   // Anlık Canlı İzleyici Simülasyonu
@@ -102,11 +104,12 @@ export default function AdminConsolePage() {
       setLiveClickCount(prev => prev + Math.floor(Math.random() * 8));
     }, 4000);
 
-    // Supabase Realtime Aboneliği
+    // Supabase Realtime Aboneliği: Çiftler, Tedarikçiler ve Teklif Talepleri Dinleniyor
     const channel = supabase
       .channel('admin-db-changes')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'couples' }, () => fetchCouples())
       .on('postgres_changes', { event: '*', schema: 'public', table: 'vendors' }, () => fetchVendors())
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'quote_requests' }, () => fetchQuotes())
       .subscribe();
 
     return () => {
@@ -117,7 +120,7 @@ export default function AdminConsolePage() {
 
   const fetchInitialData = async () => {
     setLoading(true);
-    await Promise.all([fetchCouples(), fetchVendors()]);
+    await Promise.all([fetchCouples(), fetchVendors(), fetchQuotes()]);
     setLoading(false);
   };
 
@@ -137,6 +140,15 @@ export default function AdminConsolePage() {
       .order('created_at', { ascending: false });
 
     if (data && !error) setVendors(data);
+  };
+
+  const fetchQuotes = async () => {
+    const { data, error } = await supabase
+      .from('quote_requests')
+      .select('*')
+      .order('created_at', { ascending: false });
+
+    if (data && !error) setQuotes(data);
   };
 
   // GERÇEK SUPABASE'E ÇİFT EKLEME
@@ -284,8 +296,8 @@ export default function AdminConsolePage() {
                 </div>
 
                 <div className="p-5 rounded-2xl bg-white/80 dark:bg-zinc-900/60 border border-zinc-200/70 dark:border-zinc-800 backdrop-blur-xl shadow-xs space-y-2">
-                  <span className="text-xs text-zinc-500">Günlük Tıklanma</span>
-                  <div className="text-3xl font-serif font-bold text-zinc-900 dark:text-white">{liveClickCount.toLocaleString('tr-TR')}</div>
+                  <span className="text-xs text-zinc-500">Teklif Talepleri (Canlı)</span>
+                  <div className="text-3xl font-serif font-bold text-amber-600 dark:text-amber-400">{quotes.length}</div>
                 </div>
 
                 <div className="p-5 rounded-2xl bg-white/80 dark:bg-zinc-900/60 border border-zinc-200/70 dark:border-zinc-800 backdrop-blur-xl shadow-xs space-y-2">
