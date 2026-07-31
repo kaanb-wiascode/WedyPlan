@@ -1,58 +1,173 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { Argon2Hasher } from '@/lib/identity/infrastructure/argon2-hasher';
-import { JwtTokenProvider } from '@/lib/identity/infrastructure/jwt-token-provider';
-import { RateLimiter } from '@/lib/identity/infrastructure/rate-limiter';
-import { SessionEngine } from '@/lib/identity/shared/session-engine';
+import { prisma } from '@/lib/db';
+import { hashPassword, verifyPassword, validatePassword } from '@/lib/auth/password';
+import { createSession } from '@/lib/auth/session';
+import { InvalidCredentialsError, UserNotFoundError } from '@/lib/auth/errors';
 
-export async function POST(req: NextRequest) {
-  const ip = req.headers.get('x-forwarded-for') || '127.0.0.1';
+export async function POST(request: NextRequest) {
+  try {
+    const body = await request.json();
+    const { email, password } = body;
 
-  if (RateLimiter.isRateLimited(`login:${ip}`, 5, 60000)) {
-    return NextResponse.json({ error: 'Too many login attempts. Please wait.' }, { status: 429 });
+    // 1. Validasyon
+    if (!email || !password) {
+      return NextResponse.json(
+        { success: false, error: 'E-posta ve şifre gereklidir.' },
+        { status: 400 }
+      );
+    }
+
+    // 2. Email formatı kontrol
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      return NextResponse.json(
+        { success: false, error: 'Geçerli bir e-posta adresi giriniz.' },
+        { status: 400 }
+      );
+    }
+
+    // 3. Veritabanından user'ı bul
+    const user = await (prisma as any).identityUser.findUnique({
+      where: { email: email.toLowerCase() },
+    });
+
+    if (!user) {
+      throw new UserNotFoundError();
+    }
+
+    // 4. Hesap durumunu kontrol et
+    if (user.status === 'SUSPENDED') {
+      return NextResponse.json(
+        { success: false, error: 'Hesabınız askıya alınmıştır. Destek ekibine başvurunuz.' },
+        { status: 403 }
+      );
+    }
+
+    if (user.status === 'LOCKED') {
+      return NextResponse.json(
+        { success: false, error: 'Hesabınız kilitlenmiştir. Parola sıfırlayınız.' },
+        { status: 403 }
+      );
+    }
+
+    // 5. Şifre kontrolü
+    if (!user.passwordHash) {
+      throw new InvalidCredentialsError();
+    }
+
+    const isPasswordValid = await verifyPassword(password, user.passwordHash);
+    if (!isPasswordValid) {
+      // Failed login attempt kaydet
+      const securityProfile = await (prisma as any).userSecurityProfile.findUnique({
+        where: { userId: user.id },
+      });
+
+      const failedAttempts = (securityProfile?.failedLoginAttempts || 0) + 1;
+      const isLocked = failedAttempts >= 5;
+
+      await (prisma as any).userSecurityProfile.upsert({
+        where: { userId: user.id },
+        update: {
+          failedLoginAttempts: failedAttempts,
+          lockedUntil: isLocked ? new Date(Date.now() + 30 * 60 * 1000) : null, // 30 min lock
+        },
+        create: {
+          userId: user.id,
+          failedLoginAttempts: failedAttempts,
+          lockedUntil: isLocked ? new Date(Date.now() + 30 * 60 * 1000) : null,
+        },
+      });
+
+      if (isLocked) {
+        return NextResponse.json(
+          { success: false, error: 'Çok fazla hatalı giriş. Hesap 30 dakika kilitlenmiştir.' },
+          { status: 429 }
+        );
+      }
+
+      throw new InvalidCredentialsError();
+    }
+
+    // 6. Failed attempts reset et
+    await (prisma as any).userSecurityProfile.upsert({
+      where: { userId: user.id },
+      update: { failedLoginAttempts: 0, lockedUntil: null },
+      create: { userId: user.id },
+    });
+
+    // 7. User portal'ını al (role)
+    const profile = await (prisma as any).portalProfile.findFirst({
+      where: { userId: user.id, isPrimary: true },
+    });
+
+    if (!profile) {
+      return NextResponse.json(
+        { success: false, error: 'Kullanıcı profili bulunamadı.' },
+        { status: 404 }
+      );
+    }
+
+    // Role mapping (PortalType -> JWT role)
+    const roleMap: Record<string, 'COUPLE' | 'VENDOR' | 'ADMIN'> = {
+      COUPLE: 'COUPLE',
+      VENDOR: 'VENDOR',
+      ADMIN: 'ADMIN',
+      PUBLIC: 'COUPLE', // Default
+    };
+
+    const role = roleMap[profile.portal] || 'COUPLE';
+
+    // 8. Session oluştur
+    await createSession({
+      userId: user.id,
+      email: user.email,
+      role,
+      portalContext: profile.portal,
+    });
+
+    // 9. Login audit log kaydet
+    await (prisma as any).auditLog.create({
+      data: {
+        correlationId: crypto.randomUUID(),
+        category: 'AUTHENTICATION',
+        action: 'LOGIN_SUCCESS',
+        actorUserId: user.id,
+        actorRole: role,
+        actorIpAddress: request.headers.get('x-forwarded-for') || 'unknown',
+        actorUserAgent: request.headers.get('user-agent') || 'unknown',
+        severity: 'INFO',
+      },
+    });
+
+    return NextResponse.json({
+      success: true,
+      user: {
+        id: user.id,
+        email: user.email,
+        fullName: user.fullName,
+        role,
+      },
+    });
+  } catch (error) {
+    console.error('Login error:', error);
+
+    if (error instanceof InvalidCredentialsError) {
+      return NextResponse.json(
+        { success: false, error: error.message },
+        { status: error.statusCode }
+      );
+    }
+
+    if (error instanceof UserNotFoundError) {
+      return NextResponse.json(
+        { success: false, error: error.message },
+        { status: error.statusCode }
+      );
+    }
+
+    return NextResponse.json(
+      { success: false, error: 'Giriş yapılamadı. Lütfen tekrar deneyin.' },
+      { status: 500 }
+    );
   }
-
-  const body = await req.json();
-  const { email, password, portalContext } = body;
-
-  if (!email || !password) {
-    return NextResponse.json({ error: 'Email and password are required' }, { status: 400 });
-  }
-
-  // Simulated DB lookup and Argon2 verification
-  const mockPasswordHash = await Argon2Hasher.hash('SecurePassword123!');
-  const isMatch = await Argon2Hasher.verify(mockPasswordHash, password);
-
-  if (!isMatch) {
-    return NextResponse.json({ error: 'Invalid credentials' }, { status: 401 });
-  }
-
-  const tokenFamily = SessionEngine.createTokenFamilyId();
-  const sessionId = `sess_${Date.now()}`;
-
-  const accessToken = await JwtTokenProvider.signAccessToken({
-    sub: 'usr_109283',
-    email,
-    fullName: 'Verified User',
-    activePortal: portalContext || 'COUPLE',
-    roles: ['COUPLE'],
-    permissions: ['wedding:budget:write', 'wedding:guests:manage'],
-    sessionId,
-  });
-
-  const refreshToken = await JwtTokenProvider.signRefreshToken({
-    sub: 'usr_109283',
-    sessionId,
-    tokenFamily,
-  });
-
-  const res = NextResponse.json({
-    success: true,
-    message: 'Authentication successful',
-    accessToken,
-  });
-
-  res.cookies.set('wedy_access_token', accessToken, { httpOnly: true, secure: true, sameSite: 'strict' });
-  res.cookies.set('wedy_refresh_token', refreshToken, { httpOnly: true, secure: true, sameSite: 'strict' });
-
-  return res;
 }

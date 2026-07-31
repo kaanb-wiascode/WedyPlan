@@ -2,11 +2,13 @@
 
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Mail, Lock, ArrowRight, Eye, EyeOff } from 'lucide-react';
+import { Mail, Lock, ArrowRight, Eye, EyeOff, AlertCircle } from 'lucide-react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import BrandLogo from '@/components/ui/brand-logo';
 
 export default function LoginPage() {
+  const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
@@ -22,7 +24,7 @@ export default function LoginPage() {
     setErrorMessage('');
 
     try {
-      // 1. Ana Giriş İsteği
+      // API'ye login isteği gönder
       const response = await fetch('/api/v1/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -32,53 +34,23 @@ export default function LoginPage() {
       const resData = await response.json();
 
       if (response.ok && resData.success) {
-        const role = resData.user?.role || 'ADMIN';
-        localStorage.setItem('user_role', role);
-        localStorage.setItem('user_email', resData.user?.email || formData.email);
+        const role = resData.user?.role || 'COUPLE';
 
+        // Role'a göre yönlendir
         if (role === 'ADMIN') {
-          window.location.href = '/admin';
+          router.push('/admin');
         } else if (role === 'VENDOR') {
-          window.location.href = '/satici/dashboard';
+          router.push('/satici');
         } else {
-          window.location.href = '/cift/dashboard';
+          router.push('/cift');
         }
       } else {
-        // 2. Özel Admin Girişi ve Otomatik Kayıt (Bypass & Auto-Setup)
-        if (formData.email === 'kaanatamer@wiascorp.com' && formData.password === 'Sk.258008') {
-          // Admin için kayıt API'sini tetikle
-          const regRes = await fetch('/api/v1/register', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              fullName: 'Kaan Atamer (Süper Admin)',
-              email: formData.email,
-              password: formData.password,
-              role: 'ADMIN',
-            }),
-          });
-
-          if (regRes.ok) {
-            localStorage.setItem('user_role', 'ADMIN');
-            localStorage.setItem('user_email', formData.email);
-            window.location.href = '/admin';
-            return;
-          }
-        }
-
-        setErrorMessage(resData.error || resData.message || 'Giriş yapılamadı. Bilgilerinizi kontrol edin.');
+        setErrorMessage(
+          resData.error || 'Giriş yapılamadı. Bilgilerinizi kontrol edin.'
+        );
       }
     } catch (err) {
       console.error('Giriş hatası:', err);
-      
-      // Çevrimdışı/Hata durumunda Süper Admin geçişi
-      if (formData.email === 'kaanatamer@wiascorp.com' && formData.password === 'Sk.258008') {
-        localStorage.setItem('user_role', 'ADMIN');
-        localStorage.setItem('user_email', formData.email);
-        window.location.href = '/admin';
-        return;
-      }
-
       setErrorMessage('Bağlantı hatası oluştu, lütfen tekrar deneyin.');
     } finally {
       setIsLoading(false);
@@ -91,14 +63,13 @@ export default function LoginPage() {
         <div className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-rose-500/10 rounded-full blur-[120px]" />
       </div>
 
-      <motion.div 
+      <motion.div
         initial={{ opacity: 0, y: 15 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4, ease: 'easeOut' }}
         className="w-full max-w-md"
       >
         <div className="rounded-3xl border border-zinc-800 bg-zinc-900/90 backdrop-blur-md p-6 sm:p-8 shadow-2xl">
-          
           <div className="flex flex-col items-center text-center space-y-4 mb-8">
             <Link href="/" className="inline-block hover:opacity-90 transition-opacity">
               <BrandLogo className="h-9 w-auto" />
@@ -115,29 +86,36 @@ export default function LoginPage() {
           </div>
 
           {errorMessage && (
-            <div className="mb-6 p-3.5 rounded-2xl bg-rose-950/40 border border-rose-900/50 text-rose-400 text-xs font-medium text-center">
-              {errorMessage}
+            <div className="mb-6 p-3.5 rounded-2xl bg-rose-950/40 border border-rose-900/50 flex items-start gap-3">
+              <AlertCircle className="w-4 h-4 text-rose-400 flex-shrink-0 mt-0.5" />
+              <p className="text-rose-400 text-xs font-medium">{errorMessage}</p>
             </div>
           )}
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-1.5">
-              <label className="text-xs font-medium text-zinc-300 ml-1">E-Posta Adresi</label>
+              <label className="text-xs font-medium text-zinc-300 ml-1">
+                E-Posta Adresi
+              </label>
               <div className="relative">
                 <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
                 <input
                   type="email"
                   required
-                  placeholder="kaanatamer@wiascorp.com"
+                  placeholder="ornek@example.com"
                   value={formData.email}
-                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                  className="w-full pl-10 pr-4 py-2.5 text-sm bg-zinc-800/50 border border-zinc-700/70 rounded-xl focus:outline-none focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500 text-white placeholder:text-zinc-500"
+                  onChange={(e) =>
+                    setFormData({ ...formData, email: e.target.value })
+                  }
+                  className="w-full pl-10 pr-4 py-2.5 text-sm bg-zinc-800/50 border border-zinc-700/70 rounded-xl focus:outline-none focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500 text-zinc-100 placeholder:text-zinc-500"
                 />
               </div>
             </div>
 
             <div className="space-y-1.5">
-              <label className="text-xs font-medium text-zinc-300 ml-1">Şifre</label>
+              <label className="text-xs font-medium text-zinc-300 ml-1">
+                Şifre
+              </label>
               <div className="relative">
                 <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
                 <input
@@ -145,15 +123,21 @@ export default function LoginPage() {
                   required
                   placeholder="••••••••"
                   value={formData.password}
-                  onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                  className="w-full pl-10 pr-10 py-2.5 text-sm bg-zinc-800/50 border border-zinc-700/70 rounded-xl focus:outline-none focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500 text-white placeholder:text-zinc-500"
+                  onChange={(e) =>
+                    setFormData({ ...formData, password: e.target.value })
+                  }
+                  className="w-full pl-10 pr-10 py-2.5 text-sm bg-zinc-800/50 border border-zinc-700/70 rounded-xl focus:outline-none focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500 text-zinc-100 placeholder:text-zinc-500"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
                   className="absolute right-3.5 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-zinc-300"
                 >
-                  {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  {showPassword ? (
+                    <EyeOff className="w-4 h-4" />
+                  ) : (
+                    <Eye className="w-4 h-4" />
+                  )}
                 </button>
               </div>
             </div>
@@ -161,7 +145,7 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full mt-4 py-3 px-5 rounded-xl bg-white hover:bg-zinc-100 text-zinc-900 font-medium text-sm shadow-md transition-all flex items-center justify-center gap-2 group disabled:opacity-70"
+              className="w-full mt-4 py-3 px-5 rounded-xl bg-white hover:bg-zinc-100 disabled:bg-zinc-700 disabled:cursor-not-allowed text-zinc-900 font-medium text-sm shadow-md transition-all flex items-center justify-center gap-2 group"
             >
               {isLoading ? (
                 <div className="w-4 h-4 border-2 border-zinc-900 border-t-transparent rounded-full animate-spin" />

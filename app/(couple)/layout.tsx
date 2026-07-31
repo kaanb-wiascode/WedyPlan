@@ -1,13 +1,22 @@
-import React from "react";
-import { CoupleSidebar } from "@/components/couple/layout/CoupleSidebar";
+// app/(couple)/layout.tsx
+import React from 'react';
+import { RoleGuard } from '@/components/RoleGuard';
+import { SSEProvider } from '@/components/realtime/SSEProvider';
+import { QuoteNotification } from '@/components/realtime/QuoteNotification';
 
-export default function CoupleLayout({ children }: { children: React.ReactNode }) {
+export default function CoupleLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   return (
-    <div className="flex min-h-screen bg-[#F9F8F6]">
-      <CoupleSidebar />
-      <main className="flex-1 overflow-y-auto">
-        {children}
-      </main>
-    </div>
+    <SSEProvider>
+      <RoleGuard allowedRole="COUPLE">
+        <div>
+          {children}
+          <QuoteNotification />
+        </div>
+      </RoleGuard>
+    </SSEProvider>
   );
 }
