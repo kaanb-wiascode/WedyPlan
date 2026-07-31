@@ -1,57 +1,85 @@
 'use client';
 
-import Link from 'next/link';
+import React from 'react';
+import Link from 'next/navigation';
 import { usePathname } from 'next/navigation';
-import { BrandLogo } from '@/components/ui/brand-logo';
-
-const vendorNavItems = [
-  { label: 'Kontrol Paneli', href: '/firma/dashboard', icon: '📈' },
-  { label: 'Talepler & Gelenler', href: '/firma/talepler', icon: '📩' },
-  { label: 'Takvim & Rezervasyon', href: '/firma/takvim', icon: '📅' },
-  { label: 'Vitrin & Profil', href: '/firma/vitrin', icon: '🖼️' },
-  { label: 'Sözleşmeler', href: '/firma/sozlesmeler', icon: '📑' },
-  { label: 'Finans & Raporlar', href: '/firma/finans', icon: '💳' },
-];
+import { 
+  Store, 
+  Building2, 
+  FileText, 
+  Calendar, 
+  Wallet, 
+  Users, 
+  MessageSquare, 
+  Settings, 
+  ShieldCheck,
+  TrendingUp,
+  BarChart3,
+  Award
+} from 'lucide-react';
+import { GlassPanel } from '@/components/shared/ui/GlassPanel';
 
 export function VendorSidebar() {
   const pathname = usePathname();
 
+  const navigation = [
+    { name: 'Dashboard', href: '/vendor/dashboard', icon: Building2 },
+    { name: 'Teklif Talepleri', href: '/vendor/leads', icon: FileText },
+    { name: 'Abonelik & Paketler', href: '/vendor/subscription', icon: Award },
+    { name: 'Finans & Ciro', href: '/vendor/finance', icon: Wallet },
+    { name: 'İletişim & Mesajlar', href: '/vendor/crm', icon: MessageSquare },
+    { name: 'Takvim & Etkinlikler', href: '/vendor/calendar', icon: Calendar },
+    { name: 'Firma Profili', href: '/vendor/profile', icon: Store },
+    { name: 'Ayarlar', href: '/vendor/settings', icon: Settings },
+  ];
+
   return (
-    <aside className="w-64 min-h-screen bg-[#111111] text-[#E5E5E5] p-6 flex flex-col justify-between">
-      <div>
-        {/* Tedarikçi Portalı Logosu */}
-        <div className="pb-8 border-b border-[#262626]">
-          <BrandLogo variant="vendor" width={160} height={36} />
+    <aside className="w-64 border-r border-zinc-200/80 dark:border-zinc-800/80 bg-white/70 dark:bg-zinc-950/70 backdrop-blur-2xl p-6 flex flex-col justify-between hidden lg:flex min-h-screen">
+      <div className="space-y-8">
+        
+        {/* LOGO / BRANDING (Admin Sidebar ile Aynı) */}
+        <div className="flex items-center gap-3 px-2">
+          <div className="w-10 h-10 rounded-2xl bg-zinc-900 dark:bg-white flex items-center justify-center text-white dark:text-zinc-900 shadow-md">
+            <Store className="w-5 h-5" />
+          </div>
+          <div>
+            <h2 className="font-serif font-bold text-base text-zinc-900 dark:text-white tracking-tight">WedyVendor</h2>
+            <span className="text-[10px] font-mono text-zinc-500 dark:text-zinc-400 font-semibold tracking-wider uppercase">Firma Portalı</span>
+          </div>
         </div>
 
-        {/* Menü İtemleri */}
-        <nav className="mt-6 space-y-1">
-          {vendorNavItems.map((item) => {
+        {/* MENÜ LİSTESİ */}
+        <nav className="space-y-1.5">
+          {navigation.map((item) => {
             const isActive = pathname === item.href;
+            const Icon = item.icon;
+
             return (
               <Link
-                key={item.href}
+                key={item.name}
                 href={item.href}
-                className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all ${
+                className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-2xl text-xs font-semibold transition-all cursor-pointer ${
                   isActive
-                    ? 'bg-[#222222] text-white font-semibold border-l-4 border-[#C5A059]'
-                    : 'text-[#A3A3A3] hover:bg-[#1A1A1A] hover:text-white'
+                    ? 'bg-zinc-900 text-white dark:bg-white dark:text-zinc-900 shadow-sm'
+                    : 'text-zinc-500 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-zinc-900/60'
                 }`}
               >
-                <span>{item.icon}</span>
-                <span>{item.label}</span>
+                <Icon className="w-4 h-4" />
+                <span>{item.name}</span>
               </Link>
             );
           })}
         </nav>
       </div>
 
-      <div className="pt-6 border-t border-[#262626]">
-        <div className="bg-[#1A1A1A] p-4 rounded-2xl text-xs text-[#A3A3A3] border border-[#262626]">
-          <p className="font-semibold text-white mb-1">Studio Partner</p>
-          <p>Profilinizi güncel tutarak %40 daha fazla talep alın.</p>
+      {/* ALT FİRMA ROZETİ KARTI */}
+      <GlassPanel className="p-4 space-y-2 border-zinc-200/80 dark:border-zinc-800/80">
+        <div className="flex items-center gap-2 text-xs font-bold text-zinc-900 dark:text-white">
+          <ShieldCheck className="w-4 h-4 text-emerald-500" />
+          <span>Grand Çamlıca</span>
         </div>
-      </div>
+        <p className="text-[10px] text-zinc-500 dark:text-zinc-400">Onaylı VIP Tedarikçi Statüsü Active</p>
+      </GlassPanel>
     </aside>
   );
 }
