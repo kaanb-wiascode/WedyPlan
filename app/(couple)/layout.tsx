@@ -1,6 +1,6 @@
 // app/(couple)/layout.tsx
 import React from 'react';
-import { RoleGuard } from '@/components/RoleGuard';
+import RoleGuard from '@/components/RoleGuard';
 import { SSEProvider } from '@/components/realtime/SSEProvider';
 import { QuoteNotification } from '@/components/realtime/QuoteNotification';
 
