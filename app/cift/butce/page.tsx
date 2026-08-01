@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState, useMemo } from 'react';
+import React, { useEffect, useState, useMemo, useTransition } from 'react';
 import { getBudgetItems, createBudgetItem, deleteBudgetItem } from '@/lib/actions/budget';
 import {
   Wallet,
@@ -32,17 +32,10 @@ const STATUS_OPTIONS = [
   { id: 'PAID', label: 'Tamamı Ödendi', badgeBg: 'bg-emerald-100 dark:bg-emerald-950/60', textColor: 'text-emerald-700 dark:text-emerald-400', icon: CheckCircle2 },
 ];
 
-// Başlangıç Mock Harcamaları
-const INITIAL_MOCK_ITEMS = [
-  { id: '1', title: 'Mekan Kır Bahçesi Anlaşması', category: 'Mekan', allocatedAmount: 180000, spentAmount: 180000, status: 'PAID' },
-  { id: '2', title: 'Dış Çekim Fotoğrafçı', category: 'Fotograf', allocatedAmount: 35000, spentAmount: 15000, status: 'PARTIAL' },
-  { id: '3', title: 'Gelinlik & Aksesuar', category: 'Giyim', allocatedAmount: 45000, spentAmount: 0, status: 'PENDING' },
-  { id: '4', title: 'Orkestra & DJ Performansı', category: 'Müzik', allocatedAmount: 30000, spentAmount: 30000, status: 'PAID' },
-];
-
 export default function BudgetPage() {
   const [items, setItems] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isPending, startTransition] = useTransition();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategoryFilter, setSelectedCategoryFilter] = useState('ALL');
@@ -58,33 +51,21 @@ export default function BudgetPage() {
   const [isCategoryDropdownOpen, setIsCategoryDropdownOpen] = useState(false);
   const [isStatusDropdownOpen, setIsStatusDropdownOpen] = useState(false);
 
-  // Veri Yükleme (LocalStorage + Sunucu İletişimi)
+  // Verileri Sunucudan & Çerezden Çek
+  const loadData = async () => {
+    setLoading(true);
+    const res = await getBudgetItems();
+    if (res.success && res.data) {
+      setItems(res.data);
+    }
+    setLoading(false);
+  };
+
   useEffect(() => {
-    const initData = async () => {
-      const savedLocal = localStorage.getItem('wedyplan_budget_items');
-      if (savedLocal) {
-        try {
-          setItems(JSON.parse(savedLocal));
-          setLoading(false);
-          return;
-        } catch (e) {}
-      }
-
-      const res = await getBudgetItems();
-      if (res.success && res.data && res.data.length > 0) {
-        setItems(res.data);
-        localStorage.setItem('wedyplan_budget_items', JSON.stringify(res.data));
-      } else {
-        setItems(INITIAL_MOCK_ITEMS);
-        localStorage.setItem('wedyplan_budget_items', JSON.stringify(INITIAL_MOCK_ITEMS));
-      }
-      setLoading(false);
-    };
-
-    initData();
+    loadData();
   }, []);
 
-  // Canlı Hesaplamalar
+  // Anlık Canlı Hesaplamalar
   const TOTAL_TARGET_BUDGET = 350000;
   
   const totalSpent = useMemo(() => {
@@ -94,51 +75,42 @@ export default function BudgetPage() {
   const remainingBudget = TOTAL_TARGET_BUDGET - totalSpent;
   const spentPercentage = Math.round((totalSpent / TOTAL_TARGET_BUDGET) * 100);
 
-  // Anında Harcama Ekleme (Anlık Tepkisellik)
+  // Ekleme İşlemi (Canlı UI + Server Revalidation)
   const handleAddItem = (e: React.FormEvent) => {
     e.preventDefault();
     if (!title || !allocatedAmount) return;
 
-    const newItem = {
-      id: crypto.randomUUID(),
-      title,
-      category,
-      allocatedAmount: parseFloat(allocatedAmount),
-      spentAmount: spentAmount ? parseFloat(spentAmount) : 0,
-      status,
-    };
+    startTransition(async () => {
+      const res = await createBudgetItem({
+        title,
+        category,
+        allocatedAmount: parseFloat(allocatedAmount),
+        spentAmount: spentAmount ? parseFloat(spentAmount) : 0,
+        status,
+      });
 
-    const updatedItems = [newItem, ...items];
-    setItems(updatedItems);
-    localStorage.setItem('wedyplan_budget_items', JSON.stringify(updatedItems));
-
-    // Formu Sıfırla ve Modalı Kapat
-    setTitle('');
-    setAllocatedAmount('');
-    setSpentAmount('');
-    setCategory('Mekan');
-    setStatus('PENDING');
-    setIsModalOpen(false);
-
-    // Arka Planda Senkronize Et
-    createBudgetItem({
-      title: newItem.title,
-      category: newItem.category,
-      allocatedAmount: newItem.allocatedAmount,
-      spentAmount: newItem.spentAmount,
-      status: newItem.status as any,
+      if (res.success && res.data) {
+        setItems(res.data);
+        setTitle('');
+        setAllocatedAmount('');
+        setSpentAmount('');
+        setCategory('Mekan');
+        setStatus('PENDING');
+        setIsModalOpen(false);
+      }
     });
   };
 
-  // Anında Harcama Silme
+  // Silme İşlemi
   const handleDelete = (id: string) => {
     if (!confirm('Bu harcama kalemini silmek istediğinize emin misiniz?')) return;
 
-    const updatedItems = items.filter((item) => item.id !== id);
-    setItems(updatedItems);
-    localStorage.setItem('wedyplan_budget_items', JSON.stringify(updatedItems));
-
-    deleteBudgetItem(id);
+    startTransition(async () => {
+      const res = await deleteBudgetItem(id);
+      if (res.success && res.data) {
+        setItems(res.data);
+      }
+    });
   };
 
   // Filtrelenmiş Harcama Listesi
@@ -184,7 +156,6 @@ export default function BudgetPage() {
 
       {/* 1. ÖZET FİNANS KARTLARI */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        
         <div className="p-5 rounded-2xl bg-white dark:bg-zinc-900 border border-zinc-200/80 dark:border-zinc-800 shadow-xs space-y-2">
           <span className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">Hedef Bütçe</span>
           <div className="text-2xl font-black text-zinc-900 dark:text-white">
@@ -221,10 +192,9 @@ export default function BudgetPage() {
             {spentPercentage > 85 ? '⚠️ Bütçe Sınırına Yaklaşıldı' : '✅ Bütçe İdeal Durumda'}
           </div>
           <p className="text-[11px] text-zinc-400 leading-relaxed">
-            Harcamalarınız anlık hesaplanıyor ve bütçeniz kontrol altında.
+            Harcamalarınız canlı hesaplanıyor ve bütçeniz kontrol altında.
           </p>
         </div>
-
       </div>
 
       {/* 2. CANLI BÜTÇE İLERLEME BARI */}
@@ -332,7 +302,8 @@ export default function BudgetPage() {
                       <td className="p-4 text-right">
                         <button
                           onClick={() => handleDelete(item.id)}
-                          className="p-1.5 rounded-lg hover:bg-rose-100 text-rose-500 hover:text-rose-700 transition-colors cursor-pointer"
+                          disabled={isPending}
+                          className="p-1.5 rounded-lg hover:bg-rose-100 text-rose-500 hover:text-rose-700 transition-colors cursor-pointer disabled:opacity-50"
                           title="Sil"
                         >
                           <Trash2 className="w-4 h-4" />
@@ -347,7 +318,7 @@ export default function BudgetPage() {
         </div>
       </div>
 
-      {/* 5. YENİ LÜKS HARCAMA EKLEME MODALI (ÖZEL DROPDOWN'LAR) */}
+      {/* 5. YENİ HARCAMA EKLEME MODALI */}
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
           <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-3xl p-6 sm:p-8 max-w-lg w-full shadow-2xl space-y-6 relative animate-in fade-in zoom-in-95 duration-200">
@@ -366,7 +337,6 @@ export default function BudgetPage() {
 
             <form onSubmit={handleAddItem} className="space-y-4">
               
-              {/* Harcama Başlığı */}
               <div className="space-y-1.5">
                 <label className="text-xs font-semibold text-zinc-600 dark:text-zinc-400">Harcama Başlığı</label>
                 <input
@@ -379,10 +349,10 @@ export default function BudgetPage() {
                 />
               </div>
 
-              {/* ÖZEL LÜKS DROPDOWN'LAR */}
+              {/* LÜKS DROPDOWN'LAR */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 
-                {/* 1. ÖZEL KATEGORİ DROPDOWN */}
+                {/* KATEGORİ DROPDOWN */}
                 <div className="space-y-1.5 relative">
                   <label className="text-xs font-semibold text-zinc-600 dark:text-zinc-400">Kategori</label>
                   <button
@@ -427,7 +397,7 @@ export default function BudgetPage() {
                   )}
                 </div>
 
-                {/* 2. ÖZEL ÖDEME DURUMU DROPDOWN */}
+                {/* ÖDEME DURUMU DROPDOWN */}
                 <div className="space-y-1.5 relative">
                   <label className="text-xs font-semibold text-zinc-600 dark:text-zinc-400">Ödeme Durumu</label>
                   <button
@@ -472,7 +442,7 @@ export default function BudgetPage() {
 
               </div>
 
-              {/* Tutar Girişleri */}
+              {/* TUTAR GİRİŞLERİ */}
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-1.5">
                   <label className="text-xs font-semibold text-zinc-600 dark:text-zinc-400">Planlanan Tutar (₺)</label>
@@ -508,9 +478,10 @@ export default function BudgetPage() {
                 </button>
                 <button
                   type="submit"
-                  className="px-6 py-2 rounded-xl bg-gradient-to-r from-rose-600 to-rose-500 text-white text-xs font-bold hover:shadow-md transition-all cursor-pointer"
+                  disabled={isPending}
+                  className="px-6 py-2 rounded-xl bg-gradient-to-r from-rose-600 to-rose-500 text-white text-xs font-bold hover:shadow-md transition-all cursor-pointer disabled:opacity-50"
                 >
-                  Harcamayı Kaydet
+                  {isPending ? 'Kaydediliyor...' : 'Harcamayı Kaydet'}
                 </button>
               </div>
 
