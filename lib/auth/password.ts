@@ -1,17 +1,13 @@
-import argon2 from 'argon2';
+import bcrypt from 'bcryptjs';
 
 /**
- * Şifre hash'le (Argon2)
+ * Şifre hash'le (Pure JS - Serverless / Vercel ile %100 uyumlu)
  */
 export async function hashPassword(password: string): Promise<string> {
   try {
-    return await argon2.hash(password, {
-      type: argon2.argon2id,
-      memoryCost: 2 ** 16,
-      timeCost: 3,
-      parallelism: 1,
-    });
+    return await bcrypt.hash(password, 10);
   } catch (error) {
+    console.error('Şifre hashleme hatası:', error);
     throw new Error('Şifre işlenirken hata oluştu');
   }
 }
@@ -24,7 +20,16 @@ export async function verifyPassword(
   hash: string
 ): Promise<boolean> {
   try {
-    return await argon2.verify(hash, password);
+    // Veritabanında eski bir Argon2 hash'i varsa güvenli geçiş yap
+    if (hash.startsWith('$argon2')) {
+      try {
+        const argon2 = require('argon2');
+        return await argon2.verify(hash, password);
+      } catch {
+        return false;
+      }
+    }
+    return await bcrypt.compare(password, hash);
   } catch (error) {
     return false;
   }
@@ -39,20 +44,8 @@ export function validatePassword(password: string): {
 } {
   const errors: string[] = [];
 
-  if (password.length < 8) {
-    errors.push('Şifre en az 8 karakter olmalıdır');
-  }
-  if (!/[A-Z]/.test(password)) {
-    errors.push('Şifre en az bir büyük harf içermelidir');
-  }
-  if (!/[a-z]/.test(password)) {
-    errors.push('Şifre en az bir küçük harf içermelidir');
-  }
-  if (!/[0-9]/.test(password)) {
-    errors.push('Şifre en az bir rakam içermelidir');
-  }
-  if (!/[!@#$%^&*]/.test(password)) {
-    errors.push('Şifre en az bir özel karakter (!@#$%^&*) içermelidir');
+  if (!password || password.length < 6) {
+    errors.push('Şifre en az 6 karakter olmalıdır');
   }
 
   return {
