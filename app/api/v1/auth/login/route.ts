@@ -57,7 +57,6 @@ export async function POST(request: NextRequest) {
 
     const isPasswordValid = await verifyPassword(password, user.passwordHash);
     if (!isPasswordValid) {
-      // Failed login attempt kaydet
       const securityProfile = await (prisma as any).userSecurityProfile.findUnique({
         where: { userId: user.id },
       });
@@ -69,7 +68,7 @@ export async function POST(request: NextRequest) {
         where: { userId: user.id },
         update: {
           failedLoginAttempts: failedAttempts,
-          lockedUntil: isLocked ? new Date(Date.now() + 30 * 60 * 1000) : null, // 30 min lock
+          lockedUntil: isLocked ? new Date(Date.now() + 30 * 60 * 1000) : null,
         },
         create: {
           userId: user.id,
@@ -95,16 +94,45 @@ export async function POST(request: NextRequest) {
       create: { userId: user.id },
     });
 
-    // 7. User portal'ını al (role)
-    const profile = await (prisma as any).portalProfile.findFirst({
+    // 7. User portal'ını al (GÜVENLİ & OTOMATİK ONARIMLI YAPILANDIRMA)
+    let profile = await (prisma as any).portalProfile.findFirst({
       where: { userId: user.id, isPrimary: true },
     });
 
+    // Profil yoksa arka planda sessizce oluştur (Self-Healing)
     if (!profile) {
-      return NextResponse.json(
-        { success: false, error: 'Kullanıcı profili bulunamadı.' },
-        { status: 404 }
-      );
+      try {
+        profile = await (prisma as any).portalProfile.create({
+          data: {
+            userId: user.id,
+            portal: 'COUPLE',
+            isPrimary: true,
+          },
+        });
+      } catch (profileErr) {
+        console.warn('Login esnasında portalProfile otomatik oluşturulamadı:', profileErr);
+      }
+    }
+
+    // Çift profilini de kontrol et ve eksikse oluştur
+    const portalContext = profile?.portal || 'COUPLE';
+    if (portalContext === 'COUPLE') {
+      try {
+        const existingCouple = await (prisma as any).couple.findFirst({
+          where: { userId: user.id },
+        });
+
+        if (!existingCouple) {
+          await (prisma as any).couple.create({
+            data: {
+              userId: user.id,
+              partnerOneName: user.fullName || 'Çift',
+            },
+          });
+        }
+      } catch (coupleErr) {
+        console.warn('Login esnasında couple kaydı otomatik oluşturulamadı:', coupleErr);
+      }
     }
 
     // Role mapping (PortalType -> JWT role)
@@ -112,32 +140,36 @@ export async function POST(request: NextRequest) {
       COUPLE: 'COUPLE',
       VENDOR: 'VENDOR',
       ADMIN: 'ADMIN',
-      PUBLIC: 'COUPLE', // Default
+      PUBLIC: 'COUPLE',
     };
 
-    const role = roleMap[profile.portal] || 'COUPLE';
+    const role = roleMap[portalContext] || 'COUPLE';
 
     // 8. Session oluştur
     await createSession({
       userId: user.id,
       email: user.email,
       role,
-      portalContext: profile.portal,
+      portalContext,
     });
 
-    // 9. Login audit log kaydet
-    await (prisma as any).auditLog.create({
-      data: {
-        correlationId: crypto.randomUUID(),
-        category: 'AUTHENTICATION',
-        action: 'LOGIN_SUCCESS',
-        actorUserId: user.id,
-        actorRole: role,
-        actorIpAddress: request.headers.get('x-forwarded-for') || 'unknown',
-        actorUserAgent: request.headers.get('user-agent') || 'unknown',
-        severity: 'INFO',
-      },
-    });
+    // 9. Login audit log kaydet (Güvenli adım)
+    try {
+      await (prisma as any).auditLog.create({
+        data: {
+          correlationId: crypto.randomUUID(),
+          category: 'AUTHENTICATION',
+          action: 'LOGIN_SUCCESS',
+          actorUserId: user.id,
+          actorRole: role,
+          actorIpAddress: request.headers.get('x-forwarded-for') || 'unknown',
+          actorUserAgent: request.headers.get('user-agent') || 'unknown',
+          severity: 'INFO',
+        },
+      });
+    } catch (auditErr) {
+      console.warn('Audit log eklenemedi (giriş etki edilmedi):', auditErr);
+    }
 
     return NextResponse.json({
       success: true,
