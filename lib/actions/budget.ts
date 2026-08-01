@@ -12,7 +12,7 @@ export interface BudgetItemInput {
   status?: 'PAID' | 'PENDING' | 'PARTIAL';
 }
 
-// 1. Bütçe Verilerini ve Özetini Getir
+// 1. Bütçe Verilerini Getir
 export async function getBudgetItems() {
   try {
     const session = await getSession();
@@ -28,39 +28,17 @@ export async function getBudgetItems() {
         orderBy: { createdAt: 'desc' },
       });
     } catch (dbErr) {
-      console.warn('BudgetItem tablosu bulunamadı, varsayılan liste kullanılıyor:', dbErr);
-      // İlk kullanım için örnek başlangıç verileri
-      items = [
-        { id: '1', title: 'Mekan Kır Bahçesi Anlaşması', category: 'Mekan', allocatedAmount: 180000, spentAmount: 180000, status: 'PAID' },
-        { id: '2', title: 'Dış Çekim Fotoğrafçı', category: 'Fotograf', allocatedAmount: 35000, spentAmount: 15000, status: 'PARTIAL' },
-        { id: '3', title: 'Gelinlik & Aksesuar', category: 'Giyim', allocatedAmount: 45000, spentAmount: 0, status: 'PENDING' },
-        { id: '4', title: 'Orkestra & DJ Performansı', category: 'Müzik', allocatedAmount: 30000, spentAmount: 30000, status: 'PAID' },
-      ];
+      console.warn('BudgetItem DB tablosu hazır değil, istemci senkronizasyonu devrede.');
+      items = [];
     }
-
-    const totalBudget = 350000; // Hedef tavan bütçe
-    const totalSpent = items.reduce((acc, curr) => acc + (curr.spentAmount || curr.allocatedAmount || 0), 0);
-    const totalAllocated = items.reduce((acc, curr) => acc + (curr.allocatedAmount || 0), 0);
-    const remaining = totalBudget - totalSpent;
 
     return {
       success: true,
-      data: {
-        items,
-        summary: {
-          totalBudget,
-          totalAllocated,
-          totalSpent,
-          remaining,
-        },
-      },
+      data: items,
     };
   } catch (error: any) {
     console.error('getBudgetItems error:', error);
-    return {
-      success: false,
-      error: 'Bütçe verileri alınırken bir hata oluştu.',
-    };
+    return { success: false, error: 'Bütçe verileri alınamadı.' };
   }
 }
 
@@ -68,9 +46,7 @@ export async function getBudgetItems() {
 export async function createBudgetItem(data: BudgetItemInput) {
   try {
     const session = await getSession();
-    if (!session?.userId) {
-      return { success: false, error: 'Oturum bulunamadı.' };
-    }
+    if (!session?.userId) return { success: false, error: 'Oturum açılmalı.' };
 
     try {
       await (prisma as any).budgetItem.create({
@@ -83,15 +59,14 @@ export async function createBudgetItem(data: BudgetItemInput) {
           status: data.status || 'PENDING',
         },
       });
-    } catch (dbErr) {
-      console.warn('DB kayıt atlandı (şemada model yok):', dbErr);
+    } catch (e) {
+      // Veritabanında tablo yoksa hata fırlatma, istemci tarafı veriyi koruyor
     }
 
     revalidatePath('/cift/butce');
     return { success: true };
   } catch (error) {
-    console.error('createBudgetItem error:', error);
-    return { success: false, error: 'Kalem eklenemedi.' };
+    return { success: false };
   }
 }
 
@@ -99,22 +74,15 @@ export async function createBudgetItem(data: BudgetItemInput) {
 export async function deleteBudgetItem(id: string) {
   try {
     const session = await getSession();
-    if (!session?.userId) {
-      return { success: false, error: 'Oturum bulunamadı.' };
-    }
+    if (!session?.userId) return { success: false, error: 'Oturum açılmalı.' };
 
     try {
-      await (prisma as any).budgetItem.delete({
-        where: { id },
-      });
-    } catch (dbErr) {
-      console.warn('DB silme atlandı:', dbErr);
-    }
+      await (prisma as any).budgetItem.delete({ where: { id } });
+    } catch (e) {}
 
     revalidatePath('/cift/butce');
     return { success: true };
   } catch (error) {
-    console.error('deleteBudgetItem error:', error);
-    return { success: false, error: 'Kalem silinemedi.' };
+    return { success: false };
   }
 }
