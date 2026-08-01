@@ -27,9 +27,9 @@ const menuItems = [
   { name: 'Görev & Adımlar', href: '/cift/gorevler', icon: CheckSquare },
   { name: 'Davetli & LCV Takibi', href: '/cift/davetliler', icon: Users },
   { name: 'Anlaşmalı Firmalar', href: '/cift/firmalar', icon: Building2 },
-  { name: 'Dijital Davetiye', href: '/cift/davetiyeler', icon: Mail },
-  { name: 'Mesajlar & Teklifler', href: '/cift/mesajlar', icon: MessageSquare },
-  { name: 'Ödeme Planı', href: '/cift/odemeler', icon: CreditCard },
+  { name: 'Dijital Davetiye', href: '/cift/dijital-davetiye', icon: Mail },
+  { name: 'Mesajlar & Teklifler', href: '/cift/messages', icon: MessageSquare },
+  { name: 'Ödeme Planı', href: '/cift/odeme', icon: CreditCard },
   { name: 'Hesap Ayarları', href: '/cift/ayarlar', icon: Settings },
 ];
 

@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import CoupleSidebar from '@/components/couple/layout/CoupleSidebar';
+import CoupleSidebar from '@/components/couple/layout/CoupleSidebar'; // veya '@/components/couple/CoupleSidebar'
 
 export default function CouplePortalLayout({
   children,
