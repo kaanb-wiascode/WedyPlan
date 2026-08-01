@@ -21,16 +21,16 @@ import {
 } from 'lucide-react';
 
 const menuItems = [
-  { name: 'Genel Bakış', href: '/dashboard', icon: LayoutDashboard },
-  { name: 'AI Düğün Asistanı', href: '/ai-planner', icon: Sparkles, badge: 'AI' },
-  { name: 'Bütçe Planlayıcı', href: '/budget', icon: Wallet },
-  { name: 'Görev & Adımlar', href: '/checklist', icon: CheckSquare },
-  { name: 'Davetli & LCV Takibi', href: '/guests', icon: Users },
-  { name: 'Anlaşmalı Firmalar', href: '/vendors', icon: Building2 },
-  { name: 'Dijital Davetiye', href: '/invitations', icon: Mail },
-  { name: 'Mesajlar & Teklifler', href: '/messages', icon: MessageSquare },
-  { name: 'Ödeme Planı', href: '/payments', icon: CreditCard },
-  { name: 'Hesap Ayarları', href: '/settings', icon: Settings },
+  { name: 'Genel Bakış', href: '/cift/dashboard', icon: LayoutDashboard },
+  { name: 'AI Düğün Asistanı', href: '/cift/ai-asistan', icon: Sparkles, badge: 'AI' },
+  { name: 'Bütçe Planlayıcı', href: '/cift/butce', icon: Wallet },
+  { name: 'Görev & Adımlar', href: '/cift/gorevler', icon: CheckSquare },
+  { name: 'Davetli & LCV Takibi', href: '/cift/davetliler', icon: Users },
+  { name: 'Anlaşmalı Firmalar', href: '/cift/firmalar', icon: Building2 },
+  { name: 'Dijital Davetiye', href: '/cift/davetiyeler', icon: Mail },
+  { name: 'Mesajlar & Teklifler', href: '/cift/mesajlar', icon: MessageSquare },
+  { name: 'Ödeme Planı', href: '/cift/odemeler', icon: CreditCard },
+  { name: 'Hesap Ayarları', href: '/cift/ayarlar', icon: Settings },
 ];
 
 export function CoupleSidebar() {
