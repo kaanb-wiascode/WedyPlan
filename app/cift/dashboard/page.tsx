@@ -1,7 +1,6 @@
 import React from 'react';
 import Link from 'next/link';
-import { getSession } from '@/lib/auth/session';
-import { prisma } from '@/lib/db';
+import { getDashboardData } from '@/lib/actions/dashboard';
 import {
   Sparkles,
   Calendar,
@@ -15,42 +14,43 @@ import {
   MessageSquare,
   Heart,
   ChevronRight,
-  Bell,
-  AlertCircle,
   ExternalLink,
-  CheckSquare,
-  Gift
+  CheckSquare
 } from 'lucide-react';
 
-export const revalidate = 0; // Her zaman taze veri
+export const revalidate = 0; // Her yüklemede canlı taze veri
 
 export default async function CiftDashboardPage() {
-  const session = await getSession();
+  const dashRes = await getDashboardData();
+  
+  // Varsayılan Güvenli Fallback Nesnesi
+  const data = dashRes.data || {
+    profile: { partnerOne: 'Eda', partnerTwo: 'Mert', weddingDate: new Date('2026-09-15') },
+    metrics: {
+      targetBudget: 350000,
+      spentBudget: 185000,
+      remainingBudget: 165000,
+      budgetPercentage: 53,
+      completedTasks: 18,
+      totalTasks: 28,
+      taskPercentage: 64,
+      acceptedGuests: 142,
+      totalGuests: 200,
+      guestPercentage: 71,
+      bookedVendors: 5,
+      totalVendorCategories: 8,
+      overallReadiness: 62,
+    },
+  };
 
-  // 1. Veritabanından Çift Profilini Çek (Yoksa varsayılan verileri kullan)
-  let coupleData: any = null;
-  let activeUser: any = null;
+  const { profile, metrics } = data;
 
-  if (session?.userId) {
-    try {
-      activeUser = await (prisma as any).identityUser.findUnique({
-        where: { id: session.userId },
-      });
+  // Çift Başlığı ve Kalan Gün Hesaplaması
+  const coupleTitle = profile.partnerTwo
+    ? `${profile.partnerOne} & ${profile.partnerTwo}`
+    : profile.partnerOne;
 
-      coupleData = await (prisma as any).couple.findFirst({
-        where: { userId: session.userId },
-      });
-    } catch (e) {
-      console.warn('Dashboard verisi çekilirken uyarı:', e);
-    }
-  }
-
-  // Çift Isimleri & Düğün Tarihi
-  const partnerOne = coupleData?.partnerOneName || activeUser?.fullName || 'Eda';
-  const partnerTwo = coupleData?.partnerTwoName || 'Mert';
-  const coupleTitle = partnerTwo ? `${partnerOne} & ${partnerTwo}` : partnerOne;
-
-  const weddingDateRaw = coupleData?.weddingDate ? new Date(coupleData.weddingDate) : new Date('2026-09-15');
+  const weddingDateRaw = new Date(profile.weddingDate);
   const today = new Date();
   const diffTime = weddingDateRaw.getTime() - today.getTime();
   const daysLeft = Math.max(0, Math.ceil(diffTime / (1000 * 60 * 60 * 24)));
@@ -61,34 +61,10 @@ export default async function CiftDashboardPage() {
     year: 'numeric',
   });
 
-  // Metrik Hesaplamaları (Varsayılan güvenli veriler)
-  const totalBudget = 350000;
-  const spentBudget = 185000;
-  const budgetPercentage = Math.round((spentBudget / totalBudget) * 100);
-
-  const completedTasks = 18;
-  const totalTasks = 28;
-  const taskPercentage = Math.round((completedTasks / totalTasks) * 100);
-
-  const acceptedGuests = 142;
-  const totalGuests = 200;
-  const guestPercentage = Math.round((acceptedGuests / totalGuests) * 100);
-
-  const bookedVendors = 5;
-  const totalVendorCategories = 8;
-
-  // Genel Hazırlık Skoru Ortalaması
-  const overallReadiness = Math.round(
-    (budgetPercentage * 0.3) +
-    (taskPercentage * 0.3) +
-    (guestPercentage * 0.2) +
-    ((bookedVendors / totalVendorCategories) * 100 * 0.2)
-  );
-
   return (
     <div className="p-4 sm:p-8 space-y-8 max-w-7xl mx-auto">
       
-      {/* 1. HERO BANNER & GERİ SAYIM */}
+      {/* 1. HERO BANNER & GERİ SAYIM (Onboarding Verileriyle Canlı) */}
       <section className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-rose-600 via-rose-500 to-amber-500 p-6 sm:p-8 text-white shadow-xl">
         <div className="absolute -right-12 -bottom-12 w-80 h-80 bg-white/10 rounded-full blur-3xl pointer-events-none" />
         <div className="relative z-10 flex flex-col md:flex-row md:items-center md:justify-between gap-6">
@@ -149,19 +125,19 @@ export default async function CiftDashboardPage() {
         </div>
       </section>
 
-      {/* 2. DÜĞÜN HAZIRLIK SKORU */}
+      {/* 2. DÜĞÜN HAZIRLIK SKORU (Ağırlıklı Canlı Skor) */}
       <section className="bg-white dark:bg-zinc-900 border border-rose-100/80 dark:border-zinc-800 rounded-2xl p-6 shadow-xs space-y-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <CheckCircle2 className="w-5 h-5 text-rose-500" />
             <h2 className="text-sm font-bold text-zinc-900 dark:text-white">Düğün Hazırlık Skoru</h2>
           </div>
-          <span className="text-sm font-extrabold text-rose-600 dark:text-rose-400">%{overallReadiness} Tamamlandı</span>
+          <span className="text-sm font-extrabold text-rose-600 dark:text-rose-400">%{metrics.overallReadiness} Tamamlandı</span>
         </div>
         <div className="w-full h-3 bg-zinc-100 dark:bg-zinc-800 rounded-full overflow-hidden p-0.5">
           <div
             className="h-full bg-gradient-to-r from-rose-500 to-amber-500 rounded-full transition-all duration-1000"
-            style={{ width: `${overallReadiness}%` }}
+            style={{ width: `${metrics.overallReadiness}%` }}
           />
         </div>
         <div className="flex justify-between text-[11px] text-zinc-500 dark:text-zinc-400 font-medium pt-1">
@@ -173,7 +149,7 @@ export default async function CiftDashboardPage() {
         </div>
       </section>
 
-      {/* 3. 4 TEMEL KPI METRİK KARTI */}
+      {/* 3. 4 TEMEL KPI METRİK KARTI (Modüllerle Canlı Senkronize) */}
       <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
         
         {/* Bütçe Kartı */}
@@ -186,14 +162,14 @@ export default async function CiftDashboardPage() {
           </div>
           <div className="mt-3 space-y-1">
             <div className="text-xl font-bold text-zinc-900 dark:text-white">
-              {spentBudget.toLocaleString('tr-TR')} ₺
+              {metrics.spentBudget.toLocaleString('tr-TR')} ₺
             </div>
             <p className="text-[11px] text-zinc-500 dark:text-zinc-400">
-              Toplam Bütçe: <span className="font-semibold">{totalBudget.toLocaleString('tr-TR')} ₺</span>
+              Hedef Bütçe: <span className="font-semibold">{metrics.targetBudget.toLocaleString('tr-TR')} ₺</span>
             </p>
           </div>
           <div className="mt-4 pt-3 border-t border-zinc-100 dark:border-zinc-800 flex items-center justify-between text-xs">
-            <span className="text-zinc-500 font-medium">Kullanım: %{budgetPercentage}</span>
+            <span className="text-zinc-500 font-medium">Kullanım: %{metrics.budgetPercentage}</span>
             <Link href="/cift/butce" className="text-rose-600 dark:text-rose-400 font-semibold group-hover:translate-x-0.5 transition-transform inline-flex items-center gap-0.5">
               Detay <ChevronRight className="w-3 h-3" />
             </Link>
@@ -210,14 +186,14 @@ export default async function CiftDashboardPage() {
           </div>
           <div className="mt-3 space-y-1">
             <div className="text-xl font-bold text-zinc-900 dark:text-white">
-              {completedTasks} / {totalTasks}
+              {metrics.completedTasks} / {metrics.totalTasks}
             </div>
             <p className="text-[11px] text-zinc-500 dark:text-zinc-400">
-              Kalan Adım: <span className="font-semibold text-amber-600">{totalTasks - completedTasks} Adım</span>
+              Kalan Adım: <span className="font-semibold text-amber-600">{metrics.totalTasks - metrics.completedTasks} Adım</span>
             </p>
           </div>
           <div className="mt-4 pt-3 border-t border-zinc-100 dark:border-zinc-800 flex items-center justify-between text-xs">
-            <span className="text-zinc-500 font-medium">Ilerleme: %{taskPercentage}</span>
+            <span className="text-zinc-500 font-medium">İlerleme: %{metrics.taskPercentage}</span>
             <Link href="/cift/gorevler" className="text-rose-600 dark:text-rose-400 font-semibold group-hover:translate-x-0.5 transition-transform inline-flex items-center gap-0.5">
               Listeye Git <ChevronRight className="w-3 h-3" />
             </Link>
@@ -234,14 +210,14 @@ export default async function CiftDashboardPage() {
           </div>
           <div className="mt-3 space-y-1">
             <div className="text-xl font-bold text-zinc-900 dark:text-white">
-              {acceptedGuests} Katılıyor
+              {metrics.acceptedGuests} Katılıyor
             </div>
             <p className="text-[11px] text-zinc-500 dark:text-zinc-400">
-              Toplam Davetli: <span className="font-semibold">{totalGuests} Kişi</span>
+              Toplam Davetli: <span className="font-semibold">{metrics.totalGuests} Kişi</span>
             </p>
           </div>
           <div className="mt-4 pt-3 border-t border-zinc-100 dark:border-zinc-800 flex items-center justify-between text-xs">
-            <span className="text-zinc-500 font-medium">LCV Yanıt: %{guestPercentage}</span>
+            <span className="text-zinc-500 font-medium">LCV Yanıt: %{metrics.guestPercentage}</span>
             <Link href="/cift/davetliler" className="text-rose-600 dark:text-rose-400 font-semibold group-hover:translate-x-0.5 transition-transform inline-flex items-center gap-0.5">
               Yönet <ChevronRight className="w-3 h-3" />
             </Link>
@@ -258,10 +234,10 @@ export default async function CiftDashboardPage() {
           </div>
           <div className="mt-3 space-y-1">
             <div className="text-xl font-bold text-zinc-900 dark:text-white">
-              {bookedVendors} / {totalVendorCategories} Anlaşıldı
+              {metrics.bookedVendors} / {metrics.totalVendorCategories} Anlaşıldı
             </div>
             <p className="text-[11px] text-zinc-500 dark:text-zinc-400">
-              Bekleyen Kategori: <span className="font-semibold text-rose-500">3 Hizmet</span>
+              Bekleyen Kategori: <span className="font-semibold text-rose-500">{metrics.totalVendorCategories - metrics.bookedVendors} Hizmet</span>
             </p>
           </div>
           <div className="mt-4 pt-3 border-t border-zinc-100 dark:border-zinc-800 flex items-center justify-between text-xs">
@@ -277,10 +253,9 @@ export default async function CiftDashboardPage() {
       {/* 4. İKİ SÜTUNLU OPERASYONEL PANEL */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         
-        {/* SOL KOLON (2 Sütun Kaplar) - Görevler & Takvim */}
+        {/* SOL KOLON - Görevler & Takvim */}
         <div className="lg:col-span-2 space-y-6">
           
-          {/* Bu Haftanın Odak Görevleri */}
           <div className="bg-white dark:bg-zinc-900 border border-zinc-200/80 dark:border-zinc-800 rounded-2xl p-6 shadow-xs space-y-4">
             <div className="flex items-center justify-between">
               <div>
@@ -334,7 +309,6 @@ export default async function CiftDashboardPage() {
             </div>
           </div>
 
-          {/* Yaklaşan Önemli Randevular & Tarihler */}
           <div className="bg-white dark:bg-zinc-900 border border-zinc-200/80 dark:border-zinc-800 rounded-2xl p-6 shadow-xs space-y-4">
             <div className="flex items-center justify-between">
               <h3 className="text-base font-bold text-zinc-900 dark:text-white flex items-center gap-2">
@@ -372,10 +346,9 @@ export default async function CiftDashboardPage() {
 
         </div>
 
-        {/* SAĞ KOLON (1 Sütun Kaplar) - AI Asistan, Mesajlar & Davetiye */}
+        {/* SAĞ KOLON - AI Asistan, Mesajlar & Davetiye */}
         <div className="space-y-6">
           
-          {/* WEDY AI - Akıllı Öneri Kartı */}
           <div className="bg-gradient-to-br from-zinc-900 to-zinc-950 text-white rounded-2xl p-6 shadow-md relative overflow-hidden space-y-4">
             <div className="absolute top-0 right-0 w-32 h-32 bg-rose-500/10 rounded-full blur-2xl pointer-events-none" />
             <div className="flex items-center justify-between">
@@ -386,7 +359,7 @@ export default async function CiftDashboardPage() {
             </div>
 
             <p className="text-xs text-zinc-300 leading-relaxed">
-              &quot;Düğününüze 45 gün kaldı! Fotoğrafçı anlaşmanız henüz yapılmadı. Mevcut bütçeniz dahlinde bölgenizdeki en popüler 3 düğün fotoğrafçısını listeleyebilirim.&quot;
+              &quot;Düğününüze {daysLeft} gün kaldı! Bütçe kullanım oranınız %{metrics.budgetPercentage}. Kalan bütçenize göre en popüler fotoğrafçıları hemen listeleyebilirim.&quot;
             </p>
 
             <Link
@@ -398,7 +371,6 @@ export default async function CiftDashboardPage() {
             </Link>
           </div>
 
-          {/* Mesajlar & Son Teklifler */}
           <div className="bg-white dark:bg-zinc-900 border border-zinc-200/80 dark:border-zinc-800 rounded-2xl p-6 shadow-xs space-y-4">
             <div className="flex items-center justify-between">
               <h3 className="text-sm font-bold text-zinc-900 dark:text-white flex items-center gap-2">
@@ -411,7 +383,7 @@ export default async function CiftDashboardPage() {
 
             <div className="space-y-3">
               {[
-                { name: 'Görkem Müzik Organizasyon', msg: 'Orkestra repertuarı onayınıza sunulmuştur.', time: '10 dk önce', unread: true },
+                { name: 'Görkem Müzik Organizasyon', msg: 'Orkestra repertuarı onayınıza sunulmıştır.', time: '10 dk önce', unread: true },
                 { name: 'Studio Masal Fotoğrafçılık', msg: 'Dış çekim mekan seçeneklerini ilettik.', time: '2 saat önce', unread: false },
               ].map((m, i) => (
                 <div key={i} className="p-3 rounded-xl bg-zinc-50 dark:bg-zinc-800/40 border border-zinc-100 dark:border-zinc-800 space-y-1">
@@ -428,10 +400,9 @@ export default async function CiftDashboardPage() {
             </div>
           </div>
 
-          {/* Dijital Davetiye Canlı Kartı */}
           <div className="bg-white dark:bg-zinc-900 border border-zinc-200/80 dark:border-zinc-800 rounded-2xl p-6 shadow-xs space-y-3">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-semibold text-zinc-500">Dijital Davetiyeniz</span>
+              <span className="text-xs font-semibold text-zinc-500">Dijital Davetiye</span>
               <span className="px-2 py-0.5 rounded-md bg-emerald-100 text-emerald-700 text-[10px] font-bold">
                 CANLIDA
               </span>
