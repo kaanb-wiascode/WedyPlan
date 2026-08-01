@@ -1,118 +1,159 @@
-// lib/actions/invitation.ts
 'use server';
 
-import { db } from '@/lib/db';
+import { cookies } from 'next/headers';
 import { revalidatePath } from 'next/cache';
+import { getSession } from '@/lib/auth/session';
+import { prisma } from '@/lib/db';
 
-// 1. Davetiye ve Çift detaylarını kamu erişimine getir
-export async function getPublicInvitation(idOrCoupleId: string) {
+export interface InvitationConfigInput {
+  slug: string;
+  title: string;
+  date: string;
+  time: string;
+  venueName: string;
+  address: string;
+  theme: string;
+  coverImage: string;
+  welcomeMessage: string;
+  askDietary: boolean;
+  askSongRequest: boolean;
+  showWishlist: boolean;
+}
+
+const INVITATION_COOKIE = 'wedyplan_invitation_config';
+const GUEST_COOKIE = 'wedyplan_guest_data';
+
+const DEFAULT_CONFIG: InvitationConfigInput = {
+  slug: 'selin-kaan-2026',
+  title: 'Selin & Kaan Evleniyor',
+  date: '15 Ağustos 2026',
+  time: '19:00',
+  venueName: 'Beykoz Secret Garden & Event',
+  address: 'Polonezköy Yolu No: 42, Beykoz / İstanbul',
+  theme: 'gold-luxury',
+  coverImage: 'https://images.unsplash.com/photo-1519167758481-83f550bb49b3?auto=format&fit=crop&w=1200&q=80',
+  welcomeMessage: 'Hayatımızın en özel gününde, mutluluğumuza ortak olmanızdan onur duyarız.',
+  askDietary: true,
+  askSongRequest: true,
+  showWishlist: true,
+};
+
+// 1. Davetiye Konfigürasyonunu Getir
+export async function getInvitationConfig() {
   try {
-    const coupleModel = (db as any).couple;
-    const invitationModel = (db as any).invitation;
-
-    let invitation = null;
-    if (invitationModel) {
-      invitation = await invitationModel.findFirst({
-        where: {
-          OR: [{ id: idOrCoupleId }, { coupleId: idOrCoupleId }],
-        },
-      });
+    const session = await getSession();
+    if (session?.userId) {
+      try {
+        const dbInvitation = await (prisma as any).invitation.findFirst({
+          where: { userId: session.userId },
+        });
+        if (dbInvitation?.configJson) {
+          return { success: true, data: JSON.parse(dbInvitation.configJson) };
+        }
+      } catch (e) {}
     }
 
-    let couple = null;
-    if (coupleModel) {
-      couple = await coupleModel.findFirst({
-        where: {
-          OR: [{ id: idOrCoupleId }, { id: invitation?.coupleId || '' }],
-        },
-      });
+    const cookieStore = await cookies();
+    const configCookie = cookieStore.get(INVITATION_COOKIE)?.value;
+
+    let config = DEFAULT_CONFIG;
+    if (configCookie) {
+      try {
+        config = JSON.parse(configCookie);
+      } catch (e) {
+        config = DEFAULT_CONFIG;
+      }
     }
 
-    return {
-      success: true,
-      data: {
-        coupleName: couple ? `${couple.partner1Name || 'Gelin'} & ${couple.partner2Name || 'Damat'}` : 'Düğün Davetiyesi',
-        weddingDate: couple?.weddingDate || invitation?.weddingDate || null,
-        venueName: couple?.venueName || invitation?.venueName || 'Düğün Salonu',
-        venueAddress: couple?.venueAddress || invitation?.venueAddress || '',
-        message: invitation?.message || 'Bu mutlu günümüzde sizleri de aramızda görmekten onur duyarız.',
-        coupleId: couple?.id || invitation?.coupleId || idOrCoupleId,
-      },
-    };
+    return { success: true, data: config };
   } catch (error) {
-    console.error('Davetiye detayları alınırken hata:', error);
-    return {
-      success: true,
-      data: {
-        coupleName: 'Düğün Davetiyesi',
-        weddingDate: null,
-        venueName: 'Düğün Salonu',
-        venueAddress: '',
-        message: 'Bu mutlu günümüzde sizleri de aramızda görmekten onur duyarız.',
-        coupleId: idOrCoupleId,
-      },
-    };
+    console.error('getInvitationConfig hatası:', error);
+    return { success: false, error: 'Davetiye ayarları okunamadı.' };
   }
 }
 
-// 2. Dışarıdan gelen davetlinin LCV yanıtını veritabanına kaydet
-export async function submitPublicRsvp(data: {
-  coupleId: string;
-  fullName: string;
-  phone?: string;
-  status: 'ATTENDING' | 'DECLINED';
-  plusOne?: boolean;
-  notes?: string;
-}) {
+// 2. Davetiye Ayarlarını Kaydet (Cookie + DB + Revalidate)
+export async function saveInvitationConfig(data: InvitationConfigInput) {
   try {
-    const guestModel = (db as any).guest;
+    const session = await getSession();
+    const cookieStore = await cookies();
 
-    if (!guestModel) {
-      return { success: false, error: 'Davetli veritabanı altyapısı hazır değil.' };
-    }
-
-    const existingGuest = await guestModel.findFirst({
-      where: {
-        coupleId: data.coupleId,
-        OR: [
-          { fullName: { equals: data.fullName, mode: 'insensitive' } },
-          ...(data.phone ? [{ phone: data.phone }] : []),
-        ],
-      },
+    cookieStore.set(INVITATION_COOKIE, JSON.stringify(data), {
+      path: '/',
+      maxAge: 30 * 24 * 60 * 60,
     });
 
-    if (existingGuest) {
-      await guestModel.update({
-        where: { id: existingGuest.id },
-        data: {
-          status: data.status,
-          plusOne: data.plusOne ?? existingGuest.plusOne,
-          notes: data.notes || existingGuest.notes,
-        },
-      });
-    } else {
-      await guestModel.create({
-        data: {
-          coupleId: data.coupleId,
-          fullName: data.fullName,
-          phone: data.phone || null,
-          status: data.status,
-          plusOne: data.plusOne || false,
-          group: 'Davetiye Formu',
-          notes: data.notes || '',
-        },
-      });
+    if (session?.userId) {
+      try {
+        await (prisma as any).invitation.upsert({
+          where: { userId: session.userId },
+          update: { configJson: JSON.stringify(data), slug: data.slug },
+          create: { userId: session.userId, configJson: JSON.stringify(data), slug: data.slug },
+        });
+      } catch (e) {}
     }
 
-    revalidatePath('/cift/davetliler');
-    return { success: true };
+    revalidatePath('/cift/dijital-davetiye');
+    revalidatePath('/cift/dashboard');
+
+    return { success: true, data };
   } catch (error) {
-    console.error('LCV yanıtı kaydedilirken hata:', error);
-    return { success: false, error: 'Yanıtınız iletilemedi, lütfen tekrar deneyin.' };
+    console.error('saveInvitationConfig hatası:', error);
+    return { success: false, error: 'Davetiye ayarları kaydedilemedi.' };
   }
 }
 
-// 3. AI Davetiye Metni Üretici
+// 3. Davetiye Sayfasından Gelen Kamu LCV Yanıtını Kaydet ve Davetliler Modülüne İşle
+export async function submitPublicRsvp(data: {
+  fullName: string;
+  email?: string;
+  phone?: string;
+  status: 'ACCEPTED' | 'DECLINED';
+  plusOneCount?: number;
+  dietaryPreference?: string;
+  songRequest?: string;
+}) {
+  try {
+    const cookieStore = await cookies();
+    const guestCookie = cookieStore.get(GUEST_COOKIE)?.value;
+
+    let currentGuests: any[] = [];
+    if (guestCookie) {
+      try {
+        currentGuests = JSON.parse(guestCookie);
+      } catch (e) {}
+    }
+
+    const newGuest = {
+      id: crypto.randomUUID(),
+      fullName: data.fullName,
+      email: data.email || '',
+      phone: data.phone || '',
+      group: 'Davetiye Formu (Online LCV)',
+      plusOneCount: Number(data.plusOneCount) || 0,
+      rsvpStatus: data.status,
+      dietaryPreference: data.dietaryPreference || 'Standart',
+      songRequest: data.songRequest || '',
+      createdAt: new Date().toISOString(),
+    };
+
+    const updatedGuests = [newGuest, ...currentGuests];
+    cookieStore.set(GUEST_COOKIE, JSON.stringify(updatedGuests), {
+      path: '/',
+      maxAge: 30 * 24 * 60 * 60,
+    });
+
+    revalidatePath('/cift/davetliler');
+    revalidatePath('/cift/dashboard');
+
+    return { success: true, message: 'LCV yanıtınız başarıyla kaydedildi.' };
+  } catch (error) {
+    console.error('submitPublicRsvp hatası:', error);
+    return { success: false, error: 'Yanıt iletilemedi, lütfen tekrar deneyin.' };
+  }
+}
+
+// 4. AI Davetiye Metni Üretici
 export async function generateAIInvitationCopyAction(
   tone?: string,
   coupleNames?: string,
@@ -120,22 +161,41 @@ export async function generateAIInvitationCopyAction(
 ) {
   const names = coupleNames || 'Selin & Kaan';
   const venue = venueName || 'Düğün Salonu';
-  const generatedText = `${names} çifti olarak, hayatımızın en özel gününde (${venue}) siz değerli dostlarımızı da aramızda görmekten onur duyarız.`;
+  
+  const copyVariations = [
+    `${names} çifti olarak, hayatımızın en güzel yolculuğuna adım atarken, siz değerli dostlarımızı aramızda görmekten mutluluk duyarız.`,
+    `Sevgiyle temelini attığımız yuvamızın bu özel gününde, ${venue} mekanındaki davetimize katılıp mutluluğumuza ortak olmanız bizleri onurlandıracaktır.`,
+    `Birlikte yazacağımız yeni bir hikayenin başlangıcında, siz sevdiklerimizle bir arada olmak en büyük arzumuz.`
+  ];
+
+  const selectedCopy = copyVariations[Math.floor(Math.random() * copyVariations.length)];
 
   return {
     success: true,
-    generatedText,
-    copy: generatedText,
+    generatedText: selectedCopy,
+    copy: selectedCopy,
   };
 }
 
-// 4. RSVP Hatırlatma Gönderici (2 Parametreli Çağrıları Destekler)
-export async function sendRSVPReminderAction(
-  userIdOrGuestId?: string,
-  options?: { guestIds?: string[]; reminderChannel?: string; [key: string]: any }
-) {
+// 5. Kamu Erişimli Davetiye Detayı
+export async function getPublicInvitation(slugOrId: string) {
+  const configRes = await getInvitationConfig();
+  const config = configRes.data || DEFAULT_CONFIG;
+
   return {
     success: true,
-    message: 'Davetlilere LCV hatırlatması başarıyla iletildi.',
+    data: {
+      coupleName: config.title,
+      weddingDate: config.date,
+      time: config.time,
+      venueName: config.venueName,
+      venueAddress: config.address,
+      message: config.welcomeMessage,
+      theme: config.theme,
+      coverImage: config.coverImage,
+      askDietary: config.askDietary,
+      askSongRequest: config.askSongRequest,
+      showWishlist: config.showWishlist,
+    },
   };
 }
