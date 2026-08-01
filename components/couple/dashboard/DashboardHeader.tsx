@@ -4,7 +4,12 @@ import React, { useEffect, useState } from 'react';
 import { getCoupleSettings } from '@/lib/actions/settings';
 import { Sparkles, Plus, Calendar } from 'lucide-react';
 
-export function DashboardHeader() {
+interface DashboardHeaderProps {
+  names?: string;
+  location?: string;
+}
+
+export function DashboardHeader({ names, location }: DashboardHeaderProps = {}) {
   const [profile, setProfile] = useState({
     partnerOneName: 'Sadi',
     partnerTwoName: 'Hamiyet',
@@ -48,6 +53,11 @@ export function DashboardHeader() {
 
   const daysLeft = calculateDaysLeft(profile.weddingDate);
 
+  // Canlı profil ismi varsa onu, yoksa gelen props'u kullan
+  const displayName = profile.partnerOneName && profile.partnerTwoName
+    ? `${profile.partnerOneName} & ${profile.partnerTwoName}`
+    : (names || 'Sadi & Hamiyet');
+
   return (
     <div className="p-6 sm:p-8 rounded-3xl bg-gradient-to-r from-rose-500 via-rose-600 to-amber-500 text-white shadow-xl relative overflow-hidden flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
       
@@ -59,7 +69,7 @@ export function DashboardHeader() {
         </div>
 
         <h1 className="text-2xl sm:text-4xl font-black tracking-tight leading-tight">
-          Hoş Geldiniz, {profile.partnerOneName} & {profile.partnerTwoName}! ✨
+          Hoş Geldiniz, {displayName}! ✨
         </h1>
 
         <p className="text-xs sm:text-sm text-white/90 leading-relaxed font-medium">
