@@ -61,17 +61,13 @@ export async function POST(request: NextRequest) {
     };
 
     const userRole = validRoles[role] || 'COUPLE';
+    const portalType = userRole;
 
-    // 7. Portaltype mapping
-    const portalTypeMap: Record<string, 'COUPLE' | 'VENDOR' | 'ADMIN'> = {
-      COUPLE: 'COUPLE',
-      VENDOR: 'VENDOR',
-      ADMIN: 'ADMIN',
-    };
+    // Partner isimlerini ayır
+    const [partnerOne, partnerTwo] = fullName.split(' & ').map((n: string) => n.trim());
 
-    const portalType = portalTypeMap[userRole];
-
-    // 8. User oluştur
+    // 7. TEK SORGULA TEK ATOMİK İŞLEM (Nested Create)
+    // Bu yapı Foreign Key çakışmalarını sıfıra indirir.
     const user = await (prisma as any).identityUser.create({
       data: {
         email: email.toLowerCase(),
@@ -82,40 +78,34 @@ export async function POST(request: NextRequest) {
         securityProfile: {
           create: {},
         },
+        portalProfiles: {
+          create: {
+            portal: portalType,
+            isPrimary: true,
+          },
+        },
+        ...(userRole === 'COUPLE'
+          ? {
+              couples: {
+                create: {
+                  partnerOneName: partnerOne || fullName,
+                  partnerTwoName: partnerTwo || null,
+                  weddingDate: weddingDate ? new Date(weddingDate) : null,
+                },
+              },
+            }
+          : {
+              vendors: {
+                create: {
+                  businessName: fullName,
+                  businessCategory: 'OTHER',
+                },
+              },
+            }),
       },
     });
 
-    // 9. Portal Profile oluştur
-    await (prisma as any).portalProfile.create({
-      data: {
-        userId: user.id,
-        portal: portalType,
-        isPrimary: true,
-      },
-    });
-
-    // 10. Couple veya Vendor profili oluştur
-    if (userRole === 'COUPLE') {
-      const [partnerOne, partnerTwo] = fullName.split(' & ').map((n: string) => n.trim());
-      await (prisma as any).couple.create({
-        data: {
-          userId: user.id,
-          partnerOneName: partnerOne || fullName,
-          partnerTwoName: partnerTwo || null,
-          weddingDate: weddingDate ? new Date(weddingDate) : null, // DateTime dönüşümü
-        },
-      });
-    } else if (userRole === 'VENDOR') {
-      await (prisma as any).vendor.create({
-        data: {
-          userId: user.id,
-          businessName: fullName,
-          businessCategory: 'OTHER',
-        },
-      });
-    }
-
-    // 11. Session oluştur
+    // 8. Session oluştur
     await createSession({
       userId: user.id,
       email: user.email,
@@ -123,7 +113,7 @@ export async function POST(request: NextRequest) {
       portalContext: portalType,
     });
 
-    // 12. Registration audit log (GÜVENLİ HALE GETİRİLDİ: Hata verirse ana kaydı bozmaz)
+    // 9. Registration audit log (Hata verirse kayıt akışını bozmaz)
     try {
       await (prisma as any).auditLog.create({
         data: {
@@ -139,7 +129,7 @@ export async function POST(request: NextRequest) {
         },
       });
     } catch (auditError) {
-      console.warn('Audit log oluşturulamadı (kayıt işlemi etkilenmedi):', auditError);
+      console.warn('Audit log kaydedilemedi (kayıt etkilenmedi):', auditError);
     }
 
     return NextResponse.json(
@@ -159,7 +149,6 @@ export async function POST(request: NextRequest) {
 
     const errorMessage = error?.message || String(error);
 
-    // Duplicate email hatası
     if (errorMessage.includes('Unique constraint failed')) {
       return NextResponse.json(
         { success: false, error: 'Bu e-posta adresi zaten kayıtlıdır.' },
@@ -167,7 +156,6 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // TEŞHİS İÇİN: Gerçek hata detayını istemciye döndür
     return NextResponse.json(
       { success: false, error: `Kayıt Hatası: ${errorMessage}` },
       { status: 500 }
