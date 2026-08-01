@@ -123,10 +123,8 @@ export async function handleSmartAction(threadId: string, messageId: string, act
       try { threads = JSON.parse(messageCookie); } catch (e) {}
     }
 
-    let targetVendorName = '';
     const updatedThreads = threads.map(thread => {
       if (thread.id === threadId) {
-        targetVendorName = thread.vendorName;
         const updatedMessages = thread.messages.map(msg => {
           if (msg.id === messageId && msg.metadata) {
             return { ...msg, metadata: { ...msg.metadata, status: 'APPROVED' } };
@@ -134,7 +132,6 @@ export async function handleSmartAction(threadId: string, messageId: string, act
           return msg;
         });
 
-        // Sisteme otomatik bilgi mesajı düş
         const autoReply = {
           id: crypto.randomUUID(),
           sender: 'COUPLE',
@@ -165,4 +162,44 @@ export async function generateAiReplyAction(intent: 'DISCOUNT' | 'DETAILS' | 'RE
   if (intent === 'REJECT') reply = 'İlginiz ve teklifiniz için çok teşekkür ederiz. Ancak mevcut planlamamız doğrultusunda farklı bir alternatif ile ilerleme kararı aldık. Çalışmalarınızda başarılar dileriz.';
 
   return { success: true, data: reply };
+}
+
+// -------------------------------------------------------------
+// ESKİ VE ALTERNATİF DOSYALAR İÇİN GERİYE DÖNÜK UYUMLULUK EXPORTLARI
+// -------------------------------------------------------------
+
+export async function getConversations() {
+  const res = await getMessageThreads();
+  return { success: res.success, data: res.data || [] };
+}
+
+export async function getConversationMessages(conversationId: string) {
+  const res = await getMessageThreads();
+  if (res.success && res.data) {
+    const thread = res.data.find((t: any) => t.id === conversationId);
+    return { success: true, data: thread?.messages || [] };
+  }
+  return { success: false, data: [] };
+}
+
+export async function sendMessageAction(conversationId: any, content?: any, senderId?: any) {
+  const threadId = typeof conversationId === 'object' ? (conversationId.threadId || conversationId.conversationId) : conversationId;
+  const text = typeof conversationId === 'object' ? conversationId.content : content;
+  return sendMessage({ threadId: threadId || 't1', content: text || '' });
+}
+
+export async function getMessages(conversationId?: string) {
+  return getConversationMessages(conversationId || 't1');
+}
+
+export async function markAsRead(conversationId?: string) {
+  return { success: true };
+}
+
+export async function markConversationAsRead(conversationId?: string) {
+  return { success: true };
+}
+
+export async function deleteConversation(conversationId?: string) {
+  return { success: true };
 }
