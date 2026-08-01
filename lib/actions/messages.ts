@@ -1,130 +1,168 @@
-// lib/actions/messages.ts
 'use server';
 
-import { db } from '@/lib/db';
-import { getActiveCoupleId } from '@/lib/auth/session';
+import { cookies } from 'next/headers';
 import { revalidatePath } from 'next/cache';
+import { getSession } from '@/lib/auth/session';
 
-// 1. Kullanıcının aktif sohbet/konuşma listesini getir
-export async function getConversations(userIdOrCoupleId?: string) {
-  try {
-    const activeCoupleId = await getActiveCoupleId(userIdOrCoupleId);
-    const conversationModel =
-      (db as any).conversation || (db as any).chat || (db as any).messageThread;
-
-    if (!conversationModel) {
-      return { success: false, error: 'Sohbet veritabanı modeli bulunamadı.' };
-    }
-
-    const conversations = await conversationModel.findMany({
-      where: {
-        OR: [
-          { coupleId: activeCoupleId },
-          { userId: activeCoupleId },
-          { participantId: activeCoupleId },
-        ],
-      },
-      orderBy: { updatedAt: 'desc' },
-    });
-
-    return {
-      success: true,
-      data: conversations,
-    };
-  } catch (error) {
-    console.error('Sohbetler çekilirken hata:', error);
-    return { success: false, error: 'Sohbet listesi yüklenemedi.' };
-  }
-}
-
-// 2. Belirli bir sohbetin mesaj geçmişini getir
-export async function getConversationMessages(conversationId: string) {
-  try {
-    const messageModel = (db as any).message || (db as any).chatMessage;
-
-    if (!messageModel) {
-      return { success: false, error: 'Mesaj veritabanı modeli bulunamadı.' };
-    }
-
-    const messages = await messageModel.findMany({
-      where: { conversationId },
-      orderBy: { createdAt: 'asc' },
-    });
-
-    return {
-      success: true,
-      data: messages,
-    };
-  } catch (error) {
-    console.error('Mesajlar çekilirken hata:', error);
-    return { success: false, error: 'Mesaj geçmişi yüklenemedi.' };
-  }
-}
-
-// 3. Yeni mesaj gönder
-export async function sendMessage(data: {
-  conversationId: string;
-  senderId?: string;
-  senderName?: string;
+export interface MessageInput {
+  threadId: string;
   content: string;
-}) {
+  type?: 'TEXT' | 'QUOTE_ACCEPT' | 'MEETING_CONFIRM';
+}
+
+const MESSAGE_COOKIE = 'wedyplan_messages_data';
+
+// Zengin Mock Verisi: Metin, Teklif, Sözleşme ve Randevu tiplerini içerir
+const INITIAL_THREADS = [
+  {
+    id: 't1',
+    vendorId: 'v1',
+    vendorName: 'Kır Bahçesi Davet & Tesisleri',
+    category: 'Mekan & Yeme-İçme',
+    unreadCount: 1,
+    lastMessageTime: '10:30',
+    messages: [
+      { id: 'm1', sender: 'VENDOR', content: 'Merhaba, mekanımızı ziyaretiniz için teşekkür ederiz. İhtiyaçlarınıza uygun fiyat teklifimizi iletiyoruz.', timestamp: '10:28', type: 'TEXT' },
+      { id: 'm2', sender: 'VENDOR', content: '200 Kişilik Kır Düğünü Paketi', timestamp: '10:30', type: 'QUOTE', metadata: { amount: 180000, validUntil: '2026-09-01', status: 'PENDING' } }
+    ]
+  },
+  {
+    id: 't2',
+    vendorId: 'v2',
+    vendorName: 'Studio Masal Fotoğrafçılık',
+    category: 'Fotoğraf & Video',
+    unreadCount: 2,
+    lastMessageTime: 'Dün',
+    messages: [
+      { id: 'm3', sender: 'COUPLE', content: 'Dış çekim için tarihleri ne zaman netleştirebiliriz?', timestamp: 'Pzt 14:00', type: 'TEXT' },
+      { id: 'm4', sender: 'VENDOR', content: 'Ön görüşme ve konsept belirleme için stüdyomuza bekleriz.', timestamp: 'Dün 16:00', type: 'TEXT' },
+      { id: 'm5', sender: 'VENDOR', content: 'Konsept Görüşmesi & Kahve', timestamp: 'Dün 16:05', type: 'MEETING', metadata: { date: '25 Ağustos 2026', time: '14:30', location: 'Nişantaşı Stüdyo', status: 'PENDING' } }
+    ]
+  },
+  {
+    id: 't3',
+    vendorId: 'v3',
+    vendorName: 'Görkem Müzik & Orkestra',
+    category: 'Müzik & Eğlence',
+    unreadCount: 0,
+    lastMessageTime: 'Pzt',
+    messages: [
+      { id: 'm6', sender: 'VENDOR', content: 'Repertuar listesini onayınıza sunduk. Aşağıdaki sözleşmeyi dijital olarak onaylayabilirsiniz.', timestamp: 'Pzt 09:00', type: 'TEXT' },
+      { id: 'm7', sender: 'VENDOR', content: 'Hizmet Sözleşmesi - v1.pdf', timestamp: 'Pzt 09:05', type: 'CONTRACT', metadata: { documentUrl: '#', status: 'APPROVED' } },
+      { id: 'm8', sender: 'COUPLE', content: 'Sözleşme tarafımızca onaylanmıştır, teşekkürler.', timestamp: 'Pzt 11:00', type: 'TEXT' }
+    ]
+  }
+];
+
+// 1. Tüm Mesajları ve Threadleri Getir
+export async function getMessageThreads() {
   try {
-    const activeSenderId = await getActiveCoupleId(data.senderId);
-    const messageModel = (db as any).message || (db as any).chatMessage;
-    const conversationModel =
-      (db as any).conversation || (db as any).chat || (db as any).messageThread;
+    const session = await getSession();
+    if (!session?.userId) return { success: false, error: 'Oturum bulunamadı.' };
 
-    if (!messageModel) {
-      return { success: false, error: 'Mesaj veritabanı modeli bulunamadı.' };
+    const cookieStore = await cookies();
+    const messageCookie = cookieStore.get(MESSAGE_COOKIE)?.value;
+
+    let threads = INITIAL_THREADS;
+    if (messageCookie) {
+      try { threads = JSON.parse(messageCookie); } catch (e) {}
     }
 
-    const newMessage = await messageModel.create({
-      data: {
-        conversationId: data.conversationId,
-        senderId: activeSenderId,
-        senderName: data.senderName || 'Kullanıcı',
-        content: data.content,
-        isRead: false,
-      },
-    });
-
-    if (conversationModel) {
-      await conversationModel.update({
-        where: { id: data.conversationId },
-        data: {
-          lastMessage: data.content,
-          updatedAt: new Date(),
-        },
-      });
-    }
-
-    revalidatePath('/cift/messages');
-    revalidatePath('/satici/messages');
-
-    return {
-      success: true,
-      data: newMessage,
-    };
+    return { success: true, data: threads };
   } catch (error) {
-    console.error('Mesaj gönderilirken hata:', error);
-    return { success: false, error: 'Mesaj iletilemedi.' };
+    return { success: false, error: 'Mesajlar yüklenemedi.' };
   }
 }
 
-// 4. ChatThread Bileşeni İçin Alias (Tekli veya Çift Parametreli Çağrıları Destekler)
-export async function sendMessageAction(
-  userIdOrData: any,
-  options?: { conversationId?: string; content?: string; senderName?: string; [key: string]: any }
-) {
-  const conversationId = options?.conversationId || userIdOrData?.conversationId || 'demo-chat';
-  const content = options?.content || userIdOrData?.content || userIdOrData?.message || '';
-  const senderId = typeof userIdOrData === 'string' ? userIdOrData : userIdOrData?.senderId;
-  const senderName = options?.senderName || userIdOrData?.senderName || 'Çift';
+// 2. Mesaj Gönder
+export async function sendMessage(data: MessageInput) {
+  try {
+    const cookieStore = await cookies();
+    const messageCookie = cookieStore.get(MESSAGE_COOKIE)?.value;
 
-  return sendMessage({
-    conversationId,
-    senderId,
-    senderName,
-    content,
-  });
+    let threads = INITIAL_THREADS;
+    if (messageCookie) {
+      try { threads = JSON.parse(messageCookie); } catch (e) {}
+    }
+
+    const updatedThreads = threads.map(thread => {
+      if (thread.id === data.threadId) {
+        const newMessage = {
+          id: crypto.randomUUID(),
+          sender: 'COUPLE',
+          content: data.content,
+          timestamp: new Date().toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' }),
+          type: data.type || 'TEXT',
+        };
+        return {
+          ...thread,
+          messages: [...thread.messages, newMessage],
+          lastMessageTime: newMessage.timestamp,
+        };
+      }
+      return thread;
+    });
+
+    cookieStore.set(MESSAGE_COOKIE, JSON.stringify(updatedThreads), { path: '/', maxAge: 30 * 24 * 60 * 60 });
+    revalidatePath('/cift/mesajlar');
+
+    return { success: true, data: updatedThreads };
+  } catch (error) {
+    return { success: false };
+  }
+}
+
+// 3. Akıllı Kart Aksiyonu (Teklif Onaylama, Randevu Onaylama)
+export async function handleSmartAction(threadId: string, messageId: string, action: 'ACCEPT_QUOTE' | 'CONFIRM_MEETING') {
+  try {
+    const cookieStore = await cookies();
+    const messageCookie = cookieStore.get(MESSAGE_COOKIE)?.value;
+
+    let threads = INITIAL_THREADS;
+    if (messageCookie) {
+      try { threads = JSON.parse(messageCookie); } catch (e) {}
+    }
+
+    let targetVendorName = '';
+    const updatedThreads = threads.map(thread => {
+      if (thread.id === threadId) {
+        targetVendorName = thread.vendorName;
+        const updatedMessages = thread.messages.map(msg => {
+          if (msg.id === messageId && msg.metadata) {
+            return { ...msg, metadata: { ...msg.metadata, status: 'APPROVED' } };
+          }
+          return msg;
+        });
+
+        // Sisteme otomatik bilgi mesajı düş
+        const autoReply = {
+          id: crypto.randomUUID(),
+          sender: 'COUPLE',
+          content: action === 'ACCEPT_QUOTE' ? 'Teklifinizi onayladık. Bütçe planlayıcımıza işlenmiştir.' : 'Randevu saatini takvimimize ekledik, onaylıyoruz.',
+          timestamp: new Date().toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' }),
+          type: 'TEXT'
+        };
+
+        return { ...thread, messages: [...updatedMessages, autoReply], unreadCount: 0 };
+      }
+      return thread;
+    });
+
+    cookieStore.set(MESSAGE_COOKIE, JSON.stringify(updatedThreads), { path: '/', maxAge: 30 * 24 * 60 * 60 });
+    revalidatePath('/cift/mesajlar');
+
+    return { success: true, data: updatedThreads, message: action === 'ACCEPT_QUOTE' ? 'Teklif onaylandı ve ilgili modüllere aktarıldı.' : 'Randevu onaylandı.' };
+  } catch (error) {
+    return { success: false };
+  }
+}
+
+// 4. AI Yanıt Üretici
+export async function generateAiReplyAction(intent: 'DISCOUNT' | 'DETAILS' | 'REJECT') {
+  let reply = '';
+  if (intent === 'DISCOUNT') reply = 'İlettiğiniz teklif için teşekkür ederiz. Bütçemizi optimize etmeye çalışıyoruz, bu paket üzerinde bir revizyon veya indirim yapma şansınız olabilir mi?';
+  if (intent === 'DETAILS') reply = 'Paylaştığınız bilgiler için teşekkürler. Süreçle ilgili daha detaylı bir döküman veya hizmet kapsam listesi iletebilir misiniz?';
+  if (intent === 'REJECT') reply = 'İlginiz ve teklifiniz için çok teşekkür ederiz. Ancak mevcut planlamamız doğrultusunda farklı bir alternatif ile ilerleme kararı aldık. Çalışmalarınızda başarılar dileriz.';
+
+  return { success: true, data: reply };
 }
