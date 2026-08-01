@@ -1,5 +1,6 @@
 import { redirect } from 'next/navigation';
 
 export default function CiftRedirectPage() {
-  redirect('/dashboard');
+  // Kök dizindeki /dashboard yerine /cift/dashboard adresine yönlendiriyoruz
+  redirect('/cift/dashboard');
 }
