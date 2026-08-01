@@ -1,7 +1,8 @@
 'use client';
 
 import React from 'react';
-import { Sparkles, ShieldCheck } from 'lucide-react';
+import { Sparkles, Calendar, ShieldCheck, Clock } from 'lucide-react';
+import GlassCard from '@/components/shared/ui/GlassCard';
 
 interface StickyBookingCardProps {
   startingPrice: number;
@@ -10,49 +11,54 @@ interface StickyBookingCardProps {
 
 export const StickyBookingCard: React.FC<StickyBookingCardProps> = ({ startingPrice, onOpenOfferModal }) => {
   return (
-    <>
-      {/* Desktop Floating Card */}
-      <div className="hidden lg:block sticky top-24 bg-white/60 backdrop-blur-3xl border border-white p-6 rounded-[32px] shadow-xl space-y-6">
-        <div className="space-y-1">
-          <span className="text-[10px] font-bold text-[#86868B] uppercase tracking-wider block">Başlangıç Paketi</span>
-          <div className="font-serif font-bold text-[32px] text-[#1D1D1F]">
-            {startingPrice.toLocaleString('tr-TR')} ₺
-          </div>
-          <span className="text-[11px] font-semibold text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200 inline-block">
-            ✓ Şeffaf Bütçe Garantisi
+    <div className="sticky top-32 z-40">
+      <GlassCard className="p-6 md:p-8 border-white/60 bg-white/70 shadow-2xl" hoverEffect>
+        
+        {/* Fiyat Alanı */}
+        <div className="mb-6 pb-6 border-b border-gray-200/60">
+          <span className="text-[12px] font-bold text-gray-500 uppercase tracking-wider block mb-1">
+            Başlangıç Fiyatı
           </span>
+          <div className="flex items-baseline gap-1">
+            <span className="text-4xl font-black text-gray-900 tracking-tight">
+              {startingPrice ? startingPrice.toLocaleString('tr-TR') : 'Fiyat Sorun'}
+            </span>
+            {startingPrice && <span className="text-xl font-medium text-gray-500">₺</span>}
+          </div>
         </div>
 
+        {/* Aksiyon Butonu */}
         <button
           onClick={onOpenOfferModal}
-          className="w-full bg-[#1D1D1F] hover:bg-black text-white text-[13px] font-bold py-4 rounded-full transition shadow-md cursor-pointer flex items-center justify-center gap-2"
+          className="group w-full bg-[#E6007E] hover:bg-[#c5006b] text-white text-[15px] font-bold px-6 py-4 rounded-xl transition-all shadow-lg hover:shadow-xl hover:-translate-y-0.5 flex items-center justify-center gap-2 mb-6"
         >
-          <Sparkles className="w-4 h-4 text-[#D4AF37]" />
-          <span>Ücretsiz Teklif İste</span>
+          <Sparkles className="w-5 h-5 text-white/90 group-hover:animate-pulse" /> 
+          Ücretsiz Fiyat Teklifi Al
         </button>
 
-        <div className="text-[11px] text-[#6E6E73] text-center space-y-1">
-          <p>⚡ WedyAI ile ortalama dönüş süresi 15 dakika</p>
-          <p className="flex items-center justify-center gap-1 text-emerald-700 font-bold">
-            <ShieldCheck className="w-3.5 h-3.5" /> E-İmza Sözleşme Koruması
-          </p>
+        {/* Güven Verici Özellikler (Trust Badges) */}
+        <div className="space-y-4">
+          <div className="flex items-center gap-3 text-sm text-gray-700">
+            <div className="p-2 bg-emerald-50 rounded-lg">
+              <ShieldCheck className="w-4 h-4 text-emerald-600" />
+            </div>
+            <span className="font-medium">WedyPlan Onaylı Firma</span>
+          </div>
+          <div className="flex items-center gap-3 text-sm text-gray-700">
+            <div className="p-2 bg-blue-50 rounded-lg">
+              <Clock className="w-4 h-4 text-blue-600" />
+            </div>
+            <span className="font-medium">Ort. 2 saat içinde yanıtlar</span>
+          </div>
+          <div className="flex items-center gap-3 text-sm text-gray-700">
+            <div className="p-2 bg-purple-50 rounded-lg">
+              <Calendar className="w-4 h-4 text-purple-600" />
+            </div>
+            <span className="font-medium">2027 Takvimi Açık</span>
+          </div>
         </div>
-      </div>
 
-      {/* Mobile Bottom Fixed Bar */}
-      <div className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/90 backdrop-blur-2xl border-t border-white/80 p-4 px-6 flex items-center justify-between shadow-lg">
-        <div>
-          <span className="text-[10px] text-[#86868B] uppercase font-bold block">Başlangıç</span>
-          <span className="font-serif font-bold text-[18px] text-[#1D1D1F]">{startingPrice.toLocaleString('tr-TR')} ₺</span>
-        </div>
-
-        <button
-          onClick={onOpenOfferModal}
-          className="bg-[#1D1D1F] text-white text-[12px] font-bold px-6 py-3 rounded-full flex items-center gap-1.5 cursor-pointer"
-        >
-          <Sparkles className="w-3.5 h-3.5 text-[#D4AF37]" /> Teklif Al
-        </button>
-      </div>
-    </>
+      </GlassCard>
+    </div>
   );
 };

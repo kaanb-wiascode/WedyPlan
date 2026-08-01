@@ -1,42 +1,75 @@
 'use client';
 
 import React from 'react';
+import Image from 'next/image';
 import Link from 'next/link';
-import { Star, ArrowRight } from 'lucide-react';
+import { Users, Star, MapPin } from 'lucide-react';
+import GlassCard from '@/components/shared/ui/GlassCard';
 
-interface SimilarVendorsGridProps {
-  similarVendors: {
-    id: string;
-    name: string;
-    category: string;
-    city: string;
-    startingPrice: number;
-    rating: number;
-    imageUrl: string;
-  }[];
+interface SimilarVendor {
+  id: string;
+  name?: string;
+  companyName?: string;
+  category: string;
+  rating: number;
+  location?: string;
+  city?: string; // TS Hatasını çözen ekleme
+  district?: string;
+  imageUrl?: string;
+  coverImages?: string[];
 }
 
-export const SimilarVendorsGrid: React.FC<SimilarVendorsGridProps> = ({ similarVendors }) => {
-  if (similarVendors.length === 0) return null;
+interface SimilarVendorsGridProps {
+  similarVendors?: SimilarVendor[];
+}
+
+export const SimilarVendorsGrid: React.FC<SimilarVendorsGridProps> = ({ similarVendors = [] }) => {
+  if (!similarVendors.length) return null;
 
   return (
-    <div className="space-y-4">
-      <h3 className="font-serif font-bold text-[22px] text-[#1D1D1F]">Benzer Müsait Mekanlar</h3>
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        {similarVendors.map((vendor) => (
-          <div key={vendor.id} className="p-4 bg-white/60 backdrop-blur-2xl rounded-[28px] border border-white flex items-center gap-4">
-            <img src={vendor.imageUrl} alt={vendor.name} className="w-20 h-20 rounded-[20px] object-cover shrink-0" />
-            <div className="space-y-1 flex-1 overflow-hidden">
-              <h4 className="font-bold text-[14px] text-[#1D1D1F] truncate">{vendor.name}</h4>
-              <span className="text-[11px] text-[#6E6E73] block">{vendor.city} • {vendor.category}</span>
-              <span className="font-serif font-bold text-[13px] text-[#1D1D1F] block">{vendor.startingPrice.toLocaleString('tr-TR')} ₺</span>
-            </div>
-            <Link href={`/firmalar/${vendor.id}`} className="p-2.5 bg-[#1D1D1F] text-white rounded-full hover:bg-black transition">
-              <ArrowRight className="w-4 h-4" />
-            </Link>
-          </div>
-        ))}
+    <section className="space-y-6 pt-8 border-t border-gray-200/50">
+      <div className="flex items-center gap-2 px-2">
+        <Users className="w-6 h-6 text-gray-900" />
+        <h2 className="text-2xl font-bold text-gray-900 tracking-tight">Benzer Firmalar</h2>
       </div>
-    </div>
+
+      <div className="flex overflow-x-auto gap-4 pb-4 snap-x snap-mandatory hide-scrollbar">
+        {similarVendors.map((vendor, idx) => {
+          const displayName = vendor.name || vendor.companyName;
+          const displayImage = vendor.imageUrl || (vendor.coverImages && vendor.coverImages[0]) || '/assets/placeholder-vendor.jpg';
+          const displayLocation = vendor.location || [vendor.district, vendor.city].filter(Boolean).join(', ');
+
+          return (
+            <Link key={vendor.id || idx} href={`/firmalar/${vendor.id || idx}`} className="snap-start shrink-0 w-[260px]">
+              <GlassCard hoverEffect className="h-full border-white/60 p-3">
+                <div className="relative h-36 w-full rounded-xl overflow-hidden mb-4">
+                  <Image 
+                    src={displayImage} 
+                    alt={displayName || 'Firma'} 
+                    fill 
+                    className="object-cover"
+                  />
+                  <div className="absolute top-2 right-2 bg-white/90 backdrop-blur-md px-2 py-1 rounded-lg flex items-center gap-1">
+                    <Star className="w-3 h-3 text-yellow-500 fill-current" />
+                    <span className="text-[11px] font-bold">{vendor.rating}</span>
+                  </div>
+                </div>
+                
+                <div className="px-1">
+                  <span className="text-[10px] font-bold text-[#E6007E] uppercase tracking-wider block mb-1">
+                    {vendor.category}
+                  </span>
+                  <h3 className="font-bold text-gray-900 mb-1 truncate">{displayName}</h3>
+                  <div className="flex items-center text-[12px] text-gray-500">
+                    <MapPin className="w-3 h-3 mr-1 shrink-0" />
+                    <span className="truncate">{displayLocation}</span>
+                  </div>
+                </div>
+              </GlassCard>
+            </Link>
+          );
+        })}
+      </div>
+    </section>
   );
 };

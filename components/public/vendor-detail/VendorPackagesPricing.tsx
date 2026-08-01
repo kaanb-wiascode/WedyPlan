@@ -1,8 +1,9 @@
 'use client';
 
 import React from 'react';
-import { Check, Sparkles } from 'lucide-react';
+import { Check, Sparkles, Star } from 'lucide-react';
 import { VendorPackage } from '@/types/vendor-detail-page';
+import GlassCard from '@/components/shared/ui/GlassCard';
 
 interface VendorPackagesPricingProps {
   packages: VendorPackage[];
@@ -11,59 +12,73 @@ interface VendorPackagesPricingProps {
 
 export const VendorPackagesPricing: React.FC<VendorPackagesPricingProps> = ({ packages, onOpenOfferModal }) => {
   return (
-    <div className="space-y-6">
-      <div>
-        <span className="text-[11px] font-bold text-[#E6007E] uppercase tracking-widest block mb-1">Şeffaf Bütçe</span>
-        <h2 className="font-serif font-semibold text-[28px] text-[#1D1D1F]">Düğün Paketleri & Seçenekler</h2>
+    <section className="space-y-6">
+      {/* Bölüm Başlığı */}
+      <div className="flex flex-col gap-1 px-2">
+        <span className="text-[11px] font-bold text-[#E6007E] uppercase tracking-widest flex items-center gap-1">
+          <Sparkles className="w-3.5 h-3.5" /> Şeffaf Bütçe
+        </span>
+        <h2 className="text-2xl font-bold text-gray-900 tracking-tight">Düğün Paketleri & Seçenekler</h2>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      {/* Paketler Grid (Bento Style) */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {packages.map((pkg: VendorPackage) => (
-          <div
+          <GlassCard
             key={pkg.id}
-            className={`bg-white/60 backdrop-blur-3xl p-8 rounded-[32px] border space-y-6 flex flex-col justify-between transition-all ${
-              pkg.isPopular ? 'border-[#D4AF37] shadow-xl ring-2 ring-amber-100 bg-amber-50/10' : 'border-white'
+            hoverEffect
+            className={`flex flex-col h-full p-6 md:p-8 ${
+              pkg.isPopular 
+                ? 'border-[#D4AF37]/50 ring-1 ring-[#D4AF37]/30 bg-gradient-to-br from-amber-50/40 to-transparent' 
+                : 'border-white/40'
             }`}
           >
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <h3 className="font-bold text-[22px] text-[#1D1D1F]">{pkg.name}</h3>
-                {pkg.isPopular && (
-                  <span className="text-[10px] font-bold bg-[#D4AF37] text-white px-3 py-1 rounded-full">
-                    🌟 En Çok Tercih Edilen
-                  </span>
-                )}
+            {/* Popüler Paket Etiketi */}
+            {pkg.isPopular && (
+              <div className="absolute top-0 right-0 bg-gradient-to-r from-[#D4AF37] to-amber-500 text-white text-[10px] font-bold px-4 py-1.5 rounded-bl-2xl rounded-tr-2xl shadow-md flex items-center gap-1">
+                <Star className="w-3 h-3 fill-current" /> EN ÇOK TERCİH EDİLEN
               </div>
-              <p className="text-[13px] text-[#6E6E73]">{pkg.tagline}</p>
+            )}
 
-              <div className="space-y-2 border-t border-black/5 pt-4">
+            <div className="flex-1 space-y-5">
+              <div>
+                <h3 className="font-bold text-2xl text-gray-900 mb-1">{pkg.name}</h3>
+                <p className="text-[14px] text-gray-600 font-light">{pkg.tagline}</p>
+              </div>
+
+              {/* Özellikler Listesi */}
+              <div className="space-y-3 border-t border-gray-200/50 pt-5">
                 {pkg.features.map((feat: string, idx: number) => (
-                  <div key={idx} className="flex items-center gap-2.5 text-[13px] text-[#1D1D1F]">
-                    <Check className="w-4 h-4 text-emerald-600 shrink-0" />
-                    <span>{feat}</span>
+                  <div key={idx} className="flex items-start gap-2.5">
+                    <div className="p-0.5 rounded-full bg-emerald-100/50 mt-0.5">
+                      <Check className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                    </div>
+                    <span className="text-[14px] text-gray-800 leading-snug">{feat}</span>
                   </div>
                 ))}
               </div>
             </div>
 
-            <div className="pt-6 border-t border-black/5 flex items-center justify-between">
+            {/* Fiyat ve Aksiyon Alanı */}
+            <div className="mt-8 pt-5 border-t border-gray-200/50 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div>
-                <span className="text-[10px] text-[#86868B] block uppercase font-bold">Paket Tutarı</span>
-                <span className="font-serif font-bold text-[24px] text-[#1D1D1F]">
-                  {pkg.price.toLocaleString('tr-TR')} ₺
+                <span className="text-[11px] text-gray-500 block uppercase font-bold tracking-wider mb-0.5">Paket Tutarı</span>
+                <span className="font-bold text-3xl text-gray-900 tracking-tight">
+                  {pkg.price.toLocaleString('tr-TR')} <span className="text-xl text-gray-500 font-medium">₺</span>
                 </span>
               </div>
 
               <button
                 onClick={onOpenOfferModal}
-                className="bg-[#1D1D1F] hover:bg-black text-white text-[12px] font-bold px-6 py-3 rounded-full transition cursor-pointer flex items-center gap-1.5"
+                className="group w-full sm:w-auto bg-gray-900 hover:bg-black text-white text-[13px] font-bold px-6 py-3.5 rounded-xl transition-all shadow-lg hover:shadow-xl flex items-center justify-center gap-2"
               >
-                <Sparkles className="w-3.5 h-3.5 text-[#D4AF37]" /> Teklif İsteyin
+                <Sparkles className="w-4 h-4 text-[#D4AF37] group-hover:animate-pulse" /> 
+                Teklif İsteyin
               </button>
             </div>
-          </div>
+          </GlassCard>
         ))}
       </div>
-    </div>
+    </section>
   );
 };

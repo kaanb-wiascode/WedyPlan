@@ -2,8 +2,7 @@
 
 import React, { useState } from 'react';
 import { useParams } from 'next/navigation';
-import { PublicNavbar } from '@/components/public/PublicNavbar';
-import { PublicFooter } from '@/components/public/homepage/PublicFooter';
+import PublicPageLayout from '@/components/public/PublicPageLayout';
 import { VendorDetailHero } from '@/components/public/vendor-detail/VendorDetailHero';
 import { VendorGalleryGrid } from '@/components/public/vendor-detail/VendorGalleryGrid';
 import { VendorAboutSection } from '@/components/public/vendor-detail/VendorAboutSection';
@@ -48,12 +47,10 @@ export default function VendorDetailPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#FAF8F5] text-[#1D1D1F] selection:bg-[#E6007E] selection:text-white pb-24 lg:pb-12">
+    <PublicPageLayout>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
 
-      <PublicNavbar />
-
-      <main className="max-w-7xl mx-auto px-4 sm:px-8 pt-28 space-y-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-8 space-y-8">
         {/* 1. Hero */}
         <VendorDetailHero vendor={vendor} onOpenOfferModal={() => setShowOfferModal(true)} />
 
@@ -106,14 +103,12 @@ export default function VendorDetailPage() {
           </div>
 
         </div>
-      </main>
+      </div>
 
       {/* 15. Quick Offer Modal */}
       {showOfferModal && (
         <QuickOfferModal companyName={vendor.companyName} onClose={() => setShowOfferModal(false)} />
       )}
-
-      <PublicFooter />
-    </div>
+    </PublicPageLayout>
   );
 }

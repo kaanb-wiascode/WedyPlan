@@ -13,10 +13,12 @@
     "db:seed": "prisma db seed"
   },
   "dependencies": {
+    "@ai-sdk/google": "^4.0.30",
     "@prisma/adapter-pg": "^7.9.1",
     "@prisma/client": "^7.9.1",
     "@supabase/supabase-js": "^2.111.0",
     "@vercel/analytics": "^2.0.1",
+    "ai": "^7.0.45",
     "argon2": "^0.45.1",
     "bcryptjs": "^3.0.3",
     "dotenv": "^17.4.2",

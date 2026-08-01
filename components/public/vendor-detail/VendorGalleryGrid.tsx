@@ -1,44 +1,58 @@
 'use client';
 
 import React from 'react';
-import { Image as ImageIcon, Video, Eye } from 'lucide-react';
+import Image from 'next/image';
+import { ImageIcon } from 'lucide-react';
+import GlassCard from '@/components/shared/ui/GlassCard';
 
 interface VendorGalleryGridProps {
-  coverImages: string[];
+  coverImages?: string[];
 }
 
-export const VendorGalleryGrid: React.FC<VendorGalleryGridProps> = ({ coverImages }) => {
-  return (
-    <div className="relative rounded-[36px] overflow-hidden bg-[#1D1D1F] border border-white/60 shadow-lg">
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-2 p-2 h-[420px] md:h-[480px]">
-        {/* Main Photo */}
-        <div className="md:col-span-2 h-full relative group overflow-hidden rounded-[28px]">
-          <img
-            src={coverImages[0]}
-            alt="Mekan Ana Görsel"
-            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
-          />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
-        </div>
+export const VendorGalleryGrid: React.FC<VendorGalleryGridProps> = ({ coverImages = [] }) => {
+  if (!coverImages.length) return null;
 
-        {/* Secondary Grid */}
-        <div className="hidden md:grid md:col-span-2 grid-cols-2 gap-2 h-full">
-          {coverImages.slice(1, 4).map((imgUrl: string, idx: number) => (
-            <div key={idx} className="relative group overflow-hidden rounded-[24px] h-full">
-              <img
-                src={imgUrl}
-                alt={`Mekan Görsel ${idx + 2}`}
-                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
-              />
-            </div>
-          ))}
+  // Sadece ilk 5 görseli gösterelim ki bento grid estetiği bozulmasın
+  const displayImages = coverImages.slice(0, 5);
+
+  return (
+    <section className="space-y-6">
+      <div className="flex items-center justify-between px-2">
+        <div className="flex items-center gap-2">
+          <ImageIcon className="w-6 h-6 text-gray-900" />
+          <h2 className="text-2xl font-bold text-gray-900 tracking-tight">Galeri</h2>
         </div>
+        {coverImages.length > 5 && (
+          <button className="text-sm font-semibold text-[#E6007E] hover:underline">
+            Tümünü Gör ({coverImages.length})
+          </button>
+        )}
       </div>
 
-      <button className="absolute bottom-6 right-6 bg-white/90 backdrop-blur-md px-4 py-2 rounded-full text-[12px] font-bold text-[#1D1D1F] border border-white flex items-center gap-2 hover:bg-white transition cursor-pointer shadow-md">
-        <ImageIcon className="w-4 h-4 text-[#E6007E]" />
-        <span>Tüm Fotoğrafları Gör ({coverImages.length})</span>
-      </button>
-    </div>
+      <GlassCard className="p-2 md:p-3 border-white/40">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-3 h-[400px] md:h-[500px]">
+          {displayImages.map((src, idx) => {
+            // Bento düzeni: İlk görseli büyük yapıyoruz
+            const isFeatured = idx === 0;
+            return (
+              <div 
+                key={idx} 
+                className={`relative overflow-hidden rounded-xl group cursor-pointer ${
+                  isFeatured ? 'col-span-2 row-span-2' : 'col-span-1 row-span-1'
+                }`}
+              >
+                <Image
+                  src={src}
+                  alt={`Galeri Görseli ${idx + 1}`}
+                  fill
+                  className="object-cover transition-transform duration-500 group-hover:scale-110"
+                />
+                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300" />
+              </div>
+            );
+          })}
+        </div>
+      </GlassCard>
+    </section>
   );
 };

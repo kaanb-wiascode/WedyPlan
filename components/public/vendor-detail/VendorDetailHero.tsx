@@ -1,84 +1,86 @@
 'use client';
 
-import React, { useState } from 'react';
-import { Sparkles, ShieldCheck, MapPin, Star, Heart, Share2, Award } from 'lucide-react';
-import { VendorDetailFull } from '@/types/vendor-detail-page';
+import React from 'react';
+import Image from 'next/image';
+import GlassCard from '@/components/shared/ui/GlassCard';
+import { Star, MapPin, Heart, Share2, ChevronRight } from 'lucide-react';
 
 interface VendorDetailHeroProps {
-  vendor: VendorDetailFull;
+  vendor: any; // Mock datanızdaki tüm varyasyonları kapsaması için any veya esnek tip bırakıyoruz
   onOpenOfferModal: () => void;
 }
 
 export const VendorDetailHero: React.FC<VendorDetailHeroProps> = ({ vendor, onOpenOfferModal }) => {
-  const [isSaved, setIsSaved] = useState(false);
+  // Mock data property'lerini güvenli bir şekilde eşleştiriyoruz
+  const displayName = vendor.name || vendor.companyName;
+  const displayImage = vendor.coverImageUrl || (vendor.coverImages && vendor.coverImages[0]) || '/assets/placeholder-vendor.jpg';
+  const displayLocation = vendor.location || [vendor.district, vendor.city].filter(Boolean).join(', ');
+  const displayPrice = vendor.priceRange || (vendor.startingPrice ? `${vendor.startingPrice.toLocaleString('tr-TR')} ₺` : 'Fiyat Sorun');
 
   return (
-    <div className="bg-white/50 backdrop-blur-3xl border border-white/90 p-6 sm:p-8 rounded-[36px] shadow-xs space-y-6">
-      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 border-b border-black/5 pb-6">
-        <div className="space-y-3">
-          <div className="flex flex-wrap items-center gap-2">
-            <span className="text-[11px] font-bold bg-[#D4AF37]/15 text-[#D4AF37] px-3.5 py-1 rounded-full border border-[#D4AF37]/30">
-              {vendor.category}
-            </span>
-
-            {vendor.isVerified && (
-              <span className="text-[11px] font-bold bg-emerald-50 text-emerald-800 px-3 py-1 rounded-full border border-emerald-200 flex items-center gap-1">
-                <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" /> WedyPlan Onaylı Showroom
-              </span>
-            )}
-
-            <span className="text-[11px] font-bold bg-[#E6007E]/10 text-[#E6007E] px-3 py-1 rounded-full border border-pink-200 flex items-center gap-1">
-              <Sparkles className="w-3.5 h-3.5 text-[#D4AF37]" /> %{vendor.aiMatchScore} WedyAI Uyum
-            </span>
-          </div>
-
-          <h1 className="font-serif font-bold text-[32px] sm:text-[44px] text-[#1D1D1F] leading-tight">
-            {vendor.companyName}
-          </h1>
-
-          <p className="text-[14px] text-[#6E6E73] font-light max-w-2xl">{vendor.tagline}</p>
-
-          <div className="flex items-center gap-4 text-[13px] text-[#6E6E73]">
-            <span className="flex items-center gap-1 font-semibold text-[#1D1D1F]">
-              <MapPin className="w-4 h-4 text-[#E6007E]" /> {vendor.district}, {vendor.city}
-            </span>
-            <span>•</span>
-            <span className="flex items-center gap-1 font-bold text-amber-800 bg-amber-50 px-2.5 py-0.5 rounded-full border border-amber-200">
-              <Star className="w-3.5 h-3.5 fill-amber-500 text-amber-500" /> {vendor.rating} ({vendor.reviewCount} Yorum)
-            </span>
-          </div>
-        </div>
-
-        {/* Action Buttons */}
-        <div className="flex items-center gap-3 shrink-0">
-          <button
-            onClick={() => setIsSaved(!isSaved)}
-            className={`p-3.5 rounded-full border transition flex items-center justify-center cursor-pointer ${
-              isSaved ? 'bg-pink-50 border-pink-300 text-[#E6007E]' : 'bg-white/80 border-white text-[#1D1D1F] hover:bg-white'
-            }`}
-            title="Favorilere Ekle"
-          >
-            <Heart className={`w-5 h-5 ${isSaved ? 'fill-[#E6007E]' : ''}`} />
-          </button>
-
-          <button
-            onClick={onOpenOfferModal}
-            className="bg-[#1D1D1F] hover:bg-black text-white text-[13px] font-bold px-8 py-4 rounded-full transition shadow-md flex items-center gap-2 cursor-pointer"
-          >
-            <Sparkles className="w-4 h-4 text-[#D4AF37]" />
-            <span>Ücretsiz Teklif Al</span>
-          </button>
-        </div>
+    <section className="relative w-full h-[60vh] min-h-[500px] flex items-end pb-12 lg:pb-16 rounded-3xl overflow-hidden mt-4">
+      <div className="absolute inset-0 z-0">
+        <Image
+          src={displayImage}
+          alt={displayName || 'Firma Görseli'}
+          fill
+          priority
+          className="object-cover"
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
       </div>
 
-      {/* Quick Summary Bar */}
-      <div className="flex flex-wrap items-center justify-between text-[13px] text-[#6E6E73] gap-4">
-        <div>
-          Başlangıç Fiyatı: <strong className="font-serif font-bold text-[18px] text-[#1D1D1F] ml-1">{vendor.startingPrice.toLocaleString('tr-TR')} ₺</strong>
-        </div>
-        <div>Maksimum Kapasite: <strong className="text-[#1D1D1F] font-bold">{vendor.capacity} Kişi</strong></div>
-        <div>Kuruluş Yılı: <strong className="text-[#1D1D1F] font-bold">{vendor.establishedYear}</strong></div>
+      <div className="container mx-auto px-4 relative z-10">
+        <GlassCard className="max-w-3xl p-6 md:p-8 text-white border-white/20">
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
+            
+            <div className="flex-1">
+              <div className="flex items-center gap-3 mb-3">
+                <span className="px-3 py-1 text-xs font-semibold uppercase tracking-wider bg-white/20 rounded-full backdrop-blur-sm">
+                  {vendor.category || 'Düğün Mekanı'}
+                </span>
+                <div className="flex items-center text-yellow-400 text-sm font-medium">
+                  <Star className="w-4 h-4 fill-current mr-1" />
+                  {vendor.rating} <span className="text-gray-300 ml-1">({vendor.reviewCount} Yorum)</span>
+                </div>
+              </div>
+              
+              <h1 className="text-4xl md:text-5xl font-bold mb-2 tracking-tight">
+                {displayName}
+              </h1>
+              
+              <div className="flex items-center text-gray-200 text-sm md:text-base">
+                <MapPin className="w-4 h-4 mr-1.5 opacity-80" />
+                {displayLocation}
+              </div>
+            </div>
+
+            <div className="flex flex-col items-start md:items-end gap-4">
+              <div className="text-left md:text-right">
+                <p className="text-sm text-gray-300 mb-0.5">Başlangıç Fiyatı</p>
+                <p className="text-2xl font-bold">{displayPrice}</p>
+              </div>
+              
+              <div className="flex items-center gap-3 w-full md:w-auto">
+                <button className="p-3 bg-white/10 hover:bg-white/20 border border-white/20 rounded-xl backdrop-blur-sm transition-colors">
+                  <Heart className="w-5 h-5" />
+                </button>
+                <button className="p-3 bg-white/10 hover:bg-white/20 border border-white/20 rounded-xl backdrop-blur-sm transition-colors">
+                  <Share2 className="w-5 h-5" />
+                </button>
+                <button 
+                  onClick={onOpenOfferModal}
+                  className="flex-1 md:flex-none flex items-center justify-center px-6 py-3 bg-[#E6007E] text-white font-semibold rounded-xl hover:bg-[#c5006b] transition-colors shadow-lg"
+                >
+                  Teklif İste
+                  <ChevronRight className="w-4 h-4 ml-1" />
+                </button>
+              </div>
+            </div>
+
+          </div>
+        </GlassCard>
       </div>
-    </div>
+    </section>
   );
 };
