@@ -8,7 +8,7 @@ const COOKIE_OPTIONS = {
   secure: process.env.NODE_ENV === 'production',
   sameSite: 'lax' as const,
   maxAge: 7 * 24 * 60 * 60, // 7 gün
-  path: '/', // 🚨 KRİTİK DÜZELTME: Çerezin tüm sitede geçerli olması için şart!
+  path: '/', // Çerezin tüm sitede geçerli olması için şart
 };
 
 /**
@@ -40,11 +40,14 @@ export async function getSession(): Promise<WedyJWTPayload | null> {
 }
 
 /**
- * Session'ı sil
+ * Session'ı sil (Tüm yollardan temizler)
  */
 export async function deleteSession(): Promise<void> {
   const cookieStore = await cookies();
-  cookieStore.delete(COOKIE_NAME);
+  cookieStore.delete({
+    name: COOKIE_NAME,
+    path: '/',
+  });
 }
 
 /**
@@ -69,18 +72,16 @@ export async function updateSession(
 }
 
 /**
- * Aktif Couple ID'sini al (Server Actions için)
+ * Aktif Couple ID'sini al (Sessiz Onarımlı Yapı)
  * 
  * @param coupleId - İsteğe bağlı couple ID
- * @returns Aktif couple ID veya error throw
+ * @returns Aktif couple ID veya otomatik oluşturulan couple ID
  */
 export async function getActiveCoupleId(coupleId?: string): Promise<string> {
-  // Eğer coupleId geçildiyse, onu kullan
   if (coupleId) {
     return coupleId;
   }
 
-  // Session'dan al
   const session = await getSession();
 
   if (!session || !session.userId) {
@@ -91,15 +92,22 @@ export async function getActiveCoupleId(coupleId?: string): Promise<string> {
     throw new Error('Bu işlem sadece çiftler tarafından yapılabilir.');
   }
 
-  // Veritabanından çiftin ID'sini al
   try {
-    const couple = await (prisma as any).couple.findUnique({
+    // 1. Veritabanından mevcut çift profilini ara
+    let couple = await (prisma as any).couple.findFirst({
       where: { userId: session.userId },
       select: { id: true },
     });
 
+    // 2. Profil yoksa çökme! Arka planda anında oluştur (Self-Healing)
     if (!couple) {
-      throw new Error('Çift profili bulunamadı.');
+      couple = await (prisma as any).couple.create({
+        data: {
+          userId: session.userId,
+          partnerOneName: 'Çift',
+        },
+        select: { id: true },
+      });
     }
 
     return couple.id;
@@ -110,7 +118,7 @@ export async function getActiveCoupleId(coupleId?: string): Promise<string> {
 }
 
 /**
- * Aktif Vendor ID'sini al (Server Actions için)
+ * Aktif Vendor ID'sini al (Sessiz Onarımlı Yapı)
  */
 export async function getActiveVendorId(vendorId?: string): Promise<string> {
   if (vendorId) {
@@ -128,13 +136,21 @@ export async function getActiveVendorId(vendorId?: string): Promise<string> {
   }
 
   try {
-    const vendor = await (prisma as any).vendor.findUnique({
+    let vendor = await (prisma as any).vendor.findFirst({
       where: { userId: session.userId },
       select: { id: true },
     });
 
+    // Profil yoksa arka planda oluştur
     if (!vendor) {
-      throw new Error('Satıcı profili bulunamadı.');
+      vendor = await (prisma as any).vendor.create({
+        data: {
+          userId: session.userId,
+          businessName: 'Satıcı Hizmeti',
+          businessCategory: 'OTHER',
+        },
+        select: { id: true },
+      });
     }
 
     return vendor.id;
@@ -145,7 +161,7 @@ export async function getActiveVendorId(vendorId?: string): Promise<string> {
 }
 
 /**
- * Kullanıcı bilgilerini al (Herhangi bir rol)
+ * Kullanıcı bilgilerini al
  */
 export async function getUserInfo(): Promise<WedyJWTPayload | null> {
   return getSession();
