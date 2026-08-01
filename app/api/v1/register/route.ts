@@ -63,56 +63,63 @@ export async function POST(request: NextRequest) {
     const userRole = validRoles[role] || 'COUPLE';
     const portalType = userRole;
 
-    // 7. ATOMİK TRANSACTION (Tek Bağlantı Kanalında Sıralı ve Güvenli Kayıt)
-    const user = await (prisma as any).$transaction(async (tx: any) => {
-      // a. Ana Kullanıcı Hesabı
-      const newUser = await tx.identityUser.create({
-        data: {
-          email: email.toLowerCase(),
-          passwordHash,
-          fullName,
-          status: 'ACTIVE',
-          isEmailVerified: true,
-          securityProfile: {
-            create: {},
-          },
+    // 7. Ana Kullanıcı Hesabını Oluştur (Temel Kayıt)
+    const user = await (prisma as any).identityUser.create({
+      data: {
+        email: email.toLowerCase(),
+        passwordHash,
+        fullName,
+        status: 'ACTIVE',
+        isEmailVerified: true,
+        securityProfile: {
+          create: {},
         },
-      });
+      },
+    });
 
-      // b. Portal Profili
-      await tx.portalProfile.create({
+    // 8. Portal Profili Oluştur (İkincil Tablo - Hata Verirse Kaydı Engellemez)
+    try {
+      await (prisma as any).portalProfile.create({
         data: {
-          userId: newUser.id,
+          userId: user.id,
           portal: portalType,
           isPrimary: true,
         },
       });
+    } catch (portalErr) {
+      console.warn('PortalProfile uyarısı (kayıt devam ediyor):', portalErr);
+    }
 
-      // c. Çift veya Satıcı Profili
-      if (userRole === 'COUPLE') {
-        const [partnerOne, partnerTwo] = fullName.split(' & ').map((n: string) => n.trim());
-        await tx.couple.create({
+    // 9. Çift veya Satıcı Profili Oluştur (İkincil Tablo)
+    if (userRole === 'COUPLE') {
+      const [partnerOne, partnerTwo] = fullName.split(' & ').map((n: string) => n.trim());
+      try {
+        await (prisma as any).couple.create({
           data: {
-            userId: newUser.id,
+            userId: user.id,
             partnerOneName: partnerOne || fullName,
             partnerTwoName: partnerTwo || null,
             weddingDate: weddingDate ? new Date(weddingDate) : null,
           },
         });
-      } else if (userRole === 'VENDOR') {
-        await tx.vendor.create({
+      } catch (coupleErr) {
+        console.warn('Couple profili uyarısı (kayıt devam ediyor):', coupleErr);
+      }
+    } else if (userRole === 'VENDOR') {
+      try {
+        await (prisma as any).vendor.create({
           data: {
-            userId: newUser.id,
+            userId: user.id,
             businessName: fullName,
             businessCategory: 'OTHER',
           },
         });
+      } catch (vendorErr) {
+        console.warn('Vendor profili uyarısı (kayıt devam ediyor):', vendorErr);
       }
+    }
 
-      return newUser;
-    });
-
-    // 8. Session oluştur
+    // 10. Oturum Aç (Session Cookie)
     await createSession({
       userId: user.id,
       email: user.email,
@@ -120,7 +127,7 @@ export async function POST(request: NextRequest) {
       portalContext: portalType,
     });
 
-    // 9. Registration audit log (Hata verirse kayıt akışını bozmaz)
+    // 11. Audit Log Kaydı
     try {
       await (prisma as any).auditLog.create({
         data: {
@@ -136,7 +143,7 @@ export async function POST(request: NextRequest) {
         },
       });
     } catch (auditError) {
-      console.warn('Audit log kaydedilemedi (kayıt etkilenmedi):', auditError);
+      console.warn('Audit log uyarısı:', auditError);
     }
 
     return NextResponse.json(
