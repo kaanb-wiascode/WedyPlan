@@ -1,85 +1,137 @@
 'use client';
 
-import React from 'react';
-import { 
-  Building2, 
-  FileText, 
-  Calendar, 
-  Wallet, 
-  MessageSquare, 
-  Settings, 
-  ShieldCheck,
-  Award,
-  Store
+import React, { useEffect, useState } from 'react';
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
+import {
+  LayoutDashboard,
+  Sparkles,
+  Inbox,
+  Calendar,
+  FileText,
+  Wallet,
+  Store,
+  Star,
+  Users,
+  Settings,
+  LogOut,
+  ChevronRight
 } from 'lucide-react';
-import { GlassPanel } from '@/components/shared/ui/GlassPanel';
 
-export type VendorTab = 'overview' | 'leads' | 'subscription' | 'finance' | 'crm' | 'calendar' | 'profile' | 'settings';
+const menuItems = [
+  { name: 'Genel Bakış', href: '/firma/dashboard', icon: LayoutDashboard },
+  { name: 'WedyAI Firma Copilot', href: '/firma/ai-asistan', icon: Sparkles, badge: 'AI' },
+  { name: 'Talepler & CRM', href: '/firma/talepler', icon: Inbox },
+  { name: 'Takvim & Randevular', href: '/firma/takvim', icon: Calendar },
+  { name: 'Teklif & Sözleşmeler', href: '/firma/sozlesmeler', icon: FileText },
+  { name: 'Finans & Hakedişler', href: '/firma/finans', icon: Wallet },
+  { name: 'Vitrin & Medya', href: '/firma/vitrin', icon: Store },
+  { name: 'Yorumlar & İtibar', href: '/firma/degerlendirmeler', icon: Star },
+  { name: 'Ekip & Operasyon', href: '/firma/organizasyon', icon: Users },
+  { name: 'Firma Ayarları', href: '/firma/ayarlar', icon: Settings },
+];
 
-interface VendorSidebarProps {
-  activeTab?: VendorTab;
-  setActiveTab?: (tab: VendorTab) => void;
-}
+export function VendorSidebar() {
+  const pathname = usePathname();
 
-export function VendorSidebar({ activeTab = 'overview', setActiveTab }: VendorSidebarProps) {
-  const navigation = [
-    { id: 'overview' as VendorTab, name: 'Dashboard', icon: Building2 },
-    { id: 'leads' as VendorTab, name: 'Teklif Talepleri', icon: FileText },
-    { id: 'subscription' as VendorTab, name: 'Abonelik & Paketler', icon: Award },
-    { id: 'finance' as VendorTab, name: 'Finans & Ciro', icon: Wallet },
-    { id: 'crm' as VendorTab, name: 'İletişim & CRM', icon: MessageSquare },
-    { id: 'calendar' as VendorTab, name: 'Takvim & Etkinlikler', icon: Calendar },
-    { id: 'profile' as VendorTab, name: 'Firma Profili', icon: Store },
-    { id: 'settings' as VendorTab, name: 'Ayarlar', icon: Settings },
-  ];
+  const [vendorProfile, setVendorProfile] = useState({
+    companyName: 'Beykoz Secret Garden',
+    category: 'Düğün Mekanı',
+  });
+
+  useEffect(() => {
+    try {
+      const localData = localStorage.getItem('wedyplan_vendor_profile');
+      if (localData) {
+        const parsed = JSON.parse(localData);
+        setVendorProfile({
+          companyName: parsed.companyName || 'Beykoz Secret Garden',
+          category: parsed.category || 'Düğün Mekanı',
+        });
+      }
+    } catch (e) {}
+  }, []);
 
   return (
-    <aside className="w-64 border-r border-zinc-200/80 dark:border-zinc-800/80 bg-white/70 dark:bg-zinc-950/70 backdrop-blur-2xl p-6 flex flex-col justify-between hidden lg:flex min-h-screen shrink-0">
-      <div className="space-y-8">
+    <aside className="w-72 border-r border-zinc-200/80 dark:border-zinc-800/80 bg-white/80 dark:bg-zinc-950/80 backdrop-blur-2xl flex flex-col justify-between h-screen sticky top-0 z-40 shrink-0 shadow-xs font-sans antialiased">
+      <div className="p-6 space-y-6 overflow-y-auto scrollbar-none">
         
-        {/* LOGO / BRANDING */}
-        <div className="flex items-center gap-3 px-2">
-          <div className="w-10 h-10 rounded-2xl bg-zinc-900 dark:bg-white flex items-center justify-center text-white dark:text-zinc-900 shadow-md">
-            <Store className="w-5 h-5" />
+        {/* Orijinal WedyPlan Firma Logosu */}
+        <Link href="/firma/dashboard" className="block px-1 cursor-pointer">
+          <div className="flex items-center gap-3">
+            <img
+              src="/assets/branding/logo-vendor.svg"
+              alt="WedyPlan Firma Portalı"
+              className="h-8 w-auto object-contain dark:invert"
+            />
           </div>
-          <div>
-            <h2 className="font-serif font-bold text-base text-zinc-900 dark:text-white tracking-tight">WedyVendor</h2>
-            <span className="text-[10px] font-mono text-zinc-500 dark:text-zinc-400 font-semibold tracking-wider uppercase">Firma Portalı</span>
-          </div>
-        </div>
+        </Link>
 
-        {/* MENÜ LİSTESİ */}
-        <nav className="space-y-1.5">
-          {navigation.map((item) => {
-            const isActive = activeTab === item.id;
+        {/* Menü Linkleri */}
+        <nav className="space-y-1">
+          {menuItems.map((item) => {
+            const isActive =
+              pathname === item.href ||
+              (pathname?.startsWith(`${item.href}/`) && item.href !== '/firma/dashboard');
             const Icon = item.icon;
 
             return (
-              <button
-                key={item.id}
-                onClick={() => setActiveTab && setActiveTab(item.id)}
-                className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-2xl text-xs font-semibold transition-all cursor-pointer ${
+              <Link
+                key={item.href}
+                href={item.href}
+                className={`flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs transition-all cursor-pointer select-none ${
                   isActive
-                    ? 'bg-zinc-900 text-white dark:bg-white dark:text-zinc-900 shadow-sm'
-                    : 'text-zinc-500 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-zinc-900/60'
+                    ? 'bg-zinc-900 text-white dark:bg-white dark:text-zinc-900 font-semibold shadow-xs'
+                    : 'text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-900/60 hover:text-zinc-900 dark:hover:text-zinc-100 font-medium'
                 }`}
               >
-                <Icon className="w-4 h-4" />
-                <span>{item.name}</span>
-              </button>
+                <div className="flex items-center gap-3">
+                  <Icon className={`w-4 h-4 transition-colors ${isActive ? 'text-white dark:text-zinc-900' : 'text-zinc-400'}`} />
+                  <span>{item.name}</span>
+                </div>
+                {item.badge ? (
+                  <span className={`px-1.5 py-0.5 text-[9px] font-bold rounded-md uppercase tracking-wider ${isActive ? 'bg-white/20 text-white dark:bg-black/20 dark:text-zinc-900' : 'bg-zinc-200 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300'}`}>
+                    {item.badge}
+                  </span>
+                ) : (
+                  <ChevronRight className={`w-3.5 h-3.5 transition-all ${isActive ? 'opacity-80 translate-x-0.5' : 'opacity-0 group-hover:opacity-100 text-zinc-400'}`} />
+                )}
+              </Link>
             );
           })}
         </nav>
       </div>
 
-      {/* ALT FİRMA ROZETİ KARTI */}
-      <GlassPanel className="p-4 space-y-2 border-zinc-200/80 dark:border-zinc-800/80">
-        <div className="flex items-center gap-2 text-xs font-bold text-zinc-900 dark:text-white">
-          <ShieldCheck className="w-4 h-4 text-emerald-500" />
-          <span>Grand Çamlıca</span>
+      {/* Profil Alt Kutusu */}
+      <div className="p-4 m-4 rounded-2xl bg-zinc-50/80 dark:bg-zinc-900/50 border border-zinc-200/80 dark:border-zinc-800/80 backdrop-blur-md space-y-3 shadow-xs">
+        <div className="flex items-center gap-3">
+          <div className="w-9 h-9 rounded-full bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 text-xs font-bold flex items-center justify-center shadow-xs shrink-0">
+            {vendorProfile.companyName[0]}
+          </div>
+          <div className="flex flex-col truncate min-w-0">
+            <span className="text-xs font-bold text-zinc-900 dark:text-white truncate">
+              {vendorProfile.companyName}
+            </span>
+            <span className="text-[10px] text-zinc-400 font-medium truncate mt-0.5">
+              {vendorProfile.category}
+            </span>
+          </div>
         </div>
-        <p className="text-[10px] text-zinc-500 dark:text-zinc-400">Onaylı VIP Tedarikçi Statüsü Active</p>
-      </GlassPanel>
+
+        <button
+          onClick={() => {
+            localStorage.clear();
+            document.cookie = 'wedyplan_session=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT;';
+            window.location.href = '/giris';
+          }}
+          className="w-full py-2 px-3 rounded-xl text-xs font-medium text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-200/60 dark:hover:bg-zinc-800/60 transition-all flex items-center justify-center gap-2 cursor-pointer"
+        >
+          <LogOut className="w-3.5 h-3.5" />
+          <span>Oturumu Kapat</span>
+        </button>
+      </div>
     </aside>
   );
 }
+
+export default VendorSidebar;
