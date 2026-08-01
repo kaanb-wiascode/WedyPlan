@@ -129,50 +129,54 @@ export default function FirmalarPage() {
           />
         </div>
 
-        {/* Sağ Taraf: Komuta Merkezi (Arama+Sıralama) ve Liste */}
+        {/* Sağ Taraf: Komuta Merkezi ve Liste */}
         <div className="w-full lg:w-[72%] space-y-6">
           
-          {/* Tek Satır Komuta Merkezi (Action Bar) */}
-          <GlassCard className="p-2.5 border-white/60 bg-white/80 shadow-md rounded-full flex flex-col md:flex-row items-center justify-between gap-2 relative z-40">
+          {/* Tek Satır Komuta Merkezi (Action Bar) - GÜNCELLENDİ */}
+          <GlassCard className="p-2 border-white/60 bg-white/80 shadow-md rounded-3xl lg:rounded-full flex flex-col lg:flex-row items-center justify-between gap-3 relative z-40">
             
-            <div className="flex items-center w-full md:w-auto flex-1 gap-2">
+            <div className="flex items-center w-full lg:w-auto flex-1 gap-2 px-2">
               <button 
                 onClick={() => setIsMobileFilterOpen(!isMobileFilterOpen)}
-                className="lg:hidden p-3 bg-gray-100 hover:bg-gray-200 rounded-full text-gray-700 transition-colors"
+                className="lg:hidden p-2.5 bg-gray-100 hover:bg-gray-200 rounded-full text-gray-700 transition-colors shrink-0"
               >
                 <Filter className="w-4 h-4" />
               </button>
 
               {/* Geniş Arama Kutusu */}
-              <div className="flex-1 flex items-center bg-transparent px-4 py-2">
+              <div className="flex-1 flex items-center bg-transparent py-2">
                 <Search className="w-5 h-5 text-gray-400 mr-3 shrink-0" />
                 <input
                   type="text"
                   placeholder="Firma veya hizmet ara..."
                   value={filters.search || ''}
                   onChange={(e) => handleFilterChange({ search: e.target.value })}
-                  className="bg-transparent text-[14px] font-medium text-gray-900 placeholder:text-gray-400 outline-none w-full"
+                  className="bg-transparent text-[14px] font-medium text-gray-900 placeholder:text-gray-400 outline-none w-full min-w-0" 
                 />
               </div>
             </div>
 
-            <div className="hidden md:block w-px h-8 bg-gray-200" /> {/* Ayıraç */}
+            {/* Masaüstünde görünen dikey ayıraç */}
+            <div className="hidden lg:block w-px h-8 bg-gray-200 shrink-0" />
 
-            <div className="flex items-center w-full md:w-auto justify-between md:justify-end gap-2 pr-1">
+            <div className="flex items-center justify-between lg:justify-end w-full lg:w-auto gap-3 pr-1 pb-1 lg:pb-0 shrink-0">
               
               {/* Özel Sıralama Dropdown */}
               <div className="relative" ref={sortRef}>
                 <button
                   onClick={() => setIsSortOpen(!isSortOpen)}
-                  className="px-4 py-2.5 bg-gray-100 hover:bg-gray-200 border border-transparent rounded-full text-[13px] font-semibold text-gray-800 flex items-center gap-2 transition-colors"
+                  className="px-4 py-2.5 bg-gray-100 hover:bg-gray-200 border border-transparent rounded-full text-[13px] font-semibold text-gray-800 flex items-center gap-2 transition-colors whitespace-nowrap"
                 >
-                  <ArrowDownAZ className="w-4 h-4 text-gray-500" />
-                  {sortOptions.find(o => o.id === (filters.sortBy || 'RECOMMENDED'))?.label}
-                  <ChevronDown className={`w-3.5 h-3.5 text-gray-500 transition-transform ${isSortOpen ? 'rotate-180' : ''}`} />
+                  <ArrowDownAZ className="w-4 h-4 text-gray-500 shrink-0" />
+                  <span className="hidden sm:inline-block">
+                    {sortOptions.find(o => o.id === (filters.sortBy || 'RECOMMENDED'))?.label}
+                  </span>
+                  <span className="sm:hidden">Sırala</span>
+                  <ChevronDown className={`w-3.5 h-3.5 text-gray-500 transition-transform shrink-0 ${isSortOpen ? 'rotate-180' : ''}`} />
                 </button>
 
                 {isSortOpen && (
-                  <div className="absolute top-full right-0 mt-2 w-48 bg-white border border-gray-100 rounded-2xl shadow-2xl z-50 overflow-hidden animate-in fade-in slide-in-from-top-2">
+                  <div className="absolute top-full right-0 mt-2 w-52 bg-white border border-gray-100 rounded-2xl shadow-2xl z-50 overflow-hidden animate-in fade-in slide-in-from-top-2">
                     {sortOptions.map((opt) => (
                       <button
                         key={opt.id}
@@ -189,7 +193,7 @@ export default function FirmalarPage() {
               </div>
 
               {/* Görünüm Modu Geçişi */}
-              <div className="bg-gray-100 p-1 rounded-full flex items-center">
+              <div className="bg-gray-100 p-1 rounded-full flex items-center shrink-0">
                 <button
                   onClick={() => setViewMode('GRID')}
                   className={`p-2 rounded-full transition-all ${viewMode === 'GRID' ? 'bg-white text-black shadow-sm' : 'text-gray-500 hover:text-gray-900'}`}
@@ -222,7 +226,6 @@ export default function FirmalarPage() {
                   ))}
                 </div>
               ) : vendors.length === 0 ? (
-                /* Şık Empty State */
                 <GlassCard className="py-28 text-center border-white/60 flex flex-col items-center justify-center mt-6">
                   <div className="relative mb-6">
                     <div className="absolute inset-0 bg-indigo-200 blur-xl rounded-full opacity-50" />
