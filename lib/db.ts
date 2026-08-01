@@ -11,7 +11,6 @@ const connectionString =
   'postgresql://postgres:postgres@localhost:5432/wedyplan';
 
 function createPrismaClient(): PrismaClient {
-  // 1. Prisma v7 Driver Adapter denemesi (@prisma/adapter-pg)
   try {
     const { PrismaPg } = require('@prisma/adapter-pg');
     const { Pool } = require('pg');
@@ -19,13 +18,11 @@ function createPrismaClient(): PrismaClient {
     const adapter = new PrismaPg(pool);
     return new PrismaClient({ adapter } as any);
   } catch {
-    // 2. Doğrudan adaptör nesnesi denemesi
     try {
       const { PrismaPg } = require('@prisma/adapter-pg');
       const adapter = new PrismaPg({ connectionString });
       return new PrismaClient({ adapter } as any);
     } catch {
-      // 3. Standart PrismaClient fallback
       try {
         return new PrismaClient();
       } catch {

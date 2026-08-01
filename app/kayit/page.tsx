@@ -10,7 +10,6 @@ import {
   ArrowRight, 
   Eye, 
   EyeOff,
-  Sparkles,
   ShieldCheck
 } from 'lucide-react';
 import Link from 'next/link';
@@ -49,7 +48,8 @@ export default function CoupleRegisterPage() {
       const resData = await response.json();
 
       if (response.ok && resData.success) {
-        window.location.href = '/cift/dashboard';
+        // Kayıt başarılı -> İlk kurulum sihirbazına yönlendir
+        window.location.href = '/cift/onboarding';
       } else {
         setErrorMessage(resData.error || resData.message || 'Kayıt yapılırken bir hata oluştu.');
       }
@@ -186,7 +186,7 @@ export default function CoupleRegisterPage() {
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full mt-4 py-3 px-5 rounded-xl bg-zinc-900 hover:bg-zinc-800 dark:bg-white dark:hover:bg-zinc-100 text-white dark:text-zinc-900 font-medium text-sm shadow-md transition-all flex items-center justify-center gap-2 group disabled:opacity-70"
+              className="w-full mt-4 py-3 px-5 rounded-xl bg-zinc-900 hover:bg-zinc-800 dark:bg-white dark:hover:bg-zinc-100 text-white dark:text-zinc-900 font-medium text-sm shadow-md transition-all flex items-center justify-center gap-2 group disabled:opacity-70 cursor-pointer"
             >
               {isLoading ? (
                 <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
