@@ -10,27 +10,64 @@ interface DashboardHeaderProps {
 }
 
 export function DashboardHeader({ names, location }: DashboardHeaderProps = {}) {
-  const [profile, setProfile] = useState({
+  const [profile, setProfile] = useState<{
+    partnerOneName: string;
+    partnerTwoName: string;
+    weddingDate: string;
+  }>({
     partnerOneName: 'Sadi',
     partnerTwoName: 'Hamiyet',
     weddingDate: '2026-08-15',
   });
 
-  useEffect(() => {
-    const loadProfile = async () => {
-      const res = await getCoupleSettings();
-      if (res.success && res.data?.profile) {
-        setProfile({
-          partnerOneName: res.data.profile.partnerOneName || 'Sadi',
-          partnerTwoName: res.data.profile.partnerTwoName || 'Hamiyet',
-          weddingDate: res.data.profile.weddingDate || '2026-08-15',
-        });
+  const syncProfileData = async () => {
+    // 1. Önce localStorage'dan hızlıca çek
+    try {
+      const localData = localStorage.getItem('wedyplan_couple_profile');
+      if (localData) {
+        const parsed = JSON.parse(localData);
+        if (parsed.partnerOneName || parsed.partnerTwoName) {
+          setProfile({
+            partnerOneName: parsed.partnerOneName || 'Sadi',
+            partnerTwoName: parsed.partnerTwoName || 'Hamiyet',
+            weddingDate: parsed.weddingDate || '2026-08-15',
+          });
+        }
       }
+    } catch (e) {}
+
+    // 2. Sunucu Çerezinden Oku ve Senkronize Et
+    const res = await getCoupleSettings();
+    if (res.success && res.data?.profile) {
+      const p = res.data.profile;
+      setProfile({
+        partnerOneName: p.partnerOneName || 'Sadi',
+        partnerTwoName: p.partnerTwoName || 'Hamiyet',
+        weddingDate: p.weddingDate || '2026-08-15',
+      });
+      try {
+        localStorage.setItem('wedyplan_couple_profile', JSON.stringify(p));
+      } catch (e) {}
+    }
+  };
+
+  useEffect(() => {
+    syncProfileData();
+
+    // Ayarlar güncellendiğinde anında yenile
+    const handleProfileUpdate = () => {
+      syncProfileData();
     };
-    loadProfile();
+
+    window.addEventListener('wedyplan_profile_updated', handleProfileUpdate);
+    window.addEventListener('storage', handleProfileUpdate);
+
+    return () => {
+      window.removeEventListener('wedyplan_profile_updated', handleProfileUpdate);
+      window.removeEventListener('storage', handleProfileUpdate);
+    };
   }, []);
 
-  // Kalan Gün Sayısını Dinamik Hesapla
   const calculateDaysLeft = (targetDateStr: string) => {
     if (!targetDateStr) return 0;
     const target = new Date(targetDateStr);
@@ -40,7 +77,6 @@ export function DashboardHeader({ names, location }: DashboardHeaderProps = {}) 
     return diffDays > 0 ? diffDays : 0;
   };
 
-  // Tarihi Türkçe Formata Çevir (Örn: 15 Ağustos 2026)
   const formatDate = (dateStr: string) => {
     if (!dateStr) return 'Tarih Seçilmedi';
     try {
@@ -51,17 +87,16 @@ export function DashboardHeader({ names, location }: DashboardHeaderProps = {}) 
     }
   };
 
-  const daysLeft = calculateDaysLeft(profile.weddingDate);
+  const pOne = profile.partnerOneName || 'Sadi';
+  const pTwo = profile.partnerTwoName || 'Hamiyet';
+  const wDate = profile.weddingDate || '2026-08-15';
 
-  // Canlı profil ismi varsa onu, yoksa gelen props'u kullan
-  const displayName = profile.partnerOneName && profile.partnerTwoName
-    ? `${profile.partnerOneName} & ${profile.partnerTwoName}`
-    : (names || 'Sadi & Hamiyet');
+  const displayName = `${pOne} & ${pTwo}`;
+  const daysLeft = calculateDaysLeft(wDate);
 
   return (
     <div className="p-6 sm:p-8 rounded-3xl bg-gradient-to-r from-rose-500 via-rose-600 to-amber-500 text-white shadow-xl relative overflow-hidden flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
       
-      {/* SOL ALAN: İSİMLER & AÇIKLAMA */}
       <div className="space-y-3 max-w-xl z-10">
         <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/20 backdrop-blur-md text-[11px] font-bold tracking-wide">
           <Sparkles className="w-3.5 h-3.5 text-amber-300" />
@@ -76,7 +111,6 @@ export function DashboardHeader({ names, location }: DashboardHeaderProps = {}) 
           Düğün hazırlıklarınız harika gidiyor! Planlamanızı kolaylaştırmak için tüm adımları tek ekranda topladık.
         </p>
 
-        {/* HIZLI BUTONLAR */}
         <div className="flex items-center gap-3 pt-2">
           <button className="px-4 py-2 rounded-xl bg-white text-rose-600 text-xs font-bold shadow-md hover:bg-rose-50 transition-all cursor-pointer inline-flex items-center gap-1.5">
             <Plus className="w-3.5 h-3.5" /> Harcama Ekle
@@ -87,12 +121,11 @@ export function DashboardHeader({ names, location }: DashboardHeaderProps = {}) 
         </div>
       </div>
 
-      {/* SAĞ ALAN: DİNAMİK KALAN GÜN KUTUSU */}
       <div className="p-5 rounded-2xl bg-white/15 backdrop-blur-md border border-white/20 text-center shrink-0 min-w-[160px] z-10 space-y-1">
         <div className="text-4xl font-black tracking-tight">{daysLeft}</div>
         <div className="text-[10px] font-extrabold uppercase tracking-widest text-amber-200">GÜN KALDI</div>
         <div className="text-[11px] opacity-90 font-medium pt-1 flex items-center justify-center gap-1">
-          <Calendar className="w-3 h-3" /> {formatDate(profile.weddingDate)}
+          <Calendar className="w-3 h-3" /> {formatDate(wDate)}
         </div>
       </div>
 

@@ -17,21 +17,50 @@ export default function CoupleSidebar() {
     weddingDate: '2026-08-15',
   });
 
-  useEffect(() => {
-    const loadProfile = async () => {
-      const res = await getCoupleSettings();
-      if (res.success && res.data?.profile) {
-        setProfile({
-          partnerOneName: res.data.profile.partnerOneName || 'Sadi',
-          partnerTwoName: res.data.profile.partnerTwoName || 'Hamiyet',
-          weddingDate: res.data.profile.weddingDate || '2026-08-15',
-        });
+  const syncProfileData = async () => {
+    try {
+      const localData = localStorage.getItem('wedyplan_couple_profile');
+      if (localData) {
+        const parsed = JSON.parse(localData);
+        if (parsed.partnerOneName || parsed.partnerTwoName) {
+          setProfile({
+            partnerOneName: parsed.partnerOneName || 'Sadi',
+            partnerTwoName: parsed.partnerTwoName || 'Hamiyet',
+            weddingDate: parsed.weddingDate || '2026-08-15',
+          });
+        }
       }
+    } catch (e) {}
+
+    const res = await getCoupleSettings();
+    if (res.success && res.data?.profile) {
+      setProfile({
+        partnerOneName: res.data.profile.partnerOneName || 'Sadi',
+        partnerTwoName: res.data.profile.partnerTwoName || 'Hamiyet',
+        weddingDate: res.data.profile.weddingDate || '2026-08-15',
+      });
+    }
+  };
+
+  useEffect(() => {
+    syncProfileData();
+
+    const handleProfileUpdate = () => {
+      syncProfileData();
     };
-    loadProfile();
+
+    window.addEventListener('wedyplan_profile_updated', handleProfileUpdate);
+    window.addEventListener('storage', handleProfileUpdate);
+
+    return () => {
+      window.removeEventListener('wedyplan_profile_updated', handleProfileUpdate);
+      window.removeEventListener('storage', handleProfileUpdate);
+    };
   }, [pathname]);
 
-  const initials = `${(profile.partnerOneName[0] || 'S').toUpperCase()}&${(profile.partnerTwoName[0] || 'H').toUpperCase()}`;
+  const pOne = profile.partnerOneName || 'S';
+  const pTwo = profile.partnerTwoName || 'H';
+  const initials = `${pOne[0].toUpperCase()}&${pTwo[0].toUpperCase()}`;
 
   const formatDate = (dateStr: string) => {
     if (!dateStr) return 'Tarih Belirtilmedi';

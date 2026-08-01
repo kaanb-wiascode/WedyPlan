@@ -43,21 +43,50 @@ export function CoupleSidebar() {
     weddingDate: '2026-08-15',
   });
 
-  useEffect(() => {
-    const loadProfile = async () => {
-      const res = await getCoupleSettings();
-      if (res.success && res.data?.profile) {
-        setProfile({
-          partnerOneName: res.data.profile.partnerOneName || 'Sadi',
-          partnerTwoName: res.data.profile.partnerTwoName || 'Hamiyet',
-          weddingDate: res.data.profile.weddingDate || '2026-08-15',
-        });
+  const syncProfileData = async () => {
+    try {
+      const localData = localStorage.getItem('wedyplan_couple_profile');
+      if (localData) {
+        const parsed = JSON.parse(localData);
+        if (parsed.partnerOneName || parsed.partnerTwoName) {
+          setProfile({
+            partnerOneName: parsed.partnerOneName || 'Sadi',
+            partnerTwoName: parsed.partnerTwoName || 'Hamiyet',
+            weddingDate: parsed.weddingDate || '2026-08-15',
+          });
+        }
       }
+    } catch (e) {}
+
+    const res = await getCoupleSettings();
+    if (res.success && res.data?.profile) {
+      setProfile({
+        partnerOneName: res.data.profile.partnerOneName || 'Sadi',
+        partnerTwoName: res.data.profile.partnerTwoName || 'Hamiyet',
+        weddingDate: res.data.profile.weddingDate || '2026-08-15',
+      });
+    }
+  };
+
+  useEffect(() => {
+    syncProfileData();
+
+    const handleProfileUpdate = () => {
+      syncProfileData();
     };
-    loadProfile();
+
+    window.addEventListener('wedyplan_profile_updated', handleProfileUpdate);
+    window.addEventListener('storage', handleProfileUpdate);
+
+    return () => {
+      window.removeEventListener('wedyplan_profile_updated', handleProfileUpdate);
+      window.removeEventListener('storage', handleProfileUpdate);
+    };
   }, [pathname]);
 
-  const initials = `${(profile.partnerOneName[0] || 'S').toUpperCase()}&${(profile.partnerTwoName[0] || 'H').toUpperCase()}`;
+  const pOne = profile.partnerOneName || 'S';
+  const pTwo = profile.partnerTwoName || 'H';
+  const initials = `${pOne[0].toUpperCase()}&${pTwo[0].toUpperCase()}`;
 
   const formatDate = (dateStr: string) => {
     if (!dateStr) return 'Tarih Belirtilmedi';
@@ -73,7 +102,6 @@ export function CoupleSidebar() {
     <aside className="w-72 border-r border-rose-100/60 dark:border-zinc-800/60 bg-white/70 dark:bg-zinc-950/70 backdrop-blur-2xl flex flex-col justify-between min-h-screen sticky top-0 transition-all z-30 shadow-xs">
       <div className="p-6 space-y-8">
         
-        {/* Özel Çift Portalı Logosu */}
         <Link href="/cift/dashboard" className="block px-2 group">
           <div className="relative w-48 h-12">
             <Image
@@ -86,7 +114,6 @@ export function CoupleSidebar() {
           </div>
         </Link>
 
-        {/* Navigasyon Menüsü */}
         <nav className="space-y-1">
           {menuItems.map((item) => {
             const isActive = pathname === item.href || pathname?.startsWith(`${item.href}/`);
@@ -119,7 +146,6 @@ export function CoupleSidebar() {
         </nav>
       </div>
 
-      {/* Dinamik Profil Alt Kartı */}
       <div className="p-4 m-4 rounded-2xl bg-gradient-to-b from-rose-50/40 to-white/60 dark:from-zinc-900/60 dark:to-zinc-900/30 border border-rose-100 dark:border-zinc-800/80 backdrop-blur-md space-y-3 shadow-xs">
         <div className="flex items-center gap-3">
           <div className="w-9 h-9 rounded-full bg-gradient-to-tr from-rose-400 to-rose-600 flex items-center justify-center text-white text-xs font-bold shadow-xs ring-2 ring-white dark:ring-zinc-800 shrink-0">

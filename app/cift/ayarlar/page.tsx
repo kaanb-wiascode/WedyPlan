@@ -38,15 +38,14 @@ export default function CoupleSettingsPage() {
   const [isPending, startTransition] = useTransition();
   const [activeTab, setActiveTab] = useState<'PROFILE' | 'PAYMENTS' | 'NOTIFICATIONS' | 'SECURITY'>('PROFILE');
 
-  // Form State'leri
   const [profileForm, setProfileForm] = useState<CoupleProfileData>({
-    partnerOneName: '',
-    partnerTwoName: '',
-    weddingDate: '',
-    city: '',
-    venueName: '',
-    guestCountGoal: 200,
-    targetBudget: 300000,
+    partnerOneName: 'Sadi',
+    partnerTwoName: 'Hamiyet',
+    weddingDate: '2026-08-15',
+    city: 'İstanbul',
+    venueName: 'Beykoz Secret Garden',
+    guestCountGoal: 250,
+    targetBudget: 350000,
   });
 
   const [prefForm, setPrefForm] = useState<AppPreferencesData>({
@@ -60,7 +59,6 @@ export default function CoupleSettingsPage() {
 
   const [cards, setCards] = useState<SavedPaymentMethod[]>([]);
 
-  // Kart Ekleme Modalı
   const [isAddCardOpen, setIsAddCardOpen] = useState(false);
   const [cardHolderInput, setCardHolderInput] = useState('');
   const [cardNumberInput, setCardNumberInput] = useState('');
@@ -70,11 +68,25 @@ export default function CoupleSettingsPage() {
 
   const loadData = async () => {
     setLoading(true);
+    
+    // 1. Önce localStorage'dan hızlıca oku
+    try {
+      const local = localStorage.getItem('wedyplan_couple_profile');
+      if (local) {
+        const parsed = JSON.parse(local);
+        setProfileForm((prev) => ({ ...prev, ...parsed }));
+      }
+    } catch (e) {}
+
+    // 2. Sunucudan verileri senkronize et
     const res = await getCoupleSettings();
     if (res.success && res.data) {
       setProfileForm(res.data.profile);
       setPrefForm(res.data.preferences);
       setCards(res.data.cards);
+      try {
+        localStorage.setItem('wedyplan_couple_profile', JSON.stringify(res.data.profile));
+      } catch (e) {}
     }
     setLoading(false);
   };
@@ -88,9 +100,16 @@ export default function CoupleSettingsPage() {
     setTimeout(() => setToastMessage(null), 3500);
   };
 
-  // Profil Kaydetme
+  // Profil Kaydetme (Anlık Senkronizasyon Tetikleyicili)
   const handleSaveProfile = (e: React.FormEvent) => {
     e.preventDefault();
+
+    // Anında localStorage'a yaz ve tüm portalı tetikle
+    try {
+      localStorage.setItem('wedyplan_couple_profile', JSON.stringify(profileForm));
+      window.dispatchEvent(new Event('wedyplan_profile_updated'));
+    } catch (err) {}
+
     startTransition(async () => {
       const res = await updateCoupleProfile(profileForm);
       if (res.success) {
@@ -100,19 +119,14 @@ export default function CoupleSettingsPage() {
     });
   };
 
-  // Tercihleri Kaydetme
   const handleSavePreferences = (newPrefs: AppPreferencesData) => {
     setPrefForm(newPrefs);
     startTransition(async () => {
       const res = await updateAppPreferences(newPrefs);
-      if (res.success) {
-        showToast(res.message || 'Tercihler kaydedildi.');
-        router.refresh();
-      }
+      if (res.success) showToast(res.message || 'Tercihler kaydedildi.');
     });
   };
 
-  // Kart Ekleme
   const handleAddCard = (e: React.FormEvent) => {
     e.preventDefault();
     if (!cardHolderInput || !cardNumberInput || !cardExpiryInput) return;
@@ -126,31 +140,26 @@ export default function CoupleSettingsPage() {
         setCardNumberInput('');
         setCardExpiryInput('');
         showToast(res.message || 'Kart eklendi.');
-        router.refresh();
       }
     });
   };
 
-  // Kart Silme
   const handleDeleteCard = (id: string) => {
     startTransition(async () => {
       const res = await deletePaymentMethod(id);
       if (res.success && res.data) {
         setCards(res.data);
         showToast(res.message || 'Kart silindi.');
-        router.refresh();
       }
     });
   };
 
-  // Varsayılan Kart Yapma
   const handleSetDefault = (id: string) => {
     startTransition(async () => {
       const res = await setDefaultPaymentMethod(id);
       if (res.success && res.data) {
         setCards(res.data);
         showToast(res.message || 'Varsayılan kart güncellendi.');
-        router.refresh();
       }
     });
   };
@@ -167,7 +176,6 @@ export default function CoupleSettingsPage() {
   return (
     <div className="p-4 sm:p-8 max-w-5xl mx-auto space-y-8 pb-20">
       
-      {/* TOAST BİLDİRİMİ */}
       {toastMessage && (
         <div className="fixed top-6 right-6 z-50 bg-zinc-900 text-white px-4 py-3 rounded-2xl shadow-2xl border border-zinc-800 flex items-center gap-3 animate-in fade-in slide-in-from-top-4 duration-300">
           <CheckCircle2 className="w-4 h-4 text-emerald-400" />
@@ -175,7 +183,6 @@ export default function CoupleSettingsPage() {
         </div>
       )}
 
-      {/* HEADER */}
       <div>
         <h1 className="text-2xl sm:text-3xl font-extrabold text-zinc-900 dark:text-white tracking-tight flex items-center gap-3">
           <Sliders className="w-7 h-7 text-rose-500" /> Hesap & Profil Ayarları
@@ -185,7 +192,6 @@ export default function CoupleSettingsPage() {
         </p>
       </div>
 
-      {/* ALT NAVİGASYON SEKMELERİ */}
       <div className="flex items-center gap-2 border-b border-zinc-200 dark:border-zinc-800 overflow-x-auto pb-3 scrollbar-none">
         {[
           { id: 'PROFILE', label: 'Çift & Düğün Profili', icon: User },
@@ -218,7 +224,6 @@ export default function CoupleSettingsPage() {
         })}
       </div>
 
-      {/* TAB 1: DÜĞÜN PROFİLİ */}
       {activeTab === 'PROFILE' && (
         <form onSubmit={handleSaveProfile} className="bg-white dark:bg-zinc-900 border border-zinc-200/80 dark:border-zinc-800 rounded-3xl p-6 sm:p-8 space-y-6 shadow-xs">
           <div className="flex items-center gap-3 border-b border-zinc-100 dark:border-zinc-800 pb-4">
@@ -313,7 +318,6 @@ export default function CoupleSettingsPage() {
         </form>
       )}
 
-      {/* TAB 2: KAYITLI ÖDEME YÖNTEMLERİ */}
       {activeTab === 'PAYMENTS' && (
         <div className="space-y-6">
           <div className="flex items-center justify-between">
@@ -380,7 +384,6 @@ export default function CoupleSettingsPage() {
         </div>
       )}
 
-      {/* TAB 3: WedyAI & BİLDİRİMLER */}
       {activeTab === 'NOTIFICATIONS' && (
         <div className="bg-white dark:bg-zinc-900 border border-zinc-200/80 dark:border-zinc-800 rounded-3xl p-6 sm:p-8 space-y-6 shadow-xs">
           <div className="flex items-center gap-3 border-b border-zinc-100 dark:border-zinc-800 pb-4">
@@ -423,7 +426,6 @@ export default function CoupleSettingsPage() {
         </div>
       )}
 
-      {/* TAB 4: GÜVENLİK */}
       {activeTab === 'SECURITY' && (
         <div className="bg-white dark:bg-zinc-900 border border-zinc-200/80 dark:border-zinc-800 rounded-3xl p-6 sm:p-8 space-y-6 shadow-xs">
           <div className="flex items-center gap-3 border-b border-zinc-100 dark:border-zinc-800 pb-4">
@@ -458,7 +460,6 @@ export default function CoupleSettingsPage() {
         </div>
       )}
 
-      {/* KART EKLEME MODALI */}
       {isAddCardOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
           <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-3xl p-6 sm:p-8 max-w-md w-full shadow-2xl space-y-6 relative">
