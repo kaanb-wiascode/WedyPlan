@@ -192,3 +192,5 @@ export const PublicNavbar: React.FC<PublicNavbarProps> = ({ mode = "public" }) =
     </header>
   );
 };
+
+export default PublicNavbar;
