@@ -4,6 +4,7 @@ import { getSession } from '@/lib/auth/session';
 import { prisma } from '@/lib/db';
 import { getBudgetItems } from './budget';
 import { getChecklistItems } from './checklist';
+import { getGuestItems } from './guest';
 
 export async function getDashboardData() {
   try {
@@ -34,19 +35,26 @@ export async function getDashboardData() {
     const remainingBudget = targetBudget - spentBudget;
     const budgetPercentage = Math.min(100, Math.round((spentBudget / targetBudget) * 100));
 
-    // 3. Canlı Görevler (Checklist)
+    // 3. Canlı Görevler
     const checklistRes = await getChecklistItems();
     let checklistItems = checklistRes.success && Array.isArray(checklistRes.data) ? checklistRes.data : [];
-    
     const totalTasks = checklistItems.length > 0 ? checklistItems.length : 28;
     const completedTasks = checklistItems.filter((t: any) => t.isCompleted || t.completed).length;
     const taskPercentage = Math.round((completedTasks / totalTasks) * 100);
 
-    // 4. Davetli & Tedarikçi
-    const acceptedGuests = 142;
-    const totalGuests = 200;
-    const guestPercentage = Math.round((acceptedGuests / totalGuests) * 100);
+    // 4. CANLI DAVETLİ & LCV VERİLERİ
+    const guestRes = await getGuestItems();
+    let guestItems = guestRes.success && Array.isArray(guestRes.data) ? guestRes.data : [];
+    
+    // Toplam kişi sayısı (Kişi + Yanındaki Kişi Sayısı)
+    const totalGuests = guestItems.reduce((acc, curr) => acc + 1 + (Number(curr.plusOneCount) || 0), 0);
+    const acceptedGuests = guestItems
+      .filter((g: any) => g.rsvpStatus === 'ACCEPTED')
+      .reduce((acc, curr) => acc + 1 + (Number(curr.plusOneCount) || 0), 0);
+    
+    const guestPercentage = totalGuests > 0 ? Math.round((acceptedGuests / totalGuests) * 100) : 0;
 
+    // 5. Tedarikçi Verileri
     const bookedVendors = 5;
     const totalVendorCategories = 8;
 
