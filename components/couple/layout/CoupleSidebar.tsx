@@ -99,7 +99,7 @@ export function CoupleSidebar() {
   };
 
   return (
-    <aside className="w-72 border-r border-rose-100/60 dark:border-zinc-800/60 bg-white/70 dark:bg-zinc-950/70 backdrop-blur-2xl flex flex-col justify-between min-h-screen sticky top-0 transition-all z-30 shadow-xs">
+    <aside className="w-72 border-r border-zinc-200/80 dark:border-zinc-800/80 bg-white/70 dark:bg-zinc-950/70 backdrop-blur-2xl flex flex-col justify-between min-h-screen sticky top-0 transition-all z-30 shadow-xs">
       <div className="p-6 space-y-8">
         
         <Link href="/cift/dashboard" className="block px-2 group">
@@ -108,7 +108,7 @@ export function CoupleSidebar() {
               src="/assets/branding/logo-couple.svg"
               alt="WedyPlan Çift Portalı"
               fill
-              className="object-contain object-left transition-transform group-hover:scale-102"
+              className="object-contain object-left transition-opacity group-hover:opacity-80"
               priority
             />
           </div>
@@ -123,22 +123,22 @@ export function CoupleSidebar() {
               <Link
                 key={item.href}
                 href={item.href}
-                className={`flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-medium transition-all group ${
+                className={`flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs transition-all group ${
                   isActive
-                    ? 'bg-rose-500/10 text-rose-600 dark:text-rose-400 font-semibold border border-rose-200/60 dark:border-rose-900/30 shadow-xs'
-                    : 'text-zinc-600 dark:text-zinc-400 hover:bg-rose-50/50 dark:hover:bg-zinc-900/50 hover:text-zinc-900 dark:hover:text-zinc-100'
+                    ? 'bg-zinc-900 text-white dark:bg-white dark:text-zinc-900 font-semibold shadow-xs'
+                    : 'text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-900/60 hover:text-zinc-900 dark:hover:text-zinc-100 font-medium'
                 }`}
               >
                 <div className="flex items-center gap-3">
-                  <Icon className={`w-4 h-4 transition-colors ${isActive ? 'text-rose-500' : 'text-zinc-400 group-hover:text-rose-400'}`} />
+                  <Icon className={`w-4 h-4 transition-colors ${isActive ? 'text-white dark:text-zinc-900' : 'text-zinc-400 group-hover:text-zinc-600 dark:group-hover:text-zinc-200'}`} />
                   <span>{item.name}</span>
                 </div>
                 {item.badge ? (
-                  <span className="px-1.5 py-0.5 text-[9px] font-bold rounded-md bg-rose-500 text-white uppercase tracking-wider shadow-xs">
+                  <span className={`px-1.5 py-0.5 text-[9px] font-bold rounded-md uppercase tracking-wider ${isActive ? 'bg-white/20 text-white dark:bg-black/20 dark:text-zinc-900' : 'bg-zinc-200 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300'}`}>
                     {item.badge}
                   </span>
                 ) : (
-                  <ChevronRight className={`w-3.5 h-3.5 transition-all ${isActive ? 'opacity-100 text-rose-500 translate-x-0.5' : 'opacity-0 group-hover:opacity-100 text-zinc-400'}`} />
+                  <ChevronRight className={`w-3.5 h-3.5 transition-all ${isActive ? 'opacity-80 translate-x-0.5' : 'opacity-0 group-hover:opacity-100 text-zinc-400'}`} />
                 )}
               </Link>
             );
@@ -146,26 +146,27 @@ export function CoupleSidebar() {
         </nav>
       </div>
 
-      <div className="p-4 m-4 rounded-2xl bg-gradient-to-b from-rose-50/40 to-white/60 dark:from-zinc-900/60 dark:to-zinc-900/30 border border-rose-100 dark:border-zinc-800/80 backdrop-blur-md space-y-3 shadow-xs">
+      <div className="p-4 m-4 rounded-2xl bg-zinc-50/80 dark:bg-zinc-900/50 border border-zinc-200/80 dark:border-zinc-800/80 backdrop-blur-md space-y-3 shadow-xs">
         <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-full bg-gradient-to-tr from-rose-400 to-rose-600 flex items-center justify-center text-white text-xs font-bold shadow-xs ring-2 ring-white dark:ring-zinc-800 shrink-0">
+          <div className="w-9 h-9 rounded-full bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 text-xs font-bold flex items-center justify-center shadow-xs shrink-0">
             {initials}
           </div>
           <div className="flex flex-col truncate min-w-0">
             <span className="text-xs font-bold text-zinc-900 dark:text-white truncate">
               {profile.partnerOneName} & {profile.partnerTwoName}
             </span>
-            <span className="text-[10px] text-rose-500/90 font-medium flex items-center gap-1 truncate mt-0.5">
-              <Calendar className="w-2.5 h-2.5 shrink-0" /> {formatDate(profile.weddingDate)}
+            <span className="text-[10px] text-zinc-500 dark:text-zinc-400 font-medium flex items-center gap-1 truncate mt-0.5">
+              <Calendar className="w-2.5 h-2.5 shrink-0 text-zinc-400" /> {formatDate(profile.weddingDate)}
             </span>
           </div>
         </div>
         <button
           onClick={() => {
             localStorage.clear();
+            document.cookie = 'wedyplan_session=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT;';
             window.location.href = '/giris';
           }}
-          className="w-full py-2 px-3 rounded-xl text-xs font-medium text-zinc-600 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/20 transition-all flex items-center justify-center gap-2 border border-transparent hover:border-rose-200/50 cursor-pointer"
+          className="w-full py-2 px-3 rounded-xl text-xs font-medium text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-200/60 dark:hover:bg-zinc-800/60 transition-all flex items-center justify-center gap-2 border border-transparent cursor-pointer"
         >
           <LogOut className="w-3.5 h-3.5" />
           <span>Oturumu Kapat</span>

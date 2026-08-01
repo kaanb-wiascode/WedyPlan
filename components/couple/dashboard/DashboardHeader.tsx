@@ -95,37 +95,40 @@ export function DashboardHeader({ names, location }: DashboardHeaderProps = {}) 
   const daysLeft = calculateDaysLeft(wDate);
 
   return (
-    <div className="p-6 sm:p-8 rounded-3xl bg-gradient-to-r from-rose-500 via-rose-600 to-amber-500 text-white shadow-xl relative overflow-hidden flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+    <div className="p-6 sm:p-8 rounded-3xl bg-white/70 dark:bg-zinc-900/70 backdrop-blur-2xl border border-zinc-200/80 dark:border-zinc-800/80 shadow-[0_8px_30px_rgb(0,0,0,0.03)] text-zinc-900 dark:text-zinc-100 relative overflow-hidden flex flex-col md:flex-row items-start md:items-center justify-between gap-6 transition-all">
       
+      {/* Hafif Ortam Işığı Efekti */}
+      <div className="absolute top-0 left-0 w-72 h-72 bg-zinc-200/30 dark:bg-zinc-800/20 rounded-full blur-3xl pointer-events-none -translate-x-1/2 -translate-y-1/2" />
+
       <div className="space-y-3 max-w-xl z-10">
-        <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/20 backdrop-blur-md text-[11px] font-bold tracking-wide">
-          <Sparkles className="w-3.5 h-3.5 text-amber-300" />
+        <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-zinc-200/60 dark:bg-zinc-800/80 text-zinc-700 dark:text-zinc-300 border border-zinc-300/40 dark:border-zinc-700/50 text-[11px] font-medium tracking-tight">
+          <Sparkles className="w-3.5 h-3.5 text-zinc-500 dark:text-zinc-400" />
           <span>Büyük Günü Planlıyoruz</span>
         </div>
 
-        <h1 className="text-2xl sm:text-4xl font-black tracking-tight leading-tight">
+        <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-zinc-900 dark:text-white leading-tight">
           Hoş Geldiniz, {displayName}! ✨
         </h1>
 
-        <p className="text-xs sm:text-sm text-white/90 leading-relaxed font-medium">
+        <p className="text-xs sm:text-sm text-zinc-500 dark:text-zinc-400 leading-relaxed font-normal">
           Düğün hazırlıklarınız harika gidiyor! Planlamanızı kolaylaştırmak için tüm adımları tek ekranda topladık.
         </p>
 
         <div className="flex items-center gap-3 pt-2">
-          <button className="px-4 py-2 rounded-xl bg-white text-rose-600 text-xs font-bold shadow-md hover:bg-rose-50 transition-all cursor-pointer inline-flex items-center gap-1.5">
+          <button className="px-4 py-2 rounded-xl bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 text-xs font-semibold hover:bg-black dark:hover:bg-zinc-200 transition-all cursor-pointer inline-flex items-center gap-1.5 shadow-xs">
             <Plus className="w-3.5 h-3.5" /> Harcama Ekle
           </button>
-          <button className="px-4 py-2 rounded-xl bg-white/20 backdrop-blur-md text-white text-xs font-bold hover:bg-white/30 transition-all cursor-pointer inline-flex items-center gap-1.5">
+          <button className="px-4 py-2 rounded-xl bg-zinc-100 dark:bg-zinc-800 text-zinc-800 dark:text-zinc-200 border border-zinc-200/80 dark:border-zinc-700/60 text-xs font-medium hover:bg-zinc-200/80 dark:hover:bg-zinc-700/80 transition-all cursor-pointer inline-flex items-center gap-1.5">
             Davetli Ekle
           </button>
         </div>
       </div>
 
-      <div className="p-5 rounded-2xl bg-white/15 backdrop-blur-md border border-white/20 text-center shrink-0 min-w-[160px] z-10 space-y-1">
-        <div className="text-4xl font-black tracking-tight">{daysLeft}</div>
-        <div className="text-[10px] font-extrabold uppercase tracking-widest text-amber-200">GÜN KALDI</div>
-        <div className="text-[11px] opacity-90 font-medium pt-1 flex items-center justify-center gap-1">
-          <Calendar className="w-3 h-3" /> {formatDate(wDate)}
+      <div className="p-5 rounded-2xl bg-zinc-50/80 dark:bg-zinc-800/50 backdrop-blur-md border border-zinc-200/60 dark:border-zinc-700/50 text-center shrink-0 min-w-[160px] z-10 space-y-1 shadow-xs">
+        <div className="text-3xl sm:text-4xl font-extrabold tracking-tight text-zinc-900 dark:text-white">{daysLeft}</div>
+        <div className="text-[10px] font-bold uppercase tracking-widest text-zinc-400 dark:text-zinc-500">GÜN KALDI</div>
+        <div className="text-[11px] text-zinc-500 dark:text-zinc-400 font-medium pt-1 flex items-center justify-center gap-1">
+          <Calendar className="w-3 h-3 text-zinc-400" /> {formatDate(wDate)}
         </div>
       </div>
 
