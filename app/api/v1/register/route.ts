@@ -53,7 +53,7 @@ export async function POST(request: NextRequest) {
     // 5. Şifre hash'le
     const passwordHash = await hashPassword(password);
 
-    // 6. Role validasyonu
+    // 6. Role ve Portal eşleme
     const validRoles: Record<string, 'COUPLE' | 'VENDOR' | 'ADMIN'> = {
       COUPLE: 'COUPLE',
       VENDOR: 'VENDOR',
@@ -63,46 +63,53 @@ export async function POST(request: NextRequest) {
     const userRole = validRoles[role] || 'COUPLE';
     const portalType = userRole;
 
-    // Partner isimlerini ayır
-    const [partnerOne, partnerTwo] = fullName.split(' & ').map((n: string) => n.trim());
-
-    // 7. TEK SORGULA TEK ATOMİK İŞLEM (Nested Create)
-    // Bu yapı Foreign Key çakışmalarını sıfıra indirir.
-    const user = await (prisma as any).identityUser.create({
-      data: {
-        email: email.toLowerCase(),
-        passwordHash,
-        fullName,
-        status: 'ACTIVE',
-        isEmailVerified: true,
-        securityProfile: {
-          create: {},
-        },
-        portalProfiles: {
-          create: {
-            portal: portalType,
-            isPrimary: true,
+    // 7. ATOMİK TRANSACTION (Tek Bağlantı Kanalında Sıralı ve Güvenli Kayıt)
+    const user = await (prisma as any).$transaction(async (tx: any) => {
+      // a. Ana Kullanıcı Hesabı
+      const newUser = await tx.identityUser.create({
+        data: {
+          email: email.toLowerCase(),
+          passwordHash,
+          fullName,
+          status: 'ACTIVE',
+          isEmailVerified: true,
+          securityProfile: {
+            create: {},
           },
         },
-        ...(userRole === 'COUPLE'
-          ? {
-              couples: {
-                create: {
-                  partnerOneName: partnerOne || fullName,
-                  partnerTwoName: partnerTwo || null,
-                  weddingDate: weddingDate ? new Date(weddingDate) : null,
-                },
-              },
-            }
-          : {
-              vendors: {
-                create: {
-                  businessName: fullName,
-                  businessCategory: 'OTHER',
-                },
-              },
-            }),
-      },
+      });
+
+      // b. Portal Profili
+      await tx.portalProfile.create({
+        data: {
+          userId: newUser.id,
+          portal: portalType,
+          isPrimary: true,
+        },
+      });
+
+      // c. Çift veya Satıcı Profili
+      if (userRole === 'COUPLE') {
+        const [partnerOne, partnerTwo] = fullName.split(' & ').map((n: string) => n.trim());
+        await tx.couple.create({
+          data: {
+            userId: newUser.id,
+            partnerOneName: partnerOne || fullName,
+            partnerTwoName: partnerTwo || null,
+            weddingDate: weddingDate ? new Date(weddingDate) : null,
+          },
+        });
+      } else if (userRole === 'VENDOR') {
+        await tx.vendor.create({
+          data: {
+            userId: newUser.id,
+            businessName: fullName,
+            businessCategory: 'OTHER',
+          },
+        });
+      }
+
+      return newUser;
     });
 
     // 8. Session oluştur
