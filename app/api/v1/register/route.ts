@@ -102,7 +102,7 @@ export async function POST(request: NextRequest) {
           userId: user.id,
           partnerOneName: partnerOne || fullName,
           partnerTwoName: partnerTwo || null,
-          weddingDate: weddingDate ? new Date(weddingDate) : null,
+          weddingDate: weddingDate ? new Date(weddingDate) : null, // DateTime dönüşümü
         },
       });
     } else if (userRole === 'VENDOR') {
@@ -123,20 +123,24 @@ export async function POST(request: NextRequest) {
       portalContext: portalType,
     });
 
-    // 12. Registration audit log
-    await (prisma as any).auditLog.create({
-      data: {
-        correlationId: crypto.randomUUID(),
-        category: 'AUTHENTICATION',
-        action: 'REGISTRATION_SUCCESS',
-        actorUserId: user.id,
-        actorRole: userRole,
-        actorIpAddress: request.headers.get('x-forwarded-for') || 'unknown',
-        actorUserAgent: request.headers.get('user-agent') || 'unknown',
-        severity: 'INFO',
-        metadata: { role: userRole },
-      },
-    });
+    // 12. Registration audit log (GÜVENLİ HALE GETİRİLDİ: Hata verirse ana kaydı bozmaz)
+    try {
+      await (prisma as any).auditLog.create({
+        data: {
+          correlationId: crypto.randomUUID(),
+          category: 'AUTHENTICATION',
+          action: 'REGISTRATION_SUCCESS',
+          actorUserId: user.id,
+          actorRole: userRole,
+          actorIpAddress: request.headers.get('x-forwarded-for') || 'unknown',
+          actorUserAgent: request.headers.get('user-agent') || 'unknown',
+          severity: 'INFO',
+          metadata: { role: userRole },
+        },
+      });
+    } catch (auditError) {
+      console.warn('Audit log oluşturulamadı (kayıt işlemi etkilenmedi):', auditError);
+    }
 
     return NextResponse.json(
       {
@@ -150,21 +154,22 @@ export async function POST(request: NextRequest) {
       },
       { status: 201 }
     );
-  } catch (error) {
+  } catch (error: any) {
     console.error('Registration error:', error);
 
-    if (
-      error instanceof Error &&
-      error.message.includes('Unique constraint failed')
-    ) {
+    const errorMessage = error?.message || String(error);
+
+    // Duplicate email hatası
+    if (errorMessage.includes('Unique constraint failed')) {
       return NextResponse.json(
         { success: false, error: 'Bu e-posta adresi zaten kayıtlıdır.' },
         { status: 409 }
       );
     }
 
+    // TEŞHİS İÇİN: Gerçek hata detayını istemciye döndür
     return NextResponse.json(
-      { success: false, error: 'Kayıt yapılamadı. Lütfen tekrar deneyin.' },
+      { success: false, error: `Kayıt Hatası: ${errorMessage}` },
       { status: 500 }
     );
   }
