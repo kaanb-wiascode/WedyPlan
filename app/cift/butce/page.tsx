@@ -17,19 +17,19 @@ import {
 
 // Kategori Tanımları
 const CATEGORIES = [
-  { id: 'Mekan', label: 'Mekan & Yeme-İçme', color: 'bg-rose-500' },
-  { id: 'Fotograf', label: 'Fotoğraf & Video', color: 'bg-blue-500' },
-  { id: 'Giyim', label: 'Gelinlik & Damatlık', color: 'bg-purple-500' },
-  { id: 'Müzik', label: 'Müzik & Eğlence', color: 'bg-amber-500' },
-  { id: 'Dekorasyon', label: 'Süsleme & Çiçek', color: 'bg-emerald-500' },
-  { id: 'Diğer', label: 'Diğer Hizmetler', color: 'bg-zinc-500' },
+  { id: 'Mekan', label: 'Mekan & Yeme-İçme', color: 'bg-zinc-800 dark:bg-zinc-200' },
+  { id: 'Fotograf', label: 'Fotoğraf & Video', color: 'bg-zinc-600 dark:bg-zinc-400' },
+  { id: 'Giyim', label: 'Gelinlik & Damatlık', color: 'bg-zinc-500 dark:bg-zinc-500' },
+  { id: 'Müzik', label: 'Müzik & Eğlence', color: 'bg-zinc-700 dark:bg-zinc-300' },
+  { id: 'Dekorasyon', label: 'Süsleme & Çiçek', color: 'bg-zinc-400 dark:bg-zinc-600' },
+  { id: 'Diğer', label: 'Diğer Hizmetler', color: 'bg-zinc-300 dark:bg-zinc-700' },
 ];
 
 // Ödeme Durumu Tanımları
 const STATUS_OPTIONS = [
   { id: 'PENDING', label: 'Ödeme Bekliyor', badgeBg: 'bg-zinc-100 dark:bg-zinc-800', textColor: 'text-zinc-600 dark:text-zinc-400', icon: Clock },
-  { id: 'PARTIAL', label: 'Kapora Ödendi', badgeBg: 'bg-amber-100 dark:bg-amber-950/60', textColor: 'text-amber-700 dark:text-amber-400', icon: Clock },
-  { id: 'PAID', label: 'Tamamı Ödendi', badgeBg: 'bg-emerald-100 dark:bg-emerald-950/60', textColor: 'text-emerald-700 dark:text-emerald-400', icon: CheckCircle2 },
+  { id: 'PARTIAL', label: 'Kapora Ödendi', badgeBg: 'bg-amber-500/10 border border-amber-500/20', textColor: 'text-amber-700 dark:text-amber-400', icon: Clock },
+  { id: 'PAID', label: 'Tamamı Ödendi', badgeBg: 'bg-emerald-500/10 border border-emerald-500/20', textColor: 'text-emerald-700 dark:text-emerald-400', icon: CheckCircle2 },
 ];
 
 export default function BudgetPage() {
@@ -125,87 +125,91 @@ export default function BudgetPage() {
 
   if (loading) {
     return (
-      <div className="min-h-[60vh] flex flex-col items-center justify-center space-y-3">
-        <div className="w-8 h-8 border-3 border-rose-500 border-t-transparent rounded-full animate-spin" />
-        <p className="text-xs font-semibold text-zinc-500">Bütçe Verileri Hesaplanıyor...</p>
+      <div className="min-h-[60vh] flex flex-col items-center justify-center space-y-3 font-sans">
+        <div className="w-6 h-6 border-2 border-zinc-900 dark:border-white border-t-transparent rounded-full animate-spin" />
+        <p className="text-xs font-medium text-zinc-500">Bütçe Verileri Hesaplanıyor...</p>
       </div>
     );
   }
 
   return (
-    <div className="p-4 sm:p-8 max-w-7xl mx-auto space-y-8">
+    <div className="p-4 sm:p-8 max-w-7xl mx-auto space-y-8 font-sans antialiased">
       
       {/* HEADER & HIZLI AKSİYON */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <h1 className="text-2xl sm:text-3xl font-extrabold text-zinc-900 dark:text-white tracking-tight flex items-center gap-3">
-            <Wallet className="w-7 h-7 text-rose-500" /> Düğün Bütçe Planlayıcı
+      <div className="p-8 rounded-3xl bg-white/70 dark:bg-zinc-900/70 backdrop-blur-2xl border border-zinc-200/80 dark:border-zinc-800/80 shadow-[0_8px_30px_rgb(0,0,0,0.03)] flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6">
+        <div className="space-y-2">
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-zinc-200/60 dark:bg-zinc-800/80 text-zinc-700 dark:text-zinc-300 text-[11px] font-medium border border-zinc-300/40 dark:border-zinc-700/50">
+            <Wallet className="w-3.5 h-3.5 text-zinc-500" />
+            <span>Finansal Yönetim</span>
+          </div>
+          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-zinc-900 dark:text-white">
+            Düğün Bütçe Planlayıcı
           </h1>
-          <p className="text-xs sm:text-sm text-zinc-500 dark:text-zinc-400 mt-1">
+          <p className="text-xs sm:text-sm text-zinc-500 dark:text-zinc-400">
             Maliyetlerinizi kontrol altında tutun, sürpriz harcamaların önüne geçin.
           </p>
         </div>
 
         <button
           onClick={() => setIsModalOpen(true)}
-          className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-2xl bg-gradient-to-r from-rose-600 to-rose-500 text-white text-xs font-bold shadow-md hover:shadow-lg transition-all hover:scale-[1.02] cursor-pointer"
+          className="px-5 py-2.5 rounded-xl bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 text-xs font-semibold hover:bg-black dark:hover:bg-zinc-200 transition-all cursor-pointer inline-flex items-center justify-center gap-2 shadow-xs shrink-0"
         >
           <Plus className="w-4 h-4" /> Yeni Harcama Ekle
         </button>
       </div>
 
-      {/* 1. ÖZET FİNANS KARTLARI */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="p-5 rounded-2xl bg-white dark:bg-zinc-900 border border-zinc-200/80 dark:border-zinc-800 shadow-xs space-y-2">
-          <span className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">Hedef Bütçe</span>
-          <div className="text-2xl font-black text-zinc-900 dark:text-white">
-            {TOTAL_TARGET_BUDGET.toLocaleString('tr-TR')} ₺
+      {/* 1. ÖZET FİNANS KARTLARI (Frosted Glass) */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+        <div className="p-6 rounded-3xl bg-white/70 dark:bg-zinc-900/70 backdrop-blur-2xl border border-zinc-200/80 dark:border-zinc-800/80 shadow-xs space-y-1">
+          <span className="text-xs font-medium text-zinc-400">Hedef Bütçe</span>
+          <div className="text-2xl font-bold text-zinc-900 dark:text-white">
+            ₺{TOTAL_TARGET_BUDGET.toLocaleString('tr-TR')}
           </div>
           <div className="text-[11px] text-zinc-500">Tavan Limiti</div>
         </div>
 
-        <div className="p-5 rounded-2xl bg-white dark:bg-zinc-900 border border-zinc-200/80 dark:border-zinc-800 shadow-xs space-y-2">
-          <span className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">Gerçekleşen Harcama</span>
-          <div className="text-2xl font-black text-rose-600 dark:text-rose-400">
-            {totalSpent.toLocaleString('tr-TR')} ₺
+        <div className="p-6 rounded-3xl bg-white/70 dark:bg-zinc-900/70 backdrop-blur-2xl border border-zinc-200/80 dark:border-zinc-800/80 shadow-xs space-y-1">
+          <span className="text-xs font-medium text-zinc-400">Gerçekleşen Harcama</span>
+          <div className="text-2xl font-bold text-zinc-900 dark:text-white">
+            ₺{totalSpent.toLocaleString('tr-TR')}
           </div>
           <div className="text-[11px] text-zinc-500">
-            Bütçenin <span className="font-bold text-rose-500">%{spentPercentage}</span> kadarı harcandı.
+            Bütçenin <span className="font-semibold text-zinc-900 dark:text-white">%{spentPercentage}</span> kadarı harcandı.
           </div>
         </div>
 
-        <div className="p-5 rounded-2xl bg-white dark:bg-zinc-900 border border-zinc-200/80 dark:border-zinc-800 shadow-xs space-y-2">
-          <span className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">Kalan Bütçe</span>
-          <div className="text-2xl font-black text-emerald-600 dark:text-emerald-400">
-            {remainingBudget.toLocaleString('tr-TR')} ₺
+        <div className="p-6 rounded-3xl bg-white/70 dark:bg-zinc-900/70 backdrop-blur-2xl border border-zinc-200/80 dark:border-zinc-800/80 shadow-xs space-y-1">
+          <span className="text-xs font-medium text-emerald-600 dark:text-emerald-400">Kalan Bütçe</span>
+          <div className="text-2xl font-bold text-zinc-900 dark:text-white">
+            ₺{remainingBudget.toLocaleString('tr-TR')}
           </div>
-          <div className="text-[11px] text-emerald-600 font-medium">Kullanılabilir Bakiye</div>
+          <div className="text-[11px] text-emerald-600 dark:text-emerald-400 font-medium">Kullanılabilir Bakiye</div>
         </div>
 
-        <div className="p-5 rounded-2xl bg-gradient-to-br from-zinc-900 to-zinc-950 text-white shadow-md space-y-2 relative overflow-hidden">
+        <div className="p-6 rounded-3xl bg-white/70 dark:bg-zinc-900/70 backdrop-blur-2xl border border-zinc-200/80 dark:border-zinc-800/80 shadow-xs space-y-2 relative overflow-hidden">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-rose-400 flex items-center gap-1">
-              <Sparkles className="w-3.5 h-3.5" /> Wedy AI Durum
+            <span className="text-[11px] font-bold text-zinc-500 dark:text-zinc-400 flex items-center gap-1 uppercase tracking-wider">
+              <Sparkles className="w-3.5 h-3.5 text-zinc-400" /> Wedy AI Durum
             </span>
           </div>
-          <div className="text-sm font-bold text-zinc-100">
+          <div className="text-sm font-bold text-zinc-900 dark:text-white">
             {spentPercentage > 85 ? '⚠️ Bütçe Sınırına Yaklaşıldı' : '✅ Bütçe İdeal Durumda'}
           </div>
-          <p className="text-[11px] text-zinc-400 leading-relaxed">
+          <p className="text-[11px] text-zinc-500 dark:text-zinc-400 leading-relaxed">
             Harcamalarınız canlı hesaplanıyor ve bütçeniz kontrol altında.
           </p>
         </div>
       </div>
 
       {/* 2. CANLI BÜTÇE İLERLEME BARI */}
-      <div className="p-6 rounded-2xl bg-white dark:bg-zinc-900 border border-zinc-200/80 dark:border-zinc-800 shadow-xs space-y-3">
+      <div className="p-6 rounded-3xl bg-white/70 dark:bg-zinc-900/70 backdrop-blur-2xl border border-zinc-200/80 dark:border-zinc-800/80 shadow-xs space-y-3">
         <div className="flex items-center justify-between text-xs font-bold">
           <span className="text-zinc-700 dark:text-zinc-300">Harcanan Bütçe Oranı</span>
-          <span className="text-rose-600">%{spentPercentage}</span>
+          <span className="text-zinc-900 dark:text-white">%{spentPercentage}</span>
         </div>
         <div className="w-full h-3 bg-zinc-100 dark:bg-zinc-800 rounded-full overflow-hidden p-0.5">
           <div
-            className="h-full bg-gradient-to-r from-rose-500 to-amber-500 rounded-full transition-all duration-500"
+            className="h-full bg-zinc-900 dark:bg-white rounded-full transition-all duration-500"
             style={{ width: `${Math.min(spentPercentage, 100)}%` }}
           />
         </div>
@@ -220,17 +224,17 @@ export default function BudgetPage() {
             placeholder="Harcama ara..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 rounded-xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-xs focus:outline-none focus:border-rose-500 transition-all"
+            className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-white/80 dark:bg-zinc-900/80 backdrop-blur-md border border-zinc-200/80 dark:border-zinc-800/80 text-xs text-zinc-900 dark:text-white focus:outline-none focus:border-zinc-900 dark:focus:border-white transition-all font-medium"
           />
         </div>
 
         <div className="flex items-center gap-1.5 overflow-x-auto w-full md:w-auto pb-2 md:pb-0 scrollbar-none">
           <button
             onClick={() => setSelectedCategoryFilter('ALL')}
-            className={`px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all ${
+            className={`px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${
               selectedCategoryFilter === 'ALL'
-                ? 'bg-rose-500 text-white shadow-xs'
-                : 'bg-white dark:bg-zinc-900 text-zinc-600 dark:text-zinc-400 border border-zinc-200 dark:border-zinc-800 hover:border-rose-200'
+                ? 'bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 shadow-xs'
+                : 'bg-white/80 dark:bg-zinc-900/80 text-zinc-600 dark:text-zinc-400 border border-zinc-200/80 dark:border-zinc-800/80 hover:bg-zinc-100/80'
             }`}
           >
             Tümü
@@ -239,10 +243,10 @@ export default function BudgetPage() {
             <button
               key={cat.id}
               onClick={() => setSelectedCategoryFilter(cat.id)}
-              className={`px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all ${
+              className={`px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${
                 selectedCategoryFilter === cat.id
-                  ? 'bg-rose-500 text-white shadow-xs'
-                  : 'bg-white dark:bg-zinc-900 text-zinc-600 dark:text-zinc-400 border border-zinc-200 dark:border-zinc-800 hover:border-rose-200'
+                  ? 'bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 shadow-xs'
+                  : 'bg-white/80 dark:bg-zinc-900/80 text-zinc-600 dark:text-zinc-400 border border-zinc-200/80 dark:border-zinc-800/80 hover:bg-zinc-100/80'
               }`}
             >
               {cat.label}
@@ -251,12 +255,12 @@ export default function BudgetPage() {
         </div>
       </div>
 
-      {/* 4. HARCAMA KALEMLERİ TABLOSU */}
-      <div className="bg-white dark:bg-zinc-900 border border-zinc-200/80 dark:border-zinc-800 rounded-2xl overflow-hidden shadow-xs">
+      {/* 4. HARCAMA KALEMLERİ TABLOSU (Cam Kart) */}
+      <div className="bg-white/70 dark:bg-zinc-900/70 backdrop-blur-2xl border border-zinc-200/80 dark:border-zinc-800/80 rounded-3xl overflow-hidden shadow-xs">
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
-              <tr className="bg-zinc-50/80 dark:bg-zinc-800/50 border-b border-zinc-200/80 dark:border-zinc-800 text-[11px] font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
+              <tr className="bg-zinc-50/50 dark:bg-zinc-800/30 border-b border-zinc-200/80 dark:border-zinc-800 text-[11px] font-bold text-zinc-400 uppercase tracking-wider">
                 <th className="p-4">Harcama Başlığı</th>
                 <th className="p-4">Kategori</th>
                 <th className="p-4">Planlanan Tutar</th>
@@ -265,10 +269,10 @@ export default function BudgetPage() {
                 <th className="p-4 text-right">İşlem</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-zinc-100 dark:divide-zinc-800 text-xs">
+            <tbody className="divide-y divide-zinc-200/60 dark:divide-zinc-800/60 text-xs">
               {filteredItems.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="p-8 text-center text-zinc-400">
+                  <td colSpan={6} className="p-8 text-center text-zinc-400 font-medium">
                     Henüz eklenmiş bir harcama bulunamadı.
                   </td>
                 </tr>
@@ -278,7 +282,7 @@ export default function BudgetPage() {
                   const StatusIcon = statusObj.icon;
 
                   return (
-                    <tr key={item.id} className="hover:bg-rose-50/30 dark:hover:bg-zinc-800/30 transition-colors">
+                    <tr key={item.id} className="hover:bg-zinc-50/50 dark:hover:bg-zinc-800/30 transition-colors">
                       <td className="p-4 font-bold text-zinc-900 dark:text-white">
                         {item.title}
                       </td>
@@ -288,10 +292,10 @@ export default function BudgetPage() {
                         </span>
                       </td>
                       <td className="p-4 font-semibold text-zinc-800 dark:text-zinc-200">
-                        {Number(item.allocatedAmount).toLocaleString('tr-TR')} ₺
+                        ₺{Number(item.allocatedAmount).toLocaleString('tr-TR')}
                       </td>
-                      <td className="p-4 font-semibold text-rose-600 dark:text-rose-400">
-                        {Number(item.spentAmount || 0).toLocaleString('tr-TR')} ₺
+                      <td className="p-4 font-bold text-zinc-900 dark:text-white">
+                        ₺{Number(item.spentAmount || 0).toLocaleString('tr-TR')}
                       </td>
                       <td className="p-4">
                         <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold ${statusObj.badgeBg} ${statusObj.textColor}`}>
@@ -303,7 +307,7 @@ export default function BudgetPage() {
                         <button
                           onClick={() => handleDelete(item.id)}
                           disabled={isPending}
-                          className="p-1.5 rounded-lg hover:bg-rose-100 text-rose-500 hover:text-rose-700 transition-colors cursor-pointer disabled:opacity-50"
+                          className="p-1.5 rounded-xl hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-400 hover:text-red-500 transition-colors cursor-pointer disabled:opacity-50"
                           title="Sil"
                         >
                           <Trash2 className="w-4 h-4" />
@@ -321,47 +325,47 @@ export default function BudgetPage() {
       {/* 5. YENİ HARCAMA EKLEME MODALI */}
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-          <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-3xl p-6 sm:p-8 max-w-lg w-full shadow-2xl space-y-6 relative animate-in fade-in zoom-in-95 duration-200">
+          <div className="bg-white/90 dark:bg-zinc-900/90 backdrop-blur-2xl border border-zinc-200/80 dark:border-zinc-800/80 rounded-3xl p-6 sm:p-8 max-w-lg w-full shadow-2xl space-y-6 relative animate-in fade-in zoom-in-95 duration-200">
             
-            <div className="flex items-center justify-between">
-              <h2 className="text-lg font-bold text-zinc-900 dark:text-white flex items-center gap-2">
-                <Plus className="w-5 h-5 text-rose-500" /> Yeni Bütçe Kalemi Ekle
+            <div className="flex items-center justify-between border-b border-zinc-100 dark:border-zinc-800/80 pb-3">
+              <h2 className="text-base font-bold text-zinc-900 dark:text-white flex items-center gap-2">
+                <Plus className="w-4 h-4 text-zinc-500" /> Yeni Bütçe Kalemi Ekle
               </h2>
               <button
                 onClick={() => setIsModalOpen(false)}
                 className="p-1.5 rounded-xl text-zinc-400 hover:text-zinc-700 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-all cursor-pointer"
               >
-                <X className="w-5 h-5" />
+                <X className="w-4 h-4" />
               </button>
             </div>
 
             <form onSubmit={handleAddItem} className="space-y-4">
               
-              <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-zinc-600 dark:text-zinc-400">Harcama Başlığı</label>
+              <div className="space-y-1">
+                <label className="text-[11px] font-medium text-zinc-600 dark:text-zinc-400">Harcama Başlığı</label>
                 <input
                   type="text"
                   placeholder="örn. Düğün Salonu Kiralama"
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
-                  className="w-full px-4 py-3 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-800/50 text-xs text-zinc-900 dark:text-white focus:outline-none focus:border-rose-500 focus:bg-white transition-all"
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-700/60 text-xs text-zinc-900 dark:text-white focus:outline-none focus:border-zinc-900 dark:focus:border-white transition-all font-medium"
                   required
                 />
               </div>
 
-              {/* LÜKS DROPDOWN'LAR */}
+              {/* DROPDOWN'LAR */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 
                 {/* KATEGORİ DROPDOWN */}
-                <div className="space-y-1.5 relative">
-                  <label className="text-xs font-semibold text-zinc-600 dark:text-zinc-400">Kategori</label>
+                <div className="space-y-1 relative">
+                  <label className="text-[11px] font-medium text-zinc-600 dark:text-zinc-400">Kategori</label>
                   <button
                     type="button"
                     onClick={() => {
                       setIsCategoryDropdownOpen(!isCategoryDropdownOpen);
                       setIsStatusDropdownOpen(false);
                     }}
-                    className="w-full px-3.5 py-2.5 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-800/50 text-xs font-medium text-zinc-900 dark:text-white flex items-center justify-between hover:border-rose-300 transition-all cursor-pointer"
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-zinc-200 dark:border-zinc-700/60 bg-zinc-50 dark:bg-zinc-800/50 text-xs font-medium text-zinc-900 dark:text-white flex items-center justify-between transition-all cursor-pointer"
                   >
                     <div className="flex items-center gap-2 truncate">
                       <span className={`w-2.5 h-2.5 rounded-full ${selectedCategoryObj.color}`} />
@@ -382,15 +386,15 @@ export default function BudgetPage() {
                           }}
                           className={`w-full px-3 py-2 rounded-xl text-xs font-medium flex items-center justify-between transition-colors cursor-pointer ${
                             category === cat.id
-                              ? 'bg-rose-50 dark:bg-rose-950/40 text-rose-600 dark:text-rose-400 font-bold'
-                              : 'text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800'
+                              ? 'bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-white font-bold'
+                              : 'text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-800/50'
                           }`}
                         >
                           <div className="flex items-center gap-2">
                             <span className={`w-2.5 h-2.5 rounded-full ${cat.color}`} />
                             <span>{cat.label}</span>
                           </div>
-                          {category === cat.id && <Check className="w-3.5 h-3.5 text-rose-500" />}
+                          {category === cat.id && <Check className="w-3.5 h-3.5 text-zinc-900 dark:text-white" />}
                         </button>
                       ))}
                     </div>
@@ -398,15 +402,15 @@ export default function BudgetPage() {
                 </div>
 
                 {/* ÖDEME DURUMU DROPDOWN */}
-                <div className="space-y-1.5 relative">
-                  <label className="text-xs font-semibold text-zinc-600 dark:text-zinc-400">Ödeme Durumu</label>
+                <div className="space-y-1 relative">
+                  <label className="text-[11px] font-medium text-zinc-600 dark:text-zinc-400">Ödeme Durumu</label>
                   <button
                     type="button"
                     onClick={() => {
                       setIsStatusDropdownOpen(!isStatusDropdownOpen);
                       setIsCategoryDropdownOpen(false);
                     }}
-                    className="w-full px-3.5 py-2.5 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-800/50 text-xs font-medium text-zinc-900 dark:text-white flex items-center justify-between hover:border-rose-300 transition-all cursor-pointer"
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-zinc-200 dark:border-zinc-700/60 bg-zinc-50 dark:bg-zinc-800/50 text-xs font-medium text-zinc-900 dark:text-white flex items-center justify-between transition-all cursor-pointer"
                   >
                     <span className={`px-2 py-0.5 rounded-md text-[10px] font-bold ${selectedStatusObj.badgeBg} ${selectedStatusObj.textColor}`}>
                       {selectedStatusObj.label}
@@ -426,14 +430,14 @@ export default function BudgetPage() {
                           }}
                           className={`w-full px-3 py-2 rounded-xl text-xs font-medium flex items-center justify-between transition-colors cursor-pointer ${
                             status === st.id
-                              ? 'bg-rose-50 dark:bg-rose-950/40 text-rose-600 dark:text-rose-400 font-bold'
-                              : 'text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800'
+                              ? 'bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-white font-bold'
+                              : 'text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-800/50'
                           }`}
                         >
                           <span className={`px-2 py-0.5 rounded-md text-[10px] font-bold ${st.badgeBg} ${st.textColor}`}>
                             {st.label}
                           </span>
-                          {status === st.id && <Check className="w-3.5 h-3.5 text-rose-500" />}
+                          {status === st.id && <Check className="w-3.5 h-3.5 text-zinc-900 dark:text-white" />}
                         </button>
                       ))}
                     </div>
@@ -444,26 +448,26 @@ export default function BudgetPage() {
 
               {/* TUTAR GİRİŞLERİ */}
               <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-1.5">
-                  <label className="text-xs font-semibold text-zinc-600 dark:text-zinc-400">Planlanan Tutar (₺)</label>
+                <div className="space-y-1">
+                  <label className="text-[11px] font-medium text-zinc-600 dark:text-zinc-400">Planlanan Tutar (₺)</label>
                   <input
                     type="number"
                     placeholder="150000"
                     value={allocatedAmount}
                     onChange={(e) => setAllocatedAmount(e.target.value)}
-                    className="w-full px-4 py-2.5 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-800/50 text-xs text-zinc-900 dark:text-white focus:outline-none focus:border-rose-500 focus:bg-white transition-all"
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-700/60 text-xs text-zinc-900 dark:text-white focus:outline-none focus:border-zinc-900 dark:focus:border-white transition-all font-medium"
                     required
                   />
                 </div>
 
-                <div className="space-y-1.5">
-                  <label className="text-xs font-semibold text-zinc-600 dark:text-zinc-400">Ödenen Tutar (₺)</label>
+                <div className="space-y-1">
+                  <label className="text-[11px] font-medium text-zinc-600 dark:text-zinc-400">Ödenen Tutar (₺)</label>
                   <input
                     type="number"
                     placeholder="0"
                     value={spentAmount}
                     onChange={(e) => setSpentAmount(e.target.value)}
-                    className="w-full px-4 py-2.5 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-800/50 text-xs text-zinc-900 dark:text-white focus:outline-none focus:border-rose-500 focus:bg-white transition-all"
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-700/60 text-xs text-zinc-900 dark:text-white focus:outline-none focus:border-zinc-900 dark:focus:border-white transition-all font-medium"
                   />
                 </div>
               </div>
@@ -472,14 +476,14 @@ export default function BudgetPage() {
                 <button
                   type="button"
                   onClick={() => setIsModalOpen(false)}
-                  className="px-4 py-2 rounded-xl border border-zinc-200 dark:border-zinc-800 text-xs font-semibold text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-all cursor-pointer"
+                  className="px-4 py-2 rounded-xl border border-zinc-200 dark:border-zinc-700 text-xs font-semibold text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-all cursor-pointer"
                 >
                   İptal
                 </button>
                 <button
                   type="submit"
                   disabled={isPending}
-                  className="px-6 py-2 rounded-xl bg-gradient-to-r from-rose-600 to-rose-500 text-white text-xs font-bold hover:shadow-md transition-all cursor-pointer disabled:opacity-50"
+                  className="px-6 py-2.5 rounded-xl bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 text-xs font-semibold hover:bg-black dark:hover:bg-zinc-200 transition-all cursor-pointer disabled:opacity-50"
                 >
                   {isPending ? 'Kaydediliyor...' : 'Harcamayı Kaydet'}
                 </button>

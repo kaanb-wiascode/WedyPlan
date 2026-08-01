@@ -31,9 +31,9 @@ const CATEGORIES = [
 ];
 
 const PRIORITIES = [
-  { id: 'HIGH', label: 'Acil (Yüksek)', badgeBg: 'bg-rose-100 text-rose-700 dark:bg-rose-950/60 dark:text-rose-400' },
-  { id: 'MEDIUM', label: 'Rutin (Orta)', badgeBg: 'bg-amber-100 text-amber-700 dark:bg-amber-950/60 dark:text-amber-400' },
-  { id: 'LOW', label: 'İsteğe Bağlı', badgeBg: 'bg-zinc-100 text-zinc-600 dark:bg-zinc-800 dark:text-zinc-400' },
+  { id: 'HIGH', label: 'Acil (Yüksek)', badgeBg: 'bg-zinc-900 text-white dark:bg-white dark:text-zinc-900' },
+  { id: 'MEDIUM', label: 'Rutin (Orta)', badgeBg: 'bg-zinc-100 text-zinc-700 dark:bg-zinc-800 dark:text-zinc-300' },
+  { id: 'LOW', label: 'İsteğe Bağlı', badgeBg: 'bg-zinc-50 text-zinc-500 dark:bg-zinc-900 dark:text-zinc-500' },
 ];
 
 const PARTNERS = [
@@ -145,75 +145,79 @@ export default function ChecklistPage() {
 
   if (loading) {
     return (
-      <div className="min-h-[60vh] flex flex-col items-center justify-center space-y-3">
-        <div className="w-8 h-8 border-3 border-rose-500 border-t-transparent rounded-full animate-spin" />
-        <p className="text-xs font-semibold text-zinc-500">Görev & Adımlar Yükleniyor...</p>
+      <div className="min-h-[60vh] flex flex-col items-center justify-center space-y-3 font-sans">
+        <div className="w-6 h-6 border-2 border-zinc-900 dark:border-white border-t-transparent rounded-full animate-spin" />
+        <p className="text-xs font-medium text-zinc-500">Görev & Adımlar Yükleniyor...</p>
       </div>
     );
   }
 
   return (
-    <div className="p-4 sm:p-8 max-w-7xl mx-auto space-y-8">
+    <div className="p-4 sm:p-8 max-w-7xl mx-auto space-y-8 font-sans antialiased">
       
       {/* Toast Bildirimi */}
       {notificationToast && (
-        <div className="fixed top-6 right-6 z-50 bg-zinc-900 text-white px-4 py-3 rounded-2xl shadow-2xl border border-zinc-800 flex items-center gap-3 animate-in fade-in slide-in-from-top-4 duration-300">
-          <Mail className="w-4 h-4 text-rose-400" />
+        <div className="fixed top-6 right-6 z-50 bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 px-4 py-3 rounded-2xl shadow-2xl border border-zinc-800 dark:border-zinc-200 flex items-center gap-3 animate-in fade-in slide-in-from-top-4 duration-300">
+          <Mail className="w-4 h-4 text-zinc-400" />
           <span className="text-xs font-medium">{notificationToast}</span>
         </div>
       )}
 
       {/* HEADER & HIZLI AKSİYON */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <h1 className="text-2xl sm:text-3xl font-extrabold text-zinc-900 dark:text-white tracking-tight flex items-center gap-3">
-            <CheckSquare className="w-7 h-7 text-rose-500" /> Görev & Planlama Adımları
+      <div className="p-8 rounded-3xl bg-white/70 dark:bg-zinc-900/70 backdrop-blur-2xl border border-zinc-200/80 dark:border-zinc-800/80 shadow-[0_8px_30px_rgb(0,0,0,0.03)] flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6">
+        <div className="space-y-2">
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-zinc-200/60 dark:bg-zinc-800/80 text-zinc-700 dark:text-zinc-300 text-[11px] font-medium border border-zinc-300/40 dark:border-zinc-700/50">
+            <CheckSquare className="w-3.5 h-3.5 text-zinc-500" />
+            <span>Süreç Takibi</span>
+          </div>
+          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-zinc-900 dark:text-white">
+            Görev & Planlama Adımları
           </h1>
-          <p className="text-xs sm:text-sm text-zinc-500 dark:text-zinc-400 mt-1">
+          <p className="text-xs sm:text-sm text-zinc-500 dark:text-zinc-400">
             Düğün sürecindeki sorumlulukları partnerinizle paylaşın ve aşama aşama tamamlayın.
           </p>
         </div>
 
         <button
           onClick={() => setIsModalOpen(true)}
-          className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-2xl bg-gradient-to-r from-rose-600 to-rose-500 text-white text-xs font-bold shadow-md hover:shadow-lg transition-all hover:scale-[1.02] cursor-pointer"
+          className="px-5 py-2.5 rounded-xl bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 text-xs font-semibold hover:bg-black dark:hover:bg-zinc-200 transition-all cursor-pointer inline-flex items-center justify-center gap-2 shadow-xs shrink-0"
         >
           <Plus className="w-4 h-4" /> Yeni Görev Ekle
         </button>
       </div>
 
       {/* 1. ÖZET İLERLEME KARTLARI */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div className="p-5 rounded-2xl bg-white dark:bg-zinc-900 border border-zinc-200/80 dark:border-zinc-800 shadow-xs space-y-1">
-          <span className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">Toplam Adım</span>
-          <div className="text-2xl font-black text-zinc-900 dark:text-white">{totalCount} Görev</div>
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
+        <div className="p-6 rounded-3xl bg-white/70 dark:bg-zinc-900/70 backdrop-blur-2xl border border-zinc-200/80 dark:border-zinc-800/80 shadow-xs space-y-1">
+          <span className="text-xs font-medium text-zinc-400">Toplam Adım</span>
+          <div className="text-2xl font-bold text-zinc-900 dark:text-white">{totalCount} Görev</div>
           <div className="text-[11px] text-zinc-500">Planlanan Tüm Süreç</div>
         </div>
 
-        <div className="p-5 rounded-2xl bg-white dark:bg-zinc-900 border border-zinc-200/80 dark:border-zinc-800 shadow-xs space-y-1">
-          <span className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">Tamamlanan</span>
-          <div className="text-2xl font-black text-emerald-600 dark:text-emerald-400">{completedCount} Adım</div>
-          <div className="text-[11px] text-emerald-600 font-medium">Başarıyla Tamamlandı</div>
+        <div className="p-6 rounded-3xl bg-white/70 dark:bg-zinc-900/70 backdrop-blur-2xl border border-zinc-200/80 dark:border-zinc-800/80 shadow-xs space-y-1">
+          <span className="text-xs font-medium text-emerald-600 dark:text-emerald-400">Tamamlanan</span>
+          <div className="text-2xl font-bold text-zinc-900 dark:text-white">{completedCount} Adım</div>
+          <div className="text-[11px] text-emerald-600 dark:text-emerald-400 font-medium">Başarıyla Tamamlandı</div>
         </div>
 
-        <div className="p-5 rounded-2xl bg-gradient-to-br from-zinc-900 to-zinc-950 text-white shadow-md space-y-1 relative overflow-hidden">
-          <span className="text-xs font-bold text-rose-400 flex items-center gap-1">
-            <Sparkles className="w-3.5 h-3.5" /> İlerleme Oranı
+        <div className="p-6 rounded-3xl bg-white/70 dark:bg-zinc-900/70 backdrop-blur-2xl border border-zinc-200/80 dark:border-zinc-800/80 shadow-xs space-y-1 relative overflow-hidden">
+          <span className="text-xs font-medium text-zinc-400 flex items-center gap-1">
+            <Sparkles className="w-3.5 h-3.5 text-zinc-400" /> İlerleme Oranı
           </span>
-          <div className="text-2xl font-black text-zinc-100">%{progressPercentage}</div>
-          <p className="text-[11px] text-zinc-400">Dashboard hazırlık skorunu doğrudan etkiler.</p>
+          <div className="text-2xl font-bold text-zinc-900 dark:text-white">%{progressPercentage}</div>
+          <p className="text-[11px] text-zinc-400">Dashboard hazırlık skorunu etkiler.</p>
         </div>
       </div>
 
       {/* 2. CANLI İLERLEME BARI */}
-      <div className="p-6 rounded-2xl bg-white dark:bg-zinc-900 border border-zinc-200/80 dark:border-zinc-800 shadow-xs space-y-3">
+      <div className="p-6 rounded-3xl bg-white/70 dark:bg-zinc-900/70 backdrop-blur-2xl border border-zinc-200/80 dark:border-zinc-800/80 shadow-xs space-y-3">
         <div className="flex items-center justify-between text-xs font-bold">
           <span className="text-zinc-700 dark:text-zinc-300">Hazırlık Tamamlanma Oranı</span>
-          <span className="text-rose-600">%{progressPercentage}</span>
+          <span className="text-zinc-900 dark:text-white">%{progressPercentage}</span>
         </div>
         <div className="w-full h-3 bg-zinc-100 dark:bg-zinc-800 rounded-full overflow-hidden p-0.5">
           <div
-            className="h-full bg-gradient-to-r from-rose-500 to-amber-500 rounded-full transition-all duration-500"
+            className="h-full bg-zinc-900 dark:bg-white rounded-full transition-all duration-500"
             style={{ width: `${progressPercentage}%` }}
           />
         </div>
@@ -228,7 +232,7 @@ export default function ChecklistPage() {
             placeholder="Görev ara..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 rounded-xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-xs focus:outline-none focus:border-rose-500 transition-all"
+            className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-white/80 dark:bg-zinc-900/80 backdrop-blur-md border border-zinc-200/80 dark:border-zinc-800/80 text-xs text-zinc-900 dark:text-white focus:outline-none focus:border-zinc-900 dark:focus:border-white transition-all font-medium"
           />
         </div>
 
@@ -237,8 +241,8 @@ export default function ChecklistPage() {
             onClick={() => setSelectedAssigneeFilter('ALL')}
             className={`px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${
               selectedAssigneeFilter === 'ALL'
-                ? 'bg-rose-500 text-white shadow-xs'
-                : 'bg-white dark:bg-zinc-900 text-zinc-600 dark:text-zinc-400 border border-zinc-200 dark:border-zinc-800 hover:border-rose-200'
+                ? 'bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 shadow-xs'
+                : 'bg-white/80 dark:bg-zinc-900/80 text-zinc-600 dark:text-zinc-400 border border-zinc-200/80 dark:border-zinc-800/80 hover:bg-zinc-100/80'
             }`}
           >
             Herkes
@@ -249,8 +253,8 @@ export default function ChecklistPage() {
               onClick={() => setSelectedAssigneeFilter(p.id)}
               className={`px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${
                 selectedAssigneeFilter === p.id
-                  ? 'bg-rose-500 text-white shadow-xs'
-                  : 'bg-white dark:bg-zinc-900 text-zinc-600 dark:text-zinc-400 border border-zinc-200 dark:border-zinc-800 hover:border-rose-200'
+                  ? 'bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 shadow-xs'
+                  : 'bg-white/80 dark:bg-zinc-900/80 text-zinc-600 dark:text-zinc-400 border border-zinc-200/80 dark:border-zinc-800/80 hover:bg-zinc-100/80'
               }`}
             >
               {p.label}
@@ -262,7 +266,7 @@ export default function ChecklistPage() {
       {/* 4. GÖREV LİSTESİ */}
       <div className="space-y-3">
         {filteredItems.length === 0 ? (
-          <div className="p-12 text-center bg-white dark:bg-zinc-900 rounded-2xl border border-zinc-200/80 dark:border-zinc-800 text-zinc-400 text-xs">
+          <div className="p-12 text-center bg-white/70 dark:bg-zinc-900/70 backdrop-blur-2xl rounded-3xl border border-zinc-200/80 dark:border-zinc-800/80 text-zinc-400 text-xs font-medium">
             Aradığınız kriterlere uygun görev bulunamadı.
           </div>
         ) : (
@@ -275,8 +279,8 @@ export default function ChecklistPage() {
                 key={item.id}
                 className={`p-4 rounded-2xl border transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-4 ${
                   isDone
-                    ? 'bg-zinc-50/80 dark:bg-zinc-900/40 border-zinc-200/50 text-zinc-400'
-                    : 'bg-white dark:bg-zinc-900 border border-zinc-200/80 dark:border-zinc-800 hover:border-rose-200 shadow-xs'
+                    ? 'bg-zinc-50/50 dark:bg-zinc-900/30 border-zinc-200/40 dark:border-zinc-800/60 text-zinc-400'
+                    : 'bg-white/70 dark:bg-zinc-900/70 backdrop-blur-2xl border-zinc-200/80 dark:border-zinc-800/80 shadow-xs'
                 }`}
               >
                 <div className="flex items-start sm:items-center gap-3.5">
@@ -284,7 +288,7 @@ export default function ChecklistPage() {
                     type="checkbox"
                     checked={!!isDone}
                     onChange={() => handleToggle(item.id)}
-                    className="w-5 h-5 rounded text-rose-600 focus:ring-rose-500 accent-rose-500 cursor-pointer mt-0.5 sm:mt-0"
+                    className="w-4 h-4 rounded text-zinc-900 dark:text-white focus:ring-zinc-500 accent-zinc-900 dark:accent-white cursor-pointer mt-0.5 sm:mt-0"
                   />
                   <div>
                     <h3 className={`text-xs sm:text-sm font-bold ${isDone ? 'line-through text-zinc-400' : 'text-zinc-900 dark:text-white'}`}>
@@ -309,14 +313,14 @@ export default function ChecklistPage() {
                   </span>
 
                   <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 text-[10px] font-bold">
-                    <User className="w-3 h-3 text-rose-500" />
+                    <User className="w-3 h-3 text-zinc-500" />
                     {item.assignedToName || 'Birlikte'}
                   </span>
 
                   <button
                     onClick={() => handleDelete(item.id)}
                     disabled={isPending}
-                    className="p-1.5 rounded-lg hover:bg-rose-100 text-rose-500 hover:text-rose-700 transition-colors cursor-pointer disabled:opacity-50"
+                    className="p-1.5 rounded-xl hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-400 hover:text-red-500 transition-colors cursor-pointer disabled:opacity-50"
                     title="Görevi Sil"
                   >
                     <Trash2 className="w-4 h-4" />
@@ -328,33 +332,33 @@ export default function ChecklistPage() {
         )}
       </div>
 
-      {/* 5. MODAL */}
+      {/* 5. MODAL (Frosted Glass) */}
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-          <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-3xl p-6 sm:p-8 max-w-lg w-full shadow-2xl space-y-6 relative animate-in fade-in zoom-in-95 duration-200">
+          <div className="bg-white/90 dark:bg-zinc-900/90 backdrop-blur-2xl border border-zinc-200/80 dark:border-zinc-800/80 rounded-3xl p-6 sm:p-8 max-w-lg w-full shadow-2xl space-y-6 relative animate-in fade-in zoom-in-95 duration-200">
             
-            <div className="flex items-center justify-between">
-              <h2 className="text-lg font-bold text-zinc-900 dark:text-white flex items-center gap-2">
-                <Plus className="w-5 h-5 text-rose-500" /> Yeni Düğün Görevi Ekle
+            <div className="flex items-center justify-between border-b border-zinc-100 dark:border-zinc-800/80 pb-3">
+              <h2 className="text-base font-bold text-zinc-900 dark:text-white flex items-center gap-2">
+                <Plus className="w-4 h-4 text-zinc-500" /> Yeni Düğün Görevi Ekle
               </h2>
               <button
                 onClick={() => setIsModalOpen(false)}
                 className="p-1.5 rounded-xl text-zinc-400 hover:text-zinc-700 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-all cursor-pointer"
               >
-                <X className="w-5 h-5" />
+                <X className="w-4 h-4" />
               </button>
             </div>
 
             <form onSubmit={handleAddItem} className="space-y-4">
               
-              <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-zinc-600 dark:text-zinc-400">Görev Tanımı</label>
+              <div className="space-y-1">
+                <label className="text-[11px] font-medium text-zinc-600 dark:text-zinc-400">Görev Tanımı</label>
                 <input
                   type="text"
                   placeholder="örn. Dış Çekim Mekan Rezervasyonu Yapılacak"
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
-                  className="w-full px-4 py-3 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-800/50 text-xs text-zinc-900 dark:text-white focus:outline-none focus:border-rose-500 focus:bg-white transition-all"
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-700/60 text-xs text-zinc-900 dark:text-white focus:outline-none focus:border-zinc-900 dark:focus:border-white transition-all font-medium"
                   required
                 />
               </div>
@@ -363,8 +367,8 @@ export default function ChecklistPage() {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 
                 {/* KATEGORİ DROPDOWN */}
-                <div className="space-y-1.5 relative">
-                  <label className="text-xs font-semibold text-zinc-600 dark:text-zinc-400">Kategori</label>
+                <div className="space-y-1 relative">
+                  <label className="text-[11px] font-medium text-zinc-600 dark:text-zinc-400">Kategori</label>
                   <button
                     type="button"
                     onClick={() => {
@@ -372,7 +376,7 @@ export default function ChecklistPage() {
                       setIsPriorityOpen(false);
                       setIsPartnerOpen(false);
                     }}
-                    className="w-full px-3.5 py-2.5 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-800/50 text-xs font-medium text-zinc-900 dark:text-white flex items-center justify-between hover:border-rose-300 transition-all cursor-pointer"
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-zinc-200 dark:border-zinc-700/60 bg-zinc-50 dark:bg-zinc-800/50 text-xs font-medium text-zinc-900 dark:text-white flex items-center justify-between transition-all cursor-pointer"
                   >
                     <span className="truncate">{category}</span>
                     <ChevronDown className={`w-4 h-4 text-zinc-400 transition-transform ${isCategoryOpen ? 'rotate-180' : ''}`} />
@@ -390,12 +394,12 @@ export default function ChecklistPage() {
                           }}
                           className={`w-full px-3 py-2 rounded-xl text-xs font-medium flex items-center justify-between transition-colors cursor-pointer ${
                             category === cat.id
-                              ? 'bg-rose-50 dark:bg-rose-950/40 text-rose-600 dark:text-rose-400 font-bold'
-                              : 'text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800'
+                              ? 'bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-white font-bold'
+                              : 'text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-800/50'
                           }`}
                         >
                           <span>{cat.label}</span>
-                          {category === cat.id && <Check className="w-3.5 h-3.5 text-rose-500" />}
+                          {category === cat.id && <Check className="w-3.5 h-3.5 text-zinc-900 dark:text-white" />}
                         </button>
                       ))}
                     </div>
@@ -403,8 +407,8 @@ export default function ChecklistPage() {
                 </div>
 
                 {/* ÖNCELİK DROPDOWN */}
-                <div className="space-y-1.5 relative">
-                  <label className="text-xs font-semibold text-zinc-600 dark:text-zinc-400">Öncelik Seviyesi</label>
+                <div className="space-y-1 relative">
+                  <label className="text-[11px] font-medium text-zinc-600 dark:text-zinc-400">Öncelik Seviyesi</label>
                   <button
                     type="button"
                     onClick={() => {
@@ -412,7 +416,7 @@ export default function ChecklistPage() {
                       setIsCategoryOpen(false);
                       setIsPartnerOpen(false);
                     }}
-                    className="w-full px-3.5 py-2.5 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-800/50 text-xs font-medium text-zinc-900 dark:text-white flex items-center justify-between hover:border-rose-300 transition-all cursor-pointer"
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-zinc-200 dark:border-zinc-700/60 bg-zinc-50 dark:bg-zinc-800/50 text-xs font-medium text-zinc-900 dark:text-white flex items-center justify-between transition-all cursor-pointer"
                   >
                     <span className={`px-2 py-0.5 rounded-md text-[10px] font-bold ${selectedPriorityObj.badgeBg}`}>
                       {selectedPriorityObj.label}
@@ -432,14 +436,14 @@ export default function ChecklistPage() {
                           }}
                           className={`w-full px-3 py-2 rounded-xl text-xs font-medium flex items-center justify-between transition-colors cursor-pointer ${
                             priority === pr.id
-                              ? 'bg-rose-50 dark:bg-rose-950/40 text-rose-600 dark:text-rose-400 font-bold'
-                              : 'text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800'
+                              ? 'bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-white font-bold'
+                              : 'text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-800/50'
                           }`}
                         >
                           <span className={`px-2 py-0.5 rounded-md text-[10px] font-bold ${pr.badgeBg}`}>
                             {pr.label}
                           </span>
-                          {priority === pr.id && <Check className="w-3.5 h-3.5 text-rose-500" />}
+                          {priority === pr.id && <Check className="w-3.5 h-3.5 text-zinc-900 dark:text-white" />}
                         </button>
                       ))}
                     </div>
@@ -452,8 +456,8 @@ export default function ChecklistPage() {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 
                 {/* ATANAN KİŞİ DROPDOWN */}
-                <div className="space-y-1.5 relative">
-                  <label className="text-xs font-semibold text-zinc-600 dark:text-zinc-400">Atanan Partner</label>
+                <div className="space-y-1 relative">
+                  <label className="text-[11px] font-medium text-zinc-600 dark:text-zinc-400">Atanan Partner</label>
                   <button
                     type="button"
                     onClick={() => {
@@ -461,10 +465,10 @@ export default function ChecklistPage() {
                       setIsCategoryOpen(false);
                       setIsPriorityOpen(false);
                     }}
-                    className="w-full px-3.5 py-2.5 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-800/50 text-xs font-medium text-zinc-900 dark:text-white flex items-center justify-between hover:border-rose-300 transition-all cursor-pointer"
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-zinc-200 dark:border-zinc-700/60 bg-zinc-50 dark:bg-zinc-800/50 text-xs font-medium text-zinc-900 dark:text-white flex items-center justify-between transition-all cursor-pointer"
                   >
                     <div className="flex items-center gap-1.5">
-                      <User className="w-3.5 h-3.5 text-rose-500" />
+                      <User className="w-3.5 h-3.5 text-zinc-400" />
                       <span>{assignedToName}</span>
                     </div>
                     <ChevronDown className={`w-4 h-4 text-zinc-400 transition-transform ${isPartnerOpen ? 'rotate-180' : ''}`} />
@@ -482,15 +486,15 @@ export default function ChecklistPage() {
                           }}
                           className={`w-full px-3 py-2 rounded-xl text-xs font-medium flex items-center justify-between transition-colors cursor-pointer ${
                             assignedToName === p.id
-                              ? 'bg-rose-50 dark:bg-rose-950/40 text-rose-600 dark:text-rose-400 font-bold'
-                              : 'text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800'
+                              ? 'bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-white font-bold'
+                              : 'text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-800/50'
                           }`}
                         >
                           <div className="flex items-center gap-1.5">
                             <User className="w-3.5 h-3.5 text-zinc-400" />
                             <span>{p.label}</span>
                           </div>
-                          {assignedToName === p.id && <Check className="w-3.5 h-3.5 text-rose-500" />}
+                          {assignedToName === p.id && <Check className="w-3.5 h-3.5 text-zinc-900 dark:text-white" />}
                         </button>
                       ))}
                     </div>
@@ -498,13 +502,13 @@ export default function ChecklistPage() {
                 </div>
 
                 {/* TARİH */}
-                <div className="space-y-1.5">
-                  <label className="text-xs font-semibold text-zinc-600 dark:text-zinc-400">Son Tarih</label>
+                <div className="space-y-1">
+                  <label className="text-[11px] font-medium text-zinc-600 dark:text-zinc-400">Son Tarih</label>
                   <input
                     type="date"
                     value={dueDate}
                     onChange={(e) => setDueDate(e.target.value)}
-                    className="w-full px-4 py-2.5 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-800/50 text-xs text-zinc-900 dark:text-white focus:outline-none focus:border-rose-500 focus:bg-white transition-all"
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-700/60 text-xs text-zinc-900 dark:text-white focus:outline-none focus:border-zinc-900 dark:focus:border-white transition-all font-medium"
                   />
                 </div>
 
@@ -517,10 +521,10 @@ export default function ChecklistPage() {
                   id="sendEmail"
                   checked={sendEmailNotification}
                   onChange={(e) => setSendEmailNotification(e.target.checked)}
-                  className="w-4 h-4 rounded text-rose-600 focus:ring-rose-500 accent-rose-500 cursor-pointer"
+                  className="w-4 h-4 rounded text-zinc-900 dark:text-white focus:ring-zinc-500 accent-zinc-900 dark:accent-white cursor-pointer"
                 />
                 <label htmlFor="sendEmail" className="text-xs font-medium text-zinc-600 dark:text-zinc-300 cursor-pointer flex items-center gap-1.5">
-                  <Mail className="w-3.5 h-3.5 text-rose-500" />
+                  <Mail className="w-3.5 h-3.5 text-zinc-400" />
                   Görev atandığında partnerime e-posta bildirimi gönder
                 </label>
               </div>
@@ -529,14 +533,14 @@ export default function ChecklistPage() {
                 <button
                   type="button"
                   onClick={() => setIsModalOpen(false)}
-                  className="px-4 py-2 rounded-xl border border-zinc-200 dark:border-zinc-800 text-xs font-semibold text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-all cursor-pointer"
+                  className="px-4 py-2 rounded-xl border border-zinc-200 dark:border-zinc-700 text-xs font-semibold text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-all cursor-pointer"
                 >
                   İptal
                 </button>
                 <button
                   type="submit"
                   disabled={isPending}
-                  className="px-6 py-2 rounded-xl bg-gradient-to-r from-rose-600 to-rose-500 text-white text-xs font-bold hover:shadow-md transition-all cursor-pointer disabled:opacity-50"
+                  className="px-6 py-2.5 rounded-xl bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 text-xs font-semibold hover:bg-black dark:hover:bg-zinc-200 transition-all cursor-pointer disabled:opacity-50"
                 >
                   {isPending ? 'Ekleniyor...' : 'Görevi Kaydet'}
                 </button>
