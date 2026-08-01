@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
+import { ConfirmProvider } from "@/context/ConfirmContext";
 
 const inter = Inter({
   subsets: ["latin", "latin-ext"],
@@ -21,7 +22,9 @@ export default function RootLayout({
   return (
     <html lang="tr" className={inter.variable}>
       <body className="bg-[#FDFBF7] text-neutral-900 font-sans antialiased selection:bg-rose-100 selection:text-rose-900">
-        {children}
+        <ConfirmProvider>
+          {children}
+        </ConfirmProvider>
       </body>
     </html>
   );

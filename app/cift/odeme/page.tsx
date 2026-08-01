@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useEffect, useState, useMemo, useTransition } from 'react';
+import { useConfirm } from '@/context/ConfirmContext';
 import {
   CreditCard,
   Plus,
@@ -9,12 +10,8 @@ import {
   Search,
   CheckCircle2,
   Clock,
-  AlertCircle,
   Calendar,
-  X,
-  ChevronDown,
-  Check,
-  Wallet
+  X
 } from 'lucide-react';
 
 interface PaymentInstallment {
@@ -27,6 +24,8 @@ interface PaymentInstallment {
 }
 
 export default function PaymentsPage() {
+  const confirm = useConfirm();
+
   const [installments, setInstallments] = useState<PaymentInstallment[]>([
     {
       id: '1',
@@ -113,9 +112,19 @@ export default function PaymentsPage() {
     });
   };
 
-  const handleDelete = (id: string) => {
-    if (!confirm('Bu ödeme taksitini silmek istediğinize emin misiniz?')) return;
-    setInstallments(prev => prev.filter(i => i.id !== id));
+  // 🍏 GLOBAL APPLE UYARI PENCERESİ ENTEGRASYONU
+  const handleDelete = async (id: string, itemTitle: string) => {
+    const isConfirmed = await confirm({
+      title: 'Taksiti Silmek İstediğinize Emin Misiniz?',
+      message: `"${itemTitle}" ödeme kaydı kalıcı olarak silinecektir. Bu işlem geri alınamaz.`,
+      confirmText: 'Evet, Sil',
+      cancelText: 'Vazgeç',
+      variant: 'danger',
+    });
+
+    if (isConfirmed) {
+      setInstallments(prev => prev.filter(i => i.id !== id));
+    }
   };
 
   const handleTogglePaid = (id: string) => {
@@ -164,7 +173,7 @@ export default function PaymentsPage() {
         </button>
       </div>
 
-      {/* 1. ÖZET FİNANS KARTLARI (Frosted Glass) */}
+      {/* 1. ÖZET FİNANS KARTLARI */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
         <div className="p-6 rounded-3xl bg-white/70 dark:bg-zinc-900/70 backdrop-blur-2xl border border-zinc-200/80 dark:border-zinc-800/80 shadow-xs space-y-1">
           <span className="text-xs font-medium text-zinc-400">Toplam Taksit Yükü</span>
@@ -250,7 +259,7 @@ export default function PaymentsPage() {
         </div>
       </div>
 
-      {/* 4. TAKSİT TABLOSU (Cam Kart) */}
+      {/* 4. TAKSİT TABLOSU */}
       <div className="bg-white/70 dark:bg-zinc-900/70 backdrop-blur-2xl border border-zinc-200/80 dark:border-zinc-800/80 rounded-3xl overflow-hidden shadow-xs">
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
@@ -311,7 +320,7 @@ export default function PaymentsPage() {
                     </td>
                     <td className="p-4 text-right">
                       <button
-                        onClick={() => handleDelete(item.id)}
+                        onClick={() => handleDelete(item.id, item.title)}
                         className="p-1.5 rounded-xl hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-400 hover:text-red-500 transition-colors cursor-pointer"
                         title="Sil"
                       >
@@ -326,7 +335,7 @@ export default function PaymentsPage() {
         </div>
       </div>
 
-      {/* 5. YENİ TAKSİT EKLEME MODALI (Frosted Glass) */}
+      {/* 5. YENİ TAKSİT EKLEME MODALI */}
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
           <div className="bg-white/90 dark:bg-zinc-900/90 backdrop-blur-2xl border border-zinc-200/80 dark:border-zinc-800/80 rounded-3xl p-6 sm:p-8 max-w-lg w-full shadow-2xl space-y-6 relative animate-in fade-in zoom-in-95 duration-200">
