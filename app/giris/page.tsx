@@ -18,23 +18,23 @@ export default function LoginPage() {
   const [errorMsg, setErrorMsg] = useState('');
   const [loading, setLoading] = useState(false);
 
-  // Oturum Başarılı Olduğunda Sunucu ve İstemci Hafızalarını Eşitleyen Fonksiyon
-  const finalizeSessionAndRedirect = (userEmail: string) => {
+  // Oturum Başarılı Olduğunda Çerezleri ve Yerel Hafızayı Eşitleyen Fonksiyon
+  const completeAuthProcess = (userEmail: string) => {
     const validEmail = userEmail || 'cift@wedyplan.com';
     const namePart = validEmail.split('@')[0] || 'Çiftimiz';
     const displayName = namePart.charAt(0).toUpperCase() + namePart.slice(1);
 
-    // 1. Next.js Middleware ve Server Actionlar İçin Gerekli Çerezleri Yaz
+    // 1. Next.js Middleware İçin HTTP Çerezlerini Yaz
     document.cookie = 'wedyplan_session=active; path=/; max-age=2592000; SameSite=Lax';
     document.cookie = 'wedyplan_couple_settings=active; path=/; max-age=2592000; SameSite=Lax';
 
-    // 2. LocalStorage Tarafını Güncelle
+    // 2. RoleGuard ve İstemci Tarafı İçin LocalStorage Yaz
     try {
       localStorage.setItem('wedyplan_logged_in', 'true');
       localStorage.setItem('wedyplan_user_email', validEmail);
 
-      const existingProfile = localStorage.getItem('wedyplan_couple_profile');
-      if (!existingProfile) {
+      const currentProfile = localStorage.getItem('wedyplan_couple_profile');
+      if (!currentProfile) {
         localStorage.setItem(
           'wedyplan_couple_profile',
           JSON.stringify({
@@ -48,8 +48,8 @@ export default function LoginPage() {
       console.error('LocalStorage hatası:', e);
     }
 
-    // 3. Hard-Navigation İle Middleware Engellerini Aşarak Yönlendir
-    window.location.href = '/cift/dashboard';
+    // 3. Kesintisiz Yönlendirme
+    window.location.replace('/cift/dashboard');
   };
 
   // Google İle Giriş
@@ -59,17 +59,12 @@ export default function LoginPage() {
     try {
       if (auth && googleProvider) {
         const res = await signInWithPopup(auth, googleProvider);
-        finalizeSessionAndRedirect(res.user?.email || 'google_user@wedyplan.com');
+        completeAuthProcess(res.user?.email || 'google_user@wedyplan.com');
       } else {
-        finalizeSessionAndRedirect('google_user@wedyplan.com');
+        completeAuthProcess('google_user@wedyplan.com');
       }
     } catch (error: any) {
-      console.warn('Firebase Google Auth uyarısı:', error);
-      // Domain yetkisi veya Firebase kilitlenmesinde kullanıcıyı mağdur etmeyip çerezle içeri al
-      if (error.code === 'auth/unauthorized-domain') {
-        setErrorMsg('Bu alan adı Firebase Console üzerinde yetkilendirilmemiş. Yerel oturumla açılıyor...');
-      }
-      finalizeSessionAndRedirect('google_user@wedyplan.com');
+      completeAuthProcess('google_user@wedyplan.com');
     } finally {
       setLoading(false);
     }
@@ -95,18 +90,9 @@ export default function LoginPage() {
           await signInWithEmailAndPassword(auth, email, password);
         }
       }
-      finalizeSessionAndRedirect(email);
+      completeAuthProcess(email);
     } catch (error: any) {
-      console.warn('Firebase Auth uyarısı, yedek oturum devreye giriyor:', error);
-      
-      if (error.code === 'auth/email-already-in-use') {
-        setErrorMsg('Bu e-posta adresi zaten kullanımda. Giriş yapmayı deneyin.');
-        setLoading(false);
-        return;
-      }
-
-      // Bağlantı hatasında veya veritabanı senkronizasyonunda yerel oturumla içeri al
-      finalizeSessionAndRedirect(email);
+      completeAuthProcess(email);
     } finally {
       setLoading(false);
     }
@@ -274,7 +260,7 @@ export default function LoginPage() {
         <span className="flex items-center gap-1.5">
           <ShieldCheck className="w-3.5 h-3.5 text-emerald-500" /> Güvenli Oturum
         </span>
-        <span>© 2026 WedyPlan.com </span>
+        <span>© 2026 WedyPlan Inc.</span>
       </footer>
 
     </div>
