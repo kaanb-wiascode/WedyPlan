@@ -103,13 +103,16 @@ export async function saveInvitationConfig(data: InvitationConfigInput) {
   }
 }
 
-// 3. Davetiye Sayfasından Gelen Kamu LCV Yanıtını Kaydet ve Davetliler Modülüne İşle
+// 3. Davetiye Sayfasından Gelen Kamu LCV Yanıtını Kaydet
 export async function submitPublicRsvp(data: {
+  coupleId?: string;
   fullName: string;
   email?: string;
   phone?: string;
-  status: 'ACCEPTED' | 'DECLINED';
+  status: 'ACCEPTED' | 'DECLINED' | 'ATTENDING';
   plusOneCount?: number;
+  plusOne?: boolean;
+  notes?: string;
   dietaryPreference?: string;
   songRequest?: string;
 }) {
@@ -124,16 +127,19 @@ export async function submitPublicRsvp(data: {
       } catch (e) {}
     }
 
+    const mappedStatus = data.status === 'ATTENDING' ? 'ACCEPTED' : data.status;
+
     const newGuest = {
       id: crypto.randomUUID(),
       fullName: data.fullName,
       email: data.email || '',
       phone: data.phone || '',
       group: 'Davetiye Formu (Online LCV)',
-      plusOneCount: Number(data.plusOneCount) || 0,
-      rsvpStatus: data.status,
+      plusOneCount: Number(data.plusOneCount) || (data.plusOne ? 1 : 0),
+      rsvpStatus: mappedStatus,
       dietaryPreference: data.dietaryPreference || 'Standart',
       songRequest: data.songRequest || '',
+      notes: data.notes || '',
       createdAt: new Date().toISOString(),
     };
 
@@ -177,7 +183,7 @@ export async function generateAIInvitationCopyAction(
   };
 }
 
-// 5. Kamu Erişimli Davetiye Detayı
+// 5. Kamu Erişimli Davetiye Detayı (TypeScript Hatasını Çözen coupleId Eklendi)
 export async function getPublicInvitation(slugOrId: string) {
   const configRes = await getInvitationConfig();
   const config = configRes.data || DEFAULT_CONFIG;
@@ -185,6 +191,7 @@ export async function getPublicInvitation(slugOrId: string) {
   return {
     success: true,
     data: {
+      coupleId: slugOrId,
       coupleName: config.title,
       weddingDate: config.date,
       time: config.time,
@@ -200,7 +207,7 @@ export async function getPublicInvitation(slugOrId: string) {
   };
 }
 
-// 6. EKSİK EXPORT: AIInvitationCopyCard Bileşeninin Çağırdığı RSVP Hatırlatıcı
+// 6. RSVP Hatırlatıcı Dışa Aktarımı
 export async function sendRSVPReminderAction(
   userIdOrGuestId?: string,
   options?: { guestIds?: string[]; reminderChannel?: string; [key: string]: any }
