@@ -1,12 +1,12 @@
 'use client';
 
-import React, { useEffect, useState, useTransition } from 'react';
+import React, { useEffect, useState, useTransition, useRef } from 'react';
 import { getVendors } from '@/lib/actions/vendor-discovery';
 import PublicPageLayout from '@/components/public/PublicPageLayout';
-import { FilterSidebar } from '@/components/public/vendor-listing/FilterSidebar'; // Yeni import
+import { FilterSidebar } from '@/components/public/vendor-listing/FilterSidebar';
 import { VendorListingCard } from '@/components/public/vendor-listing/VendorListingCard';
 import { VendorListingFilterState, VendorListingItem } from '@/types/vendor-listing';
-import { Sparkles, Search, Grid, Map, Filter } from 'lucide-react';
+import { Sparkles, Search, Grid, Map, Filter, ChevronDown, ArrowDownAZ } from 'lucide-react';
 import GlassCard from '@/components/shared/ui/GlassCard';
 
 export default function FirmalarPage() {
@@ -19,8 +19,10 @@ export default function FirmalarPage() {
   const [comparedVendors, setComparedVendors] = useState<string[]>([]);
   const [savedVendors, setSavedVendors] = useState<string[]>([]);
   const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false);
+  const [isSortOpen, setIsSortOpen] = useState(false);
+  
+  const sortRef = useRef<HTMLDivElement>(null);
 
-  // Merkezi Filtre State'i
   const [filters, setFilters] = useState<VendorListingFilterState & { search?: string }>({
     search: '',
     searchQuery: '',
@@ -33,6 +35,17 @@ export default function FirmalarPage() {
     maxPrice: 1000000,
     minRating: 0
   });
+
+  // Dışarı tıklayınca Sıralama menüsünü kapat
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (sortRef.current && !sortRef.current.contains(event.target as Node)) {
+        setIsSortOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   const fetchVendors = () => {
     startTransition(async () => {
@@ -87,9 +100,15 @@ export default function FirmalarPage() {
     );
   };
 
+  const sortOptions = [
+    { id: 'RECOMMENDED', label: 'Önerilen Sıralama' },
+    { id: 'RATING', label: 'En Yüksek Puan' },
+    { id: 'PRICE_LOW', label: 'En Düşük Fiyat' },
+    { id: 'PRICE_HIGH', label: 'En Yüksek Fiyat' }
+  ];
+
   return (
     <PublicPageLayout>
-      {/* Sayfa Başlığı */}
       <div className="max-w-7xl mx-auto px-4 sm:px-8 pt-8 pb-10">
         <h1 className="text-4xl md:text-5xl font-bold text-gray-900 tracking-tight mb-4 text-center">
           Mükemmel Düğün İçin En İyileri Bulun
@@ -101,8 +120,8 @@ export default function FirmalarPage() {
 
       <div className="max-w-7xl mx-auto px-4 sm:px-8 flex flex-col lg:flex-row gap-8 items-start pb-24">
         
-        {/* Sol Taraf: Detaylı Yan Filtre (Desktop'ta Sticky) */}
-        <div className={`w-full lg:w-1/4 lg:sticky lg:top-28 z-30 ${isMobileFilterOpen ? 'block' : 'hidden lg:block'}`}>
+        {/* Sol Taraf: Detaylı Yan Filtre */}
+        <div className={`w-full lg:w-[28%] lg:sticky lg:top-28 z-30 ${isMobileFilterOpen ? 'block' : 'hidden lg:block'}`}>
           <FilterSidebar 
             filters={filters}
             onChangeFilter={handleFilterChange}
@@ -110,55 +129,78 @@ export default function FirmalarPage() {
           />
         </div>
 
-        {/* Sağ Taraf: Arama, Aksiyonlar ve Liste */}
-        <div className="w-full lg:w-3/4 space-y-6">
+        {/* Sağ Taraf: Komuta Merkezi (Arama+Sıralama) ve Liste */}
+        <div className="w-full lg:w-[72%] space-y-6">
           
-          {/* Üst Aksiyon Çubuğu (Sadece Arama ve Sıralama) */}
-          <GlassCard className="p-3 border-white/60 bg-white/70 shadow-sm flex flex-wrap items-center justify-between gap-4">
+          {/* Tek Satır Komuta Merkezi (Action Bar) */}
+          <GlassCard className="p-2.5 border-white/60 bg-white/80 shadow-md rounded-full flex flex-col md:flex-row items-center justify-between gap-2 relative z-40">
             
-            {/* Mobil Filtre Açma Butonu & Arama */}
-            <div className="flex items-center gap-3 w-full md:w-auto flex-1">
+            <div className="flex items-center w-full md:w-auto flex-1 gap-2">
               <button 
                 onClick={() => setIsMobileFilterOpen(!isMobileFilterOpen)}
-                className="lg:hidden p-3 bg-white border border-gray-200 rounded-xl text-gray-700"
+                className="lg:hidden p-3 bg-gray-100 hover:bg-gray-200 rounded-full text-gray-700 transition-colors"
               >
-                <Filter className="w-5 h-5" />
+                <Filter className="w-4 h-4" />
               </button>
 
-              <div className="flex-1 md:w-80 flex items-center bg-white border border-gray-200 rounded-xl px-4 py-2.5 focus-within:ring-2 focus-within:ring-[#E6007E]/20 transition-all">
-                <Search className="w-4 h-4 text-gray-400 mr-2 shrink-0" />
+              {/* Geniş Arama Kutusu */}
+              <div className="flex-1 flex items-center bg-transparent px-4 py-2">
+                <Search className="w-5 h-5 text-gray-400 mr-3 shrink-0" />
                 <input
                   type="text"
                   placeholder="Firma veya hizmet ara..."
                   value={filters.search || ''}
                   onChange={(e) => handleFilterChange({ search: e.target.value })}
-                  className="bg-transparent text-[13px] text-gray-900 placeholder:text-gray-500 outline-none w-full"
+                  className="bg-transparent text-[14px] font-medium text-gray-900 placeholder:text-gray-400 outline-none w-full"
                 />
               </div>
             </div>
 
-            {/* Sıralama ve Görünüm (Sağ Kısım) */}
-            <div className="flex items-center justify-end gap-3 w-full md:w-auto">
-              <select
-                value={filters.sortBy || 'RECOMMENDED'}
-                onChange={(e) => handleFilterChange({ sortBy: e.target.value as any })}
-                className="px-4 py-2.5 bg-white border border-gray-200 rounded-xl text-[13px] font-semibold text-gray-700 outline-none cursor-pointer"
-              >
-                <option value="RECOMMENDED">Önerilen Sıralama</option>
-                <option value="RATING">En Yüksek Puan</option>
-                <option value="PRICE_LOW">En Düşük Fiyat</option>
-              </select>
+            <div className="hidden md:block w-px h-8 bg-gray-200" /> {/* Ayıraç */}
 
-              <div className="bg-white p-1 rounded-xl border border-gray-200 flex items-center">
+            <div className="flex items-center w-full md:w-auto justify-between md:justify-end gap-2 pr-1">
+              
+              {/* Özel Sıralama Dropdown */}
+              <div className="relative" ref={sortRef}>
+                <button
+                  onClick={() => setIsSortOpen(!isSortOpen)}
+                  className="px-4 py-2.5 bg-gray-100 hover:bg-gray-200 border border-transparent rounded-full text-[13px] font-semibold text-gray-800 flex items-center gap-2 transition-colors"
+                >
+                  <ArrowDownAZ className="w-4 h-4 text-gray-500" />
+                  {sortOptions.find(o => o.id === (filters.sortBy || 'RECOMMENDED'))?.label}
+                  <ChevronDown className={`w-3.5 h-3.5 text-gray-500 transition-transform ${isSortOpen ? 'rotate-180' : ''}`} />
+                </button>
+
+                {isSortOpen && (
+                  <div className="absolute top-full right-0 mt-2 w-48 bg-white border border-gray-100 rounded-2xl shadow-2xl z-50 overflow-hidden animate-in fade-in slide-in-from-top-2">
+                    {sortOptions.map((opt) => (
+                      <button
+                        key={opt.id}
+                        onClick={() => { handleFilterChange({ sortBy: opt.id as any }); setIsSortOpen(false); }}
+                        className={`w-full text-left px-4 py-3 text-[13px] font-medium transition-colors ${
+                          filters.sortBy === opt.id ? 'bg-[#E6007E]/5 text-[#E6007E] font-bold' : 'text-gray-700 hover:bg-gray-50'
+                        }`}
+                      >
+                        {opt.label}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* Görünüm Modu Geçişi */}
+              <div className="bg-gray-100 p-1 rounded-full flex items-center">
                 <button
                   onClick={() => setViewMode('GRID')}
-                  className={`p-2 rounded-lg transition-all ${viewMode === 'GRID' ? 'bg-[#1D1D1F] text-white' : 'text-gray-500'}`}
+                  className={`p-2 rounded-full transition-all ${viewMode === 'GRID' ? 'bg-white text-black shadow-sm' : 'text-gray-500 hover:text-gray-900'}`}
+                  title="Liste Görünümü"
                 >
                   <Grid className="w-4 h-4" />
                 </button>
                 <button
                   onClick={() => setViewMode('MAP')}
-                  className={`p-2 rounded-lg transition-all ${viewMode === 'MAP' ? 'bg-[#1D1D1F] text-white' : 'text-gray-500'}`}
+                  className={`p-2 rounded-full transition-all ${viewMode === 'MAP' ? 'bg-white text-black shadow-sm' : 'text-gray-500 hover:text-gray-900'}`}
+                  title="Harita Görünümü"
                 >
                   <Map className="w-4 h-4" />
                 </button>
@@ -174,32 +216,33 @@ export default function FirmalarPage() {
           ) : (
             <>
               {loading || isPending ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 animate-pulse">
-                  {[1, 2, 3, 4, 5, 6].map(i => (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 animate-pulse">
+                  {[1, 2, 3, 4].map(i => (
                     <div key={i} className="bg-white/50 h-[420px] rounded-[32px] border border-white/40" />
                   ))}
                 </div>
               ) : vendors.length === 0 ? (
-                /* Şık ve Şiirsel Empty State */
-                <GlassCard className="py-24 text-center border-white/60 flex flex-col items-center justify-center mt-8">
-                  <div className="p-5 bg-gradient-to-br from-indigo-100 to-purple-100 rounded-full mb-6 shadow-inner">
-                    <Sparkles className="w-10 h-10 text-indigo-500" />
+                /* Şık Empty State */
+                <GlassCard className="py-28 text-center border-white/60 flex flex-col items-center justify-center mt-6">
+                  <div className="relative mb-6">
+                    <div className="absolute inset-0 bg-indigo-200 blur-xl rounded-full opacity-50" />
+                    <Sparkles className="w-14 h-14 text-indigo-500 relative z-10" />
                   </div>
                   <h3 className="text-3xl font-bold text-gray-900 mb-4 tracking-tight">
                     Bu Kriterlerde Bir Sihir Bulamadık
                   </h3>
-                  <p className="text-gray-600 max-w-md mx-auto mb-8 font-light leading-relaxed text-lg">
+                  <p className="text-gray-500 max-w-md mx-auto mb-8 font-light leading-relaxed text-lg">
                     Belki de aradığınız o özel mekan veya kusursuz fotoğrafçı başka bir şehrin, farklı bir kategorinin ardında gizleniyordur.
                   </p>
                   <button 
                     onClick={resetFilters}
-                    className="px-8 py-4 bg-[#1D1D1F] text-white font-semibold rounded-xl hover:bg-black transition-all shadow-lg hover:shadow-xl hover:-translate-y-0.5"
+                    className="px-8 py-4 bg-[#1D1D1F] text-white font-semibold rounded-2xl hover:bg-black transition-all shadow-lg hover:shadow-xl hover:-translate-y-0.5"
                   >
                     Tüm İhtimalleri Yeniden Keşfet
                   </button>
                 </GlassCard>
               ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   {vendors.map((vendor) => (
                     <VendorListingCard
                       key={vendor.id}
