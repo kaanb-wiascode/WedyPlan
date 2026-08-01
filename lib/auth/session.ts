@@ -7,7 +7,8 @@ const COOKIE_OPTIONS = {
   httpOnly: true,
   secure: process.env.NODE_ENV === 'production',
   sameSite: 'lax' as const,
-  maxAge: 7 * 24 * 60 * 60, // 7 days
+  maxAge: 7 * 24 * 60 * 60, // 7 gün
+  path: '/', // 🚨 KRİTİK DÜZELTME: Çerezin tüm sitede geçerli olması için şart!
 };
 
 /**

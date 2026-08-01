@@ -1,4 +1,4 @@
-import { jwtVerify, SignJWT } from 'jose';
+import { jwtVerify, SignJWT, decodeJwt } from 'jose';
 
 const secret = new TextEncoder().encode(
   process.env.JWT_SECRET || 'your-super-secret-key-change-in-production'
@@ -55,16 +55,11 @@ export async function createRefreshToken(userId: string): Promise<string> {
 }
 
 /**
- * Token'dan süre dolma zamanını al
+ * Token'dan süre dolma zamanını al (Edge Runtime & Vercel Uyumlu)
  */
 export function getTokenExpiration(token: string): Date | null {
   try {
-    const parts = token.split('.');
-    if (parts.length !== 3) return null;
-
-    const payload = JSON.parse(
-      Buffer.from(parts[1], 'base64').toString('utf-8')
-    );
+    const payload = decodeJwt(token);
 
     if (payload.exp) {
       return new Date(payload.exp * 1000);
