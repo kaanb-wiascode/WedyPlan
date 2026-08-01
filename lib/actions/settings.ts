@@ -35,8 +35,8 @@ const SETTINGS_COOKIE = 'wedyplan_couple_settings';
 const CARDS_COOKIE = 'wedyplan_saved_cards';
 
 const DEFAULT_PROFILE: CoupleProfileData = {
-  partnerOneName: 'Selin',
-  partnerTwoName: 'Kaan',
+  partnerOneName: 'Sadi',
+  partnerTwoName: 'Hamiyet',
   weddingDate: '2026-08-15',
   city: 'İstanbul',
   venueName: 'Beykoz Secret Garden',
@@ -56,7 +56,7 @@ const DEFAULT_PREFERENCES: AppPreferencesData = {
 const DEFAULT_CARDS: SavedPaymentMethod[] = [
   {
     id: 'card-1',
-    cardHolder: 'Kaan Yılmaz',
+    cardHolder: 'Sadi Yılmaz',
     cardNumberMasked: '**** **** **** 4242',
     expiryDate: '12/28',
     cardBrand: 'VISA',
@@ -64,7 +64,7 @@ const DEFAULT_CARDS: SavedPaymentMethod[] = [
   },
   {
     id: 'card-2',
-    cardHolder: 'Selin Kaya',
+    cardHolder: 'Hamiyet Yılmaz',
     cardNumberMasked: '**** **** **** 8819',
     expiryDate: '09/27',
     cardBrand: 'MASTERCARD',
@@ -105,7 +105,7 @@ export async function getCoupleSettings() {
   }
 }
 
-// 2. Çift & Düğün Profil Bilgilerini Güncelle
+// 2. Çift & Düğün Profil Bilgilerini Güncelle (Portal genelinde yenileme tetiklenir)
 export async function updateCoupleProfile(profileData: CoupleProfileData) {
   try {
     const cookieStore = await cookies();
@@ -123,9 +123,10 @@ export async function updateCoupleProfile(profileData: CoupleProfileData) {
 
     cookieStore.set(SETTINGS_COOKIE, JSON.stringify(updated), { path: '/', maxAge: 30 * 24 * 60 * 60 });
     
+    // PORTAL LAYOUT VE SAYFA CANLI YENİLEMESİ
+    revalidatePath('/cift', 'layout');
     revalidatePath('/cift/ayarlar');
     revalidatePath('/cift/dashboard');
-    revalidatePath('/cift/butce');
 
     return { success: true, message: 'Profil bilgileriniz başarıyla güncellendi.', data: updated.profile };
   } catch (error) {

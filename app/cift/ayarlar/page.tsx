@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useEffect, useState, useTransition } from 'react';
+import { useRouter } from 'next/navigation';
 import {
   getCoupleSettings,
   updateCoupleProfile,
@@ -25,7 +26,6 @@ import {
   Lock,
   Building2,
   Calendar,
-  Smartphone,
   Save,
   X,
   Sliders,
@@ -33,6 +33,7 @@ import {
 } from 'lucide-react';
 
 export default function CoupleSettingsPage() {
+  const router = useRouter();
   const [loading, setLoading] = useState(true);
   const [isPending, startTransition] = useTransition();
   const [activeTab, setActiveTab] = useState<'PROFILE' | 'PAYMENTS' | 'NOTIFICATIONS' | 'SECURITY'>('PROFILE');
@@ -92,7 +93,10 @@ export default function CoupleSettingsPage() {
     e.preventDefault();
     startTransition(async () => {
       const res = await updateCoupleProfile(profileForm);
-      if (res.success) showToast(res.message || 'Profil güncellendi.');
+      if (res.success) {
+        showToast(res.message || 'Profil güncellendi.');
+        router.refresh();
+      }
     });
   };
 
@@ -101,7 +105,10 @@ export default function CoupleSettingsPage() {
     setPrefForm(newPrefs);
     startTransition(async () => {
       const res = await updateAppPreferences(newPrefs);
-      if (res.success) showToast(res.message || 'Tercihler kaydedildi.');
+      if (res.success) {
+        showToast(res.message || 'Tercihler kaydedildi.');
+        router.refresh();
+      }
     });
   };
 
@@ -119,6 +126,7 @@ export default function CoupleSettingsPage() {
         setCardNumberInput('');
         setCardExpiryInput('');
         showToast(res.message || 'Kart eklendi.');
+        router.refresh();
       }
     });
   };
@@ -130,6 +138,7 @@ export default function CoupleSettingsPage() {
       if (res.success && res.data) {
         setCards(res.data);
         showToast(res.message || 'Kart silindi.');
+        router.refresh();
       }
     });
   };
@@ -141,6 +150,7 @@ export default function CoupleSettingsPage() {
       if (res.success && res.data) {
         setCards(res.data);
         showToast(res.message || 'Varsayılan kart güncellendi.');
+        router.refresh();
       }
     });
   };
@@ -207,8 +217,6 @@ export default function CoupleSettingsPage() {
           );
         })}
       </div>
-
-      {/* 1. SEKMELER VE İÇERİKLERİ */}
 
       {/* TAB 1: DÜĞÜN PROFİLİ */}
       {activeTab === 'PROFILE' && (

@@ -1,9 +1,10 @@
 'use client';
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import Image from 'next/image';
+import { getCoupleSettings } from '@/lib/actions/settings';
 import {
   LayoutDashboard,
   Wallet,
@@ -36,12 +37,44 @@ const menuItems = [
 export function CoupleSidebar() {
   const pathname = usePathname();
 
+  const [profile, setProfile] = useState({
+    partnerOneName: 'Sadi',
+    partnerTwoName: 'Hamiyet',
+    weddingDate: '2026-08-15',
+  });
+
+  useEffect(() => {
+    const loadProfile = async () => {
+      const res = await getCoupleSettings();
+      if (res.success && res.data?.profile) {
+        setProfile({
+          partnerOneName: res.data.profile.partnerOneName || 'Sadi',
+          partnerTwoName: res.data.profile.partnerTwoName || 'Hamiyet',
+          weddingDate: res.data.profile.weddingDate || '2026-08-15',
+        });
+      }
+    };
+    loadProfile();
+  }, [pathname]);
+
+  const initials = `${(profile.partnerOneName[0] || 'S').toUpperCase()}&${(profile.partnerTwoName[0] || 'H').toUpperCase()}`;
+
+  const formatDate = (dateStr: string) => {
+    if (!dateStr) return 'Tarih Belirtilmedi';
+    try {
+      const date = new Date(dateStr);
+      return date.toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', year: 'numeric' });
+    } catch {
+      return dateStr;
+    }
+  };
+
   return (
     <aside className="w-72 border-r border-rose-100/60 dark:border-zinc-800/60 bg-white/70 dark:bg-zinc-950/70 backdrop-blur-2xl flex flex-col justify-between min-h-screen sticky top-0 transition-all z-30 shadow-xs">
       <div className="p-6 space-y-8">
         
         {/* Özel Çift Portalı Logosu */}
-        <Link href="/dashboard" className="block px-2 group">
+        <Link href="/cift/dashboard" className="block px-2 group">
           <div className="relative w-48 h-12">
             <Image
               src="/assets/branding/logo-couple.svg"
@@ -56,7 +89,7 @@ export function CoupleSidebar() {
         {/* Navigasyon Menüsü */}
         <nav className="space-y-1">
           {menuItems.map((item) => {
-            const isActive = pathname === item.href;
+            const isActive = pathname === item.href || pathname?.startsWith(`${item.href}/`);
             const Icon = item.icon;
 
             return (
@@ -86,18 +119,18 @@ export function CoupleSidebar() {
         </nav>
       </div>
 
-      {/* Profil Alt Kartı */}
+      {/* Dinamik Profil Alt Kartı */}
       <div className="p-4 m-4 rounded-2xl bg-gradient-to-b from-rose-50/40 to-white/60 dark:from-zinc-900/60 dark:to-zinc-900/30 border border-rose-100 dark:border-zinc-800/80 backdrop-blur-md space-y-3 shadow-xs">
         <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-full bg-gradient-to-tr from-rose-400 to-rose-600 flex items-center justify-center text-white text-xs font-semibold shadow-xs ring-2 ring-white dark:ring-zinc-800">
-            E&M
+          <div className="w-9 h-9 rounded-full bg-gradient-to-tr from-rose-400 to-rose-600 flex items-center justify-center text-white text-xs font-bold shadow-xs ring-2 ring-white dark:ring-zinc-800 shrink-0">
+            {initials}
           </div>
-          <div className="flex flex-col truncate">
-            <span className="text-xs font-semibold text-zinc-900 dark:text-white truncate">
-              Eda & Mert
+          <div className="flex flex-col truncate min-w-0">
+            <span className="text-xs font-bold text-zinc-900 dark:text-white truncate">
+              {profile.partnerOneName} & {profile.partnerTwoName}
             </span>
-            <span className="text-[10px] text-rose-500/90 font-medium flex items-center gap-1 truncate">
-              <Calendar className="w-2.5 h-2.5" /> 15 Eylül 2026
+            <span className="text-[10px] text-rose-500/90 font-medium flex items-center gap-1 truncate mt-0.5">
+              <Calendar className="w-2.5 h-2.5 shrink-0" /> {formatDate(profile.weddingDate)}
             </span>
           </div>
         </div>
