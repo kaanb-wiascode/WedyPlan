@@ -245,7 +245,11 @@ export async function updateSettings(data: any) { return updateAppPreferences(da
 export async function updateProfile(data: any) { return updateCoupleProfile(data); }
 
 export async function exportUserDataAction(...args: any[]) {
-  return { success: true, message: 'Verileriniz başarıyla dışa aktarıldı.' };
+  return { 
+    success: true, 
+    message: 'Verileriniz başarıyla dışa aktarıldı.',
+    downloadUrl: '#' 
+  };
 }
 
 export async function updateSecurityPasswordAction(...args: any[]) {
