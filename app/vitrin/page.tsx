@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useMemo, useTransition } from 'react';
-import { submitProfileForReviewAction, uploadVendorMediaAction } from '@/lib/actions/vendor-profile-sync';
+import { submitProfileForReviewAction, uploadVendorMediaAction } from '../../lib/actions/vendor-profile-sync';
 import {
   Store,
   Info,
