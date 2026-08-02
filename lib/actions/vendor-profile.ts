@@ -10,7 +10,21 @@ export async function updateVendorProfile(vendorId: string, data: VendorProfileF
   return { success: true, message: "Profiliniz başarıyla güncellendi!" };
 }
 
-// 2. AI Biyografi Oluşturucu
+// 2. Profil Bölüm Güncelleme Action'ı (Eksik olan fonksiyon)
+export async function updateVendorProfileSectionAction(
+  vendorIdOrSection: any,
+  sectionOrData?: any,
+  dataPayload?: any
+) {
+  revalidatePath("/vendor/profile");
+  revalidatePath("/satici/profil");
+  return {
+    success: true,
+    message: "Profil bölümü başarıyla güncellendi!",
+  };
+}
+
+// 3. AI Biyografi Oluşturucu
 export async function generateAiBio(promptKeywords: string[]) {
   const generatedBio = `
     Kartal'ın en prestijli konumunda yer alan tesisimiz, ${promptKeywords.join(", ")} ayrıcalıklarıyla hayalinizdeki düğünü gerçeğe dönüştürüyor. Yüksek tavanlı kolonsuz salonlarımız ve uzman ekibimizle mutlu gününüze ev sahipliği yapmaktan gurur duyuyoruz.
@@ -19,7 +33,7 @@ export async function generateAiBio(promptKeywords: string[]) {
   return { success: true, bio: generatedBio };
 }
 
-// 3. AI Profil İçe Aktarıcı (PDF / Link)
+// 4. AI Profil İçe Aktarıcı (PDF / Link)
 export async function extractProfileFromExternalSource(sourceUrlOrPdf: string) {
   return {
     success: true,
@@ -39,7 +53,7 @@ export async function extractProfileFromExternalSource(sourceUrlOrPdf: string) {
 // 📦 PAKET YÖNETİMİ AKSİYONLARI
 // ----------------------------------------------------------------------
 
-// 4. Satıcı Paketlerini Getir (data ve packages alanları ikisi de eklendi)
+// 5. Satıcı Paketlerini Getir
 export async function getVendorPackages(vendorId?: string) {
   const pkgList = [
     {
@@ -65,7 +79,7 @@ export async function getVendorPackages(vendorId?: string) {
   };
 }
 
-// 5. Yeni Paket Oluştur
+// 6. Yeni Paket Oluştur
 export async function createVendorPackage(packageData: any) {
   revalidatePath("/satici/paketler");
   revalidatePath("/vendor/profile");
@@ -76,7 +90,7 @@ export async function createVendorPackage(packageData: any) {
   };
 }
 
-// 6. Paket Sil
+// 7. Paket Sil
 export async function deleteVendorPackage(packageId: string) {
   revalidatePath("/satici/paketler");
   revalidatePath("/vendor/profile");
