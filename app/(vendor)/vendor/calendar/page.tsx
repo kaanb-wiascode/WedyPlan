@@ -1,8 +1,9 @@
-import React from "react";
-import VendorCalendarClient from "@/components/vendor/calendar/VendorCalendarClient";
+import React from 'react';
+import VendorCalendarClient from '@/components/vendor/calendar/VendorCalendarClient';
+import { getVendorCalendarEvents } from '@/lib/actions/vendor-calendar';
 
-export default function VendorCalendarPage() {
-  const mockVendorId = "vnd_demo_8821";
+export default async function VendorCalendarPage() {
+  const { events } = await getVendorCalendarEvents("vendor_default");
 
-  return <VendorCalendarClient vendorId={mockVendorId} />;
+  return <VendorCalendarClient initialEvents={events || []} vendorId="vendor_default" />;
 }

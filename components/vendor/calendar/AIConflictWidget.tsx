@@ -1,41 +1,41 @@
-"use client";
+'use client';
 
-import React from "react";
-import { motion } from "framer-motion";
+import React from 'react';
+import GlassCard from '@/components/shared/ui/GlassCard';
+import { Sparkles, AlertTriangle, CheckCircle2, TrendingUp } from 'lucide-react';
 
-export default function AIConflictWidget({ conflicts, suggestions }: { conflicts: any[]; suggestions: string[] }) {
-  if (!conflicts || conflicts.length === 0) return null;
-
+export default function AIConflictWidget() {
   return (
-    <motion.div whileHover={{ y: -2 }} className="p-6 backdrop-blur-2xl bg-gradient-to-br from-rose-500/10 via-white/80 to-amber-500/10 dark:from-rose-950/30 dark:via-slate-900/80 dark:to-amber-950/20 border border-rose-200/50 dark:border-rose-900/40 rounded-3xl shadow-sm space-y-4">
-      <div className="flex justify-between items-center">
-        <span className="text-xs font-bold uppercase tracking-wider text-rose-600 dark:text-rose-400">
-          ✦ AI Operations Conflict Radar & Solution Engine
-        </span>
-        <span className="px-2.5 py-1 rounded-full text-xs font-bold bg-rose-100 text-rose-700 dark:bg-rose-950 dark:text-rose-300">
-          Çakışma Uyarısı
-        </span>
+    <GlassCard className="p-5 bg-gradient-to-r from-purple-500/10 via-rose-500/5 to-transparent border-purple-200/60 dark:border-purple-900/40 relative overflow-hidden">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 relative z-10">
+        
+        <div className="space-y-1.5 max-w-xl">
+          <div className="flex items-center gap-2">
+            <div className="p-1.5 bg-purple-600 text-white rounded-lg shadow-xs">
+              <Sparkles className="w-4 h-4 animate-pulse" />
+            </div>
+            <span className="text-xs font-bold uppercase tracking-wider text-purple-700 dark:text-purple-400">
+              WedyPlan AI Akıllı Takvim Asistanı
+            </span>
+          </div>
+
+          <h3 className="text-base font-bold text-gray-900 dark:text-white">
+            Eylül 2026 Doluluk Oranı: %85 (Yüksek Talep Dönemi)
+          </h3>
+
+          <p className="text-xs text-gray-600 dark:text-gray-300 leading-relaxed">
+            15 Eylül’deki <strong>Zeynep & Can</strong> düğünü ile aynı gün Teras altyapı bakım saati çakışıyor. AI, bakım saatini 2 saat öne çekmenizi öneriyor.
+          </p>
+        </div>
+
+        <div className="flex items-center gap-2 shrink-0">
+          <div className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 rounded-xl text-xs font-bold text-emerald-700 dark:text-emerald-300">
+            <CheckCircle2 className="w-4 h-4 text-emerald-500" />
+            Takvim Optimize Edildi
+          </div>
+        </div>
+
       </div>
-
-      {conflicts.map((c) => (
-        <div key={c.id} className="p-3.5 rounded-2xl bg-white/80 dark:bg-slate-800/60 border border-rose-100 dark:border-rose-900/40 space-y-2 text-xs">
-          <div className="flex justify-between items-center">
-            <h4 className="font-bold text-rose-800 dark:text-rose-300">🚨 {c.title}</h4>
-            <span className="px-2 py-0.5 rounded text-[9px] font-bold bg-rose-600 text-white">YÜKSEK RİSK</span>
-          </div>
-          <p className="text-slate-600 dark:text-slate-300 leading-relaxed text-[11px]">{c.description}</p>
-          <div className="p-2.5 rounded-xl bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200/50 text-[11px] text-emerald-800 dark:text-emerald-300 font-semibold">
-            💡 <strong>AI Çözüm Önerisi:</strong> {c.solution}
-          </div>
-        </div>
-      ))}
-
-      {suggestions && suggestions.length > 0 && (
-        <div className="space-y-1 text-xs pt-1">
-          <span className="text-[10px] text-indigo-600 font-bold uppercase block">⚡ Zamanlama Optimasyonu Tavsiyesi</span>
-          <p className="text-slate-600 dark:text-slate-300 text-[11px] italic">{suggestions[0]}</p>
-        </div>
-      )}
-    </motion.div>
+    </GlassCard>
   );
 }
