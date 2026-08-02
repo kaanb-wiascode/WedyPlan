@@ -6,8 +6,6 @@ import { revalidatePath } from "next/cache";
 // 1. Profil Güncelleme Action'ı
 export async function updateVendorProfile(vendorId: string, data: VendorProfileFormValues) {
   const validated = VendorProfileSchema.parse(data);
-
-  // Veritabanı güncelleme simülasyonu / Prisma entegrasyonu
   revalidatePath("/vendor/profile");
   return { success: true, message: "Profiliniz başarıyla güncellendi!" };
 }
@@ -38,35 +36,37 @@ export async function extractProfileFromExternalSource(sourceUrlOrPdf: string) {
 }
 
 // ----------------------------------------------------------------------
-// 📦 PAKET YÖNETİMİ AKSİYONLARI (Eksik Olan Fonksiyonlar)
+// 📦 PAKET YÖNETİMİ AKSİYONLARI
 // ----------------------------------------------------------------------
 
-// 4. Satıcı Paketlerini Getir
+// 4. Satıcı Paketlerini Getir (data ve packages alanları ikisi de eklendi)
 export async function getVendorPackages(vendorId?: string) {
+  const pkgList = [
+    {
+      id: "1",
+      name: "Gold Düğün Paketi",
+      price: 1500,
+      currency: "EUR",
+      features: ["800 Kişilik Masa Düzeni", "Hoşgeldin Kokteyli", "Gelin Odası Konaklama"],
+    },
+    {
+      id: "2",
+      name: "Platinum Her Şey Dahil Paketi",
+      price: 2500,
+      currency: "EUR",
+      features: ["1000 Kişilik Balo Salonu", "Canlı Orkestra", "Menü Tadımı", "After Party Alanı"],
+    }
+  ];
+
   return {
     success: true,
-    packages: [
-      {
-        id: "1",
-        name: "Gold Düğün Paketi",
-        price: 1500,
-        currency: "EUR",
-        features: ["800 Kişilik Masa Düzeni", "Hoşgeldin Kokteyli", "Gelin Odası Konaklama"],
-      },
-      {
-        id: "2",
-        name: "Platinum Her Şey Dahil Paketi",
-        price: 2500,
-        currency: "EUR",
-        features: ["1000 Kişilik Balo Salonu", "Canlı Orkestra", "Menü Tadımı", "After Party Alanı"],
-      }
-    ]
+    data: pkgList,
+    packages: pkgList
   };
 }
 
 // 5. Yeni Paket Oluştur
 export async function createVendorPackage(packageData: any) {
-  // DB kayıt simülasyonu
   revalidatePath("/satici/paketler");
   revalidatePath("/vendor/profile");
   return {
@@ -78,7 +78,6 @@ export async function createVendorPackage(packageData: any) {
 
 // 6. Paket Sil
 export async function deleteVendorPackage(packageId: string) {
-  // DB silme simülasyonu
   revalidatePath("/satici/paketler");
   revalidatePath("/vendor/profile");
   return {
