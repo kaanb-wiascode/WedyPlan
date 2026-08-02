@@ -4,7 +4,14 @@ import React from 'react';
 import { motion, HTMLMotionProps } from 'framer-motion';
 import { ComponentSize } from '@/types/design-system';
 
-export type ButtonVariant = 'primary' | 'secondary' | 'glass' | 'ghost' | 'gold' | 'danger';
+export type ButtonVariant = 
+  | 'primary' 
+  | 'secondary' 
+  | 'glass' 
+  | 'ghost' 
+  | 'gold' 
+  | 'danger' 
+  | 'outline'; // 👈 'outline' varyantı eklendi
 
 interface ButtonProps extends Omit<HTMLMotionProps<'button'>, 'children'> {
   variant?: ButtonVariant;
@@ -39,6 +46,7 @@ export const Button: React.FC<ButtonProps> = ({
     ghost: 'bg-transparent text-[#6E6E73] dark:text-slate-300 hover:text-[#1D1D1F] dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/10',
     gold: 'bg-gradient-to-r from-[#D4AF37] to-amber-600 hover:from-[#B8982C] hover:to-amber-700 text-white shadow-md',
     danger: 'bg-rose-600 hover:bg-rose-700 text-white shadow-md',
+    outline: 'border border-slate-300 dark:border-zinc-700 bg-transparent text-[#1D1D1F] dark:text-white hover:bg-slate-100/50 dark:hover:bg-zinc-800/50', // 👈 Outline stilleri eklendi
   };
 
   return (

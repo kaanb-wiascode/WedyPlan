@@ -1,24 +1,52 @@
 import { z } from "zod";
 
-export const generalProfileSchema = z.object({
-  businessName: z.string().min(2, "İşletme adı gereklidir"),
-  slogan: z.string().optional(),
-  category: z.string().min(1, "Kategori seçilmelidir"),
-  city: z.string().min(2, "Şehir seçilmelidir"),
-  district: z.string().min(2, "İlçe seçilmelidir"),
-  address: z.string().min(5, "Açık adres giriniz"),
-  phone: z.string().min(10, "Geçerli telefon giriniz"),
-  email: z.string().email("Geçerli e-posta giriniz"),
-  website: z.string().optional(),
-  instagram: z.string().optional(),
-  story: z.string().min(20, "Hikaye en az 20 karakter olmalıdır"),
+// Salon / Davet Alanı Şeması
+export const SpaceSchema = z.object({
+  id: z.string().optional(),
+  name: z.string().min(2, "Salon adı gereklidir"), // Örn: Karina Balo Salonu
+  type: z.enum(["KAPALI_SALON", "AÇIK_HAVA", "HAVUZ_BAŞI", "RESTORAN"]),
+  capacityYemekliMin: z.number().min(0),
+  capacityYemekliMax: z.number().min(1),
+  capacityKokteylMax: z.number().optional(),
+  ceilingHeight: z.number().optional(), // Örn: 6.2 metre
+  features: z.array(z.string()), // ["Kolonsuz", "Deniz Manzaralı", "Açılır Tavan"]
+  images: z.array(z.string()), // Salona ait görseller
 });
 
-export const seoProfileSchema = z.object({
-  metaTitle: z.string().min(10, "Meta başlığı en az 10 karakter olmalıdır"),
-  metaDescription: z.string().min(20, "Meta açıklaması en az 20 karakter olmalıdır"),
-  keywords: z.array(z.string()).min(1, "En az bir anahtar kelime ekleyiniz"),
+// Ana Profil Şeması
+export const VendorProfileSchema = z.object({
+  // 1. Kimlik & Temel Bilgiler
+  title: z.string().min(3, "Firma adı en az 3 karakter olmalıdır"),
+  category: z.string(),
+  city: z.string(),
+  district: z.string(),
+  address: z.string(),
+  geoLat: z.number().optional(),
+  geoLng: z.number().optional(),
+  bio: z.string().min(20, "Detaylı bir tanıtım yazısı giriniz"),
+  
+  // Vitrin Fiyatları
+  minPriceWeekday: z.number(),
+  minPriceWeekend: z.number(),
+  currency: z.enum(["TRY", "EUR", "USD"]).default("TRY"),
+
+  // 2. Davet Alanları (Array)
+  spaces: z.array(SpaceSchema),
+
+  // 3. Hizmet & Paket Özellikleri
+  features: z.array(z.string()), // ["Gelin Odası", "Vale", "Menü Tadımı"]
+  cateringTypes: z.array(z.string()), // ["Kırmızı Et", "Beyaz Et", "Vegan"]
+  alcoholService: z.boolean().default(false),
+  outsideVendorAllowed: z.boolean().default(true), // Dışarıdan fotoğrafçı/organizasyon izni
+
+  // 4. Medya & Vitrin
+  coverImage: z.string().url("Geçerli bir kapak görseli giriniz"),
+  promoVideoUrl: z.string().optional(),
+  gallery: z.array(z.object({
+    url: z.string(),
+    tag: z.string().optional(), // "Masa Düzenlemeleri", "Gelin Yolu" vb.
+    isFeatured: z.boolean().default(false)
+  })),
 });
 
-export type GeneralProfileInput = z.infer<typeof generalProfileSchema>;
-export type SEOProfileInput = z.infer<typeof seoProfileSchema>;
+export type VendorProfileFormValues = z.infer<typeof VendorProfileSchema>;
