@@ -45,6 +45,16 @@ export const LeadSchema = z.object({
   createdAt: z.string()
 });
 
-// Tip tanımları
+// Aşama/Durum Güncelleme Şeması (Build hatasını çözen kısım)
+export const updateLeadStageSchema = z.object({
+  leadId: z.string().optional(),
+  status: LeadStatusEnum.optional(),
+  stage: LeadStatusEnum.optional(),
+  newStatus: LeadStatusEnum.optional(),
+  newStage: LeadStatusEnum.optional(),
+});
+
+// Tip Tanımları
 export type LeadFormValues = z.infer<typeof LeadSchema>;
 export type Lead = LeadFormValues;
+export type UpdateLeadStageInput = z.infer<typeof updateLeadStageSchema>;
