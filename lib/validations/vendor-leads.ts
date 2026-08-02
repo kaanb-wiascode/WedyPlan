@@ -1,5 +1,6 @@
 import { z } from "zod";
 
+// Status Enum
 export const LeadStatusEnum = z.enum([
   "NEW",             // Yeni Gelen Talep
   "CONTACTED",       // İletişim Kuruldu
@@ -9,8 +10,10 @@ export const LeadStatusEnum = z.enum([
   "LOST"             // Kaybedildi
 ]);
 
+// Status Tipi
 export type LeadStatus = z.infer<typeof LeadStatusEnum>;
 
+// Ana Lead Şeması
 export const LeadSchema = z.object({
   id: z.string(),
   coupleName: z.string().min(2, "Çift adı gereklidir"),
@@ -45,7 +48,7 @@ export const LeadSchema = z.object({
   createdAt: z.string()
 });
 
-// Aşama/Durum Güncelleme Şeması (Build hatasını çözen kısım)
+// Aşama/Durum Güncelleme Şeması
 export const updateLeadStageSchema = z.object({
   leadId: z.string().optional(),
   status: LeadStatusEnum.optional(),
@@ -54,7 +57,7 @@ export const updateLeadStageSchema = z.object({
   newStage: LeadStatusEnum.optional(),
 });
 
-// Tip Tanımları
+// Tip Tanımları (Dışa Aktarımlar)
 export type LeadFormValues = z.infer<typeof LeadSchema>;
 export type Lead = LeadFormValues;
 export type UpdateLeadStageInput = z.infer<typeof updateLeadStageSchema>;

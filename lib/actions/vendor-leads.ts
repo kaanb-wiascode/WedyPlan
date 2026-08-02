@@ -1,39 +1,77 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { updateLeadStageSchema, UpdateLeadStageInput } from "@/lib/validations/vendor-leads";
+import {
+  LeadStatus,
+  UpdateLeadStageInput,
+  updateLeadStageSchema,
+} from "@/lib/validations/vendor-leads";
 
-export async function updateLeadStageAction(vendorId: string, data: UpdateLeadStageInput) {
-  const validation = updateLeadStageSchema.safeParse(data);
+// 1. Canlı Sinyalli Talepleri Getir
+export async function getVendorLeads(vendorId?: string) {
+  const leads = [
+    {
+      id: "lead_101",
+      coupleName: "Zeynep & Can",
+      avatarUrl: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150",
+      email: "zeynep@example.com",
+      phone: "+90 532 111 22 33",
+      whatsappPhone: "905321112233",
+      weddingDate: "2026-09-15",
+      guestCount: 650,
+      budgetAmount: 18000,
+      currency: "EUR",
+      status: "NEW" as LeadStatus,
+      isCoupleOnline: true,
+      currentActivity: "Karina Balo Salonu görsellerini inceliyor",
+      lastSeenTime: "Şimdi",
+      unreadMessagesCount: 2,
+      aiScore: 96,
+      aiSummary: "Mekanınızın kapasitesi ve Eylül tarihi için tam uyumlu.",
+      suggestedAction: "Hemen özel teklif gönderin.",
+      notes: [],
+      createdAt: "5 dakika önce"
+    }
+  ];
 
-  if (!validation.success) {
-    return { success: false, errors: validation.error.flatten().fieldErrors };
-  }
-
-  try {
-    console.log("Updating lead " + data.leadId + " stage to " + data.stage + " for vendor " + vendorId);
-    revalidatePath("/vendor/leads");
-    return { success: true, message: "Müşteri aşaması başarıyla güncellendi ✨" };
-  } catch (error) {
-    console.error("Update Lead Stage Error:", error);
-    return { success: false, error: "Aşama güncellenemedi." };
-  }
+  return { success: true, leads };
 }
 
-export async function generateAILeadReplyAction(leadId: string, coupleName: string, budget: string) {
-  try {
-    const suggestedReply = "Merhaba " + coupleName + " Hanım & Bey! Düğün gününüz için hazırladığımız özel paket detaylarını ve " + budget + " bütçe aralığınıza uygun indirimli teklifimizi iletmekten mutluluk duyarız. Müsaitseniz kısa bir telefon görüşmesi gerçekleştirebilir miyiz?";
+// 2. Durum Güncelleme
+export async function updateLeadStatusAction(leadId: string, newStatus: LeadStatus) {
+  revalidatePath("/vendor/leads");
+  revalidatePath("/satici/talepler");
+  return { success: true, message: `Durum '${newStatus}' olarak güncellendi.` };
+}
 
-    return {
-      success: true,
-      suggestedReply,
-      leadScore: 92,
-      winProbability: 88,
-      bestFollowUpTime: "Yarın (Çarşamba) 14:30",
-      riskAnalysis: "Müşteri bütçesi teklif tutarınıza son derece uygun. 24 saat içinde yanıt verilirse satış kapatma oranı %90'ın üzerindedir.",
-    };
-  } catch (error) {
-    console.error("AI Lead Reply Error:", error);
-    return { success: false, error: "AI yanıtı üretilemedi." };
+// 3. Aşama Güncelleme
+export async function updateLeadStageAction(vendorId: string, data: UpdateLeadStageInput) {
+  const validation = updateLeadStageSchema.safeParse(data);
+  if (!validation.success) {
+    return { success: false, error: "Geçersiz veri" };
   }
+  revalidatePath("/vendor/leads");
+  revalidatePath("/satici/talepler");
+  return { success: true, message: "Aşama başarıyla güncellendi." };
+}
+
+// 4. Anlık Teklif Gönder
+export async function sendInstantOfferAction(
+  leadId: string, 
+  offerDetails: { amount: number; notes: string }
+) {
+  revalidatePath("/vendor/leads");
+  return { 
+    success: true, 
+    message: "Anlık özel teklif çiftin ekranına canlı olarak iletildi!" 
+  };
+}
+
+// 5. Talebe Not Ekle
+export async function addLeadNoteAction(leadId: string, noteText: string) {
+  revalidatePath("/vendor/leads");
+  return {
+    success: true,
+    note: { id: Date.now().toString(), text: noteText, createdAt: new Date().toISOString() }
+  };
 }
