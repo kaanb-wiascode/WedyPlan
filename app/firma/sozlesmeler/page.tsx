@@ -7,7 +7,7 @@ import {
   signVendorContractAction,
   saveOptionSettingsAction,
   archiveVendorContractAction
-} from '@/lib/actions/vendor-contract-sync';
+} from '../../../lib/actions/vendor-contract-sync';
 import {
   FileText,
   Plus,
