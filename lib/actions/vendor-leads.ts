@@ -67,10 +67,17 @@ export async function sendInstantOfferAction(
   };
 }
 
-// 5. AI WhatsApp / Yanıt Taslağı Oluşturucu (Build hatasını çözen fonksiyon)
-export async function generateAILeadReplyAction(leadId: string, customPrompt?: string) {
+// 5. AI WhatsApp / Yanıt Taslağı Oluşturucu (3 Parametreli Uyumlu Fonksiyon)
+export async function generateAILeadReplyAction(
+  leadId: string, 
+  coupleNameOrPrompt?: string, 
+  budgetText?: string
+) {
+  const nameText = coupleNameOrPrompt ? ` ${coupleNameOrPrompt}` : "";
+  const budgetInfo = budgetText ? ` ve ${budgetText}` : "";
+
   const suggestedReply = 
-    "Merhaba! WedyPlan üzerinden ilettiğiniz düğün talebinizi ve bütçe detaylarınızı inceledik. İlettiğiniz tarihte Karina Balo Salonumuz uygundur. Sizin için özel hazırladığımız ikramlı paketi ve menü tadım randevusu detaylarını iletmekten mutluluk duyarız.";
+    `Merhaba${nameText}! WedyPlan üzerinden ilettiğiniz düğün talebinizi${budgetInfo} detaylarınızı inceledik. İlettiğiniz tarihte Karina Balo Salonumuz uygundur. Sizin için özel hazırladığımız ikramlı paketi ve menü tadım randevusu detaylarını iletmekten mutluluk duyarız.`;
 
   return {
     success: true,
