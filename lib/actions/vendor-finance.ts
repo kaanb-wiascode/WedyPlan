@@ -1,43 +1,75 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { createExpenseSchema, CreateExpenseInput } from "@/lib/validations/vendor-finance";
+import { Transaction } from "@/lib/validations/vendor-finance";
 
-export async function createVendorExpenseAction(vendorId: string, data: CreateExpenseInput) {
-  const validation = createExpenseSchema.safeParse(data);
+// 1. Finansal Özet ve İşlemleri Getir
+export async function getVendorFinanceData(vendorId?: string) {
+  const transactions: Transaction[] = [
+    {
+      id: "tx_101",
+      coupleName: "Zeynep & Can",
+      title: "1. Taksit Ödemesi (Karina Balo Salonu)",
+      type: "INSTALLMENT",
+      status: "PENDING",
+      amount: 4500,
+      currency: "EUR",
+      dueDate: "2026-08-10",
+      aiRiskScore: 12,
+      aiNotes: "Daha önceki kapora ödemesini gününde yaptılar. Risk düşük."
+    },
+    {
+      id: "tx_102",
+      coupleName: "Selin & Mert",
+      title: "Kapora Ödemesi (Teras Konsepti)",
+      type: "DEPOSIT",
+      status: "OVERDUE",
+      amount: 3000,
+      currency: "EUR",
+      dueDate: "2026-07-28",
+      aiRiskScore: 84,
+      aiNotes: "Ödeme tarihi 5 gün geçti. Otomatik WhatsApp hatırlatması önerilir."
+    },
+    {
+      id: "tx_103",
+      coupleName: "Elif & Burak",
+      title: "Kapanış Bakiyesi (Havuzbaşı)",
+      type: "FINAL_PAYMENT",
+      status: "PAID",
+      amount: 9500,
+      currency: "EUR",
+      dueDate: "2026-08-01",
+      paidDate: "2026-08-01",
+      aiRiskScore: 0,
+      aiNotes: "Ödeme zamanında başarıyla tahsil edildi."
+    }
+  ];
 
-  if (!validation.success) {
-    return { success: false, errors: validation.error.flatten().fieldErrors };
-  }
+  const summary = {
+    totalRevenue: 185000,
+    collectedRevenue: 112000,
+    pendingRevenue: 73000,
+    overdueAmount: 3000,
+    currency: "EUR"
+  };
 
-  try {
-    console.log("Saving financial transaction for vendor " + vendorId + ":", validation.data);
-    revalidatePath("/vendor/finance");
-    return {
-      success: true,
-      message: "Finansal işlem ve gider kaydı başarıyla eklendi ✨",
-    };
-  } catch (error) {
-    console.error("Create Expense Error:", error);
-    return { success: false, error: "İşlem kaydedilemedi." };
-  }
+  return { success: true, summary, transactions };
 }
 
-export async function generateAIFinanceInsightsAction(vendorId: string) {
-  try {
-    return {
-      success: true,
-      financialHealthScore: 92,
-      netProfitMarginPercentage: 38,
-      cashFlowPrediction30Days: "+320.000 ₺ Pozitif Nakit Akışı",
-      taxProvisionAmount: "42.500 ₺ (Önümüzdeki Ay Ödenecek KDV/Stopaj)",
-      savingsRecommendations: [
-        { title: "Dış Ekipman Kiralama Maliyeti", advice: "Geçen aya göre dış ekipman maliyetiniz %18 arttı. Kendi ses/ışık sisteminizi satın almanız 4 ay içinde amorti sağlayacaktır.", potentialSaving: "18.500 ₺ / Ay" },
-      ],
-      profitOptimizationScore: 95,
-    };
-  } catch (error) {
-    console.error("AI Finance Insights Error:", error);
-    return { success: false, error: "AI finans analizi yapılamadı." };
-  }
+// 2. Tahsilat Kaydet Action
+export async function recordPaymentAction(transactionId: string) {
+  revalidatePath("/vendor/finance");
+  return { 
+    success: true, 
+    message: "Tahsilat başarıyla kaydedildi ve nakit akışına işlendi." 
+  };
+}
+
+// 3. AI Ödeme Hatırlatması Gönder Action
+export async function sendPaymentReminderAction(transactionId: string, coupleName: string) {
+  revalidatePath("/vendor/finance");
+  return { 
+    success: true, 
+    message: `${coupleName} çiftine WhatsApp ödeme hatırlatma bağlantısı ve SMS gönderildi.` 
+  };
 }
