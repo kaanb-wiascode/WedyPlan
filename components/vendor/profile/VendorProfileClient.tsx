@@ -5,7 +5,17 @@ import GlassCard from "@/components/shared/ui/GlassCard";
 import { Button } from "@/components/shared/ui/Button";
 import { Sparkles, Eye, Save, Building2, MapPin, Image as ImageIcon, Utensils } from "lucide-react";
 
-export function VendorProfileClient({ initialData }: { initialData: any }) {
+import { SpacesManagementTab } from "./tabs/SpacesManagementTab";
+import { ServicesAndPackagesTab } from "./tabs/ServicesAndPackagesTab";
+import { MediaAndShowcaseTab } from "./tabs/MediaAndShowcaseTab";
+import { AIProfileImporterModal } from "./widgets/AIProfileImporterModal";
+
+interface VendorProfileClientProps {
+  initialData?: any;
+  vendorId?: string;
+}
+
+export function VendorProfileClient({ initialData, vendorId }: VendorProfileClientProps) {
   const [activeTab, setActiveTab] = useState<"basics" | "spaces" | "services" | "media">("basics");
   const [isAiModalOpen, setIsAiModalOpen] = useState(false);
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
@@ -15,8 +25,8 @@ export function VendorProfileClient({ initialData }: { initialData: any }) {
       {/* Üst Başlık ve Hızlı AI Aksiyonları */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-white/50 backdrop-blur-md p-6 rounded-2xl border border-rose-100 shadow-sm">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Vitrin & Profil Yönetimi</h1>
-          <p className="text-sm text-gray-500">
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Vitrin & Profil Yönetimi</h1>
+          <p className="text-sm text-gray-500 dark:text-gray-400">
             Pazaryerinde çiftlerin gördüğü tüm içerikleri, salonları ve görselleri buradan yönetin.
           </p>
         </div>
@@ -51,7 +61,7 @@ export function VendorProfileClient({ initialData }: { initialData: any }) {
       </div>
 
       {/* Sekme Navigasyonu (Tab Navigation) */}
-      <div className="flex border-b border-gray-200 gap-2">
+      <div className="flex border-b border-gray-200 dark:border-zinc-800 gap-2 overflow-x-auto">
         {[
           { id: "basics", label: "Temel Bilgiler & Kimlik", icon: Building2 },
           { id: "spaces", label: "Davet Alanları / Salonlar", icon: MapPin },
@@ -63,10 +73,10 @@ export function VendorProfileClient({ initialData }: { initialData: any }) {
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id as any)}
-              className={`flex items-center gap-2 px-5 py-3 text-sm font-medium transition-all border-b-2 -mb-px ${
+              className={`flex items-center gap-2 px-5 py-3 text-sm font-medium transition-all border-b-2 -mb-px shrink-0 ${
                 activeTab === tab.id
-                  ? "border-rose-600 text-rose-600 bg-rose-50/50 rounded-t-lg"
-                  : "border-transparent text-gray-500 hover:text-gray-700"
+                  ? "border-rose-600 text-rose-600 bg-rose-50/50 dark:bg-rose-950/30 rounded-t-lg font-bold"
+                  : "border-transparent text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"
               }`}
             >
               <Icon className="w-4 h-4" />
@@ -80,35 +90,47 @@ export function VendorProfileClient({ initialData }: { initialData: any }) {
       <div className="mt-6">
         {activeTab === "basics" && (
           <GlassCard className="p-6 space-y-4">
-            <h3 className="text-lg font-semibold">Temel Firma Bilgileri & Başlangıç Fiyatları</h3>
-            {/* Form Alanları: Title, Category, Fiyatlar (EUR/TL) */}
-          </GlassCard>
-        )}
-
-        {activeTab === "spaces" && (
-          <GlassCard className="p-6 space-y-4">
-            <div className="flex justify-between items-center">
-              <h3 className="text-lg font-semibold">Salonlar ve Açık Alanlar</h3>
-              <Button size="sm" variant="outline">+ Yeni Salon Ekle</Button>
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Temel Firma Bilgileri & Başlangıç Fiyatları</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">
+                  Firma / Mekan Adı
+                </label>
+                <input
+                  type="text"
+                  defaultValue="Titanic Business Kartal Hotel"
+                  className="w-full px-3 py-2 text-xs rounded-xl border border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-800"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">
+                  Hafta İçi Başlangıç Fiyatı (Kişi Başı)
+                </label>
+                <input
+                  type="number"
+                  defaultValue={50}
+                  className="w-full px-3 py-2 text-xs rounded-xl border border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-800"
+                />
+              </div>
             </div>
-            {/* Salon Kartları / Bento Düzendeki Alan Listesi */}
           </GlassCard>
         )}
 
-        {activeTab === "services" && (
-          <GlassCard className="p-6 space-y-4">
-            <h3 className="text-lg font-semibold">Düğün Paketleri & İmkânlar</h3>
-            {/* Checkbox / Toggle düğmeleri: Menü Tipleri, Kurallar, Otopark */}
-          </GlassCard>
-        )}
+        {activeTab === "spaces" && <SpacesManagementTab />}
 
-        {activeTab === "media" && (
-          <GlassCard className="p-6 space-y-4">
-            <h3 className="text-lg font-semibold">Fotoğraf & Video Galeri</h3>
-            {/* Drag and drop medya kütüphanesi ve Albüm Yönetimi */}
-          </GlassCard>
-        )}
+        {activeTab === "services" && <ServicesAndPackagesTab />}
+
+        {activeTab === "media" && <MediaAndShowcaseTab />}
       </div>
+
+      {/* AI Profil Sihirbazı Modalı */}
+      <AIProfileImporterModal
+        isOpen={isAiModalOpen}
+        onClose={() => setIsAiModalOpen(false)}
+        onDataExtracted={(data) => {
+          console.log("AI Extracted Profile Data:", data);
+        }}
+      />
     </div>
   );
 }
