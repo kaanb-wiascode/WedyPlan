@@ -1,8 +1,9 @@
 import React from "react";
+import { requireUserId } from "@/lib/auth/require-ids";
 import GuestClient from "@/components/couple/guests/GuestClient";
 
-export default function CoupleGuestsPage() {
-  const mockUserId = "usr_couple_demo_123";
+export default async function CoupleGuestsPage() {
+  const userId = await requireUserId();
 
-  return <GuestClient userId={mockUserId} />;
+  return <GuestClient userId={userId} />;
 }

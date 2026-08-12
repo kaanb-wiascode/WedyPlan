@@ -11,6 +11,9 @@ interface AuthCardLayoutProps {
   footerMessage?: string;
   footerLinkText?: string;
   footerLinkHref?: string;
+  navRightLabel?: string;
+  navRightHref?: string;
+  logoVariant?: 'couple' | 'vendor' | 'main';
 }
 
 export function AuthCardLayout({
@@ -20,40 +23,71 @@ export function AuthCardLayout({
   footerMessage,
   footerLinkText,
   footerLinkHref,
+  navRightLabel = 'Firma Girişi',
+  navRightHref = '/giris?role=VENDOR',
+  logoVariant = 'couple',
 }: AuthCardLayoutProps) {
   return (
-    <div className="min-h-screen bg-[#E5E5E5] flex flex-col justify-center items-center p-4 sm:p-6">
-      <div className="w-full max-w-md bg-[#EFEFEF] border border-[#D5D5D5] rounded-3xl p-8 shadow-sm space-y-6">
-        {/* Üst Logo & Başlık */}
-        <div className="flex flex-col items-center justify-center text-center space-y-3">
-          <BrandLogo variant="main" width={180} height={40} />
-          <h1 className="text-2xl font-serif font-bold text-[#111111] mt-2">{title}</h1>
-          <p className="text-xs text-[#666666]">{subtitle}</p>
-        </div>
-
-        {/* Form İçeriği */}
-        <div className="space-y-4">
-          {children}
-        </div>
-
-        {/* Dinamik Alt Bağlantı / Dönüş Linki */}
-        <div className="text-center pt-4 border-t border-[#D5D5D5] space-y-2">
-          {footerMessage && footerLinkText && footerLinkHref && (
-            <p className="text-xs text-[#666666]">
-              {footerMessage}{' '}
-              <Link href={footerLinkHref} className="font-semibold text-[#111111] hover:text-[#C5A059] transition-colors">
-                {footerLinkText}
-              </Link>
-            </p>
-          )}
-
-          <div>
-            <Link href="/" className="text-xs text-[#888888] hover:text-[#111111] transition-colors">
-              ← Ana Sayfaya Dön
-            </Link>
-          </div>
-        </div>
+    <div className="relative min-h-screen overflow-hidden bg-[#f5f5f7] text-[#1d1d1f]">
+      <div className="pointer-events-none absolute inset-0" aria-hidden>
+        <div className="absolute -top-32 left-1/2 h-[520px] w-[520px] -translate-x-1/2 rounded-full bg-[#0071e3]/10 blur-[90px]" />
+        <div className="absolute bottom-[-120px] right-[-80px] h-[380px] w-[380px] rounded-full bg-[#af52de]/12 blur-[100px]" />
+        <div className="absolute bottom-20 left-[-60px] h-[280px] w-[280px] rounded-full bg-[#ff375f]/8 blur-[80px]" />
       </div>
+
+      <header className="apple-glass-nav sticky top-0 z-20">
+        <nav className="mx-auto flex h-12 max-w-5xl items-center justify-between px-5">
+          <Link href="/" className="flex items-center opacity-90 transition-opacity hover:opacity-100">
+            <BrandLogo variant={logoVariant} width={128} height={28} className="h-7 w-auto" />
+          </Link>
+          <Link
+            href={navRightHref}
+            className="text-[12px] font-normal text-[#1d1d1f]/80 transition-colors hover:text-[#0071e3]"
+          >
+            {navRightLabel}
+          </Link>
+        </nav>
+      </header>
+
+      <main className="relative z-10 mx-auto flex min-h-[calc(100vh-3rem)] w-full max-w-[420px] flex-col justify-center px-5 py-12">
+        <div className="apple-glass rounded-[28px] px-7 py-9 sm:px-9 sm:py-10">
+          <div className="mb-8 text-center">
+            <p className="mb-2 text-[12px] font-normal tracking-[0.04em] text-[#86868b]">
+              WedyPlan
+            </p>
+            <h1 className="text-[32px] font-semibold leading-[1.1] tracking-[-0.03em] text-[#1d1d1f] sm:text-[40px]">
+              {title}
+            </h1>
+            <p className="mx-auto mt-3 max-w-[34ch] text-[15px] font-normal leading-relaxed text-[#86868b]">
+              {subtitle}
+            </p>
+          </div>
+
+          {children}
+
+          {(footerMessage || footerLinkHref) && (
+            <div className="mt-8 border-t border-black/5 pt-6 text-center">
+              {footerMessage && footerLinkText && footerLinkHref && (
+                <p className="text-[14px] text-[#86868b]">
+                  {footerMessage}{' '}
+                  <Link
+                    href={footerLinkHref}
+                    className="font-medium text-[#0071e3] hover:underline"
+                  >
+                    {footerLinkText}
+                  </Link>
+                </p>
+              )}
+              <Link
+                href="/"
+                className="mt-3 inline-block text-[12px] text-[#86868b] transition-colors hover:text-[#1d1d1f]"
+              >
+                Ana sayfaya dön
+              </Link>
+            </div>
+          )}
+        </div>
+      </main>
     </div>
   );
 }

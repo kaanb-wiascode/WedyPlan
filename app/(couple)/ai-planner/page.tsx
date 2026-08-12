@@ -1,7 +1,8 @@
+import { requireUserId } from "@/lib/auth/require-ids";
 import AIPlannerClient from "@/components/couple/ai-planner/AIPlannerClient";
 
-export default function AIPlannerPage() {
-  const mockUserId = "usr_couple_demo_123";
+export default async function AIPlannerPage() {
+  const userId = await requireUserId();
 
-  return <AIPlannerClient userId="{mockUserId}"/>;
+  return <AIPlannerClient userId={userId}/>;
 }

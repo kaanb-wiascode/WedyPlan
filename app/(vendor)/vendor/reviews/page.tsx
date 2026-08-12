@@ -1,8 +1,9 @@
 import React from "react";
+import { requireVendorId } from "@/lib/auth/require-ids";
 import VendorReviewsClient from "@/components/vendor/reviews/VendorReviewsClient";
 
-export default function VendorReviewsPage() {
-  const mockVendorId = "vnd_demo_8821";
+export default async function VendorReviewsPage() {
+  const vendorId = await requireVendorId();
 
-  return <VendorReviewsClient vendorId={mockVendorId} />;
+  return <VendorReviewsClient vendorId={vendorId} />;
 }

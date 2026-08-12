@@ -6,7 +6,7 @@
     "dev": "npm run prisma:merge && next dev",
     "build": "npm run prisma:merge && npx prisma generate && next build",
     "start": "next start",
-    "lint": "next lint",
+    "lint": "eslint .",
     "prisma:merge": "node scripts/merge-prisma.js",
     "prisma:generate": "npm run prisma:merge && npx prisma generate",
     "prisma:db-push": "npm run prisma:merge && npx prisma db push",

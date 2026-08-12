@@ -1,74 +1,76 @@
-"use client";
+'use client';
 
-import React from "react";
-import { motion } from "framer-motion";
+import React from 'react';
+import GlassCard from '@/components/shared/ui/GlassCard';
+import { Sparkles, Radio, Activity, Zap } from 'lucide-react';
+import { LeadFormValues } from '@/lib/validations/vendor-leads';
 
-export default function AILeadInsightsWidget({
+interface AILeadInsightsWidgetProps {
+  totalLeads: number;
+  onlineCount: number;
+  hotLeadsCount: number;
+  selectedLead?: LeadFormValues | null;
+}
+
+export function AILeadInsightsWidget({
+  totalLeads = 12,
+  onlineCount = 2,
+  hotLeadsCount = 5,
   selectedLead,
-  aiReplyData,
-  onGenerateAIReply,
-  onCopyReply,
-}: {
-  selectedLead: any;
-  aiReplyData: any;
-  onGenerateAIReply: () => void;
-  onCopyReply: (text: string) => void;
-}) {
-  if (!selectedLead) {
-    return (
-      <div className="p-6 backdrop-blur-2xl bg-white/70 dark:bg-slate-900/70 border border-white/60 dark:border-slate-800 rounded-3xl shadow-sm text-center text-xs text-slate-400">
-        AI Analizini ve Yanıt Önerisini görmek için listeden veya Kanban'dan bir talep seçiniz.
-      </div>
-    );
-  }
-
+}: AILeadInsightsWidgetProps) {
   return (
-    <motion.div whileHover={{ y: -2 }} className="p-6 backdrop-blur-2xl bg-gradient-to-br from-indigo-500/10 via-white/80 to-purple-500/10 dark:from-indigo-950/30 dark:via-slate-900/80 dark:to-purple-950/20 border border-indigo-200/50 dark:border-indigo-900/40 rounded-3xl shadow-sm space-y-4">
-      <div className="flex justify-between items-center">
-        <span className="text-xs font-bold uppercase tracking-wider text-indigo-700 dark:text-indigo-400">
-          ✦ AI Lead Intelligence: {selectedLead.coupleName}
-        </span>
-        <span className="px-2.5 py-1 rounded-full text-xs font-bold bg-indigo-100 text-indigo-700 dark:bg-indigo-950 dark:text-indigo-300">
-          Skor: %{selectedLead.leadScore || 92}
-        </span>
+    <GlassCard className="p-6 bg-gradient-to-r from-rose-500/10 via-amber-500/5 to-purple-500/10 border-rose-200/80 dark:border-rose-900/40 relative overflow-hidden">
+      <div className="absolute -right-10 -bottom-10 w-48 h-48 bg-rose-500/10 rounded-full blur-2xl pointer-events-none" />
+
+      <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6 relative z-10">
+        <div className="space-y-2 max-w-2xl">
+          <div className="flex items-center gap-2">
+            <div className="px-2.5 py-1 bg-rose-500 text-white rounded-full text-[11px] font-bold flex items-center gap-1.5 shadow-xs">
+              <Radio className="w-3.5 h-3.5 animate-pulse text-amber-300" />
+              CANLI ETKİLEŞİM SİNYALİ
+            </div>
+            <span className="text-xs font-semibold text-rose-600 dark:text-rose-400 flex items-center gap-1">
+              <Activity className="w-3.5 h-3.5" />
+              {onlineCount} Çift Şu An Sayfanızda Aktif
+            </span>
+          </div>
+
+          <h3 className="text-lg font-bold text-gray-900 dark:text-white">
+            {selectedLead
+              ? `${selectedLead.coupleName} çifti sayfanızı inceliyor!`
+              : "Yüksek Dönüşüm Potansiyelli Yeni Talepleriniz Var!"}
+          </h3>
+
+          <p className="text-xs text-gray-600 dark:text-gray-300 leading-relaxed">
+            {selectedLead?.aiSummary ||
+              "WedyPlan AI, çiftlerin bütçe ve düğün tarihi uyumunu anlık hesaplar. Çevrimiçi çiftlere ilk 15 dakika içinde verilen tekliflerde anlaşma ihtimali %30 daha yüksektir."}
+          </p>
+        </div>
+
+        <div className="grid grid-cols-3 gap-3 w-full lg:w-auto shrink-0 pt-3 lg:pt-0 border-t lg:border-t-0 border-slate-200/60 dark:border-zinc-800">
+          <div className="p-3.5 bg-white/70 dark:bg-zinc-800/70 rounded-2xl text-center border border-slate-200/60 dark:border-zinc-700/60">
+            <span className="text-[10px] font-medium text-gray-500 block">Toplam Talep</span>
+            <span className="text-lg font-bold text-gray-900 dark:text-white">{totalLeads}</span>
+          </div>
+
+          <div className="p-3.5 bg-white/70 dark:bg-zinc-800/70 rounded-2xl text-center border border-rose-200/60 dark:border-rose-900/40">
+            <span className="text-[10px] font-bold text-rose-600 flex items-center justify-center gap-1">
+              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping" />
+              Online
+            </span>
+            <span className="text-lg font-bold text-emerald-600">{onlineCount} Çift</span>
+          </div>
+
+          <div className="p-3.5 bg-white/70 dark:bg-zinc-800/70 rounded-2xl text-center border border-amber-200/60 dark:border-amber-900/40">
+            <span className="text-[10px] font-bold text-amber-600 flex items-center justify-center gap-1">
+              <Zap className="w-3 h-3" /> Sıcak Fırsat
+            </span>
+            <span className="text-lg font-bold text-amber-600">{hotLeadsCount}</span>
+          </div>
+        </div>
       </div>
-
-      <div className="grid grid-cols-2 gap-2 text-xs">
-        <div className="p-3 rounded-2xl bg-white/70 dark:bg-slate-800/50 border border-indigo-100 dark:border-indigo-900/40">
-          <span className="text-[10px] text-slate-400 font-semibold block uppercase">Kazanma İhtimali</span>
-          <span className="font-bold text-emerald-600 text-sm">%{selectedLead.winProbability || 88} Yüksek</span>
-        </div>
-        <div className="p-3 rounded-2xl bg-white/70 dark:bg-slate-800/50 border border-indigo-100 dark:border-indigo-900/40">
-          <span className="text-[10px] text-slate-400 font-semibold block uppercase">En İyi Takip Zamanı</span>
-          <span className="font-bold text-indigo-600 text-xs">{selectedLead.bestFollowUpTime || "Bugün 14:30"}</span>
-        </div>
-      </div>
-
-      {/* AI Tarafından Üretilen Yanıt */}
-      <div className="space-y-2 text-xs">
-        <div className="flex justify-between items-center">
-          <span className="font-bold text-slate-700 dark:text-slate-200">💡 Önerilen WhatsApp/E-posta Yanıtı</span>
-          <button
-            onClick={onGenerateAIReply}
-            className="text-[10px] font-bold text-indigo-600 hover:underline"
-          >
-            ✦ Yanıt Yeniden Üret
-          </button>
-        </div>
-
-        <div className="p-3.5 rounded-2xl bg-white/90 dark:bg-slate-800/80 border border-slate-200/60 dark:border-slate-700/60 text-slate-700 dark:text-slate-200 italic leading-relaxed text-[11px]">
-          "{aiReplyData?.suggestedReply || "Yapay zeka yanıt taslağı bekleniyor..."}"
-        </div>
-
-        {aiReplyData?.suggestedReply && (
-          <button
-            onClick={() => onCopyReply(aiReplyData.suggestedReply)}
-            className="w-full py-2 rounded-xl bg-indigo-600 text-white font-bold text-xs hover:bg-indigo-700 transition"
-          >
-            📋 Yanıtı Kopyala & WhatsApp'a Yapıştır
-          </button>
-        )}
-      </div>
-    </motion.div>
+    </GlassCard>
   );
 }
+
+export default AILeadInsightsWidget;

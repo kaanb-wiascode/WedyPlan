@@ -1,8 +1,9 @@
 import React from "react";
+import { requireUserId } from "@/lib/auth/require-ids";
 import SettingsClient from "@/components/couple/settings/SettingsClient";
 
-export default function CoupleSettingsPage() {
-  const mockUserId = "usr_couple_demo_123";
+export default async function CoupleSettingsPage() {
+  const userId = await requireUserId();
 
-  return <SettingsClient userId={mockUserId} />;
+  return <SettingsClient userId={userId} />;
 }

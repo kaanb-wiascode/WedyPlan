@@ -1,8 +1,9 @@
 import React from "react";
+import { requireUserId } from "@/lib/auth/require-ids";
 import RequestCenterClient from "@/components/couple/requests/RequestCenterClient";
 
-export default function CoupleRequestCenterPage() {
-  const mockUserId = "usr_couple_demo_123";
+export default async function CoupleRequestCenterPage() {
+  const userId = await requireUserId();
 
-  return <RequestCenterClient userId={mockUserId} />;
+  return <RequestCenterClient userId={userId} />;
 }

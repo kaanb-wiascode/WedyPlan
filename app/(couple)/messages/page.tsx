@@ -1,8 +1,9 @@
 import React from "react";
+import { requireUserId } from "@/lib/auth/require-ids";
 import MessagesClient from "@/components/couple/messages/MessagesClient";
 
-export default function CoupleMessagesPage() {
-  const mockUserId = "usr_couple_demo_123";
+export default async function CoupleMessagesPage() {
+  const userId = await requireUserId();
 
-  return <MessagesClient userId={mockUserId} />;
+  return <MessagesClient userId={userId} />;
 }

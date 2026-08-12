@@ -1,8 +1,9 @@
 import React from "react";
+import { requireVendorId } from "@/lib/auth/require-ids";
 import VendorAIAssistantClient from "@/components/vendor/assistant/VendorAIAssistantClient";
 
-export default function VendorAIAssistantPage() {
-  const mockVendorId = "vnd_demo_8821";
+export default async function VendorAIAssistantPage() {
+  const vendorId = await requireVendorId();
 
-  return <VendorAIAssistantClient vendorId={mockVendorId} />;
+  return <VendorAIAssistantClient vendorId={vendorId} />;
 }

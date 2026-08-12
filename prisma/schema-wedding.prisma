@@ -1,0 +1,86 @@
+enum BudgetItemStatus {
+  PAID
+  PENDING
+  PARTIAL
+}
+
+enum ChecklistPriority {
+  HIGH
+  MEDIUM
+  LOW
+}
+
+enum GuestRsvpStatus {
+  PENDING
+  ACCEPTED
+  DECLINED
+}
+
+model Couple {
+  id             String    @id @default(uuid())
+  userId         String    @unique
+  partnerOneName String
+  partnerTwoName String?
+  weddingDate    DateTime?
+  targetBudget   Float     @default(350000)
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  @@index([userId])
+}
+
+model Vendor {
+  id               String   @id @default(uuid())
+  userId           String   @unique
+  businessName     String
+  businessCategory String   @default("OTHER")
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  @@index([userId])
+}
+
+model BudgetItem {
+  id              String            @id @default(uuid())
+  userId          String
+  title           String
+  category        String
+  allocatedAmount Float
+  spentAmount     Float             @default(0)
+  status          BudgetItemStatus  @default(PENDING)
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+
+  @@index([userId])
+}
+
+model Guest {
+  id                 String          @id @default(uuid())
+  userId             String
+  fullName           String
+  email              String?
+  phone              String?
+  group              String          @default("Ortak / Arkadaş")
+  plusOneCount       Int             @default(0)
+  rsvpStatus         GuestRsvpStatus @default(PENDING)
+  dietaryPreference  String?
+  createdAt          DateTime        @default(now())
+  updatedAt          DateTime        @updatedAt
+
+  @@index([userId])
+}
+
+model ChecklistItem {
+  id             String             @id @default(uuid())
+  userId         String
+  title          String
+  category       String
+  priority       ChecklistPriority  @default(MEDIUM)
+  assignedToName String?
+  dueDate        String?
+  isCompleted    Boolean            @default(false)
+  createdAt      DateTime           @default(now())
+  updatedAt      DateTime           @updatedAt
+
+  @@index([userId])
+}

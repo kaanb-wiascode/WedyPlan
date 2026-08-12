@@ -31,9 +31,7 @@ model User {
   isEmailVerified   Boolean          @default(false)
   isTwoFactorActive Boolean          @default(false)
   twoFactorSecret   String?
-  
-  // Relations
-  profiles          PortalProfile[]
+
   sessions          Session[]
   oauthAccounts     OAuthAccount[]
   
@@ -51,11 +49,11 @@ model PortalProfile {
   
   // Granular Role & Membership Context
   roles        Role[]     @relation("ProfileRoles")
-  
-  user         User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+
   createdAt    DateTime   @default(now())
 
   @@unique([userId, portal])
+  @@index([userId])
 }
 
 model Role {

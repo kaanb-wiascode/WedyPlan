@@ -1,8 +1,9 @@
 import React from "react";
+import { requireUserId } from "@/lib/auth/require-ids";
 import ContractCenterClient from "@/components/couple/contracts/ContractCenterClient";
 
-export default function CoupleContractsPage() {
-  const mockUserId = "usr_couple_demo_123";
+export default async function CoupleContractsPage() {
+  const userId = await requireUserId();
 
-  return <ContractCenterClient userId={mockUserId} />;
+  return <ContractCenterClient userId={userId} />;
 }

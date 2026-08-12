@@ -1,24 +1,23 @@
-'use client';
+"use client";
 
-import React, { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
+import React, { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 
 export default function RoleGuard({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const [authorized, setAuthorized] = useState(false);
 
   useEffect(() => {
-    // Çerez veya LocalStorage oturum denetimi
-    const hasCookie =
-      document.cookie.includes('wedyplan_session=active') ||
-      document.cookie.includes('wedyplan_couple_settings=active');
-    const hasLocalStorage = localStorage.getItem('wedyplan_logged_in') === 'true';
-
-    if (hasCookie || hasLocalStorage) {
-      setAuthorized(true);
-    } else {
-      router.push('/giris');
-    }
+    fetch("/api/v1/auth/verify")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data?.authenticated) {
+          setAuthorized(true);
+        } else {
+          router.replace("/giris");
+        }
+      })
+      .catch(() => router.replace("/giris"));
   }, [router]);
 
   if (!authorized) {

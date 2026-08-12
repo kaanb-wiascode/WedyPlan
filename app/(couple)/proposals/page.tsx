@@ -1,8 +1,9 @@
 import React from "react";
+import { requireUserId } from "@/lib/auth/require-ids";
 import ProposalComparisonClient from "@/components/couple/proposals/ProposalComparisonClient";
 
-export default function CoupleProposalsPage() {
-  const mockUserId = "usr_couple_demo_123";
+export default async function CoupleProposalsPage() {
+  const userId = await requireUserId();
 
-  return <ProposalComparisonClient userId={mockUserId} />;
+  return <ProposalComparisonClient userId={userId} />;
 }

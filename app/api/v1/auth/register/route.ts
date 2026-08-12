@@ -147,6 +147,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(
       {
         success: true,
+        redirectUrl: userRole === 'VENDOR' ? '/firma/dashboard' : userRole === 'ADMIN' ? '/admin/dashboard' : '/cift/onboarding',
         user: {
           id: user.id,
           email: user.email,

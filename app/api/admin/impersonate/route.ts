@@ -34,7 +34,7 @@ export async function POST(request: Request) {
     return NextResponse.json({
       success: true,
       shadowToken: `shadow_${user.id}_${Date.now()}`,
-      redirectUrl: targetRole === 'vendor' ? '/tedarikci/dashboard' : '/cift/dashboard',
+      redirectUrl: targetRole === 'vendor' ? '/firma/dashboard' : '/cift/dashboard',
       user: {
         id: user.id,
         name: user.names,

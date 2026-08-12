@@ -1,8 +1,9 @@
 import React from "react";
+import { requireUserId } from "@/lib/auth/require-ids";
 import InsightsClient from "@/components/couple/insights/InsightsClient";
 
-export default function CoupleInsightsPage() {
-  const mockUserId = "usr_couple_demo_123";
+export default async function CoupleInsightsPage() {
+  const userId = await requireUserId();
 
-  return <InsightsClient userId={mockUserId} />;
+  return <InsightsClient userId={userId} />;
 }

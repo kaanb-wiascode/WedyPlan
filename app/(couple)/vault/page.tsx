@@ -1,8 +1,9 @@
 import React from "react";
+import { requireUserId } from "@/lib/auth/require-ids";
 import VaultClient from "@/components/couple/vault/VaultClient";
 
-export default function CoupleVaultPage() {
-  const mockUserId = "usr_couple_demo_123";
+export default async function CoupleVaultPage() {
+  const userId = await requireUserId();
 
-  return <VaultClient userId={mockUserId} />;
+  return <VaultClient userId={userId} />;
 }

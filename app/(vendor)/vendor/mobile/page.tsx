@@ -1,8 +1,9 @@
 import React from "react";
+import { requireVendorId } from "@/lib/auth/require-ids";
 import VendorMobileClient from "@/components/vendor/mobile/VendorMobileClient";
 
-export default function VendorMobilePage() {
-  const mockVendorId = "vnd_demo_8821";
+export default async function VendorMobilePage() {
+  const vendorId = await requireVendorId();
 
-  return <VendorMobileClient vendorId={mockVendorId} />;
+  return <VendorMobileClient vendorId={vendorId} />;
 }

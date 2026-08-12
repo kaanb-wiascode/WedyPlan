@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 
-export type UserRole = 'COUPLE' | 'VENDOR' | null;
+export type UserRole = 'COUPLE' | 'VENDOR' | 'ADMIN' | null;
 
 interface WeddingOSState {
   // Rol ve Oturum

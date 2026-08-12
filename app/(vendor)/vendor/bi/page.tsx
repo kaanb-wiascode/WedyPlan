@@ -1,8 +1,9 @@
 import React from "react";
+import { requireVendorId } from "@/lib/auth/require-ids";
 import VendorBIClient from "@/components/vendor/bi/VendorBIClient";
 
-export default function VendorBIPage() {
-  const mockVendorId = "vnd_demo_8821";
+export default async function VendorBIPage() {
+  const vendorId = await requireVendorId();
 
-  return <VendorBIClient vendorId={mockVendorId} />;
+  return <VendorBIClient vendorId={vendorId} />;
 }

@@ -1,9 +1,11 @@
 import React from 'react';
+import { requireVendorId } from "@/lib/auth/require-ids";
 import VendorFinanceClient from '@/components/vendor/finance/VendorFinanceClient';
 import { getVendorFinanceData } from '@/lib/actions/vendor-finance';
 
 export default async function VendorFinancePage() {
-  const { summary, transactions } = await getVendorFinanceData("vendor_default");
+  const vendorId = await requireVendorId();
+  const { summary, transactions } = await getVendorFinanceData(vendorId);
 
   return (
     <VendorFinanceClient 

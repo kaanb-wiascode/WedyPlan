@@ -1,8 +1,9 @@
 import React from "react";
+import { requireUserId } from "@/lib/auth/require-ids";
 import BudgetClient from "@/components/couple/budget/BudgetClient";
 
-export default function CoupleBudgetPage() {
-  const mockUserId = "usr_couple_demo_123";
+export default async function CoupleBudgetPage() {
+  const userId = await requireUserId();
 
-  return <BudgetClient userId={mockUserId} />;
+  return <BudgetClient userId={userId} />;
 }

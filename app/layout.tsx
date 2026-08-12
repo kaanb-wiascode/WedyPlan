@@ -11,7 +11,8 @@ const inter = Inter({
 
 export const metadata: Metadata = {
   title: "WedyPlan — Düğün Planlama & İşletme Yönetim Platformu",
-  description: "Düğün mekanları, fotoğrafçılar ve organizasyon firmaları ile evlenecek çiftleri buluşturan akıllı platform.",
+  description:
+    "Düğün mekanları, fotoğrafçılar ve organizasyon firmaları ile evlenecek çiftleri buluşturan akıllı platform.",
 };
 
 export default function RootLayout({
@@ -21,10 +22,8 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="tr" className={inter.variable}>
-      <body className="bg-[#FDFBF7] text-neutral-900 font-sans antialiased selection:bg-rose-100 selection:text-rose-900">
-        <ConfirmProvider>
-          {children}
-        </ConfirmProvider>
+      <body className="bg-[#f5f5f7] text-[#1d1d1f] antialiased selection:bg-[#0071e3]/15 selection:text-[#1d1d1f]">
+        <ConfirmProvider>{children}</ConfirmProvider>
       </body>
     </html>
   );

@@ -1,16 +1,23 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { Suspense, useState } from 'react';
 import Link from 'next/link';
-import {
-  signInWithPopup,
-  signInWithEmailAndPassword,
-  createUserWithEmailAndPassword,
-} from 'firebase/auth';
+import { useSearchParams } from 'next/navigation';
+import { signInWithPopup } from 'firebase/auth';
 import { auth, googleProvider } from '@/lib/firebase';
-import { Eye, EyeOff, ArrowRight, ShieldCheck } from 'lucide-react';
+import { Eye, EyeOff } from 'lucide-react';
+import { AuthCardLayout } from '@/components/public/auth/AuthCardLayout';
 
 export default function LoginPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-[#f5f5f7]" />}>
+      <LoginPageContent />
+    </Suspense>
+  );
+}
+
+function LoginPageContent() {
+  const searchParams = useSearchParams();
   const [isSignUp, setIsSignUp] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -18,59 +25,47 @@ export default function LoginPage() {
   const [errorMsg, setErrorMsg] = useState('');
   const [loading, setLoading] = useState(false);
 
-  // Oturum Başarılı Olduğunda Çerezleri ve Yerel Hafızayı Eşitleyen Fonksiyon
-  const completeAuthProcess = (userEmail: string) => {
-    const validEmail = userEmail || 'cift@wedyplan.com';
-    const namePart = validEmail.split('@')[0] || 'Çiftimiz';
-    const displayName = namePart.charAt(0).toUpperCase() + namePart.slice(1);
+  const requestedRole =
+    searchParams.get('role') === 'VENDOR' ? 'VENDOR' : 'COUPLE';
+  const nextPath = searchParams.get('next');
+  const isVendor = requestedRole === 'VENDOR';
 
-    // 1. Next.js Middleware İçin HTTP Çerezlerini Yaz
-    document.cookie = 'wedyplan_session=active; path=/; max-age=2592000; SameSite=Lax';
-    document.cookie = 'wedyplan_couple_settings=active; path=/; max-age=2592000; SameSite=Lax';
-
-    // 2. RoleGuard ve İstemci Tarafı İçin LocalStorage Yaz
-    try {
-      localStorage.setItem('wedyplan_logged_in', 'true');
-      localStorage.setItem('wedyplan_user_email', validEmail);
-
-      const currentProfile = localStorage.getItem('wedyplan_couple_profile');
-      if (!currentProfile) {
-        localStorage.setItem(
-          'wedyplan_couple_profile',
-          JSON.stringify({
-            partnerOneName: displayName,
-            partnerTwoName: 'Partner',
-            weddingDate: '2026-08-15',
-          })
-        );
-      }
-    } catch (e) {
-      console.error('LocalStorage hatası:', e);
-    }
-
-    // 3. Kesintisiz Yönlendirme
-    window.location.replace('/cift/dashboard');
+  const finishLogin = (redirectUrl?: string) => {
+    const fallback = isVendor ? '/firma/dashboard' : '/cift/dashboard';
+    window.location.replace(nextPath || redirectUrl || fallback);
   };
 
-  // Google İle Giriş
   const handleGoogleSignIn = async () => {
     setLoading(true);
     setErrorMsg('');
     try {
-      if (auth && googleProvider) {
-        const res = await signInWithPopup(auth, googleProvider);
-        completeAuthProcess(res.user?.email || 'google_user@wedyplan.com');
-      } else {
-        completeAuthProcess('google_user@wedyplan.com');
+      if (!auth || !googleProvider) {
+        setErrorMsg('Google girişi şu anda kullanılamıyor.');
+        return;
       }
-    } catch (error: any) {
-      completeAuthProcess('google_user@wedyplan.com');
+
+      const res = await signInWithPopup(auth, googleProvider);
+      const idToken = await res.user.getIdToken();
+      const syncRes = await fetch('/api/v1/auth/oauth-sync', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ idToken, role: requestedRole }),
+      });
+      const data = await syncRes.json();
+
+      if (!syncRes.ok || !data.success) {
+        setErrorMsg(data.error || 'Google ile giriş yapılamadı.');
+        return;
+      }
+
+      finishLogin(data.redirectUrl);
+    } catch {
+      setErrorMsg('Google ile giriş iptal edildi veya başarısız oldu.');
     } finally {
       setLoading(false);
     }
   };
 
-  // E-Posta / Şifre İle Giriş Veya Kayıt
   const handleEmailAuth = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -83,186 +78,144 @@ export default function LoginPage() {
     }
 
     try {
-      if (auth) {
-        if (isSignUp) {
-          await createUserWithEmailAndPassword(auth, email, password);
-        } else {
-          await signInWithEmailAndPassword(auth, email, password);
-        }
+      const endpoint = isSignUp ? '/api/v1/auth/register' : '/api/v1/auth/login';
+      const payload = isSignUp
+        ? {
+            fullName: email.split('@')[0],
+            email,
+            password,
+            role: requestedRole,
+          }
+        : { email, password };
+
+      const response = await fetch(endpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+      const data = await response.json();
+
+      if (!response.ok || !data.success) {
+        setErrorMsg(data.error || 'Giriş yapılamadı. Lütfen bilgilerinizi kontrol edin.');
+        return;
       }
-      completeAuthProcess(email);
-    } catch (error: any) {
-      completeAuthProcess(email);
+
+      finishLogin(data.redirectUrl);
+    } catch {
+      setErrorMsg('Bağlantı hatası oluştu. Lütfen tekrar deneyin.');
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen w-full bg-[#F5F5F7] dark:bg-black text-zinc-900 dark:text-zinc-100 flex flex-col justify-between items-center px-4 py-8 sm:py-12 font-sans antialiased">
-      
-      {/* HEADER - Orijinal Vektör Logo */}
-      <header className="w-full max-w-4xl flex items-center justify-between px-2">
-        <Link href="/" className="flex items-center gap-3">
-          <img
-            src="/assets/branding/logo-couple.svg"
-            alt="WedyPlan Çift Portalı"
-            className="h-8 w-auto object-contain"
+    <AuthCardLayout
+      title={isSignUp ? 'Hesap oluşturun' : 'Giriş yapın'}
+      subtitle={
+        isSignUp
+          ? 'Düğün planlamanızı tek bir yerden, sade ve güvenli yönetin.'
+          : 'WedyPlan hesabınıza Apple sadeğinde devam edin.'
+      }
+      logoVariant={isVendor ? 'vendor' : 'couple'}
+      navRightLabel={isVendor ? 'Çift Girişi' : 'Firma Girişi'}
+      navRightHref={isVendor ? '/giris' : '/giris?role=VENDOR'}
+    >
+      {errorMsg && (
+        <div className="mb-5 rounded-2xl border border-[#ff375f]/20 bg-[#ff375f]/8 px-4 py-3 text-center text-[13px] text-[#ff375f]">
+          {errorMsg}
+        </div>
+      )}
+
+      <button
+        type="button"
+        onClick={handleGoogleSignIn}
+        disabled={loading}
+        className="apple-btn-secondary mb-5 disabled:opacity-50"
+      >
+        <svg className="h-[18px] w-[18px] shrink-0" viewBox="0 0 24 24">
+          <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
+          <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
+          <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z" />
+          <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z" />
+        </svg>
+        Google ile devam et
+      </button>
+
+      <div className="relative mb-5 flex items-center">
+        <div className="h-px flex-1 bg-black/8" />
+        <span className="px-3 text-[12px] text-[#86868b]">veya</span>
+        <div className="h-px flex-1 bg-black/8" />
+      </div>
+
+      <form onSubmit={handleEmailAuth} className="space-y-4">
+        <div>
+          <label className="apple-label">E-posta</label>
+          <input
+            type="email"
+            required
+            placeholder="ornek@wedyplan.com"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            className="apple-input"
           />
-        </Link>
+        </div>
 
-        <Link
-          href="/firma"
-          className="text-xs font-medium text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white transition-colors"
-        >
-          Firma Girişi →
-        </Link>
-      </header>
-
-      {/* APPLE STYLE KART */}
-      <main className="w-full max-w-[380px] mx-auto my-auto py-6">
-        <div className="bg-white/90 dark:bg-zinc-900/90 backdrop-blur-2xl border border-zinc-200/80 dark:border-zinc-800/80 shadow-[0_8px_30px_rgb(0,0,0,0.06)] rounded-3xl p-8 sm:p-10 space-y-6">
-          
-          <div className="text-center space-y-2">
-            <img
-              src="/assets/branding/logo-icon.svg"
-              alt="WedyPlan Icon"
-              className="h-10 w-10 mx-auto object-contain"
+        <div>
+          <label className="apple-label">Şifre</label>
+          <div className="relative">
+            <input
+              type={showPassword ? 'text' : 'password'}
+              required
+              placeholder="••••••••"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="apple-input pr-12"
             />
-            <div className="space-y-1">
-              <h1 className="text-2xl font-bold tracking-tight text-zinc-900 dark:text-white">
-                {isSignUp ? 'Hesap Oluşturun' : 'Giriş Yapın'}
-              </h1>
-              <p className="text-xs text-zinc-500 dark:text-zinc-400 font-normal">
-                {isSignUp
-                  ? 'Düğün planlamanızı bulutta güvenle yönetin.'
-                  : 'WedyPlan hesabınıza erişmek için bilgilerinizi girin.'}
-              </p>
-            </div>
-          </div>
-
-          {errorMsg && (
-            <div className="p-3.5 rounded-2xl bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-900/40 text-red-600 dark:text-red-400 text-xs font-medium text-center">
-              {errorMsg}
-            </div>
-          )}
-
-          {/* GOOGLE İLE DEVAM ET */}
-          <button
-            type="button"
-            onClick={handleGoogleSignIn}
-            disabled={loading}
-            className="w-full py-2.5 px-4 rounded-xl bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200/80 dark:hover:bg-zinc-700/80 text-xs font-medium text-zinc-800 dark:text-zinc-200 transition-all flex items-center justify-center gap-2.5 cursor-pointer disabled:opacity-50"
-          >
-            <svg className="w-4 h-4 shrink-0" viewBox="0 0 24 24">
-              <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
-              <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
-              <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z" />
-              <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z" />
-            </svg>
-            <span>Google ile Devam Et</span>
-          </button>
-
-          <div className="relative flex items-center justify-center my-1">
-            <div className="border-t border-zinc-200 dark:border-zinc-800 w-full" />
-            <span className="bg-white dark:bg-zinc-900 px-3 text-[10px] font-medium text-zinc-400 uppercase tracking-widest shrink-0">
-              veya
-            </span>
-          </div>
-
-          {/* E-POSTA / ŞİFRE FORMU */}
-          <form onSubmit={handleEmailAuth} className="space-y-3.5">
-            <div className="space-y-1">
-              <label className="text-[11px] font-medium text-zinc-600 dark:text-zinc-400">
-                E-Posta
-              </label>
-              <input
-                type="email"
-                required
-                placeholder="ornek@wedyplan.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="w-full px-3.5 py-2.5 rounded-xl bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-700/60 text-xs text-zinc-900 dark:text-white placeholder-zinc-400 dark:placeholder-zinc-500 focus:outline-none focus:border-zinc-900 dark:focus:border-white focus:bg-white dark:focus:bg-zinc-800 transition-all font-medium"
-              />
-            </div>
-
-            <div className="space-y-1">
-              <label className="text-[11px] font-medium text-zinc-600 dark:text-zinc-400">
-                Şifre
-              </label>
-              <div className="relative">
-                <input
-                  type={showPassword ? 'text' : 'password'}
-                  required
-                  placeholder="••••••••"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="w-full px-3.5 py-2.5 pr-10 rounded-xl bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-700/60 text-xs text-zinc-900 dark:text-white placeholder-zinc-400 dark:placeholder-zinc-500 focus:outline-none focus:border-zinc-900 dark:focus:border-white focus:bg-white dark:focus:bg-zinc-800 transition-all font-medium"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 p-1"
-                >
-                  {showPassword ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
-                </button>
-              </div>
-            </div>
-
-            {!isSignUp && (
-              <div className="flex justify-end pt-0.5">
-                <Link
-                  href="/sifremi-unuttum"
-                  className="text-[11px] font-medium text-zinc-500 hover:text-zinc-900 dark:hover:text-white transition-colors"
-                >
-                  Şifrenizi mi unuttunuz?
-                </Link>
-              </div>
-            )}
-
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full py-2.5 px-4 rounded-xl bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 hover:bg-black dark:hover:bg-zinc-100 text-xs font-medium transition-all cursor-pointer flex items-center justify-center gap-2 disabled:opacity-50 mt-1"
-            >
-              {loading ? (
-                <span>Giriş Yapılıyor...</span>
-              ) : (
-                <>
-                  <span>{isSignUp ? 'Hesap Oluştur' : 'Giriş Yap'}</span>
-                  <ArrowRight className="w-3.5 h-3.5" />
-                </>
-              )}
-            </button>
-          </form>
-
-          <div className="text-center pt-2 border-t border-zinc-100 dark:border-zinc-800/60">
             <button
               type="button"
-              onClick={() => {
-                setIsSignUp(!isSignUp);
-                setErrorMsg('');
-              }}
-              className="text-xs font-medium text-zinc-500 hover:text-zinc-900 dark:hover:text-white transition-colors cursor-pointer"
+              onClick={() => setShowPassword(!showPassword)}
+              className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[#86868b] hover:text-[#1d1d1f]"
             >
-              {isSignUp ? (
-                <span>Zaten hesabınız var mı? <strong className="font-semibold text-zinc-900 dark:text-white">Giriş Yapın</strong></span>
-              ) : (
-                <span>Hesabınız yok mu? <strong className="font-semibold text-zinc-900 dark:text-white">Kaydolun</strong></span>
-              )}
+              {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
             </button>
           </div>
-
         </div>
-      </main>
 
-      <footer className="w-full max-w-4xl flex items-center justify-between text-[11px] text-zinc-400 dark:text-zinc-500 px-2">
-        <span className="flex items-center gap-1.5">
-          <ShieldCheck className="w-3.5 h-3.5 text-emerald-500" /> Güvenli Oturum
-        </span>
-        <span>© 2026 WedyPlan Inc.</span>
-      </footer>
+        {!isSignUp && (
+          <div className="flex justify-end">
+            <Link href="/sifremi-unuttum" className="text-[13px] text-[#0071e3] hover:underline">
+              Şifrenizi mi unuttunuz?
+            </Link>
+          </div>
+        )}
 
-    </div>
+        <button type="submit" disabled={loading} className="apple-btn mt-2">
+          {loading ? 'Lütfen bekleyin…' : isSignUp ? 'Hesap oluştur' : 'Giriş yap'}
+        </button>
+      </form>
+
+      <div className="mt-6 text-center">
+        <button
+          type="button"
+          onClick={() => {
+            setIsSignUp(!isSignUp);
+            setErrorMsg('');
+          }}
+          className="text-[14px] text-[#86868b]"
+        >
+          {isSignUp ? (
+            <>
+              Zaten hesabınız var mı?{' '}
+              <span className="font-medium text-[#0071e3]">Giriş yapın</span>
+            </>
+          ) : (
+            <>
+              Hesabınız yok mu?{' '}
+              <span className="font-medium text-[#0071e3]">Kaydolun</span>
+            </>
+          )}
+        </button>
+      </div>
+    </AuthCardLayout>
   );
 }

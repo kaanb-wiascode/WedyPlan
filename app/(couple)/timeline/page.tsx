@@ -1,8 +1,9 @@
 import React from "react";
+import { requireUserId } from "@/lib/auth/require-ids";
 import TimelineClient from "@/components/couple/timeline/TimelineClient";
 
-export default function CoupleTimelinePage() {
-  const mockUserId = "usr_couple_demo_123";
+export default async function CoupleTimelinePage() {
+  const userId = await requireUserId();
 
-  return <TimelineClient userId={mockUserId} />;
+  return <TimelineClient userId={userId} />;
 }
