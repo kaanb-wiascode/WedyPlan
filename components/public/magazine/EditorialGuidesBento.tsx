@@ -12,7 +12,7 @@ export const EditorialGuidesBento: React.FC<EditorialGuidesBentoProps> = ({ guid
   return (
     <section className="py-12 px-4 sm:px-8 max-w-7xl mx-auto space-y-6">
       <div className="flex items-center gap-2 text-[#D4AF37]">
-        <BookOpen className="w-5 h-5 text-[#E6007E]" />
+        <BookOpen className="w-5 h-5 text-[#0071e3]" />
         <h2 className="font-serif font-bold text-[26px] text-[#1D1D1F]">Adım Adım Editoryal Düğün Rehberleri</h2>
       </div>
 

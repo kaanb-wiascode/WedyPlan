@@ -53,8 +53,8 @@ export function VendorSidebar() {
   }, []);
 
   return (
-    <aside className="w-72 border-r border-zinc-200/80 dark:border-zinc-800/80 bg-white/80 dark:bg-zinc-950/80 backdrop-blur-2xl flex flex-col justify-between h-screen sticky top-0 z-40 shrink-0 shadow-xs font-sans antialiased">
-      <div className="p-6 space-y-6 overflow-y-auto scrollbar-none">
+    <aside className="apple-sidebar sticky top-0 z-40 flex h-screen w-72 shrink-0 flex-col justify-between">
+      <div className="space-y-6 overflow-y-auto p-6 scrollbar-none">
         
         {/* Orijinal WedyPlan Firma Logosu */}
         <Link href="/firma/dashboard" className="block px-1 cursor-pointer">
@@ -79,22 +79,18 @@ export function VendorSidebar() {
               <Link
                 key={item.href}
                 href={item.href}
-                className={`flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs transition-all cursor-pointer select-none ${
-                  isActive
-                    ? 'bg-zinc-900 text-white dark:bg-white dark:text-zinc-900 font-semibold shadow-xs'
-                    : 'text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-900/60 hover:text-zinc-900 dark:hover:text-zinc-100 font-medium'
-                }`}
+                className={`apple-nav-item group cursor-pointer select-none ${isActive ? 'apple-nav-item-active' : 'text-[#6e6e73]'}`}
               >
                 <div className="flex items-center gap-3">
-                  <Icon className={`w-4 h-4 transition-colors ${isActive ? 'text-white dark:text-zinc-900' : 'text-zinc-400'}`} />
+                  <Icon className={`h-4 w-4 ${isActive ? 'text-[#0071e3]' : 'text-[#86868b]'}`} />
                   <span>{item.name}</span>
                 </div>
                 {item.badge ? (
-                  <span className={`px-1.5 py-0.5 text-[9px] font-bold rounded-md uppercase tracking-wider ${isActive ? 'bg-white/20 text-white dark:bg-black/20 dark:text-zinc-900' : 'bg-zinc-200 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300'}`}>
+                  <span className={`rounded-md px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wider ${isActive ? 'bg-[#0071e3]/10 text-[#0071e3]' : 'bg-black/5 text-[#6e6e73]'}`}>
                     {item.badge}
                   </span>
                 ) : (
-                  <ChevronRight className={`w-3.5 h-3.5 transition-all ${isActive ? 'opacity-80 translate-x-0.5' : 'opacity-0 group-hover:opacity-100 text-zinc-400'}`} />
+                  <ChevronRight className={`h-3.5 w-3.5 ${isActive ? 'translate-x-0.5 opacity-80' : 'text-[#86868b] opacity-0 group-hover:opacity-100'}`} />
                 )}
               </Link>
             );
@@ -103,16 +99,16 @@ export function VendorSidebar() {
       </div>
 
       {/* Profil Alt Kutusu */}
-      <div className="p-4 m-4 rounded-2xl bg-zinc-50/80 dark:bg-zinc-900/50 border border-zinc-200/80 dark:border-zinc-800/80 backdrop-blur-md space-y-3 shadow-xs">
+      <div className="apple-glass m-4 space-y-3 rounded-2xl p-4">
         <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-full bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 text-xs font-bold flex items-center justify-center shadow-xs shrink-0">
+          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#1d1d1f] text-xs font-semibold text-white">
             {vendorProfile.companyName[0]}
           </div>
-          <div className="flex flex-col truncate min-w-0">
-            <span className="text-xs font-bold text-zinc-900 dark:text-white truncate">
+          <div className="flex min-w-0 flex-col truncate">
+            <span className="truncate text-[13px] font-medium text-[#1d1d1f]">
               {vendorProfile.companyName}
             </span>
-            <span className="text-[10px] text-zinc-400 font-medium truncate mt-0.5">
+            <span className="mt-0.5 truncate text-[11px] text-[#86868b]">
               {vendorProfile.category}
             </span>
           </div>
@@ -124,7 +120,7 @@ export function VendorSidebar() {
             document.cookie = 'wedyplan_session=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT;';
             window.location.href = '/giris';
           }}
-          className="w-full py-2 px-3 rounded-xl text-xs font-medium text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-200/60 dark:hover:bg-zinc-800/60 transition-all flex items-center justify-center gap-2 cursor-pointer"
+          className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-xl px-3 py-2 text-[12px] font-medium text-[#6e6e73] hover:bg-black/5 hover:text-[#1d1d1f]"
         >
           <LogOut className="w-3.5 h-3.5" />
           <span>Oturumu Kapat</span>

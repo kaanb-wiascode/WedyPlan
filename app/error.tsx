@@ -18,10 +18,10 @@ export default function GlobalError({
   }, [error]);
 
   return (
-    <div className="min-h-screen bg-[#FAF8F5] flex flex-col items-center justify-center p-4 relative overflow-hidden">
+    <div className="apple-page flex min-h-screen flex-col items-center justify-center p-4">
       {/* Arka Plan Bulanık Efektleri */}
       <div className="absolute top-0 right-1/4 w-[40rem] h-[40rem] bg-red-500/5 rounded-full blur-[100px]" />
-      <div className="absolute bottom-0 left-1/4 w-[30rem] h-[30rem] bg-[#E6007E]/5 rounded-full blur-[100px]" />
+      <div className="absolute bottom-0 left-1/4 w-[30rem] h-[30rem] bg-[#0071e3]/5 rounded-full blur-[100px]" />
 
       <GlassCard className="max-w-2xl w-full p-8 md:p-12 text-center z-10 border-white/80">
         <div className="flex justify-center mb-6">
@@ -40,13 +40,13 @@ export default function GlobalError({
         <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
           <button 
             onClick={() => reset()}
-            className="w-full sm:w-auto flex items-center justify-center gap-2 px-8 py-4 bg-[#1D1D1F] text-white rounded-xl font-semibold hover:bg-black transition-all shadow-lg hover:shadow-xl hover:-translate-y-0.5"
+            className="apple-btn apple-btn-inline"
           >
             <RefreshCcw className="w-5 h-5" /> Tekrar Dene
           </button>
           <Link 
             href="/"
-            className="w-full sm:w-auto flex items-center justify-center gap-2 px-8 py-4 bg-white text-gray-900 border border-gray-200 rounded-xl font-semibold hover:bg-gray-50 transition-all shadow-sm hover:-translate-y-0.5"
+            className="apple-btn-secondary apple-btn-secondary-inline"
           >
             <Home className="w-5 h-5" /> Ana Sayfaya Dön
           </Link>

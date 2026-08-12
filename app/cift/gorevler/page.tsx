@@ -176,7 +176,7 @@ export default function ChecklistPage() {
       )}
 
       {/* HEADER & HIZLI AKSİYON */}
-      <div className="p-8 rounded-3xl bg-white/70 dark:bg-zinc-900/70 backdrop-blur-2xl border border-zinc-200/80 dark:border-zinc-800/80 shadow-[0_8px_30px_rgb(0,0,0,0.03)] flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6">
+      <div className="p-8 rounded-3xl apple-glass shadow-[0_8px_30px_rgb(0,0,0,0.03)] flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6">
         <div className="space-y-2">
           <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-zinc-200/60 dark:bg-zinc-800/80 text-zinc-700 dark:text-zinc-300 text-[11px] font-medium border border-zinc-300/40 dark:border-zinc-700/50">
             <CheckSquare className="w-3.5 h-3.5 text-zinc-500" />
@@ -200,19 +200,19 @@ export default function ChecklistPage() {
 
       {/* 1. ÖZET İLERLEME KARTLARI */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
-        <div className="p-6 rounded-3xl bg-white/70 dark:bg-zinc-900/70 backdrop-blur-2xl border border-zinc-200/80 dark:border-zinc-800/80 shadow-xs space-y-1">
+        <div className="p-6 rounded-3xl apple-glass shadow-xs space-y-1">
           <span className="text-xs font-medium text-zinc-400">Toplam Adım</span>
           <div className="text-2xl font-bold text-zinc-900 dark:text-white">{totalCount} Görev</div>
           <div className="text-[11px] text-zinc-500">Planlanan Tüm Süreç</div>
         </div>
 
-        <div className="p-6 rounded-3xl bg-white/70 dark:bg-zinc-900/70 backdrop-blur-2xl border border-zinc-200/80 dark:border-zinc-800/80 shadow-xs space-y-1">
+        <div className="p-6 rounded-3xl apple-glass shadow-xs space-y-1">
           <span className="text-xs font-medium text-emerald-600 dark:text-emerald-400">Tamamlanan</span>
           <div className="text-2xl font-bold text-zinc-900 dark:text-white">{completedCount} Adım</div>
           <div className="text-[11px] text-emerald-600 dark:text-emerald-400 font-medium">Başarıyla Tamamlandı</div>
         </div>
 
-        <div className="p-6 rounded-3xl bg-white/70 dark:bg-zinc-900/70 backdrop-blur-2xl border border-zinc-200/80 dark:border-zinc-800/80 shadow-xs space-y-1 relative overflow-hidden">
+        <div className="p-6 rounded-3xl apple-glass shadow-xs space-y-1 relative overflow-hidden">
           <span className="text-xs font-medium text-zinc-400 flex items-center gap-1">
             <Sparkles className="w-3.5 h-3.5 text-zinc-400" /> İlerleme Oranı
           </span>
@@ -222,7 +222,7 @@ export default function ChecklistPage() {
       </div>
 
       {/* 2. CANLI İLERLEME BARI */}
-      <div className="p-6 rounded-3xl bg-white/70 dark:bg-zinc-900/70 backdrop-blur-2xl border border-zinc-200/80 dark:border-zinc-800/80 shadow-xs space-y-3">
+      <div className="p-6 rounded-3xl apple-glass shadow-xs space-y-3">
         <div className="flex items-center justify-between text-xs font-bold">
           <span className="text-zinc-700 dark:text-zinc-300">Hazırlık Tamamlanma Oranı</span>
           <span className="text-zinc-900 dark:text-white">%{progressPercentage}</span>

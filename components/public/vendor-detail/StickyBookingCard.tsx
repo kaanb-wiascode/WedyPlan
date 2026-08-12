@@ -30,7 +30,7 @@ export const StickyBookingCard: React.FC<StickyBookingCardProps> = ({ startingPr
         {/* Aksiyon Butonu */}
         <button
           onClick={onOpenOfferModal}
-          className="group w-full bg-[#E6007E] hover:bg-[#c5006b] text-white text-[15px] font-bold px-6 py-4 rounded-xl transition-all shadow-lg hover:shadow-xl hover:-translate-y-0.5 flex items-center justify-center gap-2 mb-6"
+          className="group w-full bg-[#0071e3] hover:bg-[#0077ed] text-white text-[15px] font-bold px-6 py-4 rounded-xl transition-all shadow-lg hover:shadow-xl hover:-translate-y-0.5 flex items-center justify-center gap-2 mb-6"
         >
           <Sparkles className="w-5 h-5 text-white/90 group-hover:animate-pulse" /> 
           Ücretsiz Fiyat Teklifi Al

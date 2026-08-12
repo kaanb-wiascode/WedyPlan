@@ -22,12 +22,12 @@ export const AiFilterPanel: React.FC<AiFilterPanelProps> = ({
     <aside className="bg-white/50 backdrop-blur-2xl border border-white/90 p-6 rounded-[32px] shadow-xs space-y-6">
       <div className="flex items-center justify-between border-b border-black/5 pb-4">
         <div className="flex items-center gap-2">
-          <Filter className="w-4 h-4 text-[#E6007E]" />
+          <Filter className="w-4 h-4 text-[#0071e3]" />
           <h3 className="font-serif font-bold text-[16px] text-[#1D1D1F]">Filtreleri Özelleştir</h3>
         </div>
         <button
           onClick={onResetFilters}
-          className="text-[11px] font-bold text-[#86868B] hover:text-[#E6007E] transition flex items-center gap-1 cursor-pointer"
+          className="text-[11px] font-bold text-[#86868B] hover:text-[#0071e3] transition flex items-center gap-1 cursor-pointer"
         >
           <RotateCcw className="w-3 h-3" /> Sıfırla
         </button>
@@ -39,7 +39,7 @@ export const AiFilterPanel: React.FC<AiFilterPanelProps> = ({
         <select
           value={filters.category}
           onChange={(e) => onChangeFilter({ category: e.target.value })}
-          className="w-full p-3 bg-white/80 border border-slate-200 rounded-2xl text-[12px] font-semibold text-[#1D1D1F] outline-none focus:border-[#E6007E]"
+          className="w-full p-3 bg-white/80 border border-slate-200 rounded-2xl text-[12px] font-semibold text-[#1D1D1F] outline-none focus:border-[#0071e3]"
         >
           {categories.map((cat) => (
             <option key={cat} value={cat === 'Tümü' ? '' : cat}>{cat}</option>
@@ -53,7 +53,7 @@ export const AiFilterPanel: React.FC<AiFilterPanelProps> = ({
         <select
           value={filters.city}
           onChange={(e) => onChangeFilter({ city: e.target.value })}
-          className="w-full p-3 bg-white/80 border border-slate-200 rounded-2xl text-[12px] font-semibold text-[#1D1D1F] outline-none focus:border-[#E6007E]"
+          className="w-full p-3 bg-white/80 border border-slate-200 rounded-2xl text-[12px] font-semibold text-[#1D1D1F] outline-none focus:border-[#0071e3]"
         >
           {cities.map((city) => (
             <option key={city} value={city === 'Tüm Şehirler' ? '' : city}>{city}</option>
@@ -65,7 +65,7 @@ export const AiFilterPanel: React.FC<AiFilterPanelProps> = ({
       <div className="space-y-2">
         <div className="flex justify-between items-center text-[11px] font-bold">
           <span className="text-[#86868B] uppercase tracking-wider">Üst Bütçe Sınırı</span>
-          <span className="text-[#E6007E] font-serif font-bold text-[13px]">
+          <span className="text-[#0071e3] font-serif font-bold text-[13px]">
             {filters.maxBudget > 0 ? `${filters.maxBudget.toLocaleString('tr-TR')} ₺` : 'Sınırsız'}
           </span>
         </div>
@@ -76,7 +76,7 @@ export const AiFilterPanel: React.FC<AiFilterPanelProps> = ({
           step="25000"
           value={filters.maxBudget}
           onChange={(e) => onChangeFilter({ maxBudget: Number(e.target.value) })}
-          className="w-full accent-[#E6007E] cursor-pointer"
+          className="w-full accent-[#0071e3] cursor-pointer"
         />
       </div>
 

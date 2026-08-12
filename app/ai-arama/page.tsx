@@ -65,7 +65,7 @@ function AiSearchContent() {
   });
 
   return (
-    <div className="min-h-screen bg-[#FAF8F5] text-[#1D1D1F] selection:bg-[#E6007E] selection:text-white pb-12 overflow-hidden relative">
+    <div className="min-h-screen bg-[#f5f5f7] text-[#1D1D1F] selection:bg-[#0071e3] selection:text-white pb-12 overflow-hidden relative">
       <PublicNavbar />
 
       <main className="space-y-10">

@@ -21,10 +21,10 @@ export const JourneySelector: React.FC = () => {
           className="bg-white/50 backdrop-blur-2xl border border-white p-8 sm:p-10 rounded-[36px] shadow-sm hover:shadow-xl transition-all space-y-6 flex flex-col justify-between"
         >
           <div className="space-y-4">
-            <div className="w-12 h-12 rounded-2xl bg-pink-500/10 text-[#E6007E] flex items-center justify-center">
-              <Heart className="w-6 h-6 fill-[#E6007E]" />
+            <div className="w-12 h-12 rounded-2xl bg-pink-500/10 text-[#0071e3] flex items-center justify-center">
+              <Heart className="w-6 h-6 fill-[#0071e3]" />
             </div>
-            <span className="text-[11px] font-bold text-[#E6007E] uppercase tracking-wider block">Evlenen Çiftler İçin</span>
+            <span className="text-[11px] font-bold text-[#0071e3] uppercase tracking-wider block">Evlenen Çiftler İçin</span>
             <h3 className="font-serif font-bold text-[28px] text-[#1D1D1F]">Düğününüzü Huzur İçinde Planlayın</h3>
             <p className="text-[14px] text-[#6E6E73] font-light leading-relaxed">
               Bütçe cüzdanından LCV davetli takibine, kişisel düğün web sitenizden WedyAI asistanına kadar tüm süreç elinizin altında.
@@ -33,7 +33,7 @@ export const JourneySelector: React.FC = () => {
 
           <Link
             href="/cift"
-            className="bg-[#1D1D1F] hover:bg-black text-white font-bold text-[13px] py-4 rounded-full transition flex items-center justify-center gap-2 cursor-pointer shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#E6007E]"
+            className="bg-[#1D1D1F] hover:bg-black text-white font-bold text-[13px] py-4 rounded-full transition flex items-center justify-center gap-2 cursor-pointer shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0071e3]"
           >
             <Sparkles className="w-4 h-4 text-[#D4AF37]" />
             <span>Çift Moduna Geçin (Ücretsiz)</span>

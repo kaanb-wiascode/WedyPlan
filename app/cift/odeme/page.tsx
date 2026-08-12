@@ -151,7 +151,7 @@ export default function PaymentsPage() {
     <div className="p-4 sm:p-8 max-w-7xl mx-auto space-y-8 font-sans antialiased">
       
       {/* HEADER & HIZLI AKSİYON */}
-      <div className="p-8 rounded-3xl bg-white/70 dark:bg-zinc-900/70 backdrop-blur-2xl border border-zinc-200/80 dark:border-zinc-800/80 shadow-[0_8px_30px_rgb(0,0,0,0.03)] flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6">
+      <div className="p-8 rounded-3xl apple-glass shadow-[0_8px_30px_rgb(0,0,0,0.03)] flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6">
         <div className="space-y-2">
           <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-zinc-200/60 dark:bg-zinc-800/80 text-zinc-700 dark:text-zinc-300 text-[11px] font-medium border border-zinc-300/40 dark:border-zinc-700/50">
             <CreditCard className="w-3.5 h-3.5 text-zinc-500" />
@@ -175,13 +175,13 @@ export default function PaymentsPage() {
 
       {/* 1. ÖZET FİNANS KARTLARI */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
-        <div className="p-6 rounded-3xl bg-white/70 dark:bg-zinc-900/70 backdrop-blur-2xl border border-zinc-200/80 dark:border-zinc-800/80 shadow-xs space-y-1">
+        <div className="p-6 rounded-3xl apple-glass shadow-xs space-y-1">
           <span className="text-xs font-medium text-zinc-400">Toplam Taksit Yükü</span>
           <div className="text-2xl font-bold text-zinc-900 dark:text-white">₺{totalAmount.toLocaleString('tr-TR')}</div>
           <div className="text-[11px] text-zinc-500">Kayıtlı Tüm Taksitler</div>
         </div>
 
-        <div className="p-6 rounded-3xl bg-white/70 dark:bg-zinc-900/70 backdrop-blur-2xl border border-zinc-200/80 dark:border-zinc-800/80 shadow-xs space-y-1">
+        <div className="p-6 rounded-3xl apple-glass shadow-xs space-y-1">
           <span className="text-xs font-medium text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
             <CheckCircle2 className="w-3.5 h-3.5" /> Tamamlanan Ödemeler
           </span>
@@ -189,7 +189,7 @@ export default function PaymentsPage() {
           <div className="text-[11px] text-zinc-400">Toplam Borcun %{paidPercentage}&apos;si Ödendi</div>
         </div>
 
-        <div className="p-6 rounded-3xl bg-white/70 dark:bg-zinc-900/70 backdrop-blur-2xl border border-zinc-200/80 dark:border-zinc-800/80 shadow-xs space-y-1">
+        <div className="p-6 rounded-3xl apple-glass shadow-xs space-y-1">
           <span className="text-xs font-medium text-amber-600 dark:text-amber-400 flex items-center gap-1">
             <Clock className="w-3.5 h-3.5" /> Gelecek Taksitler
           </span>
@@ -199,7 +199,7 @@ export default function PaymentsPage() {
       </div>
 
       {/* 2. İLERLEME BARI */}
-      <div className="p-6 rounded-3xl bg-white/70 dark:bg-zinc-900/70 backdrop-blur-2xl border border-zinc-200/80 dark:border-zinc-800/80 shadow-xs space-y-3">
+      <div className="p-6 rounded-3xl apple-glass shadow-xs space-y-3">
         <div className="flex items-center justify-between text-xs font-bold">
           <span className="text-zinc-700 dark:text-zinc-300">Ödenen Taksit Oranı</span>
           <span className="text-zinc-900 dark:text-white">%{paidPercentage}</span>
@@ -260,7 +260,7 @@ export default function PaymentsPage() {
       </div>
 
       {/* 4. TAKSİT TABLOSU */}
-      <div className="bg-white/70 dark:bg-zinc-900/70 backdrop-blur-2xl border border-zinc-200/80 dark:border-zinc-800/80 rounded-3xl overflow-hidden shadow-xs">
+      <div className="apple-glass rounded-[28px] overflow-hidden shadow-xs">
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>

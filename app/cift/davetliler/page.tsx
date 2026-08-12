@@ -182,7 +182,7 @@ export default function GuestsPage() {
       )}
 
       {/* HEADER & SEKMELER (Frosted Glass) */}
-      <div className="p-8 rounded-3xl bg-white/70 dark:bg-zinc-900/70 backdrop-blur-2xl border border-zinc-200/80 dark:border-zinc-800/80 shadow-[0_8px_30px_rgb(0,0,0,0.03)] flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6">
+      <div className="p-8 rounded-3xl apple-glass shadow-[0_8px_30px_rgb(0,0,0,0.03)] flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6">
         <div className="space-y-2">
           <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-zinc-200/60 dark:bg-zinc-800/80 text-zinc-700 dark:text-zinc-300 text-[11px] font-medium border border-zinc-300/40 dark:border-zinc-700/50">
             <Users className="w-3.5 h-3.5 text-zinc-500" />
@@ -215,25 +215,25 @@ export default function GuestsPage() {
 
       {/* 1. İSTATİSTİK KARTLARI */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
-        <div className="p-6 rounded-3xl bg-white/70 dark:bg-zinc-900/70 backdrop-blur-2xl border border-zinc-200/80 dark:border-zinc-800/80 shadow-xs space-y-1">
+        <div className="p-6 rounded-3xl apple-glass shadow-xs space-y-1">
           <span className="text-xs font-medium text-zinc-400">Toplam Davetli</span>
           <div className="text-2xl font-bold text-zinc-900 dark:text-white">{totalGuests} Kişi</div>
           <div className="text-[11px] text-zinc-500">Kişi + Yanındaki Davetliler</div>
         </div>
 
-        <div className="p-6 rounded-3xl bg-white/70 dark:bg-zinc-900/70 backdrop-blur-2xl border border-zinc-200/80 dark:border-zinc-800/80 shadow-xs space-y-1">
+        <div className="p-6 rounded-3xl apple-glass shadow-xs space-y-1">
           <span className="text-xs font-medium text-emerald-600 dark:text-emerald-400">Katılanlar (LCV Onay)</span>
           <div className="text-2xl font-bold text-zinc-900 dark:text-white">{acceptedCount} Kişi</div>
           <div className="text-[11px] text-emerald-600 dark:text-emerald-400 font-medium">%{rsvpPercentage} Katılım Oranı</div>
         </div>
 
-        <div className="p-6 rounded-3xl bg-white/70 dark:bg-zinc-900/70 backdrop-blur-2xl border border-zinc-200/80 dark:border-zinc-800/80 shadow-xs space-y-1">
+        <div className="p-6 rounded-3xl apple-glass shadow-xs space-y-1">
           <span className="text-xs font-medium text-zinc-400">Katılamayanlar</span>
           <div className="text-2xl font-bold text-zinc-900 dark:text-white">{declinedCount} Kişi</div>
           <div className="text-[11px] text-zinc-500">Mazeret Bildirenler</div>
         </div>
 
-        <div className="p-6 rounded-3xl bg-white/70 dark:bg-zinc-900/70 backdrop-blur-2xl border border-zinc-200/80 dark:border-zinc-800/80 shadow-xs space-y-1">
+        <div className="p-6 rounded-3xl apple-glass shadow-xs space-y-1">
           <span className="text-xs font-medium text-amber-600 dark:text-amber-400">Yanıt Bekleyen</span>
           <div className="text-2xl font-bold text-zinc-900 dark:text-white">{pendingCount} Kişi</div>
           <div className="text-[11px] text-amber-600 dark:text-amber-400 font-medium">Hatırlatma Gönderilebilir</div>
@@ -241,7 +241,7 @@ export default function GuestsPage() {
       </div>
 
       {/* 2. LCV KATILIM İLERLEME BARI */}
-      <div className="p-6 rounded-3xl bg-white/70 dark:bg-zinc-900/70 backdrop-blur-2xl border border-zinc-200/80 dark:border-zinc-800/80 shadow-xs space-y-3">
+      <div className="p-6 rounded-3xl apple-glass shadow-xs space-y-3">
         <div className="flex items-center justify-between text-xs font-bold">
           <span className="text-zinc-700 dark:text-zinc-300">LCV Onaylanan Katılım Oranı</span>
           <span className="text-zinc-900 dark:text-white">%{rsvpPercentage}</span>
@@ -313,7 +313,7 @@ export default function GuestsPage() {
       </div>
 
       {/* 4. DAVETLİ LİSTESİ TABLOSU (Cam Kart) */}
-      <div className="bg-white/70 dark:bg-zinc-900/70 backdrop-blur-2xl border border-zinc-200/80 dark:border-zinc-800/80 rounded-3xl overflow-hidden shadow-xs">
+      <div className="apple-glass rounded-[28px] overflow-hidden shadow-xs">
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>

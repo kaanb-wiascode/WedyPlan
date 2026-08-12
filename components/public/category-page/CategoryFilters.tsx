@@ -9,7 +9,7 @@ export const CategoryFilters: React.FC = () => {
       <div className="bg-white/70 backdrop-blur-3xl p-3 sm:p-4 rounded-[32px] border border-white/90 shadow-[0_20px_40px_rgba(0,0,0,0.08)] flex flex-col sm:flex-row items-center gap-3">
         
         <div className="flex items-center gap-3 flex-1 w-full px-4 border-b sm:border-b-0 sm:border-r border-black/5 py-2 sm:py-0">
-          <Search className="w-5 h-5 text-[#E6007E] shrink-0" />
+          <Search className="w-5 h-5 text-[#0071e3] shrink-0" />
           <input
             type="text"
             placeholder="Firma veya mekan adı arayın..."

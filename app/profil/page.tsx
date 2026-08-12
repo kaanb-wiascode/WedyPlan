@@ -64,9 +64,9 @@ export default function ProfilePage() {
     <div className="min-h-screen bg-[#FDFBFD] text-slate-800 flex flex-col">
       <nav className="flex items-center justify-between px-6 md:px-12 py-4 bg-white border-b border-purple-100 shadow-sm sticky top-0 z-50">
         <Link href="/" className="text-2xl font-bold text-[#4A154B]">
-          Wedy<span className="text-[#E6007E]">Plan</span>
+          Wedy<span className="text-[#0071e3]">Plan</span>
         </Link>
-        <Link href="/" className="text-xs font-semibold text-slate-500 hover:text-[#E6007E]">
+        <Link href="/" className="text-xs font-semibold text-slate-500 hover:text-[#0071e3]">
           ← Ana Sayfaya Dön
         </Link>
       </nav>
@@ -102,7 +102,7 @@ export default function ProfilePage() {
                 required
                 value={displayName}
                 onChange={(e) => setDisplayName(e.target.value)}
-                className="w-full p-3.5 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-[#E6007E] focus:ring-1 focus:ring-[#E6007E]"
+                className="w-full p-3.5 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-[#0071e3] focus:ring-1 focus:ring-[#0071e3]"
               />
             </div>
             <button

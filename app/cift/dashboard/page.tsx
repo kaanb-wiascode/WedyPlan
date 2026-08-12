@@ -63,25 +63,25 @@ export default async function CiftDashboardPage() {
     <div className="p-4 sm:p-8 space-y-8 max-w-7xl mx-auto font-sans antialiased">
       
       {/* 1. HERO BANNER & GERİ SAYIM (Apple Frosted Glass) */}
-      <section className="relative overflow-hidden rounded-3xl bg-white/70 dark:bg-zinc-900/70 backdrop-blur-2xl border border-zinc-200/80 dark:border-zinc-800/80 p-6 sm:p-8 text-zinc-900 dark:text-zinc-100 shadow-[0_8px_30px_rgb(0,0,0,0.03)]">
+      <section className="apple-glass relative overflow-hidden rounded-[28px] p-6 text-[#1d1d1f] sm:p-8">
         <div className="absolute top-0 right-0 w-80 h-80 bg-zinc-200/30 dark:bg-zinc-800/20 rounded-full blur-3xl pointer-events-none -translate-y-1/2 translate-x-1/3" />
         
         <div className="relative z-10 flex flex-col md:flex-row md:items-center md:justify-between gap-6">
           <div className="space-y-3 max-w-xl">
-            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-zinc-200/60 dark:bg-zinc-800/80 text-zinc-700 dark:text-zinc-300 border border-zinc-300/40 dark:border-zinc-700/50 text-[11px] font-medium tracking-tight">
+            <div className="apple-chip">
               <Heart className="w-3.5 h-3.5 text-zinc-500 dark:text-zinc-400" />
               <span>Büyük Günü Planlıyoruz</span>
             </div>
-            <h1 className="text-2xl sm:text-4xl font-bold tracking-tight text-zinc-900 dark:text-white leading-tight">
+            <h1 className="text-2xl font-semibold leading-tight tracking-tight text-[#1d1d1f] sm:text-4xl">
               Hoş Geldiniz, {coupleTitle}! ✨
             </h1>
-            <p className="text-xs sm:text-sm text-zinc-500 dark:text-zinc-400 leading-relaxed font-normal">
+            <p className="text-xs font-normal leading-relaxed text-[#86868b] sm:text-sm">
               Düğün hazırlıklarınız harika gidiyor! Planlamanızı kolaylaştırmak için tüm adımları tek ekranda topladık.
             </p>
           </div>
 
           {/* Geri Sayım Kutusu */}
-          <div className="bg-zinc-50/80 dark:bg-zinc-800/50 backdrop-blur-md border border-zinc-200/60 dark:border-zinc-700/50 rounded-2xl p-5 flex items-center justify-between gap-4 sm:gap-6 shadow-xs text-center shrink-0">
+          <div className="apple-glass flex shrink-0 items-center justify-between gap-4 rounded-2xl p-5 text-center sm:gap-6">
             <div className="flex flex-col">
               <span className="text-3xl sm:text-4xl font-extrabold text-zinc-900 dark:text-white tracking-tight">{daysLeft}</span>
               <span className="text-[10px] uppercase font-bold text-zinc-400 dark:text-zinc-500 tracking-widest">Gün Kaldı</span>
@@ -103,19 +103,19 @@ export default async function CiftDashboardPage() {
         <div className="mt-8 pt-6 border-t border-zinc-200/60 dark:border-zinc-800/60 flex flex-wrap items-center gap-3 relative z-10">
           <Link
             href="/cift/butce"
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 hover:bg-black dark:hover:bg-zinc-200 text-xs font-semibold shadow-xs transition-all"
+            className="apple-btn apple-btn-inline !px-4 !py-2 !text-[13px]"
           >
             <Plus className="w-4 h-4" /> Harcama Ekle
           </Link>
           <Link
             href="/cift/davetliler"
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-zinc-100 dark:bg-zinc-800 border border-zinc-200/80 dark:border-zinc-700/60 text-zinc-800 dark:text-zinc-200 text-xs font-medium hover:bg-zinc-200/80 transition-all"
+            className="apple-btn-secondary apple-btn-secondary-inline !px-4 !py-2 !text-[13px]"
           >
             <Users className="w-4 h-4" /> Davetli Ekle
           </Link>
           <Link
             href="/cift/ai-asistan"
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-zinc-200/60 dark:bg-zinc-800/80 border border-zinc-300/40 dark:border-zinc-700/60 text-zinc-900 dark:text-white text-xs font-semibold hover:bg-zinc-300/60 transition-all"
+            className="apple-btn-secondary apple-btn-secondary-inline !px-4 !py-2 !text-[13px]"
           >
             <Sparkles className="w-4 h-4 text-zinc-500 dark:text-zinc-400" /> AI Asistana Sor
           </Link>
@@ -123,7 +123,7 @@ export default async function CiftDashboardPage() {
       </section>
 
       {/* 2. DÜĞÜN HAZIRLIK SKORU */}
-      <section className="bg-white/70 dark:bg-zinc-900/70 backdrop-blur-2xl border border-zinc-200/80 dark:border-zinc-800/80 rounded-3xl p-6 shadow-[0_8px_30px_rgb(0,0,0,0.03)] space-y-3">
+      <section className="apple-glass rounded-[28px] p-6 shadow-[0_8px_30px_rgb(0,0,0,0.03)] space-y-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <CheckCircle2 className="w-5 h-5 text-emerald-500" />
@@ -133,7 +133,7 @@ export default async function CiftDashboardPage() {
         </div>
         <div className="w-full h-3 bg-zinc-100 dark:bg-zinc-800 rounded-full overflow-hidden p-0.5">
           <div
-            className="h-full bg-zinc-900 dark:bg-white rounded-full transition-all duration-1000"
+            className="h-full rounded-full bg-[#0071e3] transition-all duration-1000"
             style={{ width: `${metrics.overallReadiness}%` }}
           />
         </div>
@@ -150,7 +150,7 @@ export default async function CiftDashboardPage() {
       <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
         
         {/* Bütçe Kartı */}
-        <div className="bg-white/70 dark:bg-zinc-900/70 backdrop-blur-2xl border border-zinc-200/80 dark:border-zinc-800/80 rounded-3xl p-5 shadow-xs space-y-3">
+        <div className="apple-glass rounded-[28px] p-5 shadow-xs space-y-3">
           <div className="flex items-center justify-between">
             <span className="text-xs font-medium text-zinc-400">Bütçe Durumu</span>
             <div className="w-8 h-8 rounded-xl bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 flex items-center justify-center">
@@ -174,7 +174,7 @@ export default async function CiftDashboardPage() {
         </div>
 
         {/* Görevler Kartı */}
-        <div className="bg-white/70 dark:bg-zinc-900/70 backdrop-blur-2xl border border-zinc-200/80 dark:border-zinc-800/80 rounded-3xl p-5 shadow-xs space-y-3">
+        <div className="apple-glass rounded-[28px] p-5 shadow-xs space-y-3">
           <div className="flex items-center justify-between">
             <span className="text-xs font-medium text-zinc-400">Yapılacak Görevler</span>
             <div className="w-8 h-8 rounded-xl bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 flex items-center justify-center">
@@ -198,7 +198,7 @@ export default async function CiftDashboardPage() {
         </div>
 
         {/* Davetli & LCV Kartı */}
-        <div className="bg-white/70 dark:bg-zinc-900/70 backdrop-blur-2xl border border-zinc-200/80 dark:border-zinc-800/80 rounded-3xl p-5 shadow-xs space-y-3">
+        <div className="apple-glass rounded-[28px] p-5 shadow-xs space-y-3">
           <div className="flex items-center justify-between">
             <span className="text-xs font-medium text-zinc-400">Davetli & LCV</span>
             <div className="w-8 h-8 rounded-xl bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 flex items-center justify-center">
@@ -222,7 +222,7 @@ export default async function CiftDashboardPage() {
         </div>
 
         {/* Anlaşmalı Firmalar Kartı */}
-        <div className="bg-white/70 dark:bg-zinc-900/70 backdrop-blur-2xl border border-zinc-200/80 dark:border-zinc-800/80 rounded-3xl p-5 shadow-xs space-y-3">
+        <div className="apple-glass rounded-[28px] p-5 shadow-xs space-y-3">
           <div className="flex items-center justify-between">
             <span className="text-xs font-medium text-zinc-400">Tedarikçi Hizmetleri</span>
             <div className="w-8 h-8 rounded-xl bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 flex items-center justify-center">
@@ -253,7 +253,7 @@ export default async function CiftDashboardPage() {
         {/* SOL KOLON - Odak Görevler & Takvim */}
         <div className="lg:col-span-2 space-y-6">
           
-          <div className="bg-white/70 dark:bg-zinc-900/70 backdrop-blur-2xl border border-zinc-200/80 dark:border-zinc-800/80 rounded-3xl p-6 shadow-xs space-y-4">
+          <div className="apple-glass rounded-[28px] p-6 shadow-xs space-y-4">
             <div className="flex items-center justify-between">
               <div>
                 <h3 className="text-base font-bold text-zinc-900 dark:text-white flex items-center gap-2">
@@ -306,7 +306,7 @@ export default async function CiftDashboardPage() {
             </div>
           </div>
 
-          <div className="bg-white/70 dark:bg-zinc-900/70 backdrop-blur-2xl border border-zinc-200/80 dark:border-zinc-800/80 rounded-3xl p-6 shadow-xs space-y-4">
+          <div className="apple-glass rounded-[28px] p-6 shadow-xs space-y-4">
             <div className="flex items-center justify-between">
               <h3 className="text-base font-bold text-zinc-900 dark:text-white flex items-center gap-2">
                 <Calendar className="w-4 h-4 text-zinc-500" /> Takvim & Prova Günleri
@@ -346,7 +346,7 @@ export default async function CiftDashboardPage() {
         {/* SAĞ KOLON - AI Asistan & Mesajlar */}
         <div className="space-y-6">
           
-          <div className="bg-white/70 dark:bg-zinc-900/70 backdrop-blur-2xl border border-zinc-200/80 dark:border-zinc-800/80 text-zinc-900 dark:text-white rounded-3xl p-6 shadow-xs relative overflow-hidden space-y-4">
+          <div className="apple-glass text-zinc-900 dark:text-white rounded-3xl p-6 shadow-xs relative overflow-hidden space-y-4">
             <div className="flex items-center justify-between">
               <span className="inline-flex items-center gap-1.5 text-[11px] font-bold px-2.5 py-1 rounded-full bg-zinc-200/60 dark:bg-zinc-800 text-zinc-800 dark:text-zinc-200 border border-zinc-300/40 dark:border-zinc-700">
                 <Sparkles className="w-3.5 h-3.5 text-zinc-500" /> Wedy AI Tavsiyesi
@@ -360,14 +360,14 @@ export default async function CiftDashboardPage() {
 
             <Link
               href="/cift/ai-asistan"
-              className="w-full py-2.5 px-4 rounded-xl bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 hover:bg-black dark:hover:bg-zinc-200 text-xs font-bold flex items-center justify-center gap-2 transition-all shadow-xs"
+              className="w-full py-2.5 px-4 rounded-full bg-[#0071e3] text-white hover:bg-[#0077ed] text-xs font-bold flex items-center justify-center gap-2 transition-all shadow-xs"
             >
               <span>Fotoğrafçı Önerilerini Gör</span>
               <ArrowUpRight className="w-4 h-4" />
             </Link>
           </div>
 
-          <div className="bg-white/70 dark:bg-zinc-900/70 backdrop-blur-2xl border border-zinc-200/80 dark:border-zinc-800/80 rounded-3xl p-6 shadow-xs space-y-4">
+          <div className="apple-glass rounded-[28px] p-6 shadow-xs space-y-4">
             <div className="flex items-center justify-between">
               <h3 className="text-sm font-bold text-zinc-900 dark:text-white flex items-center gap-2">
                 <MessageSquare className="w-4 h-4 text-zinc-500" /> Son Mesajlar
@@ -396,7 +396,7 @@ export default async function CiftDashboardPage() {
             </div>
           </div>
 
-          <div className="bg-white/70 dark:bg-zinc-900/70 backdrop-blur-2xl border border-zinc-200/80 dark:border-zinc-800/80 rounded-3xl p-6 shadow-xs space-y-3">
+          <div className="apple-glass rounded-[28px] p-6 shadow-xs space-y-3">
             <div className="flex items-center justify-between">
               <span className="text-xs font-semibold text-zinc-400">Dijital Davetiye</span>
               <span className="px-2 py-0.5 rounded-md bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-[10px] font-bold border border-emerald-500/20">

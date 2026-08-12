@@ -110,10 +110,10 @@ export default function FirmalarPage() {
   return (
     <PublicPageLayout>
       <div className="max-w-7xl mx-auto px-4 sm:px-8 pt-8 pb-10">
-        <h1 className="text-4xl md:text-5xl font-bold text-gray-900 tracking-tight mb-4 text-center">
-          Mükemmel Düğün İçin En İyileri Bulun
+        <h1 className="mb-4 text-center text-4xl font-semibold tracking-tight text-[#1d1d1f] md:text-5xl">
+          Mükemmel düğün için en iyileri bulun
         </h1>
-        <p className="text-lg text-gray-600 font-light text-center max-w-2xl mx-auto">
+        <p className="mx-auto max-w-2xl text-center text-[17px] font-normal text-[#86868b]">
           Yapay zeka destekli akıllı algoritmamızla hayalinizdeki mekanı, fotoğrafçıyı ve organizasyon firmasını saniyeler içinde keşfedin.
         </p>
       </div>
@@ -182,7 +182,7 @@ export default function FirmalarPage() {
                         key={opt.id}
                         onClick={() => { handleFilterChange({ sortBy: opt.id as any }); setIsSortOpen(false); }}
                         className={`w-full text-left px-4 py-3 text-[13px] font-medium transition-colors ${
-                          filters.sortBy === opt.id ? 'bg-[#E6007E]/5 text-[#E6007E] font-bold' : 'text-gray-700 hover:bg-gray-50'
+                          filters.sortBy === opt.id ? 'bg-[#0071e3]/8 text-[#0071e3] font-semibold' : 'text-[#1d1d1f] hover:bg-black/4'
                         }`}
                       >
                         {opt.label}
@@ -239,7 +239,7 @@ export default function FirmalarPage() {
                   </p>
                   <button 
                     onClick={resetFilters}
-                    className="px-8 py-4 bg-[#1D1D1F] text-white font-semibold rounded-2xl hover:bg-black transition-all shadow-lg hover:shadow-xl hover:-translate-y-0.5"
+                    className="apple-btn apple-btn-inline"
                   >
                     Tüm İhtimalleri Yeniden Keşfet
                   </button>

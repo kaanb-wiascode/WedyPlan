@@ -58,14 +58,14 @@ export const MobileFilterDrawer: React.FC<MobileFilterDrawerProps> = ({
             {/* Başlık ve Butonlar */}
             <div className="px-6 py-3 flex items-center justify-between border-b border-gray-100/60">
               <div className="flex items-center gap-2 text-gray-900">
-                <SlidersHorizontal className="w-5 h-5 text-[#E6007E]" />
+                <SlidersHorizontal className="w-5 h-5 text-[#0071e3]" />
                 <h3 className="font-bold text-lg">Filtrele ve Sırala</h3>
               </div>
               
               <div className="flex items-center gap-2">
                 <button
                   onClick={onReset}
-                  className="text-xs font-bold text-[#E6007E] hover:bg-[#E6007E]/10 px-3 py-1.5 rounded-full transition-colors flex items-center gap-1"
+                  className="text-xs font-bold text-[#0071e3] hover:bg-[#0071e3]/10 px-3 py-1.5 rounded-full transition-colors flex items-center gap-1"
                 >
                   <RotateCcw className="w-3.5 h-3.5" /> Temizle
                 </button>

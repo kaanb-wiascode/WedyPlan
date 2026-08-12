@@ -1,4 +1,3 @@
-// app/(couple)/layout.tsx
 import React from 'react';
 import RoleGuard from '@/components/RoleGuard';
 import { SSEProvider } from '@/components/realtime/SSEProvider';
@@ -12,7 +11,7 @@ export default function CoupleLayout({
   return (
     <SSEProvider>
       <RoleGuard allowedRole="COUPLE">
-        <div>
+        <div className="apple-page">
           {children}
           <QuoteNotification />
         </div>

@@ -10,7 +10,7 @@ export default function CoupleVendorsPage() {
   return (
     <div className="space-y-8 max-w-7xl mx-auto p-4 sm:p-8 font-sans antialiased">
       {/* Header Cam Kart */}
-      <div className="p-8 rounded-3xl bg-white/70 dark:bg-zinc-900/70 backdrop-blur-2xl border border-zinc-200/80 dark:border-zinc-800/80 shadow-[0_8px_30px_rgb(0,0,0,0.03)] space-y-2">
+      <div className="p-8 rounded-3xl apple-glass shadow-[0_8px_30px_rgb(0,0,0,0.03)] space-y-2">
         <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-zinc-200/60 dark:bg-zinc-800/80 text-zinc-700 dark:text-zinc-300 text-[11px] font-medium border border-zinc-300/40 dark:border-zinc-700/50">
           <Store className="w-3.5 h-3.5 text-zinc-500" />
           <span>Düğün Ekibi</span>
@@ -28,7 +28,7 @@ export default function CoupleVendorsPage() {
         {vendors.map((v) => (
           <div
             key={v.id}
-            className="p-6 rounded-3xl bg-white/70 dark:bg-zinc-900/70 backdrop-blur-2xl border border-zinc-200/80 dark:border-zinc-800/80 shadow-xs flex flex-col justify-between gap-5 transition-all"
+            className="p-6 rounded-3xl apple-glass shadow-xs flex flex-col justify-between gap-5 transition-all"
           >
             <div className="flex items-center gap-4">
               <img

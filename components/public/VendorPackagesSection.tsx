@@ -13,7 +13,7 @@ export const VendorPackagesSection: React.FC<VendorPackagesSectionProps> = ({ pa
   return (
     <div className="space-y-6">
       <div>
-        <span className="text-[11px] font-bold text-[#E6007E] uppercase tracking-widest block mb-1">Şeffaf Fiyatlandırma</span>
+        <span className="text-[11px] font-bold text-[#0071e3] uppercase tracking-widest block mb-1">Şeffaf Fiyatlandırma</span>
         <h2 className="font-serif font-semibold text-[28px] text-[#1D1D1F]">Düğün Paketleri & Seçenekler</h2>
       </div>
 

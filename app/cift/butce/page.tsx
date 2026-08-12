@@ -136,7 +136,7 @@ export default function BudgetPage() {
     <div className="p-4 sm:p-8 max-w-7xl mx-auto space-y-8 font-sans antialiased">
       
       {/* HEADER & HIZLI AKSİYON */}
-      <div className="p-8 rounded-3xl bg-white/70 dark:bg-zinc-900/70 backdrop-blur-2xl border border-zinc-200/80 dark:border-zinc-800/80 shadow-[0_8px_30px_rgb(0,0,0,0.03)] flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6">
+      <div className="p-8 rounded-3xl apple-glass shadow-[0_8px_30px_rgb(0,0,0,0.03)] flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6">
         <div className="space-y-2">
           <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-zinc-200/60 dark:bg-zinc-800/80 text-zinc-700 dark:text-zinc-300 text-[11px] font-medium border border-zinc-300/40 dark:border-zinc-700/50">
             <Wallet className="w-3.5 h-3.5 text-zinc-500" />
@@ -160,7 +160,7 @@ export default function BudgetPage() {
 
       {/* 1. ÖZET FİNANS KARTLARI (Frosted Glass) */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
-        <div className="p-6 rounded-3xl bg-white/70 dark:bg-zinc-900/70 backdrop-blur-2xl border border-zinc-200/80 dark:border-zinc-800/80 shadow-xs space-y-1">
+        <div className="p-6 rounded-3xl apple-glass shadow-xs space-y-1">
           <span className="text-xs font-medium text-zinc-400">Hedef Bütçe</span>
           <div className="text-2xl font-bold text-zinc-900 dark:text-white">
             ₺{TOTAL_TARGET_BUDGET.toLocaleString('tr-TR')}
@@ -168,7 +168,7 @@ export default function BudgetPage() {
           <div className="text-[11px] text-zinc-500">Tavan Limiti</div>
         </div>
 
-        <div className="p-6 rounded-3xl bg-white/70 dark:bg-zinc-900/70 backdrop-blur-2xl border border-zinc-200/80 dark:border-zinc-800/80 shadow-xs space-y-1">
+        <div className="p-6 rounded-3xl apple-glass shadow-xs space-y-1">
           <span className="text-xs font-medium text-zinc-400">Gerçekleşen Harcama</span>
           <div className="text-2xl font-bold text-zinc-900 dark:text-white">
             ₺{totalSpent.toLocaleString('tr-TR')}
@@ -178,7 +178,7 @@ export default function BudgetPage() {
           </div>
         </div>
 
-        <div className="p-6 rounded-3xl bg-white/70 dark:bg-zinc-900/70 backdrop-blur-2xl border border-zinc-200/80 dark:border-zinc-800/80 shadow-xs space-y-1">
+        <div className="p-6 rounded-3xl apple-glass shadow-xs space-y-1">
           <span className="text-xs font-medium text-emerald-600 dark:text-emerald-400">Kalan Bütçe</span>
           <div className="text-2xl font-bold text-zinc-900 dark:text-white">
             ₺{remainingBudget.toLocaleString('tr-TR')}
@@ -186,7 +186,7 @@ export default function BudgetPage() {
           <div className="text-[11px] text-emerald-600 dark:text-emerald-400 font-medium">Kullanılabilir Bakiye</div>
         </div>
 
-        <div className="p-6 rounded-3xl bg-white/70 dark:bg-zinc-900/70 backdrop-blur-2xl border border-zinc-200/80 dark:border-zinc-800/80 shadow-xs space-y-2 relative overflow-hidden">
+        <div className="p-6 rounded-3xl apple-glass shadow-xs space-y-2 relative overflow-hidden">
           <div className="flex items-center justify-between">
             <span className="text-[11px] font-bold text-zinc-500 dark:text-zinc-400 flex items-center gap-1 uppercase tracking-wider">
               <Sparkles className="w-3.5 h-3.5 text-zinc-400" /> Wedy AI Durum
@@ -202,7 +202,7 @@ export default function BudgetPage() {
       </div>
 
       {/* 2. CANLI BÜTÇE İLERLEME BARI */}
-      <div className="p-6 rounded-3xl bg-white/70 dark:bg-zinc-900/70 backdrop-blur-2xl border border-zinc-200/80 dark:border-zinc-800/80 shadow-xs space-y-3">
+      <div className="p-6 rounded-3xl apple-glass shadow-xs space-y-3">
         <div className="flex items-center justify-between text-xs font-bold">
           <span className="text-zinc-700 dark:text-zinc-300">Harcanan Bütçe Oranı</span>
           <span className="text-zinc-900 dark:text-white">%{spentPercentage}</span>
@@ -256,7 +256,7 @@ export default function BudgetPage() {
       </div>
 
       {/* 4. HARCAMA KALEMLERİ TABLOSU (Cam Kart) */}
-      <div className="bg-white/70 dark:bg-zinc-900/70 backdrop-blur-2xl border border-zinc-200/80 dark:border-zinc-800/80 rounded-3xl overflow-hidden shadow-xs">
+      <div className="apple-glass rounded-[28px] overflow-hidden shadow-xs">
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>

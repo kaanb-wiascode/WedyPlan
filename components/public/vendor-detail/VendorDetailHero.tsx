@@ -70,7 +70,7 @@ export const VendorDetailHero: React.FC<VendorDetailHeroProps> = ({ vendor, onOp
                 </button>
                 <button 
                   onClick={onOpenOfferModal}
-                  className="flex-1 md:flex-none flex items-center justify-center px-6 py-3 bg-[#E6007E] text-white font-semibold rounded-xl hover:bg-[#c5006b] transition-colors shadow-lg"
+                  className="apple-btn apple-btn-inline flex-1 md:flex-none"
                 >
                   Teklif İste
                   <ChevronRight className="w-4 h-4 ml-1" />

@@ -56,7 +56,7 @@ export const SimilarVendorsGrid: React.FC<SimilarVendorsGridProps> = ({ similarV
                 </div>
                 
                 <div className="px-1">
-                  <span className="text-[10px] font-bold text-[#E6007E] uppercase tracking-wider block mb-1">
+                  <span className="text-[10px] font-bold text-[#0071e3] uppercase tracking-wider block mb-1">
                     {vendor.category}
                   </span>
                   <h3 className="font-bold text-gray-900 mb-1 truncate">{displayName}</h3>

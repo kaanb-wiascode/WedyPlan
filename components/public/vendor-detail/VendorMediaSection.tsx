@@ -14,7 +14,7 @@ export const VendorMediaSection: React.FC<VendorMediaSectionProps> = ({ videos }
   return (
     <div className="space-y-4">
       <div className="flex items-center gap-2 text-[#1D1D1F] font-serif font-bold text-[22px]">
-        <Video className="w-5 h-5 text-[#E6007E]" />
+        <Video className="w-5 h-5 text-[#0071e3]" />
         <span>4K Tanıtım & Düğün Videoları</span>
       </div>
 
@@ -23,8 +23,8 @@ export const VendorMediaSection: React.FC<VendorMediaSectionProps> = ({ videos }
           <div key={vid.id} className="relative group rounded-[28px] overflow-hidden bg-black h-48 border border-white/60 cursor-pointer">
             <img src={vid.thumbnailUrl} alt={vid.title} className="w-full h-full object-cover opacity-80 group-hover:scale-105 transition duration-500" />
             <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
-              <div className="w-12 h-12 rounded-full bg-white/90 text-[#E6007E] flex items-center justify-center group-hover:scale-110 transition shadow-md">
-                <Play className="w-5 h-5 fill-[#E6007E] ml-1" />
+              <div className="w-12 h-12 rounded-full bg-white/90 text-[#0071e3] flex items-center justify-center group-hover:scale-110 transition shadow-md">
+                <Play className="w-5 h-5 fill-[#0071e3] ml-1" />
               </div>
             </div>
             <div className="absolute bottom-3 left-4 right-4 flex items-center justify-between text-white text-[12px] font-bold">

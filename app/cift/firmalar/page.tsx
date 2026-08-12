@@ -169,7 +169,7 @@ export default function VendorsPage() {
       )}
 
       {/* HEADER & HIZLI AKSİYON */}
-      <div className="p-8 rounded-3xl bg-white/70 dark:bg-zinc-900/70 backdrop-blur-2xl border border-zinc-200/80 dark:border-zinc-800/80 shadow-[0_8px_30px_rgb(0,0,0,0.03)] flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6">
+      <div className="p-8 rounded-3xl apple-glass shadow-[0_8px_30px_rgb(0,0,0,0.03)] flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6">
         <div className="space-y-2">
           <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-zinc-200/60 dark:bg-zinc-800/80 text-zinc-700 dark:text-zinc-300 text-[11px] font-medium border border-zinc-300/40 dark:border-zinc-700/50">
             <Building2 className="w-3.5 h-3.5 text-zinc-500" />
@@ -193,19 +193,19 @@ export default function VendorsPage() {
 
       {/* 1. ÖZET FİNANSAL SÖZLEŞME KARTLARI */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
-        <div className="p-6 rounded-3xl bg-white/70 dark:bg-zinc-900/70 backdrop-blur-2xl border border-zinc-200/80 dark:border-zinc-800/80 shadow-xs space-y-1">
+        <div className="p-6 rounded-3xl apple-glass shadow-xs space-y-1">
           <span className="text-xs font-medium text-zinc-400">Taahhüt Edilen Toplam</span>
           <div className="text-2xl font-bold text-zinc-900 dark:text-white">₺{totalAgreedBudget.toLocaleString('tr-TR')}</div>
           <div className="text-[11px] text-zinc-500">{bookedVendors.length} Anlaşmalı Firma</div>
         </div>
 
-        <div className="p-6 rounded-3xl bg-white/70 dark:bg-zinc-900/70 backdrop-blur-2xl border border-zinc-200/80 dark:border-zinc-800/80 shadow-xs space-y-1">
+        <div className="p-6 rounded-3xl apple-glass shadow-xs space-y-1">
           <span className="text-xs font-medium text-emerald-600 dark:text-emerald-400">Ödenen Tutar (Kapora + Taksit)</span>
           <div className="text-2xl font-bold text-zinc-900 dark:text-white">₺{totalPaidBudget.toLocaleString('tr-TR')}</div>
           <div className="text-[11px] text-emerald-600 dark:text-emerald-400 font-medium">Bütçe Planlayıcı ile Senkronize</div>
         </div>
 
-        <div className="p-6 rounded-3xl bg-white/70 dark:bg-zinc-900/70 backdrop-blur-2xl border border-zinc-200/80 dark:border-zinc-800/80 shadow-xs space-y-1 relative overflow-hidden">
+        <div className="p-6 rounded-3xl apple-glass shadow-xs space-y-1 relative overflow-hidden">
           <span className="text-xs font-medium text-zinc-400 flex items-center gap-1">
             <CreditCard className="w-3.5 h-3.5 text-zinc-400" /> Kalan Bakiye
           </span>
@@ -259,7 +259,7 @@ export default function VendorsPage() {
             </div>
           ) : (
             bookedVendors.map((vendor) => (
-              <div key={vendor.id} className="p-6 rounded-3xl bg-white/70 dark:bg-zinc-900/70 backdrop-blur-2xl border border-zinc-200/80 dark:border-zinc-800/80 shadow-xs space-y-5">
+              <div key={vendor.id} className="p-6 rounded-3xl apple-glass shadow-xs space-y-5">
                 <div className="flex items-start justify-between">
                   <div>
                     <span className="px-2.5 py-1 rounded-lg bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 text-[10px] font-bold">
@@ -332,7 +332,7 @@ export default function VendorsPage() {
             </div>
           ) : (
             favoriteVendors.map((vendor) => (
-              <div key={vendor.id} className="p-6 rounded-3xl bg-white/70 dark:bg-zinc-900/70 backdrop-blur-2xl border border-zinc-200/80 dark:border-zinc-800/80 shadow-xs space-y-4">
+              <div key={vendor.id} className="p-6 rounded-3xl apple-glass shadow-xs space-y-4">
                 <div className="flex items-start justify-between">
                   <div>
                     <span className="px-2.5 py-1 rounded-lg bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 text-[10px] font-bold">
@@ -371,7 +371,7 @@ export default function VendorsPage() {
 
       {/* SEKME 3: SÖZLEŞMELERİM */}
       {activeTab === 'CONTRACTS' && (
-        <div className="bg-white/70 dark:bg-zinc-900/70 backdrop-blur-2xl border border-zinc-200/80 dark:border-zinc-800/80 rounded-3xl overflow-hidden shadow-xs">
+        <div className="apple-glass rounded-[28px] overflow-hidden shadow-xs">
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse">
               <thead>
@@ -414,7 +414,7 @@ export default function VendorsPage() {
 
       {/* SEKME 4: ÖDEME & TAKSİT TAKİBİ */}
       {activeTab === 'PAYMENTS' && (
-        <div className="bg-white/70 dark:bg-zinc-900/70 backdrop-blur-2xl border border-zinc-200/80 dark:border-zinc-800/80 rounded-3xl overflow-hidden shadow-xs">
+        <div className="apple-glass rounded-[28px] overflow-hidden shadow-xs">
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse">
               <thead>
@@ -465,7 +465,7 @@ export default function VendorsPage() {
       {/* SEKME 5: DEĞERLENDİRME & WEDYPLAN GERİ BİLDİRİMİ */}
       {activeTab === 'REVIEWS' && (
         <div className="space-y-6">
-          <div className="p-6 rounded-3xl bg-white/70 dark:bg-zinc-900/70 backdrop-blur-2xl border border-zinc-200/80 dark:border-zinc-800/80 shadow-xs space-y-3">
+          <div className="p-6 rounded-3xl apple-glass shadow-xs space-y-3">
             <div className="flex items-center gap-2 text-zinc-900 dark:text-white text-xs font-bold">
               <ShieldCheck className="w-4 h-4 text-zinc-500" /> WedyPlan Müşteri Güvencesi
             </div>
@@ -477,7 +477,7 @@ export default function VendorsPage() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {bookedVendors.map((vendor) => (
-              <div key={vendor.id} className="p-5 rounded-3xl bg-white/70 dark:bg-zinc-900/70 backdrop-blur-2xl border border-zinc-200/80 dark:border-zinc-800/80 shadow-xs flex items-center justify-between">
+              <div key={vendor.id} className="p-5 rounded-3xl apple-glass shadow-xs flex items-center justify-between">
                 <div>
                   <h4 className="text-xs font-bold text-zinc-900 dark:text-white">{vendor.name}</h4>
                   <span className="text-[10px] text-zinc-400">{vendor.category}</span>

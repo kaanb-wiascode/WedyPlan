@@ -133,7 +133,7 @@ export default function DigitalInvitationBuilderPage() {
       )}
 
       {/* HEADER & HIZLI AKSİYONLAR */}
-      <div className="p-8 rounded-3xl bg-white/70 dark:bg-zinc-900/70 backdrop-blur-2xl border border-zinc-200/80 dark:border-zinc-800/80 shadow-[0_8px_30px_rgb(0,0,0,0.03)] flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6">
+      <div className="p-8 rounded-3xl apple-glass shadow-[0_8px_30px_rgb(0,0,0,0.03)] flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6">
         <div className="space-y-2">
           <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-zinc-200/60 dark:bg-zinc-800/80 text-zinc-700 dark:text-zinc-300 text-[11px] font-medium border border-zinc-300/40 dark:border-zinc-700/50">
             <Globe className="w-3.5 h-3.5 text-zinc-500" />
@@ -174,7 +174,7 @@ export default function DigitalInvitationBuilderPage() {
       </div>
 
       {/* ÜST CANLI BİLGİ BANNERI (Frosted Glass) */}
-      <div className="bg-white/70 dark:bg-zinc-900/70 backdrop-blur-2xl border border-zinc-200/80 dark:border-zinc-800/80 p-6 rounded-3xl shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-6 relative overflow-hidden">
+      <div className="apple-glass p-6 rounded-3xl shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-6 relative overflow-hidden">
         <div className="space-y-1 z-10">
           <span className="inline-flex items-center gap-1.5 text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 uppercase tracking-wider">
             Web Siteniz Yayında
@@ -198,7 +198,7 @@ export default function DigitalInvitationBuilderPage() {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
         
         {/* SOL KOLON: AYARLAR VE TASARIM FORMU */}
-        <div className="lg:col-span-7 bg-white/70 dark:bg-zinc-900/70 backdrop-blur-2xl border border-zinc-200/80 dark:border-zinc-800/80 rounded-3xl p-6 sm:p-8 space-y-6 shadow-xs">
+        <div className="lg:col-span-7 apple-glass rounded-[28px] p-6 sm:p-8 space-y-6 shadow-xs">
           <div className="border-b border-zinc-100 dark:border-zinc-800/80 pb-4 flex items-center justify-between">
             <h3 className="text-base font-bold text-zinc-900 dark:text-white flex items-center gap-2">
               <Palette className="w-5 h-5 text-zinc-500" /> Web Sitesi İçerik Düzenleyici

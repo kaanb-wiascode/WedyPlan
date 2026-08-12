@@ -19,7 +19,7 @@ export const MagazineAiSearchBox: React.FC<MagazineAiSearchBoxProps> = ({ onSear
     <div className="max-w-3xl mx-auto px-4 my-8">
       <form onSubmit={handleSearch} className="bg-white/60 backdrop-blur-2xl p-3 rounded-[32px] border border-white/90 shadow-sm flex items-center gap-3">
         <div className="flex items-center gap-3 flex-1 px-4">
-          <Sparkles className="w-5 h-5 text-[#E6007E] shrink-0" />
+          <Sparkles className="w-5 h-5 text-[#0071e3] shrink-0" />
           <input
             type="text"
             placeholder="Dergide ne aramak istersiniz? Örn: '2026 kır düğünü saç stilleri ve gelinlik tüyoları'..."

@@ -218,7 +218,7 @@ export default function VendorLeadsPage() {
       )}
 
       {/* HEADER */}
-      <div className="p-8 rounded-3xl bg-white/70 dark:bg-zinc-900/70 backdrop-blur-2xl border border-zinc-200/80 dark:border-zinc-800/80 shadow-[0_8px_30px_rgb(0,0,0,0.03)] flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6">
+      <div className="p-8 rounded-3xl apple-glass shadow-[0_8px_30px_rgb(0,0,0,0.03)] flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6">
         <div className="space-y-2">
           <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-zinc-200/60 dark:bg-zinc-800/80 text-zinc-700 dark:text-zinc-300 text-[11px] font-medium border border-zinc-300/40 dark:border-zinc-700/50">
             <Inbox className="w-3.5 h-3.5 text-zinc-500" />
@@ -298,7 +298,7 @@ export default function VendorLeadsPage() {
           {filteredLeads.map((item) => (
             <div
               key={item.id}
-              className="p-6 rounded-3xl bg-white/70 dark:bg-zinc-900/70 backdrop-blur-2xl border border-zinc-200/80 dark:border-zinc-800/80 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-6 transition-all"
+              className="p-6 rounded-3xl apple-glass shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-6 transition-all"
             >
               <div className="space-y-3 max-w-2xl">
                 <div className="flex items-center gap-3">

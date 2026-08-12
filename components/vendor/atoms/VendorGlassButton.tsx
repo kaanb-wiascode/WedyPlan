@@ -27,7 +27,7 @@ export const VendorGlassButton: React.FC<VendorGlassButtonProps> = ({
   const baseStyles = 'relative inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-full text-[13px] font-semibold transition-all focus:outline-none min-h-[42px] cursor-pointer selection:bg-none';
 
   const variants = {
-    primary: 'bg-[#1D1D1F] hover:bg-black text-white shadow-md',
+    primary: 'bg-[#0071e3] hover:bg-[#0077ed] text-white shadow-sm',
     secondary: 'bg-white/60 hover:bg-white/90 backdrop-blur-xl border border-white/80 text-[#1D1D1F] shadow-sm',
     gold: 'bg-[#D4AF37]/25 hover:bg-[#D4AF37]/40 backdrop-blur-2xl border border-[#D4AF37]/50 text-[#1D1D1F] shadow-[0_8px_25px_rgba(212,175,55,0.18)]',
     danger: 'bg-rose-500/10 hover:bg-rose-500/20 text-rose-600 border border-rose-200/50',

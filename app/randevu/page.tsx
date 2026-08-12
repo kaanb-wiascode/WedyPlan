@@ -41,9 +41,9 @@ export default function AppointmentPage() {
     <div className="min-h-screen bg-[#FDFBFD] text-slate-800">
       <nav className="flex items-center justify-between px-6 py-4 bg-white border-b border-purple-100 shadow-sm">
         <Link href="/" className="text-2xl font-bold text-[#4A154B]">
-          Wedy<span className="text-[#E6007E]">Plan</span>
+          Wedy<span className="text-[#0071e3]">Plan</span>
         </Link>
-        <Link href="/arama" className="text-xs font-semibold text-slate-500 hover:text-[#E6007E]">
+        <Link href="/arama" className="text-xs font-semibold text-slate-500 hover:text-[#0071e3]">
           ← Arama Listesine Dön
         </Link>
       </nav>
@@ -94,7 +94,7 @@ export default function AppointmentPage() {
                   placeholder="Ahmet Yılmaz"
                   value={formData.fullName}
                   onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
-                  className="w-full p-3 border border-slate-200 rounded-xl text-xs focus:outline-none focus:border-[#E6007E]"
+                  className="w-full p-3 border border-slate-200 rounded-xl text-xs focus:outline-none focus:border-[#0071e3]"
                 />
               </div>
 
@@ -106,7 +106,7 @@ export default function AppointmentPage() {
                   placeholder="05XX XXX XX XX"
                   value={formData.phone}
                   onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                  className="w-full p-3 border border-slate-200 rounded-xl text-xs focus:outline-none focus:border-[#E6007E]"
+                  className="w-full p-3 border border-slate-200 rounded-xl text-xs focus:outline-none focus:border-[#0071e3]"
                 />
               </div>
 
@@ -118,7 +118,7 @@ export default function AppointmentPage() {
                     required
                     value={formData.date}
                     onChange={(e) => setFormData({ ...formData, date: e.target.value })}
-                    className="w-full p-3 border border-slate-200 rounded-xl text-xs focus:outline-none focus:border-[#E6007E]"
+                    className="w-full p-3 border border-slate-200 rounded-xl text-xs focus:outline-none focus:border-[#0071e3]"
                   />
                 </div>
 
@@ -127,7 +127,7 @@ export default function AppointmentPage() {
                   <select
                     value={formData.timeSlot}
                     onChange={(e) => setFormData({ ...formData, timeSlot: e.target.value })}
-                    className="w-full p-3 border border-slate-200 rounded-xl text-xs focus:outline-none focus:border-[#E6007E] bg-white"
+                    className="w-full p-3 border border-slate-200 rounded-xl text-xs focus:outline-none focus:border-[#0071e3] bg-white"
                   >
                     <option value="11:00">11:00</option>
                     <option value="14:00">14:00</option>
@@ -140,7 +140,7 @@ export default function AppointmentPage() {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full bg-[#E6007E] text-white text-xs font-bold py-3.5 rounded-xl hover:bg-pink-700 transition shadow disabled:opacity-50"
+                className="w-full bg-[#0071e3] text-white text-xs font-bold py-3.5 rounded-xl hover:bg-pink-700 transition shadow disabled:opacity-50"
               >
                 {loading ? 'Randevu Oluşturuluyor...' : 'Randevu Talebini Onayla'}
               </button>

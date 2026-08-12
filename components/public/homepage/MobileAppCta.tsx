@@ -9,7 +9,7 @@ export const MobileAppCta: React.FC = () => {
       <div className="bg-[#1D1D1F] text-white p-8 sm:p-14 rounded-[40px] border border-slate-800 shadow-2xl grid grid-cols-1 lg:grid-cols-12 gap-8 items-center overflow-hidden relative">
         
         {/* Soft Ambient Sheen */}
-        <div className="absolute -right-20 -bottom-20 w-96 h-96 bg-[#E6007E]/20 blur-[120px] pointer-events-none" />
+        <div className="absolute -right-20 -bottom-20 w-96 h-96 bg-[#0071e3]/20 blur-[120px] pointer-events-none" />
 
         {/* Left Content */}
         <div className="lg:col-span-7 space-y-6 z-10">
@@ -61,7 +61,7 @@ export const MobileAppCta: React.FC = () => {
           <div className="w-64 h-[380px] bg-gradient-to-b from-slate-800 to-black rounded-[40px] border-4 border-slate-700 p-4 shadow-2xl space-y-4 flex flex-col justify-between">
             <div className="w-20 h-4 bg-slate-800 rounded-full mx-auto" />
             <div className="space-y-2 text-center p-4 bg-white/5 rounded-2xl border border-white/10">
-              <span className="text-[10px] font-bold text-[#E6007E] block uppercase">Live Notification</span>
+              <span className="text-[10px] font-bold text-[#0071e3] block uppercase">Live Notification</span>
               <p className="text-[11px] text-white font-medium">15 Ağustos Düğün Akışı Başladı!</p>
             </div>
             <div className="text-center text-[10px] text-slate-500 font-mono">WedyPlan OS Mobile</div>

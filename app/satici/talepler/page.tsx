@@ -82,7 +82,7 @@ export default function TaleplerPage() {
                         req.status === 'REPLIED'
                           ? 'bg-emerald-50 text-emerald-700'
                           : req.status === 'REJECTED'
-                          ? 'bg-rose-50 text-rose-700'
+                          ? 'bg-[#0071e3]/8 text-[#0071e3]'
                           : 'bg-amber-50 text-amber-700'
                       }`}
                     >

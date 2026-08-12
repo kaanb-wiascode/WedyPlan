@@ -1,9 +1,9 @@
 export const DESIGN_TOKENS = {
     colors: {
       brand: {
-        magenta: '#E6007E',
-        magentaHover: '#C4006B',
-        magentaLight: 'rgba(230, 0, 126, 0.1)',
+        magenta: '#0071e3',
+        magentaHover: '#0077ed',
+        magentaLight: 'rgba(0, 113, 227, 0.1)',
         gold: '#D4AF37',
         goldHover: '#B8982C',
         goldLight: 'rgba(212, 175, 55, 0.12)',
@@ -12,7 +12,7 @@ export const DESIGN_TOKENS = {
         charcoal: '#1D1D1F',
         slate: '#6E6E73',
         muted: '#86868B',
-        cream: '#FAF8F5',
+        cream: '#f5f5f7',
         pureWhite: '#FFFFFF',
         pureBlack: '#000000',
       },

@@ -33,14 +33,12 @@ export default function PremiumVendorLayout({
 
   return (
     <RoleGuard allowedRole="VENDOR">
-      <div className="min-h-screen bg-[#FFFFFF] text-[#111111] flex flex-col md:flex-row font-sans selection:bg-[#7C5CFF] selection:text-white">
-        
-        {/* Sidebar */}
-        <aside className="w-full md:w-[260px] bg-[#F8F8F7] border-r border-[rgba(0,0,0,0.06)] p-6 flex flex-col justify-between shrink-0 md:sticky md:top-0 md:h-screen z-40">
+      <div className="apple-page flex min-h-screen flex-col md:flex-row">
+        <aside className="apple-sidebar z-40 flex w-full shrink-0 flex-col justify-between p-6 md:sticky md:top-0 md:h-screen md:w-[260px]">
           <div className="space-y-8">
             <Link href="/" className="block">
-              <span className="text-[22px] font-medium tracking-tight text-[#111111]">WedyPlan.</span>
-              <span className="block text-[11px] font-medium text-[#666666] tracking-wider uppercase mt-1">
+              <span className="text-[22px] font-semibold tracking-tight text-[#1d1d1f]">WedyPlan</span>
+              <span className="apple-kicker mt-1 block">
                 İş Ortağı Paneli
               </span>
             </Link>
@@ -52,17 +50,15 @@ export default function PremiumVendorLayout({
                   <Link
                     key={item.href}
                     href={item.href}
-                    className={`flex items-center gap-3 px-3 py-2.5 rounded-[12px] text-[14px] font-medium transition-colors duration-200 ${
-                      isActive
-                        ? 'bg-white text-[#111111] shadow-[0_2px_10px_rgba(0,0,0,0.04)] border border-[rgba(0,0,0,0.04)]'
-                        : 'text-[#666666] hover:bg-[rgba(0,0,0,0.04)] hover:text-[#111111]'
-                    }`}
+                    className={`apple-nav-item ${isActive ? 'apple-nav-item-active' : 'text-[#6e6e73]'}`}
                   >
+                    <span className="flex items-center gap-3">
                     <item.icon 
-                      className={`w-[18px] h-[18px] ${isActive ? 'text-[#111111]' : 'text-[#999999]'}`} 
+                      className={`h-[18px] w-[18px] ${isActive ? 'text-[#0071e3]' : 'text-[#86868b]'}`} 
                       strokeWidth={isActive ? 2 : 1.5} 
                     />
                     <span>{item.label}</span>
+                    </span>
                   </Link>
                 );
               })}
@@ -72,7 +68,7 @@ export default function PremiumVendorLayout({
           <div className="pt-6">
             <Link
               href="/"
-              className="flex items-center gap-2 text-[13px] font-medium text-[#666666] hover:text-[#111111] transition-colors py-2 px-3 rounded-[12px] hover:bg-[rgba(0,0,0,0.04)]"
+              className="apple-nav-item text-[#6e6e73]"
             >
               <ArrowLeft className="w-4 h-4" />
               Vitrini Görüntüle
@@ -81,7 +77,7 @@ export default function PremiumVendorLayout({
         </aside>
 
         {/* Main Content Area */}
-        <main className="flex-1 p-6 md:p-10 lg:p-12 overflow-y-auto bg-[#FFFFFF]">
+        <main className="flex-1 overflow-y-auto p-6 md:p-10 lg:p-12">
           <div className="max-w-[1000px] mx-auto">
             {children}
           </div>

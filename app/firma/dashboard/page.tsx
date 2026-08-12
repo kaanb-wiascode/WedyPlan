@@ -55,25 +55,25 @@ export default function VendorDashboardPage() {
     <div className="p-4 sm:p-8 space-y-8 max-w-7xl mx-auto font-sans antialiased">
       
       {/* 1. HERO BANNER & HOŞ GELDİNİZ KARTI (Frosted Glass) */}
-      <section className="relative overflow-hidden rounded-3xl bg-white/70 dark:bg-zinc-900/70 backdrop-blur-2xl border border-zinc-200/80 dark:border-zinc-800/80 p-6 sm:p-8 text-zinc-900 dark:text-zinc-100 shadow-[0_8px_30px_rgb(0,0,0,0.03)]">
+      <section className="apple-glass relative overflow-hidden rounded-[28px] p-6 text-[#1d1d1f] sm:p-8">
         <div className="absolute top-0 right-0 w-80 h-80 bg-zinc-200/30 dark:bg-zinc-800/20 rounded-full blur-3xl pointer-events-none -translate-y-1/2 translate-x-1/3" />
         
         <div className="relative z-10 flex flex-col md:flex-row md:items-center md:justify-between gap-6">
           <div className="space-y-3 max-w-xl">
-            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-zinc-200/60 dark:bg-zinc-800/80 text-zinc-700 dark:text-zinc-300 border border-zinc-300/40 dark:border-zinc-700/50 text-[11px] font-medium tracking-tight">
+            <div className="apple-chip">
               <Building2 className="w-3.5 h-3.5 text-zinc-500" />
               <span>Firma Yönetim Merkezi</span>
             </div>
-            <h1 className="text-2xl sm:text-4xl font-bold tracking-tight text-zinc-900 dark:text-white leading-tight">
+            <h1 className="text-2xl font-semibold leading-tight tracking-tight text-[#1d1d1f] sm:text-4xl">
               {vendorProfile.companyName} ✨
             </h1>
-            <p className="text-xs sm:text-sm text-zinc-500 dark:text-zinc-400 leading-relaxed font-normal">
+            <p className="text-xs font-normal leading-relaxed text-[#86868b] sm:text-sm">
               Bu ay çiftlerden yüksek talep alıyorsunuz. Bekleyen teklif isteklerini yanıtlayarak rezervasyonlarınızı tamamlayın.
             </p>
           </div>
 
           {/* İtibar & Puan Mini Kutusu */}
-          <div className="bg-zinc-50/80 dark:bg-zinc-800/50 backdrop-blur-md border border-zinc-200/60 dark:border-zinc-700/50 rounded-2xl p-5 flex items-center justify-between gap-6 shadow-xs shrink-0">
+          <div className="apple-glass flex shrink-0 items-center justify-between gap-6 rounded-2xl p-5">
             <div className="flex flex-col text-center">
               <div className="flex items-center justify-center gap-1 text-zinc-900 dark:text-white">
                 <Star className="w-5 h-5 fill-zinc-900 dark:fill-white text-zinc-900 dark:text-white" />
@@ -99,19 +99,19 @@ export default function VendorDashboardPage() {
         <div className="mt-8 pt-6 border-t border-zinc-200/60 dark:border-zinc-800/60 flex flex-wrap items-center gap-3 relative z-10">
           <Link
             href="/firma/talepler"
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 hover:bg-black dark:hover:bg-zinc-200 text-xs font-semibold shadow-xs transition-all"
+            className="apple-btn apple-btn-inline !px-4 !py-2 !text-[13px]"
           >
             <Inbox className="w-4 h-4" /> Bekleyen Talepler ({metrics.newLeadsCount})
           </Link>
           <Link
             href="/firma/sozlesmeler"
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-zinc-100 dark:bg-zinc-800 border border-zinc-200/80 dark:border-zinc-700/60 text-zinc-800 dark:text-zinc-200 text-xs font-medium hover:bg-zinc-200/80 transition-all"
+            className="apple-btn-secondary apple-btn-secondary-inline !px-4 !py-2 !text-[13px]"
           >
             <Plus className="w-4 h-4" /> Teklif Hazırla
           </Link>
           <Link
             href="/firma/ai-asistan"
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-zinc-200/60 dark:bg-zinc-800/80 border border-zinc-300/40 dark:border-zinc-700/60 text-zinc-900 dark:text-white text-xs font-semibold hover:bg-zinc-300/60 transition-all"
+            className="apple-btn-secondary apple-btn-secondary-inline !px-4 !py-2 !text-[13px]"
           >
             <Sparkles className="w-4 h-4 text-zinc-500 dark:text-zinc-400" /> WedyAI Copilot
           </Link>
@@ -122,7 +122,7 @@ export default function VendorDashboardPage() {
       <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
         
         {/* Bekleyen Talepler */}
-        <div className="bg-white/70 dark:bg-zinc-900/70 backdrop-blur-2xl border border-zinc-200/80 dark:border-zinc-800/80 rounded-3xl p-5 shadow-xs space-y-3">
+        <div className="apple-glass rounded-[28px] p-5 shadow-xs space-y-3">
           <div className="flex items-center justify-between">
             <span className="text-xs font-medium text-zinc-400">Yeni Teklif İstekleri</span>
             <div className="w-8 h-8 rounded-xl bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 flex items-center justify-center">
@@ -146,7 +146,7 @@ export default function VendorDashboardPage() {
         </div>
 
         {/* Bu Ayki Ciro / Tahsilat */}
-        <div className="bg-white/70 dark:bg-zinc-900/70 backdrop-blur-2xl border border-zinc-200/80 dark:border-zinc-800/80 rounded-3xl p-5 shadow-xs space-y-3">
+        <div className="apple-glass rounded-[28px] p-5 shadow-xs space-y-3">
           <div className="flex items-center justify-between">
             <span className="text-xs font-medium text-zinc-400">Bu Ayki Tahsilat</span>
             <div className="w-8 h-8 rounded-xl bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 flex items-center justify-center">
@@ -170,7 +170,7 @@ export default function VendorDashboardPage() {
         </div>
 
         {/* Anlaşılan Düğünler */}
-        <div className="bg-white/70 dark:bg-zinc-900/70 backdrop-blur-2xl border border-zinc-200/80 dark:border-zinc-800/80 rounded-3xl p-5 shadow-xs space-y-3">
+        <div className="apple-glass rounded-[28px] p-5 shadow-xs space-y-3">
           <div className="flex items-center justify-between">
             <span className="text-xs font-medium text-zinc-400">Rezervasyonlar</span>
             <div className="w-8 h-8 rounded-xl bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 flex items-center justify-center">
@@ -194,7 +194,7 @@ export default function VendorDashboardPage() {
         </div>
 
         {/* Vitrin Görüntülenme */}
-        <div className="bg-white/70 dark:bg-zinc-900/70 backdrop-blur-2xl border border-zinc-200/80 dark:border-zinc-800/80 rounded-3xl p-5 shadow-xs space-y-3">
+        <div className="apple-glass rounded-[28px] p-5 shadow-xs space-y-3">
           <div className="flex items-center justify-between">
             <span className="text-xs font-medium text-zinc-400">Vitrin Etkileşimi</span>
             <div className="w-8 h-8 rounded-xl bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 flex items-center justify-center">
@@ -226,7 +226,7 @@ export default function VendorDashboardPage() {
         <div className="lg:col-span-2 space-y-6">
           
           {/* Son Teklif İstekleri */}
-          <div className="bg-white/70 dark:bg-zinc-900/70 backdrop-blur-2xl border border-zinc-200/80 dark:border-zinc-800/80 rounded-3xl p-6 shadow-xs space-y-4">
+          <div className="apple-glass rounded-[28px] p-6 shadow-xs space-y-4">
             <div className="flex items-center justify-between">
               <div>
                 <h3 className="text-base font-bold text-zinc-900 dark:text-white flex items-center gap-2">
@@ -284,7 +284,7 @@ export default function VendorDashboardPage() {
           </div>
 
           {/* Yaklaşan Düğün Takvimi */}
-          <div className="bg-white/70 dark:bg-zinc-900/70 backdrop-blur-2xl border border-zinc-200/80 dark:border-zinc-800/80 rounded-3xl p-6 shadow-xs space-y-4">
+          <div className="apple-glass rounded-[28px] p-6 shadow-xs space-y-4">
             <div className="flex items-center justify-between">
               <h3 className="text-base font-bold text-zinc-900 dark:text-white flex items-center gap-2">
                 <Calendar className="w-4 h-4 text-zinc-500" /> Yaklaşan Düğün & Etkinlikler
@@ -325,7 +325,7 @@ export default function VendorDashboardPage() {
         <div className="space-y-6">
           
           {/* AI Copilot Önerisi */}
-          <div className="bg-white/70 dark:bg-zinc-900/70 backdrop-blur-2xl border border-zinc-200/80 dark:border-zinc-800/80 text-zinc-900 dark:text-white rounded-3xl p-6 shadow-xs relative overflow-hidden space-y-4">
+          <div className="apple-glass text-zinc-900 dark:text-white rounded-3xl p-6 shadow-xs relative overflow-hidden space-y-4">
             <div className="flex items-center justify-between">
               <span className="inline-flex items-center gap-1.5 text-[11px] font-bold px-2.5 py-1 rounded-full bg-zinc-200/60 dark:bg-zinc-800 text-zinc-800 dark:text-zinc-200 border border-zinc-300/40 dark:border-zinc-700">
                 <Sparkles className="w-3.5 h-3.5 text-zinc-500" /> WedyAI Copilot
@@ -339,7 +339,7 @@ export default function VendorDashboardPage() {
 
             <Link
               href="/firma/ai-asistan"
-              className="w-full py-2.5 px-4 rounded-xl bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 hover:bg-black dark:hover:bg-zinc-200 text-xs font-bold flex items-center justify-center gap-2 transition-all shadow-xs"
+              className="w-full py-2.5 px-4 rounded-full bg-[#0071e3] text-white hover:bg-[#0077ed] text-xs font-bold flex items-center justify-center gap-2 transition-all shadow-xs"
             >
               <span>Fiyatlandırma Tavsiyesini Gör</span>
               <ArrowUpRight className="w-4 h-4" />
@@ -347,7 +347,7 @@ export default function VendorDashboardPage() {
           </div>
 
           {/* Son Yorumlar & İtibar */}
-          <div className="bg-white/70 dark:bg-zinc-900/70 backdrop-blur-2xl border border-zinc-200/80 dark:border-zinc-800/80 rounded-3xl p-6 shadow-xs space-y-4">
+          <div className="apple-glass rounded-[28px] p-6 shadow-xs space-y-4">
             <div className="flex items-center justify-between">
               <h3 className="text-sm font-bold text-zinc-900 dark:text-white flex items-center gap-2">
                 <Star className="w-4 h-4 text-zinc-500" /> Son Değerlendirmeler
@@ -380,7 +380,7 @@ export default function VendorDashboardPage() {
           </div>
 
           {/* Düğün Ekip Durumu */}
-          <div className="bg-white/70 dark:bg-zinc-900/70 backdrop-blur-2xl border border-zinc-200/80 dark:border-zinc-800/80 rounded-3xl p-6 shadow-xs space-y-3">
+          <div className="apple-glass rounded-[28px] p-6 shadow-xs space-y-3">
             <div className="flex items-center justify-between">
               <span className="text-xs font-semibold text-zinc-400">Operasyon & Ekip</span>
               <span className="px-2 py-0.5 rounded-md bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-[10px] font-bold border border-emerald-500/20">

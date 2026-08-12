@@ -21,7 +21,7 @@ export const RoleSelector: React.FC<RoleSelectorProps> = ({ selectedRole, onChan
             : 'text-[#6E6E73] hover:text-[#1D1D1F]'
         }`}
       >
-        <Heart className={`w-3.5 h-3.5 ${selectedRole === 'COUPLE' ? 'fill-[#E6007E] text-[#E6007E]' : ''}`} />
+        <Heart className={`w-3.5 h-3.5 ${selectedRole === 'COUPLE' ? 'fill-[#0071e3] text-[#0071e3]' : ''}`} />
         <span>Evlenecek Çiftim</span>
       </button>
 

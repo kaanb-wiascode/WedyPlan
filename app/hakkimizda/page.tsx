@@ -8,13 +8,13 @@ import { Heart, Target, Sparkles, ShieldCheck, Users, Globe } from 'lucide-react
 
 export default function AboutUsPage() {
   return (
-    <div className="min-h-screen bg-[#FAF8F5] text-[#1D1D1F] selection:bg-[#E6007E] selection:text-white">
+    <div className="min-h-screen bg-[#f5f5f7] text-[#1D1D1F] selection:bg-[#0071e3] selection:text-white">
       <PublicNavbar />
 
-      <main className="pt-32 pb-24 max-w-7xl mx-auto px-4 sm:px-8 space-y-12">
+      <main className="pt-16 pb-24 max-w-7xl mx-auto px-4 sm:px-8 space-y-12">
         {/* Sayfa Başlığı */}
         <div className="text-center max-w-3xl mx-auto mb-16">
-          <span className="text-[#E6007E] font-bold tracking-widest text-sm uppercase mb-3 block">Biz Kimiz?</span>
+          <span className="text-[#0071e3] font-bold tracking-widest text-sm uppercase mb-3 block">Biz Kimiz?</span>
           <h1 className="text-4xl md:text-6xl font-bold tracking-tight mb-6">Aşkın ve Teknolojinin Buluştuğu Yer</h1>
           <p className="text-lg text-gray-600 font-light">
             WedyPlan olarak, geleneksel düğün planlama süreçlerini yapay zeka ve modern teknolojiyle baştan yaratıyoruz. Çiftlerin en mutlu gününü stresten uzak, mükemmel bir deneyime dönüştürüyoruz.
@@ -27,7 +27,7 @@ export default function AboutUsPage() {
           {/* Vizyon Kartı (Büyük) */}
           <GlassCard className="col-span-1 md:col-span-8 p-8 md:p-12 border-white/60 bg-gradient-to-br from-white/80 to-white/40" hoverEffect>
             <div className="p-4 bg-pink-100 rounded-2xl w-fit mb-6">
-              <Sparkles className="w-8 h-8 text-[#E6007E]" />
+              <Sparkles className="w-8 h-8 text-[#0071e3]" />
             </div>
             <h2 className="text-3xl font-bold mb-4">Vizyonumuz</h2>
             <p className="text-gray-600 leading-relaxed text-lg font-light">

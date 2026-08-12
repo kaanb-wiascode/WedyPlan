@@ -136,7 +136,7 @@ export default function NextGenVendorPortal() {
   const netKar = totalGelir - totalGider;
 
   return (
-    <div className="flex min-h-screen bg-zinc-50/60 dark:bg-zinc-950 text-zinc-900 dark:text-zinc-100 font-sans selection:bg-amber-500/30">
+    <div className="flex min-h-screen bg-[#f5f5f7] text-zinc-900 dark:text-zinc-100 font-sans selection:bg-amber-500/30">
       
       {/* Background Glows (Admin Shell ile Birebir Aynı) */}
       <div className="fixed top-0 right-0 w-[600px] h-[600px] bg-amber-500/10 rounded-full blur-[150px] pointer-events-none -z-10" />
@@ -331,12 +331,12 @@ export default function NextGenVendorPortal() {
                           <button onClick={() => handleUpdateStatus(q.id, 'ACCEPTED')} className="px-4 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer shadow-xs">
                             <Check className="w-3.5 h-3.5" /> Teklifi Kabul Et
                           </button>
-                          <button onClick={() => handleUpdateStatus(q.id, 'REJECTED')} className="px-3 py-2 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-600 border border-rose-200/60 text-xs font-semibold transition-all cursor-pointer">
+                          <button onClick={() => handleUpdateStatus(q.id, 'REJECTED')} className="px-3 py-2 rounded-xl bg-[#0071e3]/80/10 hover:bg-[#0071e3]/80/20 text-[#0071e3] border border-rose-200/60 text-xs font-semibold transition-all cursor-pointer">
                             <X className="w-3.5 h-3.5" />
                           </button>
                         </>
                       ) : (
-                        <span className={`text-xs font-semibold px-3 py-1.5 rounded-full border ${q.status === 'ACCEPTED' ? 'bg-emerald-500/10 text-emerald-600 border-emerald-200' : 'bg-rose-500/10 text-rose-600 border-rose-200'}`}>
+                        <span className={`text-xs font-semibold px-3 py-1.5 rounded-full border ${q.status === 'ACCEPTED' ? 'bg-emerald-500/10 text-emerald-600 border-emerald-200' : 'bg-[#0071e3]/80/10 text-[#0071e3] border-rose-200'}`}>
                           {q.status === 'ACCEPTED' ? 'Kabul Edildi' : 'Reddedildi'}
                         </span>
                       )}
@@ -371,9 +371,9 @@ export default function NextGenVendorPortal() {
                   <span className="text-xs text-emerald-600 dark:text-emerald-400 font-semibold block">Toplam Gelir</span>
                   <div className="text-2xl font-serif font-bold text-emerald-600 dark:text-emerald-400 mt-1">₺{totalGelir.toLocaleString('tr-TR')}</div>
                 </div>
-                <div className="p-4 rounded-2xl bg-rose-500/10 border border-rose-500/20">
-                  <span className="text-xs text-rose-600 dark:text-rose-400 font-semibold block">Toplam Masraf</span>
-                  <div className="text-2xl font-serif font-bold text-rose-600 dark:text-rose-400 mt-1">₺{totalGider.toLocaleString('tr-TR')}</div>
+                <div className="p-4 rounded-2xl bg-[#0071e3]/80/10 border border-rose-500/20">
+                  <span className="text-xs text-[#0071e3] dark:text-rose-400 font-semibold block">Toplam Masraf</span>
+                  <div className="text-2xl font-serif font-bold text-[#0071e3] dark:text-rose-400 mt-1">₺{totalGider.toLocaleString('tr-TR')}</div>
                 </div>
                 <div className="p-4 rounded-2xl bg-zinc-900 dark:bg-zinc-800 text-white border border-zinc-700">
                   <span className="text-xs text-zinc-400 font-semibold block">Net İşletme Kârı</span>

@@ -39,7 +39,7 @@ export default function ArticleDetailPage({ params }: { params: { slug: string }
   };
 
   return (
-    <div className="min-h-screen bg-[#FAF8F5] text-[#1D1D1F] selection:bg-[#E6007E] selection:text-white pb-20">
+    <div className="min-h-screen bg-[#f5f5f7] text-[#1D1D1F] selection:bg-[#0071e3] selection:text-white pb-20">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
 
       {/* Top Reading Progress Line */}
@@ -47,10 +47,10 @@ export default function ArticleDetailPage({ params }: { params: { slug: string }
 
       <PublicNavbar />
 
-      <main className="max-w-4xl mx-auto px-4 sm:px-8 pt-32 space-y-8">
+      <main className="max-w-4xl mx-auto px-4 sm:px-8 pt-16 space-y-8">
         {/* Editorial Header */}
         <div className="space-y-4 text-center max-w-3xl mx-auto">
-          <span className="inline-flex items-center gap-1.5 px-3.5 py-1 bg-white/80 text-[#E6007E] border border-pink-200 rounded-full text-[11px] font-bold">
+          <span className="inline-flex items-center gap-1.5 px-3.5 py-1 bg-white/80 text-[#0071e3] border border-pink-200 rounded-full text-[11px] font-bold">
             <Sparkles className="w-3.5 h-3.5 text-[#D4AF37]" /> {article.category}
           </span>
 

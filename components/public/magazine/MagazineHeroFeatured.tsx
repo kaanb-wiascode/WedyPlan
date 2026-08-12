@@ -30,7 +30,7 @@ export const MagazineHeroFeatured: React.FC<MagazineHeroFeaturedProps> = ({ arti
         {/* Floating Glass Editorial Content */}
         <div className="relative z-10 max-w-3xl space-y-4 bg-white/20 backdrop-blur-3xl p-6 sm:p-8 rounded-[32px] border border-white/30 text-white">
           <div className="flex items-center gap-3">
-            <span className="text-[10px] font-bold uppercase tracking-wider bg-[#E6007E] text-white px-3 py-1 rounded-full shadow-xs flex items-center gap-1">
+            <span className="text-[10px] font-bold uppercase tracking-wider bg-[#0071e3] text-white px-3 py-1 rounded-full shadow-xs flex items-center gap-1">
               <Sparkles className="w-3 h-3 text-[#D4AF37]" /> Editörün Seçimi
             </span>
             <span className="text-[11px] font-semibold text-white/80 flex items-center gap-1">
@@ -57,7 +57,7 @@ export const MagazineHeroFeatured: React.FC<MagazineHeroFeaturedProps> = ({ arti
               className="bg-white text-[#1D1D1F] hover:bg-slate-100 px-6 py-2.5 rounded-full font-bold text-[12px] transition flex items-center gap-1.5 cursor-pointer"
             >
               <span>Makaleyi Okuyun</span>
-              <ArrowRight className="w-3.5 h-3.5 text-[#E6007E]" />
+              <ArrowRight className="w-3.5 h-3.5 text-[#0071e3]" />
             </Link>
           </div>
         </div>

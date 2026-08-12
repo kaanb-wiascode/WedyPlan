@@ -16,7 +16,7 @@ export const AiRecommendedVendors: React.FC<AiRecommendedVendorsProps> = ({ reco
   return (
     <section className="max-w-7xl mx-auto px-4 sm:px-8 py-4 space-y-4">
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2 text-[#E6007E] font-bold text-[13px]">
+        <div className="flex items-center gap-2 text-[#0071e3] font-bold text-[13px]">
           <Sparkles className="w-4 h-4 text-[#D4AF37]" />
           <span>WedyAI Öne Çıkarılan Tavsiyeler</span>
         </div>
@@ -36,12 +36,12 @@ export const AiRecommendedVendors: React.FC<AiRecommendedVendorsProps> = ({ reco
               className="w-20 h-20 rounded-[20px] object-cover shrink-0 border border-white"
             />
             <div className="space-y-1 overflow-hidden flex-1">
-              <span className="text-[10px] font-bold text-[#E6007E] bg-pink-50 px-2 py-0.5 rounded-md inline-block">
+              <span className="text-[10px] font-bold text-[#0071e3] bg-pink-50 px-2 py-0.5 rounded-md inline-block">
                 %{vendor.aiMatchScore} Uyumlu
               </span>
               <h4 className="font-serif font-bold text-[14px] text-[#1D1D1F] truncate">{vendor.name}</h4>
               <div className="flex items-center gap-2 text-[11px] text-[#6E6E73]">
-                <span className="flex items-center gap-0.5"><MapPin className="w-3 h-3 text-[#E6007E]" /> {vendor.district}</span>
+                <span className="flex items-center gap-0.5"><MapPin className="w-3 h-3 text-[#0071e3]" /> {vendor.district}</span>
                 <span>•</span>
                 <span className="flex items-center gap-0.5 text-amber-800 font-bold"><Star className="w-3 h-3 fill-amber-500 text-amber-500" /> {vendor.rating}</span>
               </div>

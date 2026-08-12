@@ -51,14 +51,14 @@ export default function RoleGuard({ children, allowedRole }: RoleGuardProps) {
 
   if (status !== "ok") {
     return (
-      <div className="min-h-screen bg-[#F8F8F7] flex flex-col items-center justify-center p-6 text-center">
-        <div className="w-16 h-16 bg-[#111111] text-white rounded-full flex items-center justify-center mb-4 shadow-md">
-          <Lock className="w-8 h-8" />
+      <div className="apple-page flex min-h-screen flex-col items-center justify-center p-6 text-center">
+        <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-[#0071e3] text-white">
+          <Lock className="h-7 w-7" />
         </div>
-        <h2 className="text-[24px] font-medium text-[#111111] tracking-tight mb-2">
+        <h2 className="mb-2 text-[24px] font-semibold tracking-tight text-[#1d1d1f]">
           {status === "denied" ? "Erişim Sınırlandırıldı" : "Oturum Doğrulanıyor"}
         </h2>
-        <p className="text-[14px] text-[#666666] max-w-[400px]">
+        <p className="max-w-[400px] text-[14px] text-[#86868b]">
           {status === "denied"
             ? "Bu sayfa için yetkiniz yok. Yönlendiriliyorsunuz..."
             : "Güvenli oturumunuz kontrol ediliyor..."}

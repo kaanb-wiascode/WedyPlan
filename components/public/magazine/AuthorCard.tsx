@@ -15,7 +15,7 @@ export const AuthorCard: React.FC<AuthorCardProps> = ({ author }) => {
         <img src={author.avatarUrl} alt={author.name} className="w-14 h-14 rounded-full object-cover border-2 border-white shadow-xs" />
         <div>
           <h4 className="font-serif font-bold text-[18px] text-[#1D1D1F]">{author.name}</h4>
-          <span className="text-[11px] font-semibold text-[#E6007E] block">{author.title}</span>
+          <span className="text-[11px] font-semibold text-[#0071e3] block">{author.title}</span>
         </div>
       </div>
 

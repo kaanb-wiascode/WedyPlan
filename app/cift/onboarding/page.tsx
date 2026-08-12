@@ -71,7 +71,7 @@ export default function PremiumCoupleOnboardingPage() {
         
         {/* STEP 1: Names & Date */}
         {step === 1 && (
-          <div className="p-8 sm:p-10 rounded-3xl bg-white/70 dark:bg-zinc-900/70 backdrop-blur-2xl border border-zinc-200/80 dark:border-zinc-800/80 shadow-[0_8px_30px_rgb(0,0,0,0.03)] space-y-8">
+          <div className="p-8 sm:p-10 rounded-3xl apple-glass shadow-[0_8px_30px_rgb(0,0,0,0.03)] space-y-8">
             <div>
               <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-zinc-200/60 dark:bg-zinc-800/80 rounded-full border border-zinc-300/40 dark:border-zinc-700/50 text-[11px] font-medium text-zinc-700 dark:text-zinc-300 mb-4">
                 <Heart className="w-3.5 h-3.5 text-zinc-500 fill-zinc-500" /> Adım 1 / 3
@@ -136,7 +136,7 @@ export default function PremiumCoupleOnboardingPage() {
 
         {/* STEP 2: Budget & Capacity */}
         {step === 2 && (
-          <div className="p-8 sm:p-10 rounded-3xl bg-white/70 dark:bg-zinc-900/70 backdrop-blur-2xl border border-zinc-200/80 dark:border-zinc-800/80 shadow-[0_8px_30px_rgb(0,0,0,0.03)] space-y-8 animate-in fade-in duration-300">
+          <div className="p-8 sm:p-10 rounded-3xl apple-glass shadow-[0_8px_30px_rgb(0,0,0,0.03)] space-y-8 animate-in fade-in duration-300">
             <div>
               <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-zinc-200/60 dark:bg-zinc-800/80 rounded-full border border-zinc-300/40 dark:border-zinc-700/50 text-[11px] font-medium text-zinc-700 dark:text-zinc-300 mb-4">
                 <Wallet className="w-3.5 h-3.5 text-zinc-500" /> Adım 2 / 3
@@ -193,7 +193,7 @@ export default function PremiumCoupleOnboardingPage() {
 
         {/* STEP 3: Vibe & AI Allocation */}
         {step === 3 && (
-          <div className="p-8 sm:p-10 rounded-3xl bg-white/70 dark:bg-zinc-900/70 backdrop-blur-2xl border border-zinc-200/80 dark:border-zinc-800/80 shadow-[0_8px_30px_rgb(0,0,0,0.03)] space-y-8 animate-in fade-in duration-300">
+          <div className="p-8 sm:p-10 rounded-3xl apple-glass shadow-[0_8px_30px_rgb(0,0,0,0.03)] space-y-8 animate-in fade-in duration-300">
             <div>
               <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-zinc-200/60 dark:bg-zinc-800/80 rounded-full border border-zinc-300/40 dark:border-zinc-700/50 text-[11px] font-medium text-zinc-700 dark:text-zinc-300 mb-4">
                 <Sparkles className="w-3.5 h-3.5 text-zinc-500" /> Adım 3 / 3

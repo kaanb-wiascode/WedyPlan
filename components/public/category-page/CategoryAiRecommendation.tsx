@@ -9,7 +9,7 @@ export const CategoryAiRecommendation: React.FC = () => {
     <section className="py-12 px-6 max-w-7xl mx-auto">
       <div className="bg-gradient-to-r from-pink-500/10 via-purple-500/5 to-amber-500/10 backdrop-blur-3xl border border-white/80 p-8 sm:p-12 rounded-[40px] shadow-sm flex flex-col md:flex-row items-center justify-between gap-6">
         <div className="space-y-3 max-w-2xl">
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-white/80 text-[#E6007E] border border-pink-200 rounded-full text-[11px] font-bold">
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-white/80 text-[#0071e3] border border-pink-200 rounded-full text-[11px] font-bold">
             <Sparkles className="w-3.5 h-3.5 text-[#D4AF37]" /> Yapay Zeka Destekli Eşleştirme
           </div>
           <h2 className="font-serif font-bold text-[28px] sm:text-[32px] text-[#1D1D1F]">

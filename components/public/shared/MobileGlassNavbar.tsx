@@ -21,11 +21,11 @@ export const MobileGlassNavbar = () => {
       {/* Üst Süzülen Cam Bar (Pill Header) */}
       <div className="bg-white/70 backdrop-blur-xl border border-white/80 p-3 rounded-full shadow-lg flex items-center justify-between px-5">
         <Link href="/" className="font-serif font-bold text-xl text-[#1D1D1F]">
-          wedy<span className="text-[#E6007E]">plan</span>.
+          wedy<span className="text-[#0071e3]">plan</span>.
         </Link>
 
         <div className="flex items-center gap-2">
-          <Link href="/favoriler" className="p-2 text-gray-700 hover:text-[#E6007E]">
+          <Link href="/favoriler" className="p-2 text-gray-700 hover:text-[#0071e3]">
             <Heart className="w-5 h-5" />
           </Link>
           <button
@@ -49,9 +49,9 @@ export const MobileGlassNavbar = () => {
           >
             <div className="space-y-6">
               <div className="flex items-center gap-3 p-3 bg-gradient-to-r from-pink-50 to-purple-50 rounded-2xl border border-pink-100">
-                <Sparkles className="w-6 h-6 text-[#E6007E]" />
+                <Sparkles className="w-6 h-6 text-[#0071e3]" />
                 <div>
-                  <p className="text-xs font-bold text-[#E6007E] uppercase">Yapay Zeka Asistanı</p>
+                  <p className="text-xs font-bold text-[#0071e3] uppercase">Yapay Zeka Asistanı</p>
                   <p className="text-sm font-semibold text-gray-800">Hayalindeki Düğünü Planla</p>
                 </div>
               </div>
@@ -87,7 +87,7 @@ export const MobileGlassNavbar = () => {
                 <Link
                   href="/hizli-teklif"
                   onClick={() => setIsOpen(false)}
-                  className="w-full py-3.5 bg-[#E6007E] text-white font-bold text-center text-sm rounded-2xl shadow-lg hover:bg-[#c5006b] transition-all"
+                  className="w-full py-3.5 bg-[#0071e3] text-white font-bold text-center text-sm rounded-2xl shadow-lg hover:bg-[#0077ed] transition-all"
                 >
                   Ücretsiz Teklif Al
                 </Link>

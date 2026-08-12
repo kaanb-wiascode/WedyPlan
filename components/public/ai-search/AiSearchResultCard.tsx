@@ -29,7 +29,7 @@ export const AiSearchResultCard: React.FC<AiSearchResultCardProps> = ({ vendor }
           />
 
           <div className="absolute top-4 left-4 flex items-center gap-2">
-            <span className="text-[10px] font-bold bg-[#E6007E] text-white px-3 py-1 rounded-full shadow-xs flex items-center gap-1">
+            <span className="text-[10px] font-bold bg-[#0071e3] text-white px-3 py-1 rounded-full shadow-xs flex items-center gap-1">
               <Sparkles className="w-3 h-3 text-[#D4AF37]" /> %{vendor.matchScore} Uyum
             </span>
             {vendor.isVerified && (
@@ -43,7 +43,7 @@ export const AiSearchResultCard: React.FC<AiSearchResultCardProps> = ({ vendor }
             onClick={() => setIsFavorite(!isFavorite)}
             className="absolute top-4 right-4 p-2.5 bg-white/80 backdrop-blur-md rounded-full border border-white text-[#1D1D1F] transition hover:scale-110 cursor-pointer shadow-xs"
           >
-            <Heart className={`w-4 h-4 ${isFavorite ? 'fill-[#E6007E] text-[#E6007E]' : ''}`} />
+            <Heart className={`w-4 h-4 ${isFavorite ? 'fill-[#0071e3] text-[#0071e3]' : ''}`} />
           </button>
 
           <div className="absolute bottom-4 right-4 bg-white/90 backdrop-blur-md px-3 py-1 rounded-full text-[11px] font-bold text-[#1D1D1F] border border-white flex items-center gap-1">
@@ -61,13 +61,13 @@ export const AiSearchResultCard: React.FC<AiSearchResultCardProps> = ({ vendor }
           </div>
 
           <Link href={`/firmalar/${vendor.id}`}>
-            <h3 className="font-serif font-bold text-[20px] text-[#1D1D1F] group-hover:text-[#E6007E] transition-colors line-clamp-1">
+            <h3 className="font-serif font-bold text-[20px] text-[#1D1D1F] group-hover:text-[#0071e3] transition-colors line-clamp-1">
               {vendor.name}
             </h3>
           </Link>
 
           <div className="flex items-center gap-1.5 text-[12px] text-[#6E6E73]">
-            <MapPin className="w-3.5 h-3.5 text-[#E6007E]" />
+            <MapPin className="w-3.5 h-3.5 text-[#0071e3]" />
             <span>{vendor.district}, {vendor.city}</span>
           </div>
 

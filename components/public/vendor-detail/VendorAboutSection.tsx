@@ -14,7 +14,7 @@ export const VendorAboutSection: React.FC<VendorAboutSectionProps> = ({ story, s
     <section className="space-y-6">
       {/* Bölüm Başlığı */}
       <div className="flex items-center gap-2 px-2">
-        <Sparkles className="w-6 h-6 text-[#E6007E]" />
+        <Sparkles className="w-6 h-6 text-[#0071e3]" />
         <h2 className="text-2xl font-bold text-gray-900 tracking-tight">Firma Hakkında</h2>
       </div>
 
@@ -24,8 +24,8 @@ export const VendorAboutSection: React.FC<VendorAboutSectionProps> = ({ story, s
         {/* Sol Büyük Kart: Hikaye (8 Kolon Kaplar) */}
         <GlassCard className="col-span-1 md:col-span-8 p-6 md:p-8" hoverEffect>
           <div className="flex items-center gap-3 mb-5">
-            <div className="p-3 bg-[#E6007E]/10 rounded-xl">
-              <BookOpen className="w-5 h-5 text-[#E6007E]" />
+            <div className="p-3 bg-[#0071e3]/10 rounded-xl">
+              <BookOpen className="w-5 h-5 text-[#0071e3]" />
             </div>
             <h3 className="text-lg font-bold text-gray-900">Hikayemiz & Hizmet Anlayışımız</h3>
           </div>
@@ -46,7 +46,7 @@ export const VendorAboutSection: React.FC<VendorAboutSectionProps> = ({ story, s
             {/* İlk 4 özelliği burada listeliyoruz */}
             {specialties.slice(0, 4).map((spec, idx) => (
               <div key={idx} className="flex items-start gap-3">
-                <CheckCircle2 className="w-5 h-5 text-[#E6007E] shrink-0 mt-0.5" />
+                <CheckCircle2 className="w-5 h-5 text-[#0071e3] shrink-0 mt-0.5" />
                 <span className="text-[14px] text-gray-800 font-medium leading-snug">{spec}</span>
               </div>
             ))}

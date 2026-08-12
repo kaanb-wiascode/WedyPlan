@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import CoupleSidebar from '@/components/couple/layout/CoupleSidebar'; // veya '@/components/couple/CoupleSidebar'
+import CoupleSidebar from '@/components/couple/layout/CoupleSidebar';
 
 export default function CouplePortalLayout({
   children,
@@ -9,15 +9,10 @@ export default function CouplePortalLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="min-h-screen bg-zinc-50/60 dark:bg-zinc-950 text-zinc-900 dark:text-zinc-100 flex font-sans">
-      {/* Şık Glass Sidebar */}
+    <div className="apple-page flex min-h-screen">
       <CoupleSidebar />
-
-      {/* İçerik Alanı */}
-      <div className="flex-1 flex flex-col min-w-0">
-        <main className="flex-1 relative z-10">
-          {children}
-        </main>
+      <div className="flex min-w-0 flex-1 flex-col">
+        <main className="relative z-10 flex-1">{children}</main>
       </div>
     </div>
   );

@@ -75,10 +75,10 @@ export default function ModaKatalogPage() {
     <PublicPageLayout>
       {/* Sayfa Başlığı */}
       <div className="max-w-7xl mx-auto px-4 sm:px-8 pt-8 pb-10">
-        <h1 className="text-4xl md:text-5xl font-bold text-gray-900 tracking-tight mb-4 text-center">
-          Düğün Modası & Gelinlik Koleksiyonları
+        <h1 className="mb-4 text-center text-4xl font-semibold tracking-tight text-[#1d1d1f] md:text-5xl">
+          Düğün modası ve gelinlik koleksiyonları
         </h1>
-        <p className="text-lg text-gray-600 font-light text-center max-w-2xl mx-auto">
+        <p className="mx-auto max-w-2xl text-center text-[17px] text-[#86868b]">
           Yeni sezon gelinlik modellerini, damatlıkları ve özel tasarım modaevlerini tek bir platformda keşfedin ve randevu alın.
         </p>
       </div>
@@ -147,7 +147,7 @@ export default function ModaKatalogPage() {
                         key={opt.id}
                         onClick={() => { handleFilterChange({ sortBy: opt.id }); setIsSortOpen(false); }}
                         className={`w-full text-left px-4 py-3 text-[13px] font-medium transition-colors ${
-                          filters.sortBy === opt.id ? 'bg-[#E6007E]/5 text-[#E6007E] font-bold' : 'text-gray-700 hover:bg-gray-50'
+                          filters.sortBy === opt.id ? 'bg-[#0071e3]/8 text-[#0071e3] font-semibold' : 'text-[#1d1d1f] hover:bg-black/4'
                         }`}
                       >
                         {opt.label}
@@ -193,15 +193,15 @@ export default function ModaKatalogPage() {
                         onClick={() => toggleSave(product.id)}
                         className="absolute top-3 right-3 p-2.5 bg-white/80 backdrop-blur-md rounded-full text-gray-900 shadow-sm hover:scale-110 transition-all"
                       >
-                        <Heart className={`w-4 h-4 ${isSaved ? 'fill-[#E6007E] text-[#E6007E]' : ''}`} />
+                        <Heart className={`w-4 h-4 ${isSaved ? 'fill-[#0071e3] text-[#0071e3]' : ''}`} />
                       </button>
                       <span className="absolute bottom-3 left-3 bg-black/60 backdrop-blur-md text-white px-3 py-1 rounded-full text-[11px] font-medium">
                         {product.category}
                       </span>
                     </div>
 
-                    <p className="text-[11px] font-bold text-[#E6007E] uppercase tracking-wider mb-1">{product.designer}</p>
-                    <h3 className="text-lg font-bold text-gray-900 mb-2 group-hover:text-[#E6007E] transition-colors">{product.title}</h3>
+                    <p className="mb-1 text-[11px] font-medium uppercase tracking-wider text-[#0071e3]">{product.designer}</p>
+                    <h3 className="mb-2 text-lg font-semibold tracking-tight text-[#1d1d1f]">{product.title}</h3>
                   </div>
 
                   <div className="flex items-center justify-between pt-4 border-t border-gray-100 mt-4">

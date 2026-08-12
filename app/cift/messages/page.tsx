@@ -101,7 +101,7 @@ export default function MessagesPage() {
       )}
 
       {/* HEADER */}
-      <div className="p-8 rounded-3xl bg-white/70 dark:bg-zinc-900/70 backdrop-blur-2xl border border-zinc-200/80 dark:border-zinc-800/80 shadow-[0_8px_30px_rgb(0,0,0,0.03)] shrink-0 space-y-2">
+      <div className="p-8 rounded-3xl apple-glass shadow-[0_8px_30px_rgb(0,0,0,0.03)] shrink-0 space-y-2">
         <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-zinc-200/60 dark:bg-zinc-800/80 text-zinc-700 dark:text-zinc-300 text-[11px] font-medium border border-zinc-300/40 dark:border-zinc-700/50">
           <MessageSquare className="w-3.5 h-3.5 text-zinc-500" />
           <span>İletişim & Teklifler</span>
@@ -115,7 +115,7 @@ export default function MessagesPage() {
       </div>
 
       {/* MAIN CHAT INTERFACE (Apple Frosted Glass) */}
-      <div className="bg-white/70 dark:bg-zinc-900/70 backdrop-blur-2xl border border-zinc-200/80 dark:border-zinc-800/80 rounded-3xl overflow-hidden shadow-xs flex-1 flex flex-col lg:flex-row min-h-0">
+      <div className="apple-glass rounded-[28px] overflow-hidden shadow-xs flex-1 flex flex-col lg:flex-row min-h-0">
         
         {/* SOL KOLON: SOHBET LİSTESİ */}
         <div className="w-full lg:w-[320px] border-r border-zinc-200/80 dark:border-zinc-800/80 flex flex-col shrink-0 bg-zinc-50/40 dark:bg-zinc-950/20">

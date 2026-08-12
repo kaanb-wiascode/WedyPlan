@@ -43,7 +43,7 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({
         </div>
         <button
           onClick={onResetFilters}
-          className="text-[11px] font-bold text-[#E6007E] hover:text-[#c5006b] flex items-center gap-1.5 uppercase tracking-wider transition-colors bg-[#E6007E]/5 px-3 py-1.5 rounded-full"
+          className="text-[11px] font-bold text-[#0071e3] hover:text-[#0077ed] flex items-center gap-1.5 uppercase tracking-wider transition-colors bg-[#0071e3]/5 px-3 py-1.5 rounded-full"
         >
           <RotateCcw className="w-3.5 h-3.5" /> Temizle
         </button>
@@ -133,7 +133,7 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({
                 // Şimdilik görsel amaçlı eklenmiştir.
                 className="w-full flex items-center gap-3 p-3 rounded-2xl hover:bg-gray-100 transition-all text-left group"
               >
-                <div className="w-4 h-4 rounded-full border border-gray-300 group-hover:border-[#E6007E] transition-colors" />
+                <div className="w-4 h-4 rounded-full border border-gray-300 group-hover:border-[#0071e3] transition-colors" />
                 <span className="text-[13px] font-medium text-gray-700">{price.label}</span>
               </button>
             ))}

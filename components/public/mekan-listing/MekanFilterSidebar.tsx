@@ -61,12 +61,12 @@ export const MekanFilterSidebar: React.FC<MekanFilterSidebarProps> = ({
     <div className="p-6 bg-white border border-neutral-200/80 rounded-[32px] shadow-sm w-full">
       <div className="flex items-center justify-between mb-6 pb-4 border-b border-neutral-100">
         <div className="flex items-center gap-2 text-neutral-900">
-          <SlidersHorizontal className="w-5 h-5 text-rose-600" />
+          <SlidersHorizontal className="w-5 h-5 text-[#0071e3]" />
           <h3 className="font-serif font-bold text-lg tracking-tight">Mekan Filtreleri</h3>
         </div>
         <button
           onClick={onResetFilters}
-          className="text-[11px] font-bold text-neutral-500 hover:text-rose-600 flex items-center gap-1 uppercase tracking-wider transition-colors"
+          className="text-[11px] font-bold text-neutral-500 hover:text-[#0071e3] flex items-center gap-1 uppercase tracking-wider transition-colors"
         >
           <RotateCcw className="w-3.5 h-3.5" /> Temizle
         </button>
@@ -108,13 +108,13 @@ export const MekanFilterSidebar: React.FC<MekanFilterSidebarProps> = ({
                   key={cap.id}
                   onClick={() => onChangeFilter({ capacity: cap.id })}
                   className={`w-full flex items-center gap-3 p-3 rounded-2xl transition-all text-left group ${
-                    isActive ? 'bg-rose-50 text-rose-700' : 'hover:bg-neutral-50 text-neutral-600'
+                    isActive ? 'bg-[#0071e3]/8 text-[#0071e3]' : 'hover:bg-neutral-50 text-neutral-600'
                   }`}
                 >
                   <div className={`w-4 h-4 rounded-full border flex items-center justify-center transition-colors ${
                     isActive ? 'border-rose-600' : 'border-neutral-300 group-hover:border-rose-400'
                   }`}>
-                    {isActive && <div className="w-2 h-2 bg-rose-600 rounded-full" />}
+                    {isActive && <div className="w-2 h-2 bg-[#0071e3] rounded-full" />}
                   </div>
                   <span className="text-[13px] font-medium">{cap.label}</span>
                 </button>

@@ -244,7 +244,7 @@ export default function AdminConsolePage() {
   };
 
   return (
-    <div className="flex min-h-screen bg-zinc-50/60 dark:bg-zinc-950 text-zinc-900 dark:text-zinc-100 font-sans">
+    <div className="flex min-h-screen bg-[#f5f5f7] text-zinc-900 dark:text-zinc-100 font-sans">
       <AdminSidebar activeTab={activeTab} setActiveTab={setActiveTab} />
 
       <main className="flex-1 p-6 sm:p-8 lg:p-10 space-y-8 overflow-y-auto">
@@ -270,8 +270,8 @@ export default function AdminConsolePage() {
               </div>
 
               <div className="flex items-center gap-3">
-                <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-rose-500/10 border border-rose-200/60 text-rose-600 text-xs font-semibold">
-                  <span className="w-2 h-2 rounded-full bg-rose-500 animate-ping" />
+                <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#0071e3]/80/10 border border-rose-200/60 text-[#0071e3] text-xs font-semibold">
+                  <span className="w-2 h-2 rounded-full bg-[#0071e3]/80 animate-ping" />
                   <span>{liveVisitors} Anlık İzleyici</span>
                 </div>
                 <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-200/60 text-emerald-600 text-xs font-semibold">
@@ -430,7 +430,7 @@ export default function AdminConsolePage() {
                       <h4 className="font-bold text-sm">{v.name}</h4>
                       <p className="text-xs text-zinc-500">Kategori: {v.category} • Şehir: {v.city}</p>
                     </div>
-                    <button onClick={() => toggleVendorStatus(v.id, v.is_verified)} className={`text-xs font-bold px-3 py-1 rounded-full border cursor-pointer ${v.is_verified ? 'bg-emerald-500/10 text-emerald-600 border-emerald-200' : 'bg-rose-500/10 text-rose-600 border-rose-200'}`}>
+                    <button onClick={() => toggleVendorStatus(v.id, v.is_verified)} className={`text-xs font-bold px-3 py-1 rounded-full border cursor-pointer ${v.is_verified ? 'bg-emerald-500/10 text-emerald-600 border-emerald-200' : 'bg-[#0071e3]/80/10 text-[#0071e3] border-rose-200'}`}>
                       {v.is_verified ? 'Onaylı' : 'Onay Ver'}
                     </button>
                   </div>
@@ -487,7 +487,7 @@ export default function AdminConsolePage() {
                 <h3 className="font-serif font-bold text-base">Acil Ödeme Blokaj Şalteri</h3>
                 <div className="flex items-center justify-between">
                   <span className="text-xs text-zinc-500">Şüpheli işlemlerde tüm hakedişleri durdur</span>
-                  <button onClick={() => setPayoutHoldStatus(!payoutHoldStatus)} className={`px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${payoutHoldStatus ? 'bg-rose-600 text-white' : 'bg-zinc-100 text-zinc-700 dark:bg-zinc-800 dark:text-zinc-300'}`}>
+                  <button onClick={() => setPayoutHoldStatus(!payoutHoldStatus)} className={`px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${payoutHoldStatus ? 'bg-[#0071e3] text-white' : 'bg-zinc-100 text-zinc-700 dark:bg-zinc-800 dark:text-zinc-300'}`}>
                     {payoutHoldStatus ? 'BLOKE EDİLDİ' : 'NORMAL AKIŞ'}
                   </button>
                 </div>
@@ -537,7 +537,7 @@ export default function AdminConsolePage() {
                     <p className="text-xs text-zinc-500 mt-1">Sebep: {d.reason} • Tutar: <span className="font-bold">{d.amount}</span></p>
                   </div>
                   <div className="flex gap-2">
-                    <button onClick={() => alert(`${d.id} tutarı çift hesabına iade edildi.`)} className="px-3 py-1.5 bg-rose-500/10 text-rose-600 border border-rose-200 rounded-xl text-xs font-bold cursor-pointer">Çifte İade Et</button>
+                    <button onClick={() => alert(`${d.id} tutarı çift hesabına iade edildi.`)} className="px-3 py-1.5 bg-[#0071e3]/80/10 text-[#0071e3] border border-rose-200 rounded-xl text-xs font-bold cursor-pointer">Çifte İade Et</button>
                     <button onClick={() => alert(`${d.id} tutarı tedarikçiye aktarıldı.`)} className="px-3 py-1.5 bg-emerald-500/10 text-emerald-600 border border-emerald-200 rounded-xl text-xs font-bold cursor-pointer">Firmaya Aktar</button>
                   </div>
                 </div>

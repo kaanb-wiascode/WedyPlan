@@ -95,7 +95,7 @@ export function DashboardHeader({ names, location }: DashboardHeaderProps = {}) 
   const daysLeft = calculateDaysLeft(wDate);
 
   return (
-    <div className="p-6 sm:p-8 rounded-3xl bg-white/70 dark:bg-zinc-900/70 backdrop-blur-2xl border border-zinc-200/80 dark:border-zinc-800/80 shadow-[0_8px_30px_rgb(0,0,0,0.03)] text-zinc-900 dark:text-zinc-100 relative overflow-hidden flex flex-col md:flex-row items-start md:items-center justify-between gap-6 transition-all">
+    <div className="p-6 sm:p-8 rounded-3xl apple-glass shadow-[0_8px_30px_rgb(0,0,0,0.03)] text-zinc-900 dark:text-zinc-100 relative overflow-hidden flex flex-col md:flex-row items-start md:items-center justify-between gap-6 transition-all">
       
       {/* Hafif Ortam Işığı Efekti */}
       <div className="absolute top-0 left-0 w-72 h-72 bg-zinc-200/30 dark:bg-zinc-800/20 rounded-full blur-3xl pointer-events-none -translate-x-1/2 -translate-y-1/2" />

@@ -14,7 +14,7 @@ export const FeaturedVendors: React.FC = () => {
           <span className="text-[11px] font-bold text-[#D4AF37] uppercase tracking-widest block mb-1">Onaylı Partnerler</span>
           <h2 className="font-serif font-semibold text-[32px] text-[#1D1D1F]">Öne Çıkan Düğün Mekanları</h2>
         </div>
-        <Link href="/firmalar" className="text-[13px] font-bold text-[#1D1D1F] hover:text-[#E6007E] transition flex items-center gap-1">
+        <Link href="/firmalar" className="text-[13px] font-bold text-[#1D1D1F] hover:text-[#0071e3] transition flex items-center gap-1">
           Tümünü Gör <ArrowRight className="w-4 h-4" />
         </Link>
       </div>
@@ -34,7 +34,7 @@ export const FeaturedVendors: React.FC = () => {
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
                 />
                 <div className="absolute top-4 left-4 flex items-center gap-2">
-                  <span className="text-[10px] font-bold bg-[#E6007E] text-white px-3 py-1 rounded-full shadow-xs flex items-center gap-1">
+                  <span className="text-[10px] font-bold bg-[#0071e3] text-white px-3 py-1 rounded-full shadow-xs flex items-center gap-1">
                     <Sparkles className="w-3 h-3 text-[#D4AF37]" /> %{vendor.aiMatchScore} Uyum
                   </span>
                 </div>
@@ -45,11 +45,11 @@ export const FeaturedVendors: React.FC = () => {
 
               <div className="p-6 space-y-3">
                 <span className="text-[10px] font-mono font-bold text-[#86868B] uppercase">{vendor.category}</span>
-                <h3 className="font-serif font-bold text-[20px] text-[#1D1D1F] group-hover:text-[#E6007E] transition-colors">
+                <h3 className="font-serif font-bold text-[20px] text-[#1D1D1F] group-hover:text-[#0071e3] transition-colors">
                   {vendor.name}
                 </h3>
                 <div className="flex items-center gap-2 text-[12px] text-[#6E6E73]">
-                  <MapPin className="w-3.5 h-3.5 text-[#E6007E]" />
+                  <MapPin className="w-3.5 h-3.5 text-[#0071e3]" />
                   <span>{vendor.district}, {vendor.city}</span>
                 </div>
               </div>

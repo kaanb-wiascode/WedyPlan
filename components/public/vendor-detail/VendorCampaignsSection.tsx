@@ -24,17 +24,17 @@ export const VendorCampaignsSection: React.FC<VendorCampaignsSectionProps> = ({ 
         <GlassCard 
           key={campaign.id}
           hoverEffect
-          className="p-1 border-[#E6007E]/20 bg-gradient-to-r from-[#E6007E]/10 to-purple-500/10"
+          className="p-1 border-[#0071e3]/20 bg-gradient-to-r from-[#0071e3]/10 to-purple-500/10"
         >
           <div className="bg-white/60 backdrop-blur-sm rounded-[14px] p-5 md:p-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
             
             <div className="flex items-start gap-4">
-              <div className="p-3 bg-gradient-to-br from-[#E6007E] to-purple-600 rounded-2xl shrink-0 shadow-md">
+              <div className="p-3 bg-gradient-to-br from-[#0071e3] to-purple-600 rounded-2xl shrink-0 shadow-md">
                 <Gift className="w-6 h-6 text-white" />
               </div>
               <div>
                 {campaign.badge && (
-                  <span className="inline-block px-2.5 py-1 bg-[#E6007E]/10 text-[#E6007E] text-[10px] font-bold uppercase tracking-wider rounded-md mb-2">
+                  <span className="inline-block px-2.5 py-1 bg-[#0071e3]/10 text-[#0071e3] text-[10px] font-bold uppercase tracking-wider rounded-md mb-2">
                     {campaign.badge}
                   </span>
                 )}

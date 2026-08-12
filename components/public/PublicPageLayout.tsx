@@ -10,16 +10,9 @@ interface PublicPageLayoutProps {
 
 export default function PublicPageLayout({ children }: PublicPageLayoutProps) {
   return (
-    <div className="min-h-screen flex flex-col bg-[#FDFBF7] text-neutral-900 font-sans antialiased">
-      {/* Üst Navigasyon */}
+    <div className="apple-page flex min-h-screen flex-col">
       <PublicNavbar mode="public" />
-
-      {/* Sayfa İçeriği */}
-      <main className="flex-1 pt-24 md:pt-28">
-        {children}
-      </main>
-
-      {/* Koyu Temiz Footer */}
+      <main className="flex-1">{children}</main>
       <PublicFooter />
     </div>
   );

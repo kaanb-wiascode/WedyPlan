@@ -29,7 +29,7 @@ export const PortalLayoutEngine: React.FC<PortalLayoutEngineProps> = ({
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
 
   return (
-    <div className="min-h-screen bg-[#FAF8F5] dark:bg-[#0D0D0E] text-[#1D1D1F] dark:text-zinc-100 flex flex-col lg:flex-row relative">
+    <div className="min-h-screen bg-[#f5f5f7] dark:bg-[#0D0D0E] text-[#1D1D1F] dark:text-zinc-100 flex flex-col lg:flex-row relative">
       {/* Universal Sidebar */}
       <LayoutSidebar
         portalType={portalType}

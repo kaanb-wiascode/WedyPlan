@@ -20,14 +20,14 @@ export const HeroSection: React.FC = () => {
         transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
         className="space-y-6 max-w-4xl mx-auto"
       >
-        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/60 backdrop-blur-xl border border-white text-[12px] font-bold text-[#E6007E] shadow-xs">
+        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/60 backdrop-blur-xl border border-white text-[12px] font-bold text-[#0071e3] shadow-xs">
           <Sparkles className="w-4 h-4 text-[#D4AF37]" />
           <span>WedyAI Supported Wedding Commerce Operating System</span>
         </div>
 
         <h1 className="text-[40px] sm:text-[64px] lg:text-[76px] font-serif font-normal leading-[1.08] tracking-tight text-[#1D1D1F]">
           Hayalinizdeki Düğünü <br className="hidden sm:block" />
-          <span className="font-serif italic font-semibold text-transparent bg-clip-text bg-gradient-to-r from-[#1D1D1F] via-[#E6007E] to-[#D4AF37]">
+          <span className="font-serif italic font-semibold text-transparent bg-clip-text bg-gradient-to-r from-[#1D1D1F] via-[#0071e3] to-[#D4AF37]">
             Akıllı Zeka İle Yönlendirin.
           </span>
         </h1>
@@ -46,7 +46,7 @@ export const HeroSection: React.FC = () => {
       >
         <div className="bg-white/50 backdrop-blur-2xl p-3 rounded-[32px] border border-white/80 shadow-[0_20px_50px_rgba(0,0,0,0.06)] flex flex-col sm:flex-row items-center gap-3">
           <div className="flex items-center gap-3 flex-1 w-full px-4 py-1">
-            <Sparkles className="w-5 h-5 text-[#E6007E] shrink-0 animate-pulse" />
+            <Sparkles className="w-5 h-5 text-[#0071e3] shrink-0 animate-pulse" />
             <input
               type="text"
               placeholder="WedyAI'a anlatın: 'İstanbul Anadolu yakasında 500 kişilik kır bahçesi...'"
@@ -79,7 +79,7 @@ export const HeroSection: React.FC = () => {
         </div>
         <span>•</span>
         <div className="flex items-center gap-1.5">
-          <Heart className="w-4 h-4 text-[#E6007E]" />
+          <Heart className="w-4 h-4 text-[#0071e3]" />
           <span>Sıfır Komisyon Çift Modu</span>
         </div>
       </motion.div>

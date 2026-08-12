@@ -119,7 +119,7 @@ export default function PublicRsvpPage({ params }: { params: Promise<{ id: strin
             </h2>
 
             {errorMessage && (
-              <p className="text-xs text-rose-400 bg-rose-500/10 p-2.5 rounded border border-rose-500/20">
+              <p className="text-xs text-rose-400 bg-[#0071e3]/80/10 p-2.5 rounded border border-rose-500/20">
                 {errorMessage}
               </p>
             )}
@@ -165,7 +165,7 @@ export default function PublicRsvpPage({ params }: { params: Promise<{ id: strin
                   onClick={() => setStatus('DECLINED')}
                   className={`py-2.5 rounded-lg text-xs font-semibold border transition-all ${
                     status === 'DECLINED'
-                      ? 'bg-rose-600 border-rose-400 text-white shadow-lg shadow-rose-900/50'
+                      ? 'bg-[#0071e3] border-rose-400 text-white shadow-lg shadow-rose-900/50'
                       : 'bg-white/5 border-white/10 text-slate-300 hover:bg-white/10'
                   }`}
                 >

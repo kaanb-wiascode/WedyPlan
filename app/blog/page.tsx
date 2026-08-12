@@ -29,7 +29,7 @@ export default function WeddingMagazinePage() {
   });
 
   return (
-    <div className="min-h-screen bg-[#FAF8F5] text-[#1D1D1F] selection:bg-[#E6007E] selection:text-white pb-16">
+    <div className="min-h-screen bg-[#f5f5f7] text-[#1D1D1F] selection:bg-[#0071e3] selection:text-white pb-16">
       <PublicNavbar />
 
       <main className="space-y-6">

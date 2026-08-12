@@ -88,7 +88,7 @@ export default function VendorDashboardPage() {
   };
 
   return (
-    <div className="min-h-screen bg-zinc-50/60 dark:bg-zinc-950 text-zinc-900 dark:text-zinc-100 font-sans p-4 sm:p-8 lg:p-12">
+    <div className="min-h-screen bg-[#f5f5f7] text-zinc-900 dark:text-zinc-100 font-sans p-4 sm:p-8 lg:p-12">
       
       {/* Soft Arka Plan Işıkları (WedyPlan Premium Glow) */}
       <div className="fixed top-0 right-0 w-[500px] h-[500px] bg-amber-200/20 dark:bg-amber-900/10 rounded-full blur-[140px] pointer-events-none -z-10" />
@@ -276,7 +276,7 @@ export default function VendorDashboardPage() {
                             </button>
                             <button
                               onClick={() => handleUpdateQuoteStatus(q.id, 'REJECTED')}
-                              className="px-3 py-2 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-600 border border-rose-200/60 text-xs font-semibold transition-all cursor-pointer"
+                              className="px-3 py-2 rounded-xl bg-[#0071e3]/80/10 hover:bg-[#0071e3]/80/20 text-[#0071e3] border border-rose-200/60 text-xs font-semibold transition-all cursor-pointer"
                             >
                               <X className="w-3.5 h-3.5" />
                             </button>
@@ -285,7 +285,7 @@ export default function VendorDashboardPage() {
                           <span className={`text-xs font-semibold px-3 py-1.5 rounded-full border ${
                             q.status === 'ACCEPTED' 
                               ? 'bg-emerald-500/10 text-emerald-600 border-emerald-200' 
-                              : 'bg-rose-500/10 text-rose-600 border-rose-200'
+                              : 'bg-[#0071e3]/80/10 text-[#0071e3] border-rose-200'
                           }`}>
                             {q.status === 'ACCEPTED' ? 'Kabul Edildi' : 'Reddedildi'}
                           </span>

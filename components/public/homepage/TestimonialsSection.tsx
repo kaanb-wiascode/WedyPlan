@@ -8,7 +8,7 @@ export const TestimonialsSection: React.FC = () => {
   return (
     <section className="py-16 px-6 max-w-7xl mx-auto space-y-8">
       <div className="text-center space-y-2">
-        <span className="text-[11px] font-bold text-[#E6007E] uppercase tracking-widest block">Sosyal Kanıt & Güven</span>
+        <span className="text-[11px] font-bold text-[#0071e3] uppercase tracking-widest block">Sosyal Kanıt & Güven</span>
         <h2 className="font-serif font-semibold text-[32px] sm:text-[40px] text-[#1D1D1F]">Çiftler ve Partnerler Ne Diyor?</h2>
       </div>
 
@@ -33,7 +33,7 @@ export const TestimonialsSection: React.FC = () => {
               </div>
 
               <div className="relative">
-                <Quote className="w-8 h-8 text-[#E6007E]/20 absolute -top-2 -left-2 -z-10" />
+                <Quote className="w-8 h-8 text-[#0071e3]/20 absolute -top-2 -left-2 -z-10" />
                 <p className="text-[15px] text-[#1D1D1F] font-light leading-relaxed italic">
                   "{item.quote}"
                 </p>

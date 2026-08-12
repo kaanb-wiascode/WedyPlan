@@ -48,7 +48,7 @@ export const OtpInput: React.FC<OtpInputProps> = ({ length = 6, onComplete }) =>
           value={digit}
           onChange={(e) => handleChange(e.target.value, idx)}
           onKeyDown={(e) => handleKeyDown(e, idx)}
-          className="w-11 h-13 text-center font-mono font-bold text-[20px] bg-white border border-slate-200 rounded-2xl outline-none focus:border-[#E6007E] focus:ring-2 focus:ring-pink-100 transition shadow-2xs"
+          className="w-11 h-13 text-center font-mono font-bold text-[20px] bg-white border border-slate-200 rounded-2xl outline-none focus:border-[#0071e3] focus:ring-2 focus:ring-pink-100 transition shadow-2xs"
         />
       ))}
     </div>

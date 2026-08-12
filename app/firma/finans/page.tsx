@@ -273,7 +273,7 @@ export default function VendorFinancePage() {
       )}
 
       {/* HEADER (Frosted Glass) */}
-      <div className="p-8 rounded-3xl bg-white/70 dark:bg-zinc-900/70 backdrop-blur-2xl border border-zinc-200/80 dark:border-zinc-800/80 shadow-[0_8px_30px_rgb(0,0,0,0.03)] flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6">
+      <div className="p-8 rounded-3xl apple-glass shadow-[0_8px_30px_rgb(0,0,0,0.03)] flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6">
         <div className="space-y-2">
           <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-zinc-200/60 dark:bg-zinc-800/80 text-zinc-700 dark:text-zinc-300 text-[11px] font-medium border border-zinc-300/40 dark:border-zinc-700/50">
             <Wallet className="w-3.5 h-3.5 text-zinc-500" />
@@ -369,7 +369,7 @@ export default function VendorFinancePage() {
 
           {/* KPI KARTLARI */}
           <div className="grid grid-cols-1 sm:grid-cols-4 gap-5">
-            <div className="p-6 rounded-3xl bg-white/70 dark:bg-zinc-900/70 backdrop-blur-2xl border border-zinc-200/80 dark:border-zinc-800/80 shadow-xs space-y-1">
+            <div className="p-6 rounded-3xl apple-glass shadow-xs space-y-1">
               <span className="text-xs font-medium text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
                 <CheckCircle2 className="w-3.5 h-3.5" /> Hesaba Geçen Ciro
               </span>
@@ -377,7 +377,7 @@ export default function VendorFinancePage() {
               <div className="text-[10px] text-zinc-400">İyzico Tahsil Edilen</div>
             </div>
 
-            <div className="p-6 rounded-3xl bg-white/70 dark:bg-zinc-900/70 backdrop-blur-2xl border border-zinc-200/80 dark:border-zinc-800/80 shadow-xs space-y-1">
+            <div className="p-6 rounded-3xl apple-glass shadow-xs space-y-1">
               <span className="text-xs font-medium text-amber-600 dark:text-amber-400 flex items-center gap-1">
                 <ShieldCheck className="w-3.5 h-3.5" /> Havuzda Bekleyen (Escrow)
               </span>
@@ -385,13 +385,13 @@ export default function VendorFinancePage() {
               <div className="text-[10px] text-zinc-400">Düğün Günü Serbest Kalacak</div>
             </div>
 
-            <div className="p-6 rounded-3xl bg-white/70 dark:bg-zinc-900/70 backdrop-blur-2xl border border-zinc-200/80 dark:border-zinc-800/80 shadow-xs space-y-1">
+            <div className="p-6 rounded-3xl apple-glass shadow-xs space-y-1">
               <span className="text-xs font-medium text-zinc-400">Bekleyen Tahsilatlar</span>
               <div className="text-2xl font-bold text-zinc-900 dark:text-white">₺{pendingCollection.toLocaleString('tr-TR')}</div>
               <div className="text-[10px] text-zinc-400">Gelecek Taksitler</div>
             </div>
 
-            <div className="p-6 rounded-3xl bg-white/70 dark:bg-zinc-900/70 backdrop-blur-2xl border border-zinc-200/80 dark:border-zinc-800/80 shadow-xs space-y-1">
+            <div className="p-6 rounded-3xl apple-glass shadow-xs space-y-1">
               <span className="text-xs font-medium text-zinc-400">Toplam Hacim</span>
               <div className="text-2xl font-bold text-zinc-900 dark:text-white">₺{totalVolume.toLocaleString('tr-TR')}</div>
               <div className="text-[10px] text-zinc-400">Tüm Anlaşmalar</div>
@@ -399,7 +399,7 @@ export default function VendorFinancePage() {
           </div>
 
           {/* GÖRSEL FİNANSAL BAR GRAFİĞİ (SIMULATION) */}
-          <div className="p-6 sm:p-8 bg-white/70 dark:bg-zinc-900/70 backdrop-blur-2xl border border-zinc-200/80 dark:border-zinc-800/80 rounded-3xl space-y-6 shadow-xs">
+          <div className="p-6 sm:p-8 apple-glass rounded-[28px] space-y-6 shadow-xs">
             <div className="flex items-center justify-between">
               <div>
                 <h3 className="text-sm font-bold text-zinc-900 dark:text-white">Gelir & Tahsilat Çizelgesi ({timeframe})</h3>
@@ -438,7 +438,7 @@ export default function VendorFinancePage() {
       {/* ------------------ SEKME 2: İYZİCO TAHSİLATLAR & ÖDEME LİNKLERİ ------------------ */}
       {activeTab === 'PAYMENTS' && (
         <div className="space-y-4 animate-in fade-in duration-300">
-          <div className="bg-white/70 dark:bg-zinc-900/70 backdrop-blur-2xl border border-zinc-200/80 dark:border-zinc-800/80 rounded-3xl overflow-hidden shadow-xs">
+          <div className="apple-glass rounded-[28px] overflow-hidden shadow-xs">
             <div className="overflow-x-auto">
               <table className="w-full text-left border-collapse">
                 <thead>
@@ -493,7 +493,7 @@ export default function VendorFinancePage() {
             <span>Güvenli Havuz (Escrow), çiftlerin ödediği kaporaları etkinlik tarihine kadar korur. Düğün gerçekleştiğinde veya onay verildiğinde hakedişinizi doğrudan banka hesabınıza aktarabilirsiniz.</span>
           </div>
 
-          <div className="bg-white/70 dark:bg-zinc-900/70 backdrop-blur-2xl border border-zinc-200/80 dark:border-zinc-800/80 rounded-3xl overflow-hidden shadow-xs">
+          <div className="apple-glass rounded-[28px] overflow-hidden shadow-xs">
             <div className="overflow-x-auto">
               <table className="w-full text-left border-collapse">
                 <thead>
@@ -544,7 +544,7 @@ export default function VendorFinancePage() {
       {/* ------------------ SEKME 4: GİB E-FATURA & ARŞİV ------------------ */}
       {activeTab === 'INVOICES' && (
         <div className="space-y-4 animate-in fade-in duration-300">
-          <div className="bg-white/70 dark:bg-zinc-900/70 backdrop-blur-2xl border border-zinc-200/80 dark:border-zinc-800/80 rounded-3xl overflow-hidden shadow-xs">
+          <div className="apple-glass rounded-[28px] overflow-hidden shadow-xs">
             <div className="overflow-x-auto">
               <table className="w-full text-left border-collapse">
                 <thead>

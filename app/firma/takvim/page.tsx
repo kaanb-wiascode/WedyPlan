@@ -216,7 +216,7 @@ export default function VendorCalendarPage() {
       )}
 
       {/* HEADER (Frosted Glass) */}
-      <div className="p-8 rounded-3xl bg-white/70 dark:bg-zinc-900/70 backdrop-blur-2xl border border-zinc-200/80 dark:border-zinc-800/80 shadow-[0_8px_30px_rgb(0,0,0,0.03)] flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6">
+      <div className="p-8 rounded-3xl apple-glass shadow-[0_8px_30px_rgb(0,0,0,0.03)] flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6">
         <div className="space-y-2">
           <div className="flex flex-wrap items-center gap-2">
             <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-zinc-200/60 dark:bg-zinc-800/80 text-zinc-700 dark:text-zinc-300 text-[11px] font-medium border border-zinc-300/40 dark:border-zinc-700/50">
@@ -248,7 +248,7 @@ export default function VendorCalendarPage() {
 
       {/* 1. ÖZET METRİK KARTLARI */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
-        <div className="p-6 rounded-3xl bg-white/70 dark:bg-zinc-900/70 backdrop-blur-2xl border border-zinc-200/80 dark:border-zinc-800/80 shadow-xs space-y-1">
+        <div className="p-6 rounded-3xl apple-glass shadow-xs space-y-1">
           <span className="text-xs font-medium text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
             <Lock className="w-3.5 h-3.5" /> Kilitli Düğün Günleri
           </span>
@@ -256,7 +256,7 @@ export default function VendorCalendarPage() {
           <div className="text-[11px] text-zinc-400">Tarihler Diğer Çiftlere Kapatıldı</div>
         </div>
 
-        <div className="p-6 rounded-3xl bg-white/70 dark:bg-zinc-900/70 backdrop-blur-2xl border border-zinc-200/80 dark:border-zinc-800/80 shadow-xs space-y-1">
+        <div className="p-6 rounded-3xl apple-glass shadow-xs space-y-1">
           <span className="text-xs font-medium text-amber-600 dark:text-amber-400 flex items-center gap-1">
             <Clock className="w-3.5 h-3.5" /> Opsiyon & Randevular
           </span>
@@ -264,7 +264,7 @@ export default function VendorCalendarPage() {
           <div className="text-[11px] text-zinc-400">Onay veya Prova Bekliyor</div>
         </div>
 
-        <div className="p-6 rounded-3xl bg-white/70 dark:bg-zinc-900/70 backdrop-blur-2xl border border-zinc-200/80 dark:border-zinc-800/80 shadow-xs space-y-1">
+        <div className="p-6 rounded-3xl apple-glass shadow-xs space-y-1">
           <span className="text-xs font-medium text-zinc-400">Ağustos Doluluk Oranı</span>
           <div className="text-2xl font-bold text-zinc-900 dark:text-white">%85 Dolu</div>
           <div className="text-[11px] text-zinc-400">Sezon Yüksek Talepli</div>
@@ -335,7 +335,7 @@ export default function VendorCalendarPage() {
 
       {/* GÖRÜNÜM 1: AYLIK MATRİS (MONTH GRID VIEW) */}
       {viewMode === 'MONTH_GRID' && (
-        <div className="p-6 rounded-3xl bg-white/70 dark:bg-zinc-900/70 backdrop-blur-2xl border border-zinc-200/80 dark:border-zinc-800/80 shadow-xs space-y-4">
+        <div className="p-6 rounded-3xl apple-glass shadow-xs space-y-4">
           <div className="flex items-center justify-between border-b border-zinc-100 dark:border-zinc-800 pb-4">
             <h2 className="text-base font-bold text-zinc-900 dark:text-white flex items-center gap-2">
               <CalendarDays className="w-4 h-4 text-zinc-500" /> Ağustos 2026 Takvimi
@@ -394,7 +394,7 @@ export default function VendorCalendarPage() {
           {filteredEvents.map((evt) => (
             <div
               key={evt.id}
-              className="p-6 rounded-3xl bg-white/70 dark:bg-zinc-900/70 backdrop-blur-2xl border border-zinc-200/80 dark:border-zinc-800/80 shadow-xs space-y-4 flex flex-col justify-between"
+              className="p-6 rounded-3xl apple-glass shadow-xs space-y-4 flex flex-col justify-between"
             >
               <div className="space-y-3">
                 <div className="flex items-start justify-between">

@@ -270,7 +270,7 @@ export default function VendorContractsPage() {
       )}
 
       {/* HEADER (Frosted Glass) */}
-      <div className="p-8 rounded-3xl bg-white/70 dark:bg-zinc-900/70 backdrop-blur-2xl border border-zinc-200/80 dark:border-zinc-800/80 shadow-[0_8px_30px_rgb(0,0,0,0.03)] flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6">
+      <div className="p-8 rounded-3xl apple-glass shadow-[0_8px_30px_rgb(0,0,0,0.03)] flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6">
         <div className="space-y-2">
           <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-zinc-200/60 dark:bg-zinc-800/80 text-zinc-700 dark:text-zinc-300 text-[11px] font-medium border border-zinc-300/40 dark:border-zinc-700/50">
             <FileText className="w-3.5 h-3.5 text-zinc-500" />
@@ -353,7 +353,7 @@ export default function VendorContractsPage() {
 
           {/* 3 TEMEL VERİSEL KPI KARTI */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
-            <div className="p-6 rounded-3xl bg-white/70 dark:bg-zinc-900/70 backdrop-blur-2xl border border-zinc-200/80 dark:border-zinc-800/80 shadow-xs space-y-2">
+            <div className="p-6 rounded-3xl apple-glass shadow-xs space-y-2">
               <span className="text-xs font-medium text-zinc-400 flex items-center gap-1">
                 <TrendingUp className="w-3.5 h-3.5 text-emerald-500" /> Teklif - Sözleşme Dönüşüm Oranı
               </span>
@@ -367,7 +367,7 @@ export default function VendorContractsPage() {
               </div>
             </div>
 
-            <div className="p-6 rounded-3xl bg-white/70 dark:bg-zinc-900/70 backdrop-blur-2xl border border-zinc-200/80 dark:border-zinc-800/80 shadow-xs space-y-2">
+            <div className="p-6 rounded-3xl apple-glass shadow-xs space-y-2">
               <span className="text-xs font-medium text-zinc-400 flex items-center gap-1">
                 <ShieldCheck className="w-3.5 h-3.5 text-emerald-500" /> Tahsil Edilen Kaporalar
               </span>
@@ -375,7 +375,7 @@ export default function VendorContractsPage() {
               <p className="text-[11px] text-zinc-400">İmzalanan {signedCount} Sözleşmeden Alındı</p>
             </div>
 
-            <div className="p-6 rounded-3xl bg-white/70 dark:bg-zinc-900/70 backdrop-blur-2xl border border-zinc-200/80 dark:border-zinc-800/80 shadow-xs space-y-2">
+            <div className="p-6 rounded-3xl apple-glass shadow-xs space-y-2">
               <span className="text-xs font-medium text-zinc-400">Toplam Anlaşma Hacmi</span>
               <div className="text-3xl font-black text-zinc-900 dark:text-white">₺{totalVolume.toLocaleString('tr-TR')}</div>
               <p className="text-[11px] text-zinc-400">Tüm Canlı Sözleşmeler Dahil</p>
@@ -383,7 +383,7 @@ export default function VendorContractsPage() {
           </div>
 
           {/* DÜĞÜN SÖZLEŞMESİ DURUM DAĞILIMI (GÖRSEL GRAFİK BARI) */}
-          <div className="p-6 sm:p-8 bg-white/70 dark:bg-zinc-900/70 backdrop-blur-2xl border border-zinc-200/80 dark:border-zinc-800/80 rounded-3xl space-y-4 shadow-xs">
+          <div className="p-6 sm:p-8 apple-glass rounded-[28px] space-y-4 shadow-xs">
             <h3 className="text-sm font-bold text-zinc-900 dark:text-white">Sözleşme Aşaması Dağılımı</h3>
             <div className="w-full h-4 rounded-full bg-zinc-100 dark:bg-zinc-800 overflow-hidden flex gap-1 p-0.5">
               <div className="h-full bg-emerald-500 rounded-l-full" style={{ width: `${(signedCount / (contracts.length || 1)) * 100}%` }} title="İmzalandı" />
@@ -417,7 +417,7 @@ export default function VendorContractsPage() {
             </div>
           </div>
 
-          <div className="bg-white/70 dark:bg-zinc-900/70 backdrop-blur-2xl border border-zinc-200/80 dark:border-zinc-800/80 rounded-3xl overflow-hidden shadow-xs">
+          <div className="apple-glass rounded-[28px] overflow-hidden shadow-xs">
             <div className="overflow-x-auto">
               <table className="w-full text-left border-collapse">
                 <thead>
@@ -504,7 +504,7 @@ export default function VendorContractsPage() {
       {/* ------------------ SEKME 3: ŞABLON KÜTÜPHANESİ ------------------ */}
       {activeTab === 'TEMPLATES' && (
         <div className="space-y-6 animate-in fade-in duration-300">
-          <div className="p-6 rounded-3xl bg-white/70 dark:bg-zinc-900/70 backdrop-blur-2xl border border-zinc-200/80 dark:border-zinc-800/80 shadow-xs space-y-4">
+          <div className="p-6 rounded-3xl apple-glass shadow-xs space-y-4">
             <h3 className="text-sm font-bold text-zinc-900 dark:text-white flex items-center gap-2">
               <Copy className="w-4 h-4 text-zinc-500" /> Hazır Sözleşme Şablonları & Dinamik Değişkenler
             </h3>
@@ -531,7 +531,7 @@ export default function VendorContractsPage() {
 
       {/* ------------------ SEKME 4: OPSİYON VE UYARI AYARLARI ------------------ */}
       {activeTab === 'OPTION_SETTINGS' && (
-        <form onSubmit={handleSaveOptionSettings} className="p-8 rounded-3xl bg-white/70 dark:bg-zinc-900/70 backdrop-blur-2xl border border-zinc-200/80 dark:border-zinc-800/80 shadow-xs space-y-6 animate-in fade-in duration-300">
+        <form onSubmit={handleSaveOptionSettings} className="p-8 rounded-3xl apple-glass shadow-xs space-y-6 animate-in fade-in duration-300">
           <div className="space-y-1">
             <h3 className="text-sm font-bold text-zinc-900 dark:text-white flex items-center gap-2">
               <Sliders className="w-4 h-4 text-zinc-500" /> Opsiyon Süreleri & Otomatik Hatırlatıcı Ayarları

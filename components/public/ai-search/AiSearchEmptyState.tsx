@@ -10,7 +10,7 @@ interface AiSearchEmptyStateProps {
 export const AiSearchEmptyState: React.FC<AiSearchEmptyStateProps> = ({ onReset }) => {
   return (
     <div className="bg-white/50 backdrop-blur-2xl border border-white p-12 rounded-[36px] text-center space-y-4 max-w-xl mx-auto shadow-xs">
-      <div className="w-14 h-14 rounded-2xl bg-pink-500/10 text-[#E6007E] flex items-center justify-center mx-auto">
+      <div className="w-14 h-14 rounded-2xl bg-pink-500/10 text-[#0071e3] flex items-center justify-center mx-auto">
         <Sparkles className="w-7 h-7 text-[#D4AF37]" />
       </div>
 

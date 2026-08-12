@@ -11,13 +11,13 @@ export const AiValueProp: React.FC = () => {
         
         {/* Left Explanation */}
         <div className="lg:col-span-7 space-y-4">
-          <div className="inline-flex items-center gap-1.5 px-3.5 py-1 bg-white/80 text-[#E6007E] border border-pink-200 rounded-full text-[11px] font-bold">
+          <div className="inline-flex items-center gap-1.5 px-3.5 py-1 bg-white/80 text-[#0071e3] border border-pink-200 rounded-full text-[11px] font-bold">
             <Bot className="w-3.5 h-3.5" /> WedyAI Akıllı Düzlem
           </div>
 
           <h2 className="font-serif font-semibold text-[32px] sm:text-[42px] text-[#1D1D1F] leading-tight">
             Klasik Rehber Değil; <br />
-            <span className="italic text-[#E6007E]">Akıllı Düğün Danışmanı.</span>
+            <span className="italic text-[#0071e3]">Akıllı Düğün Danışmanı.</span>
           </h2>
 
           <p className="text-[15px] text-[#6E6E73] font-light leading-relaxed">
@@ -46,13 +46,13 @@ export const AiValueProp: React.FC = () => {
           </div>
 
           <div className="space-y-2 text-[12px]">
-            <div className="p-3 bg-[#FAF8F5] rounded-xl font-medium text-[#1D1D1F]">
+            <div className="p-3 bg-[#f5f5f7] rounded-xl font-medium text-[#1D1D1F]">
               ✓ Belirlenen 350,000 ₺ bütçe sınırına tam uygunluk.
             </div>
-            <div className="p-3 bg-[#FAF8F5] rounded-xl font-medium text-[#1D1D1F]">
+            <div className="p-3 bg-[#f5f5f7] rounded-xl font-medium text-[#1D1D1F]">
               ✓ 15 Ağustos 2026 Cumartesi akşamı boş takvim slotu.
             </div>
-            <div className="p-3 bg-[#FAF8F5] rounded-xl font-medium text-[#1D1D1F]">
+            <div className="p-3 bg-[#f5f5f7] rounded-xl font-medium text-[#1D1D1F]">
               ✓ Boğaz manzaralı ve dış catering izinli.
             </div>
           </div>

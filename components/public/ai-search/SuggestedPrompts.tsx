@@ -21,7 +21,7 @@ export const SuggestedPrompts: React.FC<SuggestedPromptsProps> = ({ onSelectProm
             onClick={() => onSelectPrompt(item.text)}
             className="text-[12px] font-medium text-[#1D1D1F] bg-white/60 hover:bg-white border border-white/80 px-3.5 py-1.5 rounded-full transition shadow-2xs hover:shadow-xs cursor-pointer flex items-center gap-1.5"
           >
-            <Sparkles className="w-3 h-3 text-[#E6007E]" />
+            <Sparkles className="w-3 h-3 text-[#0071e3]" />
             <span>"{item.text}"</span>
           </button>
         ))}

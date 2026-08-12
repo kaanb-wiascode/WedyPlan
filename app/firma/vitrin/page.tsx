@@ -135,7 +135,7 @@ export default function VendorProfileManagementPage() {
         )}
 
         {/* HEADER */}
-        <div className="p-8 rounded-3xl bg-white/70 dark:bg-zinc-900/70 backdrop-blur-2xl border border-zinc-200/80 dark:border-zinc-800/80 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+        <div className="p-8 rounded-3xl apple-glass flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
           <div className="space-y-2">
             <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-zinc-200/60 dark:bg-zinc-800/80 text-zinc-700 dark:text-zinc-300 text-[11px] font-medium border border-zinc-300/40">
               <Store className="w-3.5 h-3.5" /> <span>Firma Paneli Vitrin Yönetimi</span>
@@ -176,7 +176,7 @@ export default function VendorProfileManagementPage() {
       </div>
 
       {/* SEKME İÇERİKLERİ */}
-      <div className="bg-white/70 dark:bg-zinc-900/70 backdrop-blur-2xl border border-zinc-200/80 dark:border-zinc-800/80 rounded-3xl p-6 sm:p-8 min-h-[500px]">
+      <div className="apple-glass rounded-[28px] p-6 sm:p-8 min-h-[500px]">
         
         {/* SEKME 1: GENEL BİLGİLER & İLETİŞİM */}
         {activeTab === 'GENERAL' && (

@@ -23,7 +23,7 @@ export const VendorGalleryGrid: React.FC<VendorGalleryGridProps> = ({ coverImage
           <h2 className="text-2xl font-bold text-gray-900 tracking-tight">Galeri</h2>
         </div>
         {coverImages.length > 5 && (
-          <button className="text-sm font-semibold text-[#E6007E] hover:underline">
+          <button className="text-sm font-semibold text-[#0071e3] hover:underline">
             Tümünü Gör ({coverImages.length})
           </button>
         )}

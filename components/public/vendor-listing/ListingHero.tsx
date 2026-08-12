@@ -22,14 +22,14 @@ export const ListingHero: React.FC<ListingHeroProps> = ({
         animate={{ opacity: 1, y: 0 }}
         className="space-y-3"
       >
-        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/60 backdrop-blur-xl border border-white text-[12px] font-bold text-[#E6007E] shadow-xs">
+        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/60 backdrop-blur-xl border border-white text-[12px] font-bold text-[#0071e3] shadow-xs">
           <Sparkles className="w-4 h-4 text-[#D4AF37]" />
           <span>WedyPlan Verified Partner Directory</span>
         </div>
 
         <h1 className="text-[32px] sm:text-[48px] font-serif font-normal text-[#1D1D1F] leading-tight">
           Hayalinizdeki Düğün İçin <br className="hidden sm:block" />
-          <span className="italic font-semibold text-transparent bg-clip-text bg-gradient-to-r from-[#1D1D1F] via-[#E6007E] to-[#D4AF37]">
+          <span className="italic font-semibold text-transparent bg-clip-text bg-gradient-to-r from-[#1D1D1F] via-[#0071e3] to-[#D4AF37]">
             Onaylı İşletmeleri Keşfedin.
           </span>
         </h1>
@@ -42,7 +42,7 @@ export const ListingHero: React.FC<ListingHeroProps> = ({
       {/* Quick Search Input */}
       <div className="max-w-2xl mx-auto">
         <div className="bg-white/60 backdrop-blur-2xl p-2.5 rounded-[28px] border border-white/90 shadow-sm flex items-center gap-3 px-4">
-          <Search className="w-5 h-5 text-[#E6007E] shrink-0" />
+          <Search className="w-5 h-5 text-[#0071e3] shrink-0" />
           <input
             type="text"
             placeholder="Firma adı, mekan veya ilçe ara (Örn: Luxe Kır Bahçesi, Beykoz)..."

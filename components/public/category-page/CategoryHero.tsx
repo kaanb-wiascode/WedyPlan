@@ -21,7 +21,7 @@ export const CategoryHero: React.FC<CategoryHeroProps> = ({ data }) => {
       {/* Dynamic Background Image with Overlay */}
       <div className="absolute inset-0 z-0">
         <img src={data.coverImage} alt={data.title} className="w-full h-full object-cover" />
-        <div className="absolute inset-0 bg-gradient-to-b from-[#1D1D1F]/80 via-[#1D1D1F]/60 to-[#FAF8F5]" />
+        <div className="absolute inset-0 bg-gradient-to-b from-[#1D1D1F]/80 via-[#1D1D1F]/60 to-[#f5f5f7]" />
       </div>
 
       <motion.div

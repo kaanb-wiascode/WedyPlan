@@ -7,9 +7,5 @@ export default function AdminLayout({
 }: {
   children: React.ReactNode;
 }) {
-  return (
-    <div className="min-h-screen bg-zinc-50/60 dark:bg-zinc-950 text-zinc-900 dark:text-zinc-100 font-sans">
-      {children}
-    </div>
-  );
+  return <div className="apple-page">{children}</div>;
 }

@@ -85,14 +85,12 @@ export default function MekanlarPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-[#FDFBF7] text-neutral-900 font-sans">
-      <PublicPageLayout>
-        {/* Sayfa Başlığı (Editoryal Tema) */}
-        <div className="max-w-7xl mx-auto px-4 sm:px-8 pt-12 pb-10">
-          <h1 className="text-4xl md:text-5xl font-serif font-bold text-neutral-900 tracking-tight mb-4 text-center">
-            Düğün Mekanları & Davet Alanları
+    <PublicPageLayout>
+        <div className="mx-auto max-w-7xl px-4 pb-10 pt-12 sm:px-8">
+          <h1 className="mb-4 text-center text-4xl font-semibold tracking-tight text-[#1d1d1f] md:text-5xl">
+            Düğün mekanları ve davet alanları
           </h1>
-          <p className="text-lg text-neutral-600 font-light text-center max-w-2xl mx-auto leading-relaxed">
+          <p className="mx-auto max-w-2xl text-center text-[17px] leading-relaxed text-[#86868b]">
             Boğaz manzaralı yalılardan, doğayla iç içe kır bahçelerine kadar hayalinizdeki mekanı keşfedin ve anında ücretsiz teklif alın.
           </p>
         </div>
@@ -159,7 +157,7 @@ export default function MekanlarPage() {
                           key={opt.id}
                           onClick={() => { handleFilterChange({ sortBy: opt.id }); setIsSortOpen(false); }}
                           className={`w-full text-left px-4 py-3 text-[13px] font-medium transition-colors ${
-                            filters.sortBy === opt.id ? 'bg-rose-50 text-rose-700 font-bold' : 'text-neutral-700 hover:bg-neutral-50'
+                            filters.sortBy === opt.id ? 'bg-[#0071e3]/8 text-[#0071e3] font-semibold' : 'text-[#1d1d1f] hover:bg-black/4'
                           }`}
                         >
                           {opt.label}
@@ -201,7 +199,7 @@ export default function MekanlarPage() {
                         )}
 
                         <button onClick={() => toggleSave(venue.id)} className="absolute top-4 right-4 p-2.5 bg-white/90 backdrop-blur-md rounded-full text-neutral-900 shadow-sm hover:scale-110 transition-transform">
-                          <Heart className={`w-4 h-4 ${isSaved ? 'fill-rose-600 text-rose-600' : ''}`} />
+                          <Heart className={`w-4 h-4 ${isSaved ? 'fill-[#0071e3] text-[#0071e3]' : ''}`} />
                         </button>
 
                         <div className="absolute bottom-4 left-4 right-4 flex items-center justify-between">
@@ -217,9 +215,9 @@ export default function MekanlarPage() {
                       {/* İçerik */}
                       <div className="p-6 space-y-4">
                         <div>
-                          <h3 className="font-serif font-bold text-2xl text-neutral-900 mb-1 group-hover:text-rose-700 transition-colors line-clamp-1">{venue.title}</h3>
+                          <h3 className="mb-1 line-clamp-1 text-2xl font-semibold tracking-tight text-[#1d1d1f]">{venue.title}</h3>
                           <div className="flex items-center text-xs text-neutral-500 font-medium">
-                            <MapPin className="w-3.5 h-3.5 mr-1 text-rose-500" /> {venue.location}
+                            <MapPin className="mr-1 h-3.5 w-3.5 text-[#0071e3]" /> {venue.location}
                           </div>
                         </div>
 
@@ -242,7 +240,7 @@ export default function MekanlarPage() {
                           <span className="text-[10px] text-neutral-400 font-bold uppercase tracking-widest block mb-0.5">Kişi Başı Başlangıç</span>
                           <span className="text-xl font-bold text-neutral-900">{venue.minPrice}</span>
                         </div>
-                        <Link href={`/mekanlar/${venue.id}`} className="px-5 py-3 bg-rose-600 hover:bg-rose-700 text-white text-[13px] font-bold rounded-2xl transition-all shadow-md hover:shadow-lg active:scale-95 flex items-center gap-1.5">
+                        <Link href={`/mekanlar/${venue.id}`} className="apple-btn apple-btn-inline !px-5 !py-3 !text-[13px]">
                           Ücretsiz Teklif Al
                         </Link>
                       </div>
@@ -255,6 +253,5 @@ export default function MekanlarPage() {
           </div>
         </div>
       </PublicPageLayout>
-    </div>
   );
 }

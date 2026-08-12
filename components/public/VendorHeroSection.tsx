@@ -46,7 +46,7 @@ export const VendorHeroSection: React.FC<VendorHeroSectionProps> = ({ vendor, on
 
         {/* Gallery Badge */}
         <button className="absolute bottom-6 right-6 bg-white/80 backdrop-blur-2xl px-4 py-2 rounded-full text-[12px] font-bold text-[#1D1D1F] border border-white flex items-center gap-2 hover:bg-white transition cursor-pointer shadow-md">
-          <ImageIcon className="w-4 h-4 text-[#E6007E]" />
+          <ImageIcon className="w-4 h-4 text-[#0071e3]" />
           <span>Tüm Görselleri Gör ({vendor.coverImages.length})</span>
         </button>
       </div>
@@ -74,9 +74,9 @@ export const VendorHeroSection: React.FC<VendorHeroSectionProps> = ({ vendor, on
               {/* WedyAI Match Badge Trigger */}
               <button
                 onClick={() => setShowAiModal(true)}
-                className="text-[11px] font-bold bg-gradient-to-r from-pink-500/10 to-purple-500/10 text-[#E6007E] border border-pink-200/80 px-3 py-1 rounded-full flex items-center gap-1.5 hover:scale-105 transition cursor-pointer"
+                className="text-[11px] font-bold bg-gradient-to-r from-pink-500/10 to-purple-500/10 text-[#0071e3] border border-pink-200/80 px-3 py-1 rounded-full flex items-center gap-1.5 hover:scale-105 transition cursor-pointer"
               >
-                <Sparkles className="w-3.5 h-3.5 text-[#E6007E]" />
+                <Sparkles className="w-3.5 h-3.5 text-[#0071e3]" />
                 <span>%{vendor.aiMatch.score} WedyAI Uyum Skoru</span>
               </button>
             </div>
@@ -89,7 +89,7 @@ export const VendorHeroSection: React.FC<VendorHeroSectionProps> = ({ vendor, on
 
             <div className="flex items-center gap-4 text-[13px] text-[#6E6E73]">
               <span className="flex items-center gap-1 font-semibold text-[#1D1D1F]">
-                <MapPin className="w-4 h-4 text-[#E6007E]" /> {vendor.district}, {vendor.city}
+                <MapPin className="w-4 h-4 text-[#0071e3]" /> {vendor.district}, {vendor.city}
               </span>
               <span>•</span>
               <span className="flex items-center gap-1 font-bold text-amber-800 bg-amber-50 px-2.5 py-0.5 rounded-full border border-amber-200">
@@ -104,11 +104,11 @@ export const VendorHeroSection: React.FC<VendorHeroSectionProps> = ({ vendor, on
               onClick={() => setIsFavorite(!isFavorite)}
               className={`p-3.5 rounded-full border transition-all flex items-center justify-center cursor-pointer ${
                 isFavorite
-                  ? 'bg-pink-50 border-pink-300 text-[#E6007E]'
+                  ? 'bg-pink-50 border-pink-300 text-[#0071e3]'
                   : 'bg-white/80 border-white text-[#1D1D1F] hover:bg-white'
               }`}
             >
-              <Heart className={`w-5 h-5 ${isFavorite ? 'fill-[#E6007E]' : ''}`} />
+              <Heart className={`w-5 h-5 ${isFavorite ? 'fill-[#0071e3]' : ''}`} />
             </button>
 
             <button

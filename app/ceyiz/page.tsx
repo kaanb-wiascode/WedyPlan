@@ -86,27 +86,25 @@ export default function CeyizMarketplacePage() {
   ];
 
   return (
-    <div className="min-h-screen bg-[#FDFBF7] text-neutral-900 font-sans">
-      <PublicPageLayout>
+    <PublicPageLayout>
         
-        {/* Banner / Çeyiz Listesi Çağrısı */}
-        <div className="max-w-7xl mx-auto px-4 sm:px-8 pt-8 pb-6">
-          <div className="bg-gradient-to-r from-neutral-900 via-neutral-800 to-neutral-900 text-white rounded-[32px] p-8 md:p-10 shadow-xl flex flex-col md:flex-row items-center justify-between gap-6 relative overflow-hidden">
-            <div className="space-y-2 max-w-xl text-center md:text-left z-10">
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-rose-500/20 text-rose-300 rounded-full text-xs font-bold uppercase tracking-wider">
-                <Gift className="w-3.5 h-3.5" /> WedyPlan Registry
+        <div className="mx-auto max-w-7xl px-4 pb-6 pt-8 sm:px-8">
+          <div className="apple-glass apple-card relative flex flex-col items-center justify-between gap-6 overflow-hidden p-8 md:flex-row md:p-10">
+            <div className="z-10 max-w-xl space-y-2 text-center md:text-left">
+              <span className="apple-chip">
+                <Gift className="h-3.5 w-3.5" /> WedyPlan Registry
               </span>
-              <h1 className="text-3xl md:text-4xl font-serif font-bold tracking-tight">
-                Kendi Çeyiz Listeni Oluştur
+              <h1 className="text-3xl font-semibold tracking-tight text-[#1d1d1f] md:text-4xl">
+                Kendi çeyiz listeni oluştur
               </h1>
-              <p className="text-neutral-300 text-xs md:text-sm font-light leading-relaxed">
+              <p className="text-[14px] leading-relaxed text-[#86868b]">
                 Beğendiğin tüm ev eşyalarını çeyiz listene ekle, düğün davetlilerin sana hayalindeki hediyeleri kolayca alsın!
               </p>
             </div>
             
             <Link
               href="/cift/ceyiz-listem"
-              className="px-8 py-4 bg-[#E6007E] hover:bg-[#c5006b] text-white text-sm font-bold rounded-2xl transition-all shadow-lg shrink-0 z-10 flex items-center gap-2"
+              className="apple-btn apple-btn-inline z-10 shrink-0"
             >
               <Sparkles className="w-4 h-4" />
               <span>Çeyiz Listemi Yönet</span>
@@ -175,7 +173,7 @@ export default function CeyizMarketplacePage() {
                           key={opt.id}
                           onClick={() => { handleFilterChange({ sortBy: opt.id }); setIsSortOpen(false); }}
                           className={`w-full text-left px-4 py-3 text-[13px] font-medium transition-colors ${
-                            filters.sortBy === opt.id ? 'bg-pink-50 text-[#E6007E] font-bold' : 'text-neutral-700 hover:bg-neutral-50'
+                            filters.sortBy === opt.id ? 'bg-[#0071e3]/8 text-[#0071e3] font-semibold' : 'text-[#1d1d1f] hover:bg-black/4'
                           }`}
                         >
                           {opt.label}
@@ -221,7 +219,7 @@ export default function CeyizMarketplacePage() {
                         <button
                           onClick={() => toggleRegistry(product.id)}
                           className={`absolute top-4 right-4 p-2.5 rounded-full shadow-md backdrop-blur-md transition-all ${
-                            isInRegistry ? 'bg-[#E6007E] text-white scale-110' : 'bg-white/90 text-neutral-700 hover:scale-110'
+                            isInRegistry ? 'bg-[#0071e3] text-white scale-110' : 'bg-white/90 text-neutral-700 hover:scale-110'
                           }`}
                           title="Çeyiz Listeme Ekle"
                         >
@@ -244,7 +242,7 @@ export default function CeyizMarketplacePage() {
                           </span>
                         </div>
 
-                        <h3 className="font-serif font-bold text-lg text-neutral-900 leading-snug group-hover:text-[#E6007E] transition-colors line-clamp-2">
+                        <h3 className="line-clamp-2 text-lg font-semibold leading-snug tracking-tight text-[#1d1d1f]">
                           {product.title}
                         </h3>
                       </div>
@@ -266,7 +264,7 @@ export default function CeyizMarketplacePage() {
                             onClick={() => toggleRegistry(product.id)}
                             className={`px-3 py-2.5 rounded-xl text-[12px] font-bold border transition-all flex items-center gap-1 ${
                               isInRegistry 
-                                ? 'bg-pink-50 border-pink-200 text-[#E6007E]' 
+                                ? 'bg-[#0071e3]/8 border-[#0071e3]/20 text-[#0071e3]' 
                                 : 'border-neutral-200 text-neutral-700 hover:bg-neutral-50'
                             }`}
                           >
@@ -291,6 +289,5 @@ export default function CeyizMarketplacePage() {
         </div>
 
       </PublicPageLayout>
-    </div>
   );
 }

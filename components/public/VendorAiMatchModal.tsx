@@ -18,7 +18,7 @@ export const VendorAiMatchModal: React.FC<VendorAiMatchModalProps> = ({ matchDat
         </button>
 
         <div className="space-y-2">
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-pink-500/10 text-[#E6007E] border border-pink-200 rounded-full text-[11px] font-bold">
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-pink-500/10 text-[#0071e3] border border-pink-200 rounded-full text-[11px] font-bold">
             <Sparkles className="w-3.5 h-3.5" /> WedyAI Kişiselleştirilmiş Uyum Skoru
           </div>
           <div className="flex items-center gap-3">

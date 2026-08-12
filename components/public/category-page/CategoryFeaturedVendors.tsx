@@ -13,7 +13,7 @@ export const CategoryFeaturedVendors: React.FC<CategoryFeaturedVendorsProps> = (
     <section className="py-12 px-6 max-w-7xl mx-auto space-y-6">
       <div className="flex items-center justify-between">
         <h2 className="font-serif font-bold text-[28px] text-[#1D1D1F]">Öne Çıkan Partnerler</h2>
-        <Link href="/firmalar" className="text-[13px] font-bold text-[#1D1D1F] hover:text-[#E6007E] transition flex items-center gap-1">
+        <Link href="/firmalar" className="text-[13px] font-bold text-[#1D1D1F] hover:text-[#0071e3] transition flex items-center gap-1">
           Tümünü Gör <ArrowRight className="w-4 h-4" />
         </Link>
       </div>
@@ -34,11 +34,11 @@ export const CategoryFeaturedVendors: React.FC<CategoryFeaturedVendorsProps> = (
             </div>
 
             <div className="p-6 space-y-3">
-              <h3 className="font-serif font-bold text-[20px] text-[#1D1D1F] group-hover:text-[#E6007E] transition-colors truncate">
+              <h3 className="font-serif font-bold text-[20px] text-[#1D1D1F] group-hover:text-[#0071e3] transition-colors truncate">
                 {vendor.name}
               </h3>
               <div className="flex items-center gap-2 text-[12px] text-[#6E6E73]">
-                <MapPin className="w-3.5 h-3.5 text-[#E6007E]" />
+                <MapPin className="w-3.5 h-3.5 text-[#0071e3]" />
                 <span>{vendor.district}, {vendor.city}</span>
               </div>
               <div className="pt-3 border-t border-black/5 flex items-center justify-between">

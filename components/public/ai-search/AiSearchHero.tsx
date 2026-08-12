@@ -36,14 +36,14 @@ export const AiSearchHero: React.FC<AiSearchHeroProps> = ({
         transition={{ duration: 0.6 }}
         className="space-y-3"
       >
-        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/60 backdrop-blur-xl border border-white text-[12px] font-bold text-[#E6007E] shadow-xs">
+        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/60 backdrop-blur-xl border border-white text-[12px] font-bold text-[#0071e3] shadow-xs">
           <Sparkles className="w-4 h-4 text-[#D4AF37]" />
           <span>WedyAI Natural Language Search Engine</span>
         </div>
 
         <h1 className="text-[32px] sm:text-[50px] font-serif font-normal text-[#1D1D1F] leading-tight tracking-tight">
           Aradığınız Düğün Hizmetini <br className="hidden sm:block" />
-          <span className="italic font-semibold text-transparent bg-clip-text bg-gradient-to-r from-[#1D1D1F] via-[#E6007E] to-[#D4AF37]">
+          <span className="italic font-semibold text-transparent bg-clip-text bg-gradient-to-r from-[#1D1D1F] via-[#0071e3] to-[#D4AF37]">
             Kendi Cümlelerinizle Yazın.
           </span>
         </h1>
@@ -62,7 +62,7 @@ export const AiSearchHero: React.FC<AiSearchHeroProps> = ({
       >
         <div className="bg-white/60 backdrop-blur-3xl p-3 sm:p-4 rounded-[32px] border border-white/90 shadow-[0_20px_50px_rgba(0,0,0,0.06)] flex flex-col sm:flex-row items-center gap-3">
           <div className="flex items-center gap-3 flex-1 w-full px-4 py-1">
-            <Sparkles className={`w-5 h-5 text-[#E6007E] shrink-0 ${isProcessing ? 'animate-spin' : 'animate-pulse'}`} />
+            <Sparkles className={`w-5 h-5 text-[#0071e3] shrink-0 ${isProcessing ? 'animate-spin' : 'animate-pulse'}`} />
             <input
               type="text"
               placeholder="Örn: 'İstanbul'da 400 kişilik kır bahçesi ve fotoğrafçı dahil 300.000 ₺...'"

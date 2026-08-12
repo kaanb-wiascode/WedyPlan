@@ -45,11 +45,11 @@ export const VendorFaqSection: React.FC<VendorFaqSectionProps> = ({ faq = [] }) 
                   onClick={() => toggleFaq(idx)}
                   className="w-full flex items-center justify-between p-5 text-left focus:outline-none"
                 >
-                  <span className={`font-semibold text-[15px] pr-4 ${isOpen ? 'text-[#E6007E]' : 'text-gray-800'}`}>
+                  <span className={`font-semibold text-[15px] pr-4 ${isOpen ? 'text-[#0071e3]' : 'text-gray-800'}`}>
                     {item.question}
                   </span>
-                  <div className={`p-1 rounded-full transition-transform duration-300 ${isOpen ? 'bg-[#E6007E]/10 rotate-180' : 'bg-gray-100'}`}>
-                    <ChevronDown className={`w-4 h-4 ${isOpen ? 'text-[#E6007E]' : 'text-gray-500'}`} />
+                  <div className={`p-1 rounded-full transition-transform duration-300 ${isOpen ? 'bg-[#0071e3]/10 rotate-180' : 'bg-gray-100'}`}>
+                    <ChevronDown className={`w-4 h-4 ${isOpen ? 'text-[#0071e3]' : 'text-gray-500'}`} />
                   </div>
                 </button>
                 

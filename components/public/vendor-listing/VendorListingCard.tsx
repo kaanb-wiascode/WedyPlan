@@ -26,7 +26,7 @@ export const VendorListingCard: React.FC<VendorListingCardProps> = ({
     <GlassCard
       hoverEffect
       className={`group flex flex-col justify-between h-full overflow-hidden ${
-        isCompared ? 'border-[#E6007E]/50 ring-2 ring-[#E6007E]/20' : 'border-white/60'
+        isCompared ? 'border-[#0071e3]/50 ring-2 ring-[#0071e3]/20' : 'border-white/60'
       }`}
     >
       <div>
@@ -43,7 +43,7 @@ export const VendorListingCard: React.FC<VendorListingCardProps> = ({
           {/* Sol Üst: Badge'ler */}
           <div className="absolute top-4 left-4 flex flex-col items-start gap-2">
             {vendor.aiMatchScore && (
-              <span className="text-[11px] font-bold bg-gradient-to-r from-[#E6007E] to-purple-600 text-white px-3 py-1.5 rounded-full shadow-lg flex items-center gap-1.5">
+              <span className="text-[11px] font-bold bg-gradient-to-r from-[#0071e3] to-purple-600 text-white px-3 py-1.5 rounded-full shadow-lg flex items-center gap-1.5">
                 <Sparkles className="w-3.5 h-3.5 text-yellow-300" /> %{vendor.aiMatchScore} AI Uyumu
               </span>
             )}
@@ -59,7 +59,7 @@ export const VendorListingCard: React.FC<VendorListingCardProps> = ({
             onClick={(e) => { e.preventDefault(); onToggleSave(vendor.id); }}
             className="absolute top-4 right-4 p-2.5 bg-white/50 hover:bg-white/90 backdrop-blur-md rounded-full transition-all cursor-pointer shadow-sm z-10"
           >
-            <Heart className={`w-4 h-4 transition-colors ${isSaved ? 'fill-[#E6007E] text-[#E6007E]' : 'text-gray-900'}`} />
+            <Heart className={`w-4 h-4 transition-colors ${isSaved ? 'fill-[#0071e3] text-[#0071e3]' : 'text-gray-900'}`} />
           </button>
 
           {/* Sağ Alt: Puan */}
@@ -72,7 +72,7 @@ export const VendorListingCard: React.FC<VendorListingCardProps> = ({
         {/* İçerik Alanı */}
         <div className="p-5 space-y-3">
           <div className="flex items-center justify-between">
-            <span className="text-[11px] font-bold text-[#E6007E] uppercase tracking-wider">{vendor.category}</span>
+            <span className="text-[11px] font-bold text-[#0071e3] uppercase tracking-wider">{vendor.category}</span>
             <span className={`text-[10px] font-bold px-2.5 py-1 rounded-lg ${
               vendor.isAvailable
                 ? 'bg-emerald-50 text-emerald-700'
@@ -83,7 +83,7 @@ export const VendorListingCard: React.FC<VendorListingCardProps> = ({
           </div>
 
           <Link href={`/firmalar/${vendor.id}`}>
-            <h3 className="text-xl font-bold text-gray-900 group-hover:text-[#E6007E] transition-colors line-clamp-1">
+            <h3 className="text-xl font-bold text-gray-900 group-hover:text-[#0071e3] transition-colors line-clamp-1">
               {vendor.name}
             </h3>
           </Link>
@@ -121,7 +121,7 @@ export const VendorListingCard: React.FC<VendorListingCardProps> = ({
             onClick={() => onToggleCompare(vendor)}
             title="Karşılaştır"
             className={`p-2.5 rounded-xl transition-all ${
-              isCompared ? 'bg-[#E6007E] text-white shadow-md' : 'bg-white border border-gray-200 text-gray-600 hover:text-gray-900 hover:border-gray-300'
+              isCompared ? 'bg-[#0071e3] text-white shadow-md' : 'bg-white border border-gray-200 text-gray-600 hover:text-gray-900 hover:border-gray-300'
             }`}
           >
             <Layers className="w-4 h-4" />

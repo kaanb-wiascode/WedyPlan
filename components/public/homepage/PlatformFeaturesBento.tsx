@@ -29,9 +29,9 @@ export const PlatformFeaturesBento: React.FC = () => {
             >
               <div className="flex items-center justify-between">
                 <div className="w-12 h-12 rounded-2xl bg-white text-[#1D1D1F] flex items-center justify-center shadow-xs">
-                  <IconComponent className="w-6 h-6 text-[#E6007E]" />
+                  <IconComponent className="w-6 h-6 text-[#0071e3]" />
                 </div>
-                <span className="text-[10px] font-bold bg-[#E6007E]/10 text-[#E6007E] px-3 py-1 rounded-full border border-pink-200">
+                <span className="text-[10px] font-bold bg-[#0071e3]/10 text-[#0071e3] px-3 py-1 rounded-full border border-pink-200">
                   {feat.badge}
                 </span>
               </div>

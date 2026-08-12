@@ -25,7 +25,7 @@ export const QuickOfferModal: React.FC<QuickOfferModalProps> = ({ companyName, o
         </button>
 
         <div className="space-y-1">
-          <span className="text-[10px] font-bold text-[#E6007E] bg-pink-50 px-2.5 py-0.5 rounded-full inline-flex items-center gap-1">
+          <span className="text-[10px] font-bold text-[#0071e3] bg-pink-50 px-2.5 py-0.5 rounded-full inline-flex items-center gap-1">
             <Sparkles className="w-3.5 h-3.5 text-[#D4AF37]" /> WedyAI Teklif İste
           </span>
           <h3 className="font-serif font-bold text-[22px] text-[#1D1D1F]">{companyName}</h3>
@@ -38,7 +38,7 @@ export const QuickOfferModal: React.FC<QuickOfferModalProps> = ({ companyName, o
             placeholder="Ad Soyad"
             value={form.fullName}
             onChange={(e) => setForm({ ...form, fullName: e.target.value })}
-            className="w-full p-3.5 border border-slate-200 rounded-2xl text-xs outline-none focus:border-[#E6007E]"
+            className="w-full p-3.5 border border-slate-200 rounded-2xl text-xs outline-none focus:border-[#0071e3]"
           />
           <input
             type="tel"
@@ -46,14 +46,14 @@ export const QuickOfferModal: React.FC<QuickOfferModalProps> = ({ companyName, o
             placeholder="Telefon Numarası"
             value={form.phone}
             onChange={(e) => setForm({ ...form, phone: e.target.value })}
-            className="w-full p-3.5 border border-slate-200 rounded-2xl text-xs outline-none focus:border-[#E6007E]"
+            className="w-full p-3.5 border border-slate-200 rounded-2xl text-xs outline-none focus:border-[#0071e3]"
           />
           <input
             type="date"
             required
             value={form.weddingDate}
             onChange={(e) => setForm({ ...form, weddingDate: e.target.value })}
-            className="w-full p-3.5 border border-slate-200 rounded-2xl text-xs outline-none focus:border-[#E6007E]"
+            className="w-full p-3.5 border border-slate-200 rounded-2xl text-xs outline-none focus:border-[#0071e3]"
           />
           <button
             type="submit"

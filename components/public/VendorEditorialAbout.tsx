@@ -20,7 +20,7 @@ export const VendorEditorialAbout: React.FC<{ vendor: VendorDetail }> = ({ vendo
       <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 pt-2">
         {vendor.specialties.map((spec, idx) => (
           <div key={idx} className="p-3 bg-white/80 rounded-[18px] border border-white flex items-center gap-2 text-[12px] font-semibold text-[#1D1D1F]">
-            <CheckCircle2 className="w-4 h-4 text-[#E6007E]" />
+            <CheckCircle2 className="w-4 h-4 text-[#0071e3]" />
             <span>{spec}</span>
           </div>
         ))}

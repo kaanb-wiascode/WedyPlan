@@ -8,10 +8,10 @@ import { Shield } from 'lucide-react';
 
 export default function PrivacyPolicyPage() {
   return (
-    <div className="min-h-screen bg-[#FAF8F5] text-[#1D1D1F] selection:bg-[#E6007E] selection:text-white">
+    <div className="min-h-screen bg-[#f5f5f7] text-[#1D1D1F] selection:bg-[#0071e3] selection:text-white">
       <PublicNavbar />
 
-      <main className="pt-32 pb-24 max-w-4xl mx-auto px-4 sm:px-8">
+      <main className="pt-16 pb-24 max-w-4xl mx-auto px-4 sm:px-8">
         
         <div className="mb-10 flex flex-col items-center text-center">
           <div className="p-3 bg-emerald-100 rounded-full mb-4">

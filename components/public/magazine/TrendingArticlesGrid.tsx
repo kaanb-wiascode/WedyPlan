@@ -12,7 +12,7 @@ interface TrendingArticlesGridProps {
 export const TrendingArticlesGrid: React.FC<TrendingArticlesGridProps> = ({ articles }) => {
   return (
     <section className="py-8 px-4 sm:px-8 max-w-7xl mx-auto space-y-6">
-      <div className="flex items-center gap-2 text-[#E6007E]">
+      <div className="flex items-center gap-2 text-[#0071e3]">
         <TrendingUp className="w-5 h-5 text-[#D4AF37]" />
         <h2 className="font-serif font-bold text-[26px] text-[#1D1D1F]">Haftanın En Çok Okunan Trendleri</h2>
       </div>
@@ -33,7 +33,7 @@ export const TrendingArticlesGrid: React.FC<TrendingArticlesGridProps> = ({ arti
                   <Clock className="w-3.5 h-3.5" /> {art.readTimeMinutes} Dk Okuma • {art.publishedAt}
                 </div>
                 <Link href={`/blog/${art.slug}`}>
-                  <h3 className="font-serif font-bold text-[18px] text-[#1D1D1F] group-hover:text-[#E6007E] transition line-clamp-2">
+                  <h3 className="font-serif font-bold text-[18px] text-[#1D1D1F] group-hover:text-[#0071e3] transition line-clamp-2">
                     {art.title}
                   </h3>
                 </Link>

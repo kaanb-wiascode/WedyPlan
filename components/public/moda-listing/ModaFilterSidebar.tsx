@@ -51,7 +51,7 @@ export const ModaFilterSidebar: React.FC<ModaFilterSidebarProps> = ({
         </div>
         <button
           onClick={onResetFilters}
-          className="text-[11px] font-bold text-[#E6007E] hover:text-[#c5006b] flex items-center gap-1.5 uppercase tracking-wider transition-colors bg-[#E6007E]/5 px-3 py-1.5 rounded-full"
+          className="text-[11px] font-bold text-[#0071e3] hover:text-[#0077ed] flex items-center gap-1.5 uppercase tracking-wider transition-colors bg-[#0071e3]/5 px-3 py-1.5 rounded-full"
         >
           <RotateCcw className="w-3.5 h-3.5" /> Temizle
         </button>
@@ -108,7 +108,7 @@ export const ModaFilterSidebar: React.FC<ModaFilterSidebarProps> = ({
           <button
             onClick={() => onChangeFilter({ rentalOption: !filters.rentalOption })}
             className={`w-full flex items-center justify-between p-3.5 border rounded-2xl transition-all duration-300 ${
-              filters.rentalOption ? 'bg-rose-50 border-rose-200 shadow-sm' : 'bg-white border-gray-100 hover:border-gray-200'
+              filters.rentalOption ? 'bg-[#0071e3]/8 border-rose-200 shadow-sm' : 'bg-white border-gray-100 hover:border-gray-200'
             }`}
           >
             <span className={`text-[13px] font-semibold flex items-center gap-2 ${filters.rentalOption ? 'text-rose-800' : 'text-gray-700'}`}>

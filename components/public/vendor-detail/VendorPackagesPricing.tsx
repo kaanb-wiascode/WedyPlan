@@ -15,7 +15,7 @@ export const VendorPackagesPricing: React.FC<VendorPackagesPricingProps> = ({ pa
     <section className="space-y-6">
       {/* Bölüm Başlığı */}
       <div className="flex flex-col gap-1 px-2">
-        <span className="text-[11px] font-bold text-[#E6007E] uppercase tracking-widest flex items-center gap-1">
+        <span className="text-[11px] font-bold text-[#0071e3] uppercase tracking-widest flex items-center gap-1">
           <Sparkles className="w-3.5 h-3.5" /> Şeffaf Bütçe
         </span>
         <h2 className="text-2xl font-bold text-gray-900 tracking-tight">Düğün Paketleri & Seçenekler</h2>

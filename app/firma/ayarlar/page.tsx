@@ -27,7 +27,7 @@ export default function VendorSettingsPage() {
       )}
 
       {/* HEADER */}
-      <div className="p-8 rounded-3xl bg-white/70 dark:bg-zinc-900/70 backdrop-blur-2xl border border-zinc-200/80 dark:border-zinc-800/80 shadow-[0_8px_30px_rgb(0,0,0,0.03)] space-y-2">
+      <div className="p-8 rounded-3xl apple-glass shadow-[0_8px_30px_rgb(0,0,0,0.03)] space-y-2">
         <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-zinc-200/60 dark:bg-zinc-800/80 text-zinc-700 dark:text-zinc-300 text-[11px] font-medium border border-zinc-300/40 dark:border-zinc-700/50">
           <Settings className="w-3.5 h-3.5 text-zinc-500" />
           <span>Firma Konfigürasyonu</span>
@@ -40,7 +40,7 @@ export default function VendorSettingsPage() {
         </p>
       </div>
 
-      <form onSubmit={handleSave} className="bg-white/70 dark:bg-zinc-900/70 backdrop-blur-2xl border border-zinc-200/80 dark:border-zinc-800/80 rounded-3xl p-6 sm:p-8 space-y-6 shadow-xs">
+      <form onSubmit={handleSave} className="apple-glass rounded-[28px] p-6 sm:p-8 space-y-6 shadow-xs">
         <h3 className="text-sm font-bold text-zinc-900 dark:text-white border-b border-zinc-100 dark:border-zinc-800 pb-3">
           Resmi Şirket & İletişim Bilgileri
         </h3>

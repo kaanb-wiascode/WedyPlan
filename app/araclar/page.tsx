@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import PublicNavbar from "@/components/public/PublicNavbar";
+import PublicFooter from "@/components/public/homepage/PublicFooter";
 
 export default function PlanlamaStudyoPage() {
   const [selectedTool, setSelectedTool] = useState<string | null>(null);
@@ -25,44 +26,40 @@ export default function PlanlamaStudyoPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-[#FDFBF7] text-neutral-900 font-sans antialiased selection:bg-rose-100 selection:text-rose-900">
+    <div className="apple-page">
       <PublicNavbar mode="public" />
 
-      {/* Hero Header - Rozet Kaldırıldı */}
-      <section className="relative pt-36 pb-16 md:pt-44 md:pb-24 px-4 overflow-hidden">
-        <div className="max-w-4xl mx-auto text-center space-y-6">
-          <h1 className="text-4xl md:text-6xl font-serif tracking-tight leading-[1.15] text-neutral-900">
-            Düğününüzü Dijital Çağın <br />
-            <span className="italic bg-gradient-to-r from-rose-600 via-amber-600 to-amber-500 bg-clip-text text-transparent">
-              Zarafetiyle Tasarlayın
-            </span>
+      <section className="relative overflow-hidden px-4 pb-16 pt-16 md:pb-24 md:pt-24">
+        <div className="mx-auto max-w-4xl space-y-6 text-center">
+          <p className="apple-kicker">Planlama stüdyosu</p>
+          <h1 className="text-4xl font-semibold leading-[1.08] tracking-tight text-[#1d1d1f] md:text-6xl">
+            Düğününüzü dijital çağın
+            <br />
+            zarafetiyle tasarlayın.
           </h1>
-
-          <p className="max-w-2xl mx-auto text-base md:text-lg text-neutral-600 font-normal leading-relaxed">
+          <p className="mx-auto max-w-2xl text-[17px] font-normal leading-relaxed text-[#86868b] md:text-[21px]">
             Düğün sürecinizi baştan sona organize eden profesyonel planlama araçlarımıza tek bir dokunuşla ücretsiz erişin.
           </p>
         </div>
       </section>
 
-      {/* Şık Araç Kartları Grid */}
-      <section className="pb-28 px-6 max-w-7xl mx-auto">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {tools.map((tool, idx) => (
-            <div key={idx} className="group relative p-8 rounded-3xl bg-white/80 backdrop-blur-md border border-neutral-200/80 shadow-sm hover:shadow-2xl hover:border-rose-200 transition-all duration-300 flex flex-col justify-between">
+      <section className="mx-auto max-w-7xl px-6 pb-28">
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+          {tools.map((tool) => (
+            <div key={tool.title} className="apple-glass apple-card group relative flex flex-col justify-between p-8">
               <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <span className="px-3 py-1 rounded-full bg-neutral-100 text-[11px] font-semibold text-neutral-600 group-hover:bg-rose-50 group-hover:text-rose-700 transition-colors">
-                    {tool.badge}
-                  </span>
-                </div>
-                <h3 className="font-serif font-bold text-2xl text-neutral-900 group-hover:text-rose-950 transition-colors">{tool.title}</h3>
-                <p className="text-sm text-neutral-600 leading-relaxed font-normal">{tool.desc}</p>
+                <span className="apple-chip">{tool.badge}</span>
+                <h3 className="text-2xl font-semibold tracking-tight text-[#1d1d1f]">{tool.title}</h3>
+                <p className="text-[14px] font-normal leading-relaxed text-[#86868b]">{tool.desc}</p>
               </div>
-
-              <div className="pt-6 mt-4 border-t border-neutral-100">
-                <button type="button" onClick={() => { setSelectedTool(tool.title); setIsSubmitted(false); }} className="inline-flex items-center gap-2 text-xs font-semibold text-neutral-900 hover:text-rose-600 transition-colors">
-                  <span>Kullanmaya Başla</span>
-                  <span className="text-sm group-hover:translate-x-1 transition-transform">→</span>
+              <div className="mt-4 border-t border-black/8 pt-6">
+                <button
+                  type="button"
+                  onClick={() => { setSelectedTool(tool.title); setIsSubmitted(false); }}
+                  className="apple-link inline-flex items-center gap-2 text-[14px]"
+                >
+                  <span>Kullanmaya başla</span>
+                  <span>→</span>
                 </button>
               </div>
             </div>
@@ -70,48 +67,54 @@ export default function PlanlamaStudyoPage() {
         </div>
       </section>
 
-      {/* APPLE CAM STİLİNDE (GLASSMORPHISM) INTERAKTIF MODAL FORM */}
       {selectedTool && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-md animate-in fade-in duration-200">
-          <div className="relative w-full max-w-lg bg-white/85 backdrop-blur-2xl p-8 md:p-10 rounded-3xl border border-white/60 shadow-2xl space-y-6">
-            <button onClick={() => setSelectedTool(null)} className="absolute top-5 right-5 w-8 h-8 flex items-center justify-center rounded-full bg-neutral-100 text-neutral-500 hover:bg-neutral-200 transition-colors text-sm">✕</button>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 p-4 backdrop-blur-md">
+          <div className="apple-glass apple-card relative w-full max-w-lg space-y-6 p-8 md:p-10">
+            <button
+              onClick={() => setSelectedTool(null)}
+              className="absolute right-5 top-5 flex h-8 w-8 items-center justify-center rounded-full bg-black/5 text-sm text-[#86868b] hover:bg-black/10"
+            >
+              ✕
+            </button>
 
             {!isSubmitted ? (
               <>
                 <div className="space-y-2">
-                  <span className="px-3 py-1 rounded-full bg-rose-50 text-[10px] font-bold text-rose-700 uppercase tracking-wider">{selectedTool}</span>
-                  <h3 className="text-2xl md:text-3xl font-serif text-neutral-900">Hızlıca Başlayın</h3>
-                  <p className="text-xs text-neutral-500 leading-relaxed">Formu doldurarak bu aracı ve tüm WedyPlan stüdyo araçlarını anında kullanmaya başlayın.</p>
+                  <span className="apple-chip">{selectedTool}</span>
+                  <h3 className="text-2xl font-semibold tracking-tight text-[#1d1d1f] md:text-3xl">Hızlıca başlayın</h3>
+                  <p className="text-[13px] leading-relaxed text-[#86868b]">Formu doldurarak bu aracı ve tüm WedyPlan stüdyo araçlarını anında kullanmaya başlayın.</p>
                 </div>
 
                 <form onSubmit={handleFormSubmit} className="space-y-4">
                   <div>
-                    <label className="block text-xs font-semibold text-neutral-700 mb-1">Adınız Soyadınız</label>
-                    <input type="text" placeholder="Gelin veya Damat Adı" required className="w-full px-4 py-3 rounded-2xl bg-white/70 border border-neutral-200 text-sm focus:outline-none focus:ring-2 focus:ring-rose-500/20" />
+                    <label className="apple-label">Adınız Soyadınız</label>
+                    <input type="text" placeholder="Gelin veya Damat Adı" required className="apple-input" />
                   </div>
                   <div>
-                    <label className="block text-xs font-semibold text-neutral-700 mb-1">E-posta Adresiniz</label>
-                    <input type="email" placeholder="ornek@gmail.com" required className="w-full px-4 py-3 rounded-2xl bg-white/70 border border-neutral-200 text-sm focus:outline-none focus:ring-2 focus:ring-rose-500/20" />
+                    <label className="apple-label">E-posta Adresiniz</label>
+                    <input type="email" placeholder="ornek@gmail.com" required className="apple-input" />
                   </div>
                   <div>
-                    <label className="block text-xs font-semibold text-neutral-700 mb-1">Planlanan Düğün Tarihi (Opsiyonel)</label>
-                    <input type="date" className="w-full px-4 py-3 rounded-2xl bg-white/70 border border-neutral-200 text-sm text-neutral-700 focus:outline-none focus:ring-2 focus:ring-rose-500/20" />
+                    <label className="apple-label">Planlanan Düğün Tarihi (Opsiyonel)</label>
+                    <input type="date" className="apple-input" />
                   </div>
-                  <button type="submit" className="w-full py-4 text-xs font-semibold text-white bg-neutral-900 hover:bg-neutral-800 rounded-2xl transition-all shadow-lg hover:shadow-xl mt-2">
-                    Aracı Kilidini Aç & Kullanmaya Başla →
+                  <button type="submit" className="apple-btn mt-2">
+                    Aracı kilidini aç ve kullanmaya başla
                   </button>
                 </form>
               </>
             ) : (
-              <div className="py-8 text-center space-y-4">
-                <div className="w-14 h-14 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto text-xl font-bold animate-bounce">✓</div>
-                <h3 className="text-2xl font-serif text-neutral-900">Erişim Sağlandı!</h3>
-                <p className="text-xs text-neutral-500 max-w-xs mx-auto">Hesabınız oluşturuldu. Tüm stüdyo araçları aktif ediliyor, sayfa yönlendiriliyor...</p>
+              <div className="space-y-4 py-8 text-center">
+                <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-[#0071e3]/10 text-xl font-semibold text-[#0071e3]">✓</div>
+                <h3 className="text-2xl font-semibold tracking-tight text-[#1d1d1f]">Erişim sağlandı</h3>
+                <p className="mx-auto max-w-xs text-[13px] text-[#86868b]">Hesabınız oluşturuldu. Tüm stüdyo araçları aktif ediliyor, sayfa yönlendiriliyor...</p>
               </div>
             )}
           </div>
         </div>
       )}
+
+      <PublicFooter />
     </div>
   );
 }

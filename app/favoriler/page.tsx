@@ -121,10 +121,10 @@ export default function FavoritesPage() {
       {/* Navbar */}
       <nav className="flex items-center justify-between px-6 md:px-12 py-4 bg-white border-b border-purple-100 shadow-sm sticky top-0 z-50">
         <Link href="/" className="text-2xl font-bold text-[#4A154B]">
-          Wedy<span className="text-[#E6007E]">Plan</span>
+          Wedy<span className="text-[#0071e3]">Plan</span>
         </Link>
         <div className="flex items-center gap-4">
-          <Link href="/arama" className="text-xs font-semibold text-[#4A154B] hover:text-[#E6007E]">
+          <Link href="/arama" className="text-xs font-semibold text-[#4A154B] hover:text-[#0071e3]">
             🔍 Firma Ara
           </Link>
           <Link href="/" className="text-xs font-semibold text-slate-500 hover:text-slate-800">
@@ -154,7 +154,7 @@ export default function FavoritesPage() {
           </div>
           <Link
             href="/arama"
-            className="bg-[#E6007E] hover:bg-pink-600 text-white text-xs font-bold px-5 py-3 rounded-xl transition shadow-lg whitespace-nowrap"
+            className="bg-[#0071e3] hover:bg-pink-600 text-white text-xs font-bold px-5 py-3 rounded-xl transition shadow-lg whitespace-nowrap"
           >
             + Yeni Firma Keşfet
           </Link>
@@ -165,7 +165,7 @@ export default function FavoritesPage() {
           <p className="text-center text-slate-400 text-xs py-16">Favorileriniz yükleniyor...</p>
         ) : favoriteVendors.length === 0 ? (
           <div className="bg-white p-12 text-center rounded-3xl border border-purple-100 shadow-sm space-y-4">
-            <div className="w-16 h-16 bg-pink-50 text-[#E6007E] text-2xl rounded-full flex items-center justify-center mx-auto">
+            <div className="w-16 h-16 bg-pink-50 text-[#0071e3] text-2xl rounded-full flex items-center justify-center mx-auto">
               ❤️
             </div>
             <div className="space-y-1">
@@ -222,7 +222,7 @@ export default function FavoritesPage() {
                 </div>
 
                 <div className="p-5 pt-0 border-t border-slate-50 flex items-center justify-between mt-4">
-                  <span className="text-xs font-bold text-[#E6007E]">{vendor.price || 'Fiyat Alınız'}</span>
+                  <span className="text-xs font-bold text-[#0071e3]">{vendor.price || 'Fiyat Alınız'}</span>
                   <Link
                     href={`/firma/${vendor.id}`}
                     className="bg-[#4A154B] text-white text-xs px-4 py-2 rounded-lg font-semibold hover:bg-purple-900 transition"

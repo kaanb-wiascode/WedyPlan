@@ -64,12 +64,12 @@ export const LiquidVendorCard: React.FC<LiquidVendorCardProps> = ({ vendor, onSe
             <span>WedyPlan Onaylı Partner</span>
           </div>
 
-          <h3 className="font-serif font-semibold text-[20px] text-[#1D1D1F] group-hover:text-[#E6007E] transition-colors line-clamp-1">
+          <h3 className="font-serif font-semibold text-[20px] text-[#1D1D1F] group-hover:text-[#0071e3] transition-colors line-clamp-1">
             {vendor.name}
           </h3>
 
           <div className="flex items-center gap-2 text-[12px] text-[#6E6E73]">
-            <span className="flex items-center gap-1"><MapPin className="w-3.5 h-3.5 text-[#E6007E]" /> {vendor.city}</span>
+            <span className="flex items-center gap-1"><MapPin className="w-3.5 h-3.5 text-[#0071e3]" /> {vendor.city}</span>
             <span>•</span>
             <span className="font-serif font-bold text-[#1D1D1F]">{vendor.price}</span>
           </div>
@@ -86,7 +86,7 @@ export const LiquidVendorCard: React.FC<LiquidVendorCardProps> = ({ vendor, onSe
           onClick={() => onSelectVendorForQuote && onSelectVendorForQuote(vendor)}
           className="w-full bg-white/80 hover:bg-[#1D1D1F] hover:text-white text-[#1D1D1F] text-[12px] font-bold py-3 rounded-2xl border border-white/90 shadow-xs transition-all flex items-center justify-center gap-2 group/btn cursor-pointer"
         >
-          <Sparkles className="w-3.5 h-3.5 text-[#E6007E] group-hover/btn:text-[#D4AF37] transition-colors" />
+          <Sparkles className="w-3.5 h-3.5 text-[#0071e3] group-hover/btn:text-[#D4AF37] transition-colors" />
           <span>WedyAI İle Teklif Al</span>
           <ArrowRight className="w-3.5 h-3.5 opacity-60 group-hover/btn:translate-x-1 transition-transform" />
         </button>
