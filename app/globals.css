@@ -203,9 +203,26 @@
   }
 
   .apple-btn-compact {
-    padding: 0.42rem 0.9rem;
+    padding: 0.5rem 1rem;
     font-size: 13px;
-    font-weight: 510;
+    font-weight: 560;
+    min-height: 36px;
+    letter-spacing: -0.01em;
+  }
+
+  .apple-btn-solid {
+    background: #1d1d1f;
+    color: #fff;
+    border: 1px solid #1d1d1f;
+    box-shadow: none;
+  }
+
+  .apple-btn-solid:hover {
+    background: #333336;
+    border-color: #333336;
+    color: #fff;
+    transform: none;
+    box-shadow: none;
   }
 
   .apple-label {

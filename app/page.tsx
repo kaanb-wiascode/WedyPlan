@@ -108,7 +108,7 @@ export default function HomePage() {
               </div>
             </div>
             <div className="p-3 md:p-2.5">
-              <Link href={searchHref()} className="apple-btn apple-btn-inline w-full gap-2 md:h-full md:min-w-[140px]">
+              <Link href={searchHref()} className="apple-btn apple-btn-solid apple-btn-inline w-full gap-2 md:h-full md:min-w-[140px]">
                 <span>Keşfet</span>
                 <ArrowRight className="h-4 w-4" />
               </Link>

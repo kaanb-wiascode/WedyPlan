@@ -18,7 +18,7 @@ const SIZE_MAP: Record<LogoSize, { width: number; height: number; className: str
   sm: { width: 176, height: 40, className: 'h-10 w-auto' },
   md: { width: 220, height: 48, className: 'h-12 w-auto' },
   lg: { width: 264, height: 58, className: 'h-14 w-auto' },
-  nav: { width: 240, height: 54, className: 'h-11 w-auto sm:h-12 md:h-[52px]' },
+  nav: { width: 196, height: 44, className: 'h-9 w-auto sm:h-10' },
   auth: { width: 260, height: 58, className: 'h-12 w-auto sm:h-14' },
   footer: { width: 248, height: 56, className: 'h-12 w-auto sm:h-14' },
   panel: { width: 228, height: 52, className: 'h-12 w-auto' },

@@ -17,6 +17,14 @@ interface PublicNavbarProps {
   mode?: 'public' | 'vendor';
 }
 
+const NAV_LABEL: Record<CatalogGroupId, string> = {
+  mekanlar: 'Mekanlar',
+  firmalar: 'Firmalar',
+  moda: 'Moda',
+  organizasyon: 'Organizasyon',
+  diger: 'Daha fazlası',
+};
+
 const GROUP_HREF: Record<CatalogGroupId, string> = {
   mekanlar: '/dugun-mekanlari',
   firmalar: '/dugun-fotografcilari',
@@ -73,30 +81,30 @@ export const PublicNavbar: React.FC<PublicNavbarProps> = ({ mode = 'public' }) =
   };
 
   const linkClass =
-    'inline-flex items-center gap-0.5 text-[13px] font-medium tracking-tight text-[#1d1d1f] hover:text-[#424245]';
+    'inline-flex items-center gap-1 text-[12px] font-medium tracking-[0.01em] text-[#6e6e73] transition-colors hover:text-[#1d1d1f]';
 
   const majorCities = CATALOG_CITIES.filter((c) => MAJOR_CITY_SLUGS.includes(c.slug));
   const navGroups = CATALOG_GROUPS.slice(0, 4);
 
   return (
     <header className="apple-glass-nav sticky top-0 z-50">
-      <nav className="mx-auto flex h-[68px] max-w-7xl items-center justify-between gap-3 px-4 sm:h-[72px] md:px-6">
+      <nav className="mx-auto flex h-14 max-w-7xl items-center justify-between gap-4 px-4 md:h-16 md:px-6">
         <Link href="/" className="flex shrink-0 items-center opacity-90 hover:opacity-100">
           <BrandLogo variant={isVendor ? 'vendor' : 'default'} size="nav" />
         </Link>
 
         {!isVendor ? (
-          <div className="hidden items-center gap-4 lg:flex">
+          <div className="hidden min-w-0 flex-1 items-center justify-center gap-6 xl:gap-7 lg:flex">
             {navGroups.map((group) => (
               <div
                 key={group.id}
-                className="relative py-4"
+                className="relative py-3"
                 onMouseEnter={() => openMenu(group.id)}
                 onMouseLeave={scheduleClose}
               >
                 <Link href={GROUP_HREF[group.id]} className={linkClass}>
-                  {group.name}
-                  <ChevronDown className={`h-3.5 w-3.5 text-[#86868b] transition ${activeDropdown === group.id ? 'rotate-180' : ''}`} />
+                  {NAV_LABEL[group.id]}
+                  <ChevronDown className={`h-3 w-3 text-[#86868b] transition ${activeDropdown === group.id ? 'rotate-180' : ''}`} />
                 </Link>
               </div>
             ))}
@@ -105,24 +113,24 @@ export const PublicNavbar: React.FC<PublicNavbarProps> = ({ mode = 'public' }) =
             <Link href="/blog" className={linkClass}>Rehber</Link>
           </div>
         ) : (
-          <div className="hidden items-center gap-4 lg:flex">
+          <div className="hidden flex-1 items-center justify-center gap-7 lg:flex">
             <Link href="#cozumler" className={linkClass}>Çözümler</Link>
             <Link href="#neden-wedyplan" className={linkClass}>Neden WedyPlan</Link>
             <Link href="#paketler" className={linkClass}>Paketler</Link>
           </div>
         )}
 
-        <div className="flex items-center gap-2.5">
+        <div className="flex shrink-0 items-center gap-2">
           {!isVendor && (
             <form onSubmit={handleSearch} className="hidden items-center xl:flex">
-              <div className="flex h-10 items-center rounded-full border border-black/10 bg-white px-3.5">
-                <Search className="mr-2 h-4 w-4 text-[#86868b]" />
+              <div className="flex h-9 items-center rounded-full border border-black/8 bg-white/80 px-3">
+                <Search className="mr-2 h-3.5 w-3.5 text-[#86868b]" />
                 <input
                   type="text"
                   placeholder="Mekan, firma, şehir"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-44 bg-transparent text-[14px] text-[#1d1d1f] outline-none placeholder:text-[#86868b]"
+                  className="w-36 bg-transparent text-[12px] text-[#1d1d1f] outline-none placeholder:text-[#86868b]"
                 />
               </div>
             </form>
@@ -133,12 +141,12 @@ export const PublicNavbar: React.FC<PublicNavbarProps> = ({ mode = 'public' }) =
               <Link href="/hizli-teklif" className="apple-btn-secondary apple-btn-compact apple-btn-inline hidden sm:inline-flex">
                 Teklif al
               </Link>
-              <Link href="/giris" className="apple-btn apple-btn-compact apple-btn-inline hidden sm:inline-flex">
+              <Link href="/giris" className="apple-btn apple-btn-solid apple-btn-compact apple-btn-inline hidden sm:inline-flex">
                 Giriş yap
               </Link>
               <button
                 type="button"
-                className="inline-flex h-11 w-11 items-center justify-center rounded-full lg:hidden"
+                className="inline-flex h-9 w-9 items-center justify-center rounded-full lg:hidden"
                 onClick={() => setMobileOpen((open) => !open)}
                 aria-label="Menü"
               >
@@ -150,12 +158,12 @@ export const PublicNavbar: React.FC<PublicNavbarProps> = ({ mode = 'public' }) =
               <Link href="/giris?role=VENDOR" className="apple-btn-secondary apple-btn-compact apple-btn-inline hidden sm:inline-flex">
                 Firma girişi
               </Link>
-              <Link href="/firma-katil/onboarding" className="apple-btn apple-btn-compact apple-btn-inline hidden sm:inline-flex">
+              <Link href="/firma-katil/onboarding" className="apple-btn apple-btn-solid apple-btn-compact apple-btn-inline hidden sm:inline-flex">
                 Başvurun
               </Link>
               <button
                 type="button"
-                className="inline-flex h-11 w-11 items-center justify-center rounded-full lg:hidden"
+                className="inline-flex h-9 w-9 items-center justify-center rounded-full lg:hidden"
                 onClick={() => setMobileOpen((open) => !open)}
                 aria-label="Menü"
               >
@@ -176,7 +184,7 @@ export const PublicNavbar: React.FC<PublicNavbarProps> = ({ mode = 'public' }) =
             <div className="mx-auto grid max-w-7xl grid-cols-12 gap-6 px-6 py-6">
               <div className="col-span-3 border-r border-black/8 pr-5">
                 <p className="text-[11px] font-medium uppercase tracking-[0.08em] text-[#86868b]">
-                  {CATALOG_GROUPS.find((g) => g.id === activeDropdown)?.name}
+                  {NAV_LABEL[activeDropdown as CatalogGroupId]}
                 </p>
                 <p className="mt-2 text-[16px] font-semibold leading-snug tracking-tight text-[#1d1d1f]">
                   Kategoriye göre keşfedin
@@ -200,7 +208,7 @@ export const PublicNavbar: React.FC<PublicNavbarProps> = ({ mode = 'public' }) =
                     onClick={() => setActiveDropdown(null)}
                     className="rounded-lg px-2.5 py-1.5 hover:bg-[#f5f5f7]"
                   >
-                    <span className="block text-[13px] font-medium text-[#1d1d1f]">{cat.name}</span>
+                    <span className="block text-[12px] font-medium text-[#1d1d1f]">{cat.name}</span>
                     <span className="text-[11px] text-[#86868b]">
                       {cat.vendorCount.toLocaleString('tr-TR')} ilan
                     </span>
@@ -215,7 +223,7 @@ export const PublicNavbar: React.FC<PublicNavbarProps> = ({ mode = 'public' }) =
                       key={city.slug}
                       href={catalogHref(GROUP_CITY_CATEGORY[activeDropdown as CatalogGroupId], city.slug)}
                       onClick={() => setActiveDropdown(null)}
-                      className="block rounded-lg px-2.5 py-1.5 text-[13px] font-medium text-[#1d1d1f] hover:bg-[#f5f5f7]"
+                      className="block rounded-lg px-2.5 py-1.5 text-[12px] font-medium text-[#1d1d1f] hover:bg-[#f5f5f7]"
                     >
                       {city.name}
                     </Link>
@@ -241,7 +249,7 @@ export const PublicNavbar: React.FC<PublicNavbarProps> = ({ mode = 'public' }) =
             </div>
           </form>
           <div className="mb-4 grid grid-cols-2 gap-2">
-            <Link href="/giris" onClick={() => setMobileOpen(false)} className="apple-btn apple-btn-compact">
+            <Link href="/giris" onClick={() => setMobileOpen(false)} className="apple-btn apple-btn-solid apple-btn-compact">
               Giriş yap
             </Link>
             <Link href="/hizli-teklif" onClick={() => setMobileOpen(false)} className="apple-btn-secondary apple-btn-compact">
@@ -275,7 +283,7 @@ export const PublicNavbar: React.FC<PublicNavbarProps> = ({ mode = 'public' }) =
             <Link href="#neden-wedyplan" className="rounded-lg px-2 py-3 text-[15px] font-medium" onClick={() => setMobileOpen(false)}>Neden WedyPlan</Link>
             <Link href="#paketler" className="rounded-lg px-2 py-3 text-[15px] font-medium" onClick={() => setMobileOpen(false)}>Paketler</Link>
             <Link href="/giris?role=VENDOR" className="apple-btn-secondary apple-btn-compact mt-3" onClick={() => setMobileOpen(false)}>Firma girişi</Link>
-            <Link href="/firma-katil/onboarding" className="apple-btn apple-btn-compact mt-2" onClick={() => setMobileOpen(false)}>Başvurun</Link>
+            <Link href="/firma-katil/onboarding" className="apple-btn apple-btn-solid apple-btn-compact mt-2" onClick={() => setMobileOpen(false)}>Başvurun</Link>
           </div>
         </div>
       ) : null}
