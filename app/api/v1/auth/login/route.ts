@@ -4,6 +4,10 @@ import { hashPassword, verifyPassword, validatePassword } from '@/lib/auth/passw
 import { createSession } from '@/lib/auth/session';
 import { InvalidCredentialsError, UserNotFoundError } from '@/lib/auth/errors';
 
+export const runtime = 'nodejs';
+export const dynamic = 'force-dynamic';
+export const maxDuration = 60;
+
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
