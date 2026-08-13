@@ -2,7 +2,9 @@
 
 import { revalidatePath } from 'next/cache';
 import { prisma } from '@/lib/db';
-import { coupleSlugify, requireCoupleContext } from '@/lib/couple/workspace';
+import { auditCouple, coupleSlugify, requireCoupleContext } from '@/lib/couple/workspace';
+
+const db = prisma as any;
 
 export interface InvitationConfigInput {
   slug: string;
@@ -123,13 +125,162 @@ export async function saveInvitationConfig(data: InvitationConfigInput) {
   return getInvitationConfig();
 }
 
-export async function generateAIInvitationCopyAction() {
-  const ctx = await requireCoupleContext();
-  const names = ctx ? `${ctx.couple.partnerOneName}${ctx.couple.partnerTwoName ? ` & ${ctx.couple.partnerTwoName}` : ''}` : 'biz';
+export async function generateAIInvitationCopyAction(
+  tone?: string,
+  coupleNames?: string,
+  venueName?: string,
+) {
+  const ctx = await requireCoupleContext().catch(() => null);
+  const names =
+    coupleNames ||
+    (ctx
+      ? `${ctx.couple.partnerOneName}${ctx.couple.partnerTwoName ? ` & ${ctx.couple.partnerTwoName}` : ''}`
+      : 'biz');
+  const venue = venueName || ctx?.couple.venueName || 'düğünümüz';
+  const key = String(tone || 'romantic').toUpperCase();
+  const copies: Record<string, string> = {
+    ROMANTIC: `${names} olarak hayatımızın en özel gününde, ${venue} mekanında yanımızda olmanızı dileriz.`,
+    FORMAL: `${names} çifti, ${venue} adresindeki düğün törenlerine katılımınızı rica eder.`,
+    FUN: `${names} evleniyor! ${venue}'de müzik, dans ve sohbet için sizi bekliyoruz.`,
+    MINIMAL: `${names} — ${venue}. Katılımınızı bekleriz.`,
+  };
+  const generatedText = copies[key] || copies.ROMANTIC;
   return {
     success: true,
+    generatedText,
+    copy: generatedText,
+    data: { welcomeMessage: generatedText },
+  };
+}
+
+export async function getPublicInvitation(slugOrId: string) {
+  const invitation = await db.coupleInvitation
+    .findFirst({
+      where: {
+        OR: [{ slug: slugOrId }, { coupleId: slugOrId }, { id: slugOrId }],
+      },
+    })
+    .catch(() => null);
+  const couple = invitation
+    ? await db.couple.findUnique({ where: { id: invitation.coupleId } }).catch(() => null)
+    : await db.couple
+        .findFirst({ where: { OR: [{ id: slugOrId }, { slug: slugOrId }] } })
+        .catch(() => null);
+  if (!couple) {
+    return { success: false as const, error: 'Davetiye bulunamadı.' };
+  }
+  const title =
+    invitation?.title ||
+    `${couple.partnerOneName}${couple.partnerTwoName ? ` & ${couple.partnerTwoName}` : ''}`;
+  return {
+    success: true as const,
     data: {
-      welcomeMessage: `${names} olarak hayatımızın en özel gününde yanımızda olmanızı dileriz.`,
+      coupleId: couple.id,
+      coupleName: title,
+      weddingDate: couple.weddingDate,
+      time: invitation?.timeLabel || '19:00',
+      venueName: invitation?.venueName || couple.venueName || '',
+      venueAddress: invitation?.address || couple.city || '',
+      message: invitation?.welcomeMessage || 'Hayatımızın en özel gününde yanımızda olmanızı dileriz.',
+      theme: invitation?.theme || 'minimalist-white',
+      coverImage: invitation?.coverImage || '',
+      askDietary: invitation?.askDietary ?? true,
+      askSongRequest: invitation?.askSongRequest ?? true,
+      showWishlist: invitation?.showWishlist ?? true,
     },
+  };
+}
+
+export async function submitPublicRsvp(data: {
+  coupleId?: string;
+  fullName: string;
+  email?: string;
+  phone?: string;
+  status: 'ACCEPTED' | 'DECLINED' | 'ATTENDING';
+  plusOneCount?: number;
+  plusOne?: boolean;
+  notes?: string;
+  dietaryPreference?: string;
+  songRequest?: string;
+}) {
+  const coupleId = String(data.coupleId || '');
+  if (!coupleId || !data.fullName?.trim()) {
+    return { success: false as const, error: 'Davetiye veya isim eksik.' };
+  }
+  const couple = await db.couple.findUnique({ where: { id: coupleId } }).catch(() => null);
+  if (!couple) {
+    return { success: false as const, error: 'Davetiye bulunamadı.' };
+  }
+  const attending = data.status === 'ATTENDING' || data.status === 'ACCEPTED';
+  const plusOneCount = Number(data.plusOneCount) || (data.plusOne ? 1 : 0);
+  await db.coupleRsvp
+    .create({
+      data: {
+        coupleId: couple.id,
+        userId: couple.userId,
+        guestName: data.fullName.trim(),
+        email: data.email || null,
+        phone: data.phone || null,
+        attending,
+        plusOneCount,
+        dietary: data.dietaryPreference || '',
+        songRequest: data.songRequest || '',
+        note: data.notes || '',
+      },
+    })
+    .catch(() => null);
+  await db.guest
+    .create({
+      data: {
+        userId: couple.userId,
+        fullName: data.fullName.trim(),
+        email: data.email || null,
+        phone: data.phone || null,
+        group: 'Davetiye LCV',
+        plusOneCount,
+        rsvpStatus: attending ? 'ACCEPTED' : 'DECLINED',
+        dietaryPreference: data.dietaryPreference || null,
+      },
+    })
+    .catch(() => null);
+  await auditCouple('COUPLE_RSVP_RECEIVED', {
+    actorRole: 'GUEST',
+    targetEntity: 'Couple',
+    targetEntityId: couple.id,
+    metadata: { guestName: data.fullName.trim(), attending },
+  });
+  revalidatePath('/cift/davetliler');
+  revalidatePath('/cift/dashboard');
+  if (couple.slug) revalidatePath(`/dugun/${couple.slug}`);
+  return { success: true as const, message: 'LCV yanıtınız başarıyla kaydedildi.' };
+}
+
+export async function sendRSVPReminderAction(
+  _userIdOrGuestId?: string,
+  options?: { guestIds?: string[]; reminderChannel?: string; [key: string]: any },
+) {
+  const ctx = await requireCoupleContext();
+  if (!ctx) return { success: false as const, error: 'Oturum açılmalı.' };
+  const pending = await db.guest
+    .findMany({
+      where: {
+        userId: ctx.session.userId,
+        rsvpStatus: 'PENDING',
+        ...(options?.guestIds?.length ? { id: { in: options.guestIds } } : {}),
+      },
+      select: { id: true, fullName: true },
+    })
+    .catch(() => []);
+  await auditCouple('COUPLE_RSVP_REMINDER_REQUESTED', {
+    actorUserId: ctx.session.userId,
+    targetEntityId: ctx.couple.id,
+    metadata: { pendingCount: pending.length, channel: options?.reminderChannel || 'IN_APP' },
+  });
+  return {
+    success: true as const,
+    message:
+      pending.length > 0
+        ? `${pending.length} davetli henüz yanıt vermedi. WhatsApp gönderimi henüz bağlı değil; davetiye linkini paylaşabilirsiniz.`
+        : 'Bekleyen LCV yok.',
   };
 }

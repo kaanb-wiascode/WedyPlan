@@ -3,7 +3,10 @@
 import { revalidatePath } from 'next/cache';
 import { getSession } from '@/lib/auth/session';
 import { prisma } from '@/lib/db';
+import { hashPassword, validatePassword, verifyPassword } from '@/lib/auth/password';
 import { auditCouple, coupleSlugify, requireCoupleContext } from '@/lib/couple/workspace';
+
+const db = prisma as any;
 
 export interface CoupleProfileData {
   partnerOneName: string;
@@ -118,4 +121,136 @@ export async function updateAppPreferences(_data: AppPreferencesData) {
 export async function getSessionEmail() {
   const session = await getSession();
   return session?.email || '';
+}
+
+export async function getSettings() {
+  return getCoupleSettings();
+}
+
+export async function updateSettings(data: AppPreferencesData) {
+  return updateAppPreferences(data);
+}
+
+export async function updateProfile(data: CoupleProfileData) {
+  return updateCoupleProfile(data);
+}
+
+export async function exportUserDataAction(userId?: string) {
+  const ctx = await requireCoupleContext();
+  if (!ctx) return { success: false as const, error: 'Oturum açılmalı.' };
+  if (userId && userId !== ctx.session.userId) {
+    return { success: false as const, error: 'Bu paketi yalnızca hesap sahibi indirebilir.' };
+  }
+  const [guests, budget, tasks, rsvps, invitation] = await Promise.all([
+    db.guest.findMany({ where: { userId: ctx.session.userId } }).catch(() => []),
+    db.budgetItem.findMany({ where: { userId: ctx.session.userId } }).catch(() => []),
+    db.checklistItem.findMany({ where: { userId: ctx.session.userId } }).catch(() => []),
+    db.coupleRsvp.findMany({ where: { coupleId: ctx.couple.id } }).catch(() => []),
+    db.coupleInvitation.findUnique({ where: { coupleId: ctx.couple.id } }).catch(() => null),
+  ]);
+  const payload = JSON.stringify(
+    {
+      exportedAt: new Date().toISOString(),
+      profile: ctx.couple,
+      invitation,
+      guests,
+      budget,
+      tasks,
+      rsvps,
+    },
+    null,
+    2,
+  );
+  await auditCouple('COUPLE_DATA_EXPORTED', {
+    actorUserId: ctx.session.userId,
+    targetEntityId: ctx.couple.id,
+  });
+  return {
+    success: true as const,
+    message: 'KVKK veri paketi hazır.',
+    downloadUrl: `data:application/json;charset=utf-8,${encodeURIComponent(payload)}`,
+  };
+}
+
+export async function updateSecurityPasswordAction(
+  userId: string,
+  data: { currentPassword: string; newPassword: string; confirmPassword: string },
+) {
+  const session = await getSession();
+  if (!session?.userId || session.userId !== userId) {
+    return { success: false as const, error: 'Oturum açılmalı.' };
+  }
+  if (data.newPassword !== data.confirmPassword) {
+    return { success: false as const, error: 'Yeni şifreler eşleşmiyor.' };
+  }
+  const check = validatePassword(data.newPassword);
+  if (!check.isValid) {
+    return { success: false as const, error: check.errors[0] || 'Şifre geçersiz.' };
+  }
+  const user = await db.identityUser.findUnique({ where: { id: session.userId } }).catch(() => null);
+  if (!user?.passwordHash) {
+    return { success: false as const, error: 'Hesap bulunamadı.' };
+  }
+  const ok = await verifyPassword(data.currentPassword, user.passwordHash);
+  if (!ok) {
+    return { success: false as const, error: 'Mevcut şifre hatalı.' };
+  }
+  await db.identityUser
+    .update({
+      where: { id: session.userId },
+      data: { passwordHash: await hashPassword(data.newPassword) },
+    })
+    .catch(() => null);
+  await auditCouple('COUPLE_PASSWORD_UPDATED', {
+    actorUserId: session.userId,
+    targetEntityId: session.userId,
+  });
+  return { success: true as const, message: 'Şifreniz güncellendi.' };
+}
+
+export async function updateUserProfileSettingAction(
+  userId: string,
+  data: {
+    fullName: string;
+    email: string;
+    phone?: string;
+    weddingRole?: string;
+    preferredLanguage?: string;
+    preferredCurrency?: string;
+  },
+) {
+  const session = await getSession();
+  if (!session?.userId || session.userId !== userId) {
+    return { success: false as const, error: 'Oturum açılmalı.' };
+  }
+  const email = String(data.email || '').trim().toLowerCase();
+  if (!email) {
+    return { success: false as const, error: 'E-posta gerekli.' };
+  }
+  await db.identityUser
+    .update({
+      where: { id: session.userId },
+      data: {
+        fullName: data.fullName,
+        email,
+        phoneNumber: data.phone || null,
+      },
+    })
+    .catch(() => null);
+  const couple = await db.couple.findFirst({ where: { userId: session.userId } }).catch(() => null);
+  if (couple && data.fullName) {
+    await db.couple
+      .update({
+        where: { id: couple.id },
+        data: { partnerOneName: data.fullName },
+      })
+      .catch(() => null);
+  }
+  await auditCouple('COUPLE_ACCOUNT_UPDATED', {
+    actorUserId: session.userId,
+    targetEntityId: couple?.id || session.userId,
+    metadata: { weddingRole: data.weddingRole, preferredCurrency: data.preferredCurrency },
+  });
+  revalidatePath('/cift/ayarlar');
+  return { success: true as const, message: 'Profil ayarlarınız güncellendi.' };
 }
