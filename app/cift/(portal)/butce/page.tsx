@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState, useMemo, useTransition } from 'react';
 import { getBudgetItems, createBudgetItem, deleteBudgetItem } from '@/lib/actions/budget';
+import { getCoupleSettings } from '@/lib/actions/settings';
 import {
   Wallet,
   Plus,
@@ -52,11 +53,17 @@ export default function BudgetPage() {
   const [isStatusDropdownOpen, setIsStatusDropdownOpen] = useState(false);
 
   // Verileri Sunucudan & Çerezden Çek
+  const [targetBudget, setTargetBudget] = useState(0);
+
   const loadData = async () => {
     setLoading(true);
     const res = await getBudgetItems();
     if (res.success && res.data) {
       setItems(res.data);
+    }
+    const settings = await getCoupleSettings();
+    if (settings.success && settings.data?.profile?.targetBudget) {
+      setTargetBudget(Number(settings.data.profile.targetBudget) || 0);
     }
     setLoading(false);
   };
@@ -66,7 +73,7 @@ export default function BudgetPage() {
   }, []);
 
   // Anlık Canlı Hesaplamalar
-  const TOTAL_TARGET_BUDGET = 350000;
+  const TOTAL_TARGET_BUDGET = targetBudget || 1;
   
   const totalSpent = useMemo(() => {
     return items.reduce((acc, curr) => acc + (Number(curr.spentAmount) || 0), 0);

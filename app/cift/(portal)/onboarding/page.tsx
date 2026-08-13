@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { completeCoupleOnboardingAction } from '@/lib/actions/couple-workspace';
 import { useWeddingOS } from '@/store/useWeddingOS';
 import { 
   Sparkles, 
@@ -25,21 +26,30 @@ export default function PremiumCoupleOnboardingPage() {
 
   // Form State
   const [formData, setFormData] = useState({
-    partner1: 'Selin',
-    partner2: 'Caner',
-    weddingDate: '2026-08-15',
+    partner1: '',
+    partner2: '',
+    weddingDate: '',
     city: 'İstanbul',
-    guestCount: 300,
+    guestCount: 150,
     budgetAmount: 350000,
     vibe: 'Sade & Lüks'
   });
 
-  const handleNext = () => {
+  const handleNext = async () => {
     if (step < 3) {
       setStep((prev) => (prev + 1) as 2 | 3);
-    } else {
-      router.push('/cift/dashboard');
+      return;
     }
+    const payload = new FormData();
+    payload.set('partner1', formData.partner1);
+    payload.set('partner2', formData.partner2);
+    payload.set('weddingDate', formData.weddingDate);
+    payload.set('city', formData.city);
+    payload.set('guestCount', String(formData.guestCount));
+    payload.set('budgetAmount', String(formData.budgetAmount));
+    payload.set('vibe', formData.vibe);
+    await completeCoupleOnboardingAction(payload);
+    router.push('/cift/dashboard');
   };
 
   const handleBack = () => {

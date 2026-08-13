@@ -38,6 +38,8 @@ export function VendorInbox({
 
   useEffect(() => {
     load();
+    const timer = setInterval(load, 4000);
+    return () => clearInterval(timer);
   }, []);
 
   useEffect(() => {

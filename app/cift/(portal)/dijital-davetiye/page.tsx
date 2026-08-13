@@ -44,15 +44,15 @@ export default function DigitalInvitationBuilderPage() {
 
   // Davetiye Ayarları State
   const [invitationConfig, setInvitationConfig] = useState({
-    slug: 'selin-kaan-2026',
-    title: 'Selin & Kaan Evleniyor',
-    date: '15 Ağustos 2026',
+    slug: '',
+    title: '',
+    date: '',
     time: '19:00',
-    venueName: 'Beykoz Secret Garden & Event',
-    address: 'Polonezköy Yolu No: 42, Beykoz / İstanbul',
-    theme: 'gold-luxury',
-    coverImage: 'https://images.unsplash.com/photo-1519167758481-83f550bb49b3?auto=format&fit=crop&w=1200&q=80',
-    welcomeMessage: 'Hayatımızın en özel gününde, mutluluğumuza ortak olmanızdan onur duyarız.',
+    venueName: '',
+    address: '',
+    theme: 'minimalist-white',
+    coverImage: '',
+    welcomeMessage: '',
     askDietary: true,
     askSongRequest: true,
     showWishlist: true,
@@ -70,7 +70,7 @@ export default function DigitalInvitationBuilderPage() {
     initConfig();
   }, []);
 
-  const fullUrl = `https://wedyplan.com/davetiye/${invitationConfig.slug}`;
+  const fullUrl = `https://www.wedyplan.com/dugun/${invitationConfig.slug}`;
 
   const showToast = (msg: string) => {
     setToastMessage(msg);

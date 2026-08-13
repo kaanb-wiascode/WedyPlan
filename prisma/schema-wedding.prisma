@@ -24,6 +24,11 @@ model Couple {
   weddingDate    DateTime?
   targetBudget   Float     @default(350000)
   city           String?
+  venueName      String    @default("")
+  guestCountGoal Int       @default(0)
+  vibe           String    @default("")
+  slug           String?   @unique
+  onboardingDone Boolean   @default(false)
   status         String    @default("ACTIVE")
   notes          String?
   createdAt      DateTime  @default(now())

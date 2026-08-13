@@ -26,7 +26,11 @@ function refreshVendor() {
   revalidatePath('/firma/ayarlar');
   revalidatePath('/cift/messages');
   revalidatePath('/cift/firmalar');
+  revalidatePath('/cift/dashboard');
+  revalidatePath('/cift/odeme');
+  revalidatePath('/cift/butce');
   revalidatePath('/admin/mesaj-denetim');
+  revalidatePath('/admin/ciftler');
   revalidatePath('/firmalar');
 }
 

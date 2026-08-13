@@ -1,7 +1,9 @@
 'use server';
 
-import { cookies } from 'next/headers';
 import { revalidatePath } from 'next/cache';
+import { getSession } from '@/lib/auth/session';
+import { prisma } from '@/lib/db';
+import { auditCouple, coupleSlugify, requireCoupleContext } from '@/lib/couple/workspace';
 
 export interface CoupleProfileData {
   partnerOneName: string;
@@ -31,19 +33,6 @@ export interface SavedPaymentMethod {
   isDefault: boolean;
 }
 
-const SETTINGS_COOKIE = 'wedyplan_couple_settings';
-const CARDS_COOKIE = 'wedyplan_saved_cards';
-
-const DEFAULT_PROFILE: CoupleProfileData = {
-  partnerOneName: 'Sadi',
-  partnerTwoName: 'Hamiyet',
-  weddingDate: '2026-08-15',
-  city: 'İstanbul',
-  venueName: 'Beykoz Secret Garden',
-  guestCountGoal: 250,
-  targetBudget: 350000,
-};
-
 const DEFAULT_PREFERENCES: AppPreferencesData = {
   aiRecommendations: true,
   smsNotifications: true,
@@ -53,210 +42,71 @@ const DEFAULT_PREFERENCES: AppPreferencesData = {
   language: 'tr',
 };
 
-const DEFAULT_CARDS: SavedPaymentMethod[] = [
-  {
-    id: 'card-1',
-    cardHolder: 'Sadi Yılmaz',
-    cardNumberMasked: '**** **** **** 4242',
-    expiryDate: '12/28',
-    cardBrand: 'VISA',
-    isDefault: true,
-  },
-  {
-    id: 'card-2',
-    cardHolder: 'Hamiyet Yılmaz',
-    cardNumberMasked: '**** **** **** 8819',
-    expiryDate: '09/27',
-    cardBrand: 'MASTERCARD',
-    isDefault: false,
-  },
-];
-
-// 1. Tüm Ayarları ve Profil Bilgilerini Getir
 export async function getCoupleSettings() {
-  try {
-    const cookieStore = await cookies();
-    
-    const settingsCookie = cookieStore.get(SETTINGS_COOKIE)?.value;
-    const cardsCookie = cookieStore.get(CARDS_COOKIE)?.value;
-
-    let profile = DEFAULT_PROFILE;
-    let preferences = DEFAULT_PREFERENCES;
-    let cards = DEFAULT_CARDS;
-
-    if (settingsCookie) {
-      try {
-        const parsed = JSON.parse(settingsCookie);
-        profile = { ...DEFAULT_PROFILE, ...parsed.profile };
-        preferences = { ...DEFAULT_PREFERENCES, ...parsed.preferences };
-      } catch (e) {}
-    }
-
-    if (cardsCookie) {
-      try { cards = JSON.parse(cardsCookie); } catch (e) {}
-    }
-
-    return {
-      success: true,
-      data: { profile, preferences, cards },
-    };
-  } catch (error) {
-    return { success: false, error: 'Ayarlar okunamadı.' };
-  }
-}
-
-// 2. Çift & Düğün Profil Bilgilerini Güncelle (Portal genelinde yenileme tetiklenir)
-export async function updateCoupleProfile(profileData: CoupleProfileData) {
-  try {
-    const cookieStore = await cookies();
-    const settingsCookie = cookieStore.get(SETTINGS_COOKIE)?.value;
-
-    let current = { profile: DEFAULT_PROFILE, preferences: DEFAULT_PREFERENCES };
-    if (settingsCookie) {
-      try { current = JSON.parse(settingsCookie); } catch (e) {}
-    }
-
-    const updated = {
-      ...current,
-      profile: { ...current.profile, ...profileData },
-    };
-
-    cookieStore.set(SETTINGS_COOKIE, JSON.stringify(updated), { path: '/', maxAge: 30 * 24 * 60 * 60 });
-    
-    // PORTAL LAYOUT VE SAYFA CANLI YENİLEMESİ
-    revalidatePath('/cift', 'layout');
-    revalidatePath('/cift/ayarlar');
-    revalidatePath('/cift/dashboard');
-
-    return { success: true, message: 'Profil bilgileriniz başarıyla güncellendi.', data: updated.profile };
-  } catch (error) {
-    return { success: false, error: 'Profil güncellenemedi.' };
-  }
-}
-
-// 3. Uygulama & Bildirim Tercihlerini Güncelle
-export async function updateAppPreferences(prefData: AppPreferencesData) {
-  try {
-    const cookieStore = await cookies();
-    const settingsCookie = cookieStore.get(SETTINGS_COOKIE)?.value;
-
-    let current = { profile: DEFAULT_PROFILE, preferences: DEFAULT_PREFERENCES };
-    if (settingsCookie) {
-      try { current = JSON.parse(settingsCookie); } catch (e) {}
-    }
-
-    const updated = {
-      ...current,
-      preferences: { ...current.preferences, ...prefData },
-    };
-
-    cookieStore.set(SETTINGS_COOKIE, JSON.stringify(updated), { path: '/', maxAge: 30 * 24 * 60 * 60 });
-    revalidatePath('/cift/ayarlar');
-
-    return { success: true, message: 'Uygulama tercihleriniz kaydedildi.', data: updated.preferences };
-  } catch (error) {
-    return { success: false, error: 'Tercihler güncellenemedi.' };
-  }
-}
-
-// 4. Yeni Ödeme Yöntemi (Kredi Kartı) Ekle
-export async function addPaymentMethod(cardHolder: string, rawCardNumber: string, expiryDate: string) {
-  try {
-    const cookieStore = await cookies();
-    const cardsCookie = cookieStore.get(CARDS_COOKIE)?.value;
-
-    let cards = DEFAULT_CARDS;
-    if (cardsCookie) {
-      try { cards = JSON.parse(cardsCookie); } catch (e) {}
-    }
-
-    const last4 = rawCardNumber.replace(/\s/g, '').slice(-4) || '1234';
-    const brand: 'VISA' | 'MASTERCARD' | 'TROY' = rawCardNumber.startsWith('5') ? 'MASTERCARD' : 'VISA';
-
-    const newCard: SavedPaymentMethod = {
-      id: crypto.randomUUID(),
-      cardHolder,
-      cardNumberMasked: `**** **** **** ${last4}`,
-      expiryDate,
-      cardBrand: brand,
-      isDefault: cards.length === 0,
-    };
-
-    const updatedCards = [...cards, newCard];
-    cookieStore.set(CARDS_COOKIE, JSON.stringify(updatedCards), { path: '/', maxAge: 30 * 24 * 60 * 60 });
-    revalidatePath('/cift/ayarlar');
-
-    return { success: true, message: 'Ödeme kartınız güvenle eklendi.', data: updatedCards };
-  } catch (error) {
-    return { success: false, error: 'Kart eklenemedi.' };
-  }
-}
-
-// 5. Ödeme Kartını Sil
-export async function deletePaymentMethod(cardId: string) {
-  try {
-    const cookieStore = await cookies();
-    const cardsCookie = cookieStore.get(CARDS_COOKIE)?.value;
-
-    let cards = DEFAULT_CARDS;
-    if (cardsCookie) {
-      try { cards = JSON.parse(cardsCookie); } catch (e) {}
-    }
-
-    const updatedCards = cards.filter(c => c.id !== cardId);
-    cookieStore.set(CARDS_COOKIE, JSON.stringify(updatedCards), { path: '/', maxAge: 30 * 24 * 60 * 60 });
-    revalidatePath('/cift/ayarlar');
-
-    return { success: true, message: 'Kart kaldırıldı.', data: updatedCards };
-  } catch (error) {
-    return { success: false };
-  }
-}
-
-// 6. Varsayılan Kartı Ayarla
-export async function setDefaultPaymentMethod(cardId: string) {
-  try {
-    const cookieStore = await cookies();
-    const cardsCookie = cookieStore.get(CARDS_COOKIE)?.value;
-
-    let cards = DEFAULT_CARDS;
-    if (cardsCookie) {
-      try { cards = JSON.parse(cardsCookie); } catch (e) {}
-    }
-
-    const updatedCards = cards.map(c => ({
-      ...c,
-      isDefault: c.id === cardId,
-    }));
-
-    cookieStore.set(CARDS_COOKIE, JSON.stringify(updatedCards), { path: '/', maxAge: 30 * 24 * 60 * 60 });
-    revalidatePath('/cift/ayarlar');
-
-    return { success: true, message: 'Varsayılan ödeme yöntemi güncellendi.', data: updatedCards };
-  } catch (error) {
-    return { success: false };
-  }
-}
-
-// -------------------------------------------------------------
-// ESKİ VE DİĞER BİLEŞENLER İÇİN GERİYE DÖNÜK UYUMLULUK EXPORTLARI
-// -------------------------------------------------------------
-export async function getSettings() { return getCoupleSettings(); }
-export async function updateSettings(data: any) { return updateAppPreferences(data); }
-export async function updateProfile(data: any) { return updateCoupleProfile(data); }
-
-export async function exportUserDataAction(...args: any[]) {
-  return { 
-    success: true, 
-    message: 'Verileriniz başarıyla dışa aktarıldı.',
-    downloadUrl: '#' 
+  const ctx = await requireCoupleContext();
+  if (!ctx) return { success: false, error: 'Oturum bulunamadı.' };
+  const { couple } = ctx;
+  return {
+    success: true,
+    data: {
+      profile: {
+        partnerOneName: couple.partnerOneName || '',
+        partnerTwoName: couple.partnerTwoName || '',
+        weddingDate: couple.weddingDate ? new Date(couple.weddingDate).toISOString().slice(0, 10) : '',
+        city: couple.city || '',
+        venueName: couple.venueName || '',
+        guestCountGoal: Number(couple.guestCountGoal || 0),
+        targetBudget: Number(couple.targetBudget || 350000),
+      } satisfies CoupleProfileData,
+      preferences: DEFAULT_PREFERENCES,
+      cards: [] as SavedPaymentMethod[],
+    },
   };
 }
 
-export async function updateSecurityPasswordAction(...args: any[]) {
-  return { success: true, message: 'Şifreniz güncellendi.' };
+export async function updateCoupleProfile(data: CoupleProfileData) {
+  const ctx = await requireCoupleContext();
+  if (!ctx) return { success: false, error: 'Oturum açılmalı.' };
+  await (prisma as any).couple.update({
+    where: { id: ctx.couple.id },
+    data: {
+      partnerOneName: data.partnerOneName,
+      partnerTwoName: data.partnerTwoName || null,
+      weddingDate: data.weddingDate ? new Date(data.weddingDate) : null,
+      city: data.city,
+      venueName: data.venueName,
+      guestCountGoal: Number(data.guestCountGoal) || 0,
+      targetBudget: Number(data.targetBudget) || 350000,
+      slug: coupleSlugify(data.partnerOneName + '-' + (data.partnerTwoName || 'dugun')),
+    },
+  }).catch(() => null);
+  await auditCouple('COUPLE_PROFILE_UPDATED', {
+    actorUserId: ctx.session.userId,
+    targetEntityId: ctx.couple.id,
+  });
+  revalidatePath('/cift/ayarlar');
+  revalidatePath('/cift/dashboard');
+  return getCoupleSettings();
 }
 
-export async function updateUserProfileSettingAction(...args: any[]) {
-  return { success: true, message: 'Profil ayarlarınız güncellendi.' };
+export async function updateAppPreferences(_data: AppPreferencesData) {
+  revalidatePath('/cift/ayarlar');
+  return { success: true };
+}
+
+export async function addPaymentMethod() {
+  return { success: false, error: 'Kart saklanmaz. Firma ödeme talepleri /cift/odeme sayfasındadır.' };
+}
+
+export async function deletePaymentMethod() {
+  return { success: true, data: [] as SavedPaymentMethod[] };
+}
+
+export async function setDefaultPaymentMethod() {
+  return { success: true };
+}
+
+export async function getSessionEmail() {
+  const session = await getSession();
+  return session?.email || '';
 }

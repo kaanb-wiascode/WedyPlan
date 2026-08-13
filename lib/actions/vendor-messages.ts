@@ -18,6 +18,7 @@ const db = prisma as any;
 function refreshChat() {
   revalidatePath('/firma/mesajlar');
   revalidatePath('/cift/messages');
+  revalidatePath('/cift/dashboard');
   revalidatePath('/admin/mesaj-denetim');
 }
 

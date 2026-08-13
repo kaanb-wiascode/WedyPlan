@@ -1,0 +1,78 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model CoupleInvitation {
+  id              String   @id @default(uuid())
+  coupleId        String   @unique
+  userId          String
+  slug            String   @unique
+  title           String
+  dateLabel       String   @default("")
+  timeLabel       String   @default("19:00")
+  venueName       String   @default("")
+  address         String   @default("")
+  theme           String   @default("minimalist-white")
+  coverImage      String   @default("")
+  welcomeMessage  String   @default("")
+  askDietary      Boolean  @default(true)
+  askSongRequest  Boolean  @default(true)
+  showWishlist    Boolean  @default(true)
+  published       Boolean  @default(false)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([userId])
+}
+
+model CouplePhoto {
+  id           String   @id @default(uuid())
+  coupleId     String
+  userId       String
+  url          String
+  caption      String   @default("")
+  uploaderName String   @default("Çift")
+  createdAt    DateTime @default(now())
+
+  @@index([coupleId, createdAt])
+  @@index([userId])
+}
+
+model CoupleGiftItem {
+  id          String   @id @default(uuid())
+  coupleId    String
+  userId      String
+  title       String
+  category    String   @default("Hediye")
+  price       Int      @default(0)
+  imageUrl    String   @default("")
+  isPurchased Boolean  @default(false)
+  purchasedBy String?
+  createdAt   DateTime @default(now())
+
+  @@index([coupleId])
+  @@index([userId])
+}
+
+model CoupleRsvp {
+  id          String   @id @default(uuid())
+  coupleId    String
+  userId      String
+  guestName   String
+  email       String?
+  phone       String?
+  attending   Boolean
+  plusOneCount Int     @default(0)
+  dietary     String   @default("")
+  songRequest String   @default("")
+  note        String   @default("")
+  createdAt   DateTime @default(now())
+
+  @@index([coupleId, createdAt])
+  @@index([userId])
+}

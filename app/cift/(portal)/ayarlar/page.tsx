@@ -39,12 +39,12 @@ export default function CoupleSettingsPage() {
   const [activeTab, setActiveTab] = useState<'PROFILE' | 'PAYMENTS' | 'NOTIFICATIONS' | 'SECURITY'>('PROFILE');
 
   const [profileForm, setProfileForm] = useState<CoupleProfileData>({
-    partnerOneName: 'Sadi',
-    partnerTwoName: 'Hamiyet',
-    weddingDate: '2026-08-15',
-    city: 'İstanbul',
-    venueName: 'Beykoz Secret Garden',
-    guestCountGoal: 250,
+    partnerOneName: '',
+    partnerTwoName: '',
+    weddingDate: '',
+    city: '',
+    venueName: '',
+    guestCountGoal: 0,
     targetBudget: 350000,
   });
 

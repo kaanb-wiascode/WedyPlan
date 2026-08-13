@@ -18,7 +18,8 @@ import {
   Settings,
   LogOut,
   ChevronRight,
-  Calendar
+  Calendar,
+  Camera
 } from 'lucide-react';
 import { SidebarPortalSwitcher } from '@/components/shared/layout/SidebarPortalSwitcher';
 
@@ -30,6 +31,7 @@ const menuItems = [
   { name: 'Davetliler', href: '/cift/davetliler', icon: Users },
   { name: 'Firmalar', href: '/cift/firmalar', icon: Building2 },
   { name: 'Davetiye', href: '/cift/dijital-davetiye', icon: Mail },
+  { name: 'Fotoğraf duvarı', href: '/cift/fotograf-duvari', icon: Camera },
   { name: 'Mesajlar', href: '/cift/messages', icon: MessageSquare },
   { name: 'Ödeme', href: '/cift/odeme', icon: CreditCard },
   { name: 'Ayarlar', href: '/cift/ayarlar', icon: Settings },
@@ -39,9 +41,9 @@ export function CoupleSidebar() {
   const pathname = usePathname();
 
   const [profile, setProfile] = useState({
-    partnerOneName: 'Sadi',
-    partnerTwoName: 'Hamiyet',
-    weddingDate: '2026-08-15',
+    partnerOneName: '',
+    partnerTwoName: '',
+    weddingDate: '',
   });
 
   const syncProfileData = async () => {
@@ -51,9 +53,9 @@ export function CoupleSidebar() {
         const parsed = JSON.parse(localData);
         if (parsed.partnerOneName || parsed.partnerTwoName) {
           setProfile({
-            partnerOneName: parsed.partnerOneName || 'Sadi',
-            partnerTwoName: parsed.partnerTwoName || 'Hamiyet',
-            weddingDate: parsed.weddingDate || '2026-08-15',
+            partnerOneName: parsed.partnerOneName || '',
+            partnerTwoName: parsed.partnerTwoName || '',
+            weddingDate: parsed.weddingDate || '',
           });
         }
       }
@@ -62,9 +64,9 @@ export function CoupleSidebar() {
     const res = await getCoupleSettings();
     if (res.success && res.data?.profile) {
       setProfile({
-        partnerOneName: res.data.profile.partnerOneName || 'Sadi',
-        partnerTwoName: res.data.profile.partnerTwoName || 'Hamiyet',
-        weddingDate: res.data.profile.weddingDate || '2026-08-15',
+        partnerOneName: res.data.profile.partnerOneName || '',
+        partnerTwoName: res.data.profile.partnerTwoName || '',
+        weddingDate: res.data.profile.weddingDate || '',
       });
     }
   };
@@ -85,9 +87,9 @@ export function CoupleSidebar() {
     };
   }, [pathname]);
 
-  const pOne = profile.partnerOneName || 'S';
-  const pTwo = profile.partnerTwoName || 'H';
-  const initials = `${pOne[0].toUpperCase()}&${pTwo[0].toUpperCase()}`;
+  const pOne = profile.partnerOneName || 'Ç';
+  const pTwo = profile.partnerTwoName || '';
+  const initials = pTwo ? `${pOne[0]?.toUpperCase()}&${pTwo[0]?.toUpperCase()}` : (pOne[0]?.toUpperCase() || 'Ç');
 
   const formatDate = (dateStr: string) => {
     if (!dateStr) return 'Tarih Belirtilmedi';
@@ -100,8 +102,8 @@ export function CoupleSidebar() {
   };
 
   return (
-    <aside className="apple-sidebar sticky top-0 z-30 flex min-h-screen w-60 flex-col justify-between">
-      <div className="space-y-5 p-4">
+    <aside className="apple-sidebar sticky top-0 z-30 flex h-screen w-60 shrink-0 flex-col overflow-hidden">
+      <div className="min-h-0 flex-1 space-y-5 overflow-y-auto p-4">
         
         <Link href="/cift/dashboard" className="block px-2 group">
           <div className="relative w-40 h-10">
@@ -151,7 +153,7 @@ export function CoupleSidebar() {
           </div>
           <div className="flex min-w-0 flex-col truncate">
             <span className="truncate text-[13px] font-medium text-[#1d1d1f]">
-              {profile.partnerOneName} & {profile.partnerTwoName}
+              {profile.partnerTwoName ? `${profile.partnerOneName} & ${profile.partnerTwoName}` : (profile.partnerOneName || 'Çift')}
             </span>
             <span className="mt-0.5 flex items-center gap-1 truncate text-[11px] text-[#86868b]">
               <Calendar className="h-2.5 w-2.5 shrink-0" /> {formatDate(profile.weddingDate)}

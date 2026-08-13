@@ -1,9 +1,8 @@
 'use server';
 
-import { cookies } from 'next/headers';
 import { revalidatePath } from 'next/cache';
-import { getSession } from '@/lib/auth/session';
 import { prisma } from '@/lib/db';
+import { coupleSlugify, requireCoupleContext } from '@/lib/couple/workspace';
 
 export interface InvitationConfigInput {
   slug: string;
@@ -20,201 +19,117 @@ export interface InvitationConfigInput {
   showWishlist: boolean;
 }
 
-const INVITATION_COOKIE = 'wedyplan_invitation_config';
-const GUEST_COOKIE = 'wedyplan_guest_data';
-
-const DEFAULT_CONFIG: InvitationConfigInput = {
-  slug: 'selin-kaan-2026',
-  title: 'Selin & Kaan Evleniyor',
-  date: '15 Ağustos 2026',
-  time: '19:00',
-  venueName: 'Beykoz Secret Garden & Event',
-  address: 'Polonezköy Yolu No: 42, Beykoz / İstanbul',
-  theme: 'gold-luxury',
-  coverImage: 'https://images.unsplash.com/photo-1519167758481-83f550bb49b3?auto=format&fit=crop&w=1200&q=80',
-  welcomeMessage: 'Hayatımızın en özel gününde, mutluluğumuza ortak olmanızdan onur duyarız.',
-  askDietary: true,
-  askSongRequest: true,
-  showWishlist: true,
-};
-
-// 1. Davetiye Konfigürasyonunu Getir
-export async function getInvitationConfig() {
-  try {
-    const session = await getSession();
-    if (session?.userId) {
-      try {
-        const dbInvitation = await (prisma as any).invitation.findFirst({
-          where: { userId: session.userId },
-        });
-        if (dbInvitation?.configJson) {
-          return { success: true, data: JSON.parse(dbInvitation.configJson) };
-        }
-      } catch (e) {}
-    }
-
-    const cookieStore = await cookies();
-    const configCookie = cookieStore.get(INVITATION_COOKIE)?.value;
-
-    let config = DEFAULT_CONFIG;
-    if (configCookie) {
-      try {
-        config = JSON.parse(configCookie);
-      } catch (e) {
-        config = DEFAULT_CONFIG;
-      }
-    }
-
-    return { success: true, data: config };
-  } catch (error) {
-    console.error('getInvitationConfig hatası:', error);
-    return { success: false, error: 'Davetiye ayarları okunamadı.' };
-  }
-}
-
-// 2. Davetiye Ayarlarını Kaydet (Cookie + DB + Revalidate)
-export async function saveInvitationConfig(data: InvitationConfigInput) {
-  try {
-    const session = await getSession();
-    const cookieStore = await cookies();
-
-    cookieStore.set(INVITATION_COOKIE, JSON.stringify(data), {
-      path: '/',
-      maxAge: 30 * 24 * 60 * 60,
-    });
-
-    if (session?.userId) {
-      try {
-        await (prisma as any).invitation.upsert({
-          where: { userId: session.userId },
-          update: { configJson: JSON.stringify(data), slug: data.slug },
-          create: { userId: session.userId, configJson: JSON.stringify(data), slug: data.slug },
-        });
-      } catch (e) {}
-    }
-
-    revalidatePath('/cift/dijital-davetiye');
-    revalidatePath('/cift/dashboard');
-
-    return { success: true, data };
-  } catch (error) {
-    console.error('saveInvitationConfig hatası:', error);
-    return { success: false, error: 'Davetiye ayarları kaydedilemedi.' };
-  }
-}
-
-// 3. Davetiye Sayfasından Gelen Kamu LCV Yanıtını Kaydet
-export async function submitPublicRsvp(data: {
-  coupleId?: string;
-  fullName: string;
-  email?: string;
-  phone?: string;
-  status: 'ACCEPTED' | 'DECLINED' | 'ATTENDING';
-  plusOneCount?: number;
-  plusOne?: boolean;
-  notes?: string;
-  dietaryPreference?: string;
-  songRequest?: string;
-}) {
-  try {
-    const cookieStore = await cookies();
-    const guestCookie = cookieStore.get(GUEST_COOKIE)?.value;
-
-    let currentGuests: any[] = [];
-    if (guestCookie) {
-      try {
-        currentGuests = JSON.parse(guestCookie);
-      } catch (e) {}
-    }
-
-    const mappedStatus = data.status === 'ATTENDING' ? 'ACCEPTED' : data.status;
-
-    const newGuest = {
-      id: crypto.randomUUID(),
-      fullName: data.fullName,
-      email: data.email || '',
-      phone: data.phone || '',
-      group: 'Davetiye Formu (Online LCV)',
-      plusOneCount: Number(data.plusOneCount) || (data.plusOne ? 1 : 0),
-      rsvpStatus: mappedStatus,
-      dietaryPreference: data.dietaryPreference || 'Standart',
-      songRequest: data.songRequest || '',
-      notes: data.notes || '',
-      createdAt: new Date().toISOString(),
-    };
-
-    const updatedGuests = [newGuest, ...currentGuests];
-    cookieStore.set(GUEST_COOKIE, JSON.stringify(updatedGuests), {
-      path: '/',
-      maxAge: 30 * 24 * 60 * 60,
-    });
-
-    revalidatePath('/cift/davetliler');
-    revalidatePath('/cift/dashboard');
-
-    return { success: true, message: 'LCV yanıtınız başarıyla kaydedildi.' };
-  } catch (error) {
-    console.error('submitPublicRsvp hatası:', error);
-    return { success: false, error: 'Yanıt iletilemedi, lütfen tekrar deneyin.' };
-  }
-}
-
-// 4. AI Davetiye Metni Üretici
-export async function generateAIInvitationCopyAction(
-  tone?: string,
-  coupleNames?: string,
-  venueName?: string
-) {
-  const names = coupleNames || 'Selin & Kaan';
-  const venue = venueName || 'Düğün Salonu';
-  
-  const copyVariations = [
-    `${names} çifti olarak, hayatımızın en güzel yolculuğuna adım atarken, siz değerli dostlarımızı aramızda görmekten mutluluk duyarız.`,
-    `Sevgiyle temelini attığımız yuvamızın bu özel gününde, ${venue} mekanındaki davetimize katılıp mutluluğumuza ortak olmanız bizleri onurlandıracaktır.`,
-    `Birlikte yazacağımız yeni bir hikayenin başlangıcında, siz sevdiklerimizle bir arada olmak en büyük arzumuz.`
-  ];
-
-  const selectedCopy = copyVariations[Math.floor(Math.random() * copyVariations.length)];
-
+function toConfig(row: any, fallback: InvitationConfigInput): InvitationConfigInput {
+  if (!row) return fallback;
   return {
-    success: true,
-    generatedText: selectedCopy,
-    copy: selectedCopy,
+    slug: row.slug,
+    title: row.title,
+    date: row.dateLabel,
+    time: row.timeLabel,
+    venueName: row.venueName,
+    address: row.address,
+    theme: row.theme,
+    coverImage: row.coverImage,
+    welcomeMessage: row.welcomeMessage,
+    askDietary: row.askDietary,
+    askSongRequest: row.askSongRequest,
+    showWishlist: row.showWishlist,
   };
 }
 
-// 5. Kamu Erişimli Davetiye Detayı (TypeScript Hatasını Çözen coupleId Eklendi)
-export async function getPublicInvitation(slugOrId: string) {
-  const configRes = await getInvitationConfig();
-  const config = configRes.data || DEFAULT_CONFIG;
+export async function getInvitationConfig() {
+  const ctx = await requireCoupleContext();
+  if (!ctx) return { success: false, error: 'Oturum bulunamadı.' };
+  const { couple, session } = ctx;
+  const fallback: InvitationConfigInput = {
+    slug: couple.slug || coupleSlugify(`${couple.partnerOneName}-${couple.partnerTwoName || 'dugun'}`),
+    title: `${couple.partnerOneName}${couple.partnerTwoName ? ` & ${couple.partnerTwoName}` : ''} Evleniyor`,
+    date: couple.weddingDate ? new Date(couple.weddingDate).toLocaleDateString('tr-TR') : '',
+    time: '19:00',
+    venueName: couple.venueName || '',
+    address: couple.city || '',
+    theme: 'minimalist-white',
+    coverImage: '',
+    welcomeMessage: 'Hayatımızın en özel gününde yanımızda olmanızı dileriz.',
+    askDietary: true,
+    askSongRequest: true,
+    showWishlist: true,
+  };
+  const row = await (prisma as any).coupleInvitation.findUnique({ where: { coupleId: couple.id } }).catch(() => null);
+  if (!row) {
+    const created = await (prisma as any).coupleInvitation.create({
+      data: {
+        coupleId: couple.id,
+        userId: session.userId,
+        slug: fallback.slug,
+        title: fallback.title,
+        dateLabel: fallback.date,
+        timeLabel: fallback.time,
+        venueName: fallback.venueName,
+        address: fallback.address,
+        welcomeMessage: fallback.welcomeMessage,
+      },
+    }).catch(() => null);
+    return { success: true, data: toConfig(created, fallback) };
+  }
+  return { success: true, data: toConfig(row, fallback) };
+}
 
+export async function saveInvitationConfig(data: InvitationConfigInput) {
+  const ctx = await requireCoupleContext();
+  if (!ctx) return { success: false, error: 'Oturum açılmalı.' };
+  const slug = coupleSlugify(data.slug || ctx.couple.slug || ctx.couple.partnerOneName);
+  await (prisma as any).coupleInvitation.upsert({
+    where: { coupleId: ctx.couple.id },
+    update: {
+      slug,
+      title: data.title,
+      dateLabel: data.date,
+      timeLabel: data.time,
+      venueName: data.venueName,
+      address: data.address,
+      theme: data.theme,
+      coverImage: data.coverImage,
+      welcomeMessage: data.welcomeMessage,
+      askDietary: data.askDietary,
+      askSongRequest: data.askSongRequest,
+      showWishlist: data.showWishlist,
+      published: true,
+    },
+    create: {
+      coupleId: ctx.couple.id,
+      userId: ctx.session.userId,
+      slug,
+      title: data.title,
+      dateLabel: data.date,
+      timeLabel: data.time,
+      venueName: data.venueName,
+      address: data.address,
+      theme: data.theme,
+      coverImage: data.coverImage,
+      welcomeMessage: data.welcomeMessage,
+      askDietary: data.askDietary,
+      askSongRequest: data.askSongRequest,
+      showWishlist: data.showWishlist,
+      published: true,
+    },
+  }).catch(() => null);
+  await (prisma as any).couple.update({
+    where: { id: ctx.couple.id },
+    data: { slug, venueName: data.venueName },
+  }).catch(() => null);
+  revalidatePath('/cift/dijital-davetiye');
+  revalidatePath(`/dugun/${slug}`);
+  return getInvitationConfig();
+}
+
+export async function generateAIInvitationCopyAction() {
+  const ctx = await requireCoupleContext();
+  const names = ctx ? `${ctx.couple.partnerOneName}${ctx.couple.partnerTwoName ? ` & ${ctx.couple.partnerTwoName}` : ''}` : 'biz';
   return {
     success: true,
     data: {
-      coupleId: slugOrId,
-      coupleName: config.title,
-      weddingDate: config.date,
-      time: config.time,
-      venueName: config.venueName,
-      venueAddress: config.address,
-      message: config.welcomeMessage,
-      theme: config.theme,
-      coverImage: config.coverImage,
-      askDietary: config.askDietary,
-      askSongRequest: config.askSongRequest,
-      showWishlist: config.showWishlist,
+      welcomeMessage: `${names} olarak hayatımızın en özel gününde yanımızda olmanızı dileriz.`,
     },
-  };
-}
-
-// 6. RSVP Hatırlatıcı Dışa Aktarımı
-export async function sendRSVPReminderAction(
-  userIdOrGuestId?: string,
-  options?: { guestIds?: string[]; reminderChannel?: string; [key: string]: any }
-) {
-  console.log(`[RSVP HATIRLATMA TETİKLENDİ]: ${userIdOrGuestId || 'Tüm davetliler'}`);
-  return {
-    success: true,
-    message: 'Davetlilere LCV hatırlatması başarıyla iletildi.',
   };
 }

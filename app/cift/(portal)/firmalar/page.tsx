@@ -29,6 +29,11 @@ export default async function CoupleVendorsPage() {
     where: { coupleUserId: session.userId },
     orderBy: { createdAt: 'desc' },
   }).catch(() => []);
+  const leads = await db.marketplaceLead.findMany({
+    where: { coupleUserId: session.userId },
+    orderBy: { createdAt: 'desc' },
+    take: 20,
+  }).catch(() => []);
   const vendorIds = [...new Set(dealsWithSteps.map((d) => d.vendorId))];
   const vendors = vendorIds.length
     ? await db.vendor.findMany({ where: { id: { in: vendorIds } } }).catch(() => [])
@@ -78,6 +83,18 @@ export default async function CoupleVendorsPage() {
         })
       )}
 
+      {(leads as any[]).length > 0 ? (
+        <section className="space-y-2">
+          <h2 className="text-[16px] font-semibold">Gönderilen teklif talepleri</h2>
+          {(leads as any[]).map((lead) => (
+            <div key={lead.id} className="apple-panel flex justify-between rounded-[20px] p-4 text-[13px]">
+              <span>{lead.vendorName} · {lead.city}</span>
+              <span className="text-[#86868b]">{lead.status}</span>
+            </div>
+          ))}
+        </section>
+      ) : null}
+
       {(payments as any[]).length > 0 ? (
         <section className="space-y-2">
           <h2 className="text-[16px] font-semibold">Ödeme talepleri</h2>
@@ -96,6 +113,7 @@ export default async function CoupleVendorsPage() {
 async function openChat(formData: FormData) {
   'use server';
   await startVendorCoupleChatAction(String(formData.get('vendorId') || ''));
+  redirect('/cift/messages');
 }
 
 function StartChat({ vendorId }: { vendorId: string }) {
