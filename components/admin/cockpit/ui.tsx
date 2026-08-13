@@ -56,7 +56,16 @@ export function StatusPill({ status }: { status: string }) {
     REJECTED: 'bg-rose-50 text-rose-700',
     LOCKED: 'bg-rose-50 text-rose-700',
     CONTACTED: 'bg-amber-50 text-amber-700',
-    CLOSED: 'bg-zinc-100 text-zinc-600',
+  ISSUED: 'bg-emerald-50 text-emerald-700',
+    SENT: 'bg-[#0071e3]/10 text-[#0071e3]',
+    WON: 'bg-emerald-50 text-emerald-700',
+    OPEN: 'bg-[#0071e3]/10 text-[#0071e3]',
+    DONE: 'bg-emerald-50 text-emerald-700',
+    DRAFT: 'bg-zinc-100 text-zinc-600',
+    IN_REVIEW: 'bg-amber-50 text-amber-700',
+    SUBMITTED: 'bg-[#0071e3]/10 text-[#0071e3]',
+    NOT_SENT: 'bg-zinc-100 text-zinc-600',
+    QUEUED: 'bg-amber-50 text-amber-700',
   };
   return (
     <span className={`rounded-full px-2.5 py-1 text-[11px] font-semibold ${map[status] || 'bg-zinc-100 text-zinc-600'}`}>

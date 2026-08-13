@@ -17,50 +17,97 @@ import {
   LogOut,
   ChevronRight,
   Shield,
+  Gem,
+  FolderCheck,
+  Target,
+  Contact,
+  Handshake,
+  MapPinned,
+  Headphones,
+  Ticket,
+  MessageCircle,
+  ListTodo,
+  MessagesSquare,
+  Calendar,
+  FileBarChart,
+  Receipt,
+  Scale,
+  Boxes,
+  BadgeDollarSign,
 } from 'lucide-react';
 import { SidebarPortalSwitcher } from '@/components/shared/layout/SidebarPortalSwitcher';
+import type { OpsDesk } from '@/lib/ops/catalog';
+import { DESK_NAV, SHARED_NAV, SUPER_NAV } from '@/lib/ops/catalog';
 
-type NavItem = {
-  href: string;
-  name: string;
-  icon: typeof LayoutDashboard;
-  exact?: boolean;
+const ICONS: Record<string, typeof LayoutDashboard> = {
+  LayoutDashboard,
+  Users,
+  Store,
+  ClipboardCheck,
+  ListChecks,
+  Inbox,
+  Wallet,
+  Settings,
+  ScrollText,
+  Shield,
+  Gem,
+  FolderCheck,
+  Target,
+  Contact,
+  Handshake,
+  MapPinned,
+  Headphones,
+  Ticket,
+  MessageCircle,
+  ListTodo,
+  MessagesSquare,
+  Calendar,
+  FileBarChart,
+  Receipt,
+  Scale,
+  Boxes,
+  BadgeDollarSign,
 };
 
-const groups: { title: string; items: NavItem[] }[] = [
-  {
-    title: 'Kokpit',
-    items: [{ href: '/admin', name: 'Komuta merkezi', icon: LayoutDashboard, exact: true }],
-  },
-  {
-    title: 'Operasyon',
-    items: [
-      { href: '/admin/onaylar', name: 'Firma onayları', icon: ClipboardCheck },
-      { href: '/admin/firmalar', name: 'Firmalar', icon: Store },
-      { href: '/admin/ciftler', name: 'Çiftler', icon: Users },
-      { href: '/admin/hizmetler', name: 'Hizmet denetimi', icon: ListChecks },
-      { href: '/admin/talepler', name: 'Teklif talepleri', icon: Inbox },
-    ],
-  },
-  {
-    title: 'Kontrol',
-    items: [
-      { href: '/admin/kullanicilar', name: 'Kullanıcılar', icon: Shield },
-      { href: '/admin/finans', name: 'Finans', icon: Wallet },
-      { href: '/admin/sistem', name: 'Sistem', icon: Settings },
-      { href: '/admin/denetim', name: 'Denetim kaydı', icon: ScrollText },
-    ],
-  },
-];
+type NavItem = { href: string; name: string; icon: string; exact?: boolean };
+
+function groupsForDesk(desk: OpsDesk): { title: string; items: NavItem[] }[] {
+  const shared = [{ title: 'İş akışı', items: SHARED_NAV }];
+  if (desk === 'SUPER') {
+    return [
+      ...SUPER_NAV,
+      ...DESK_NAV.FINANCE,
+      ...DESK_NAV.SALES,
+      ...DESK_NAV.REGION,
+      ...DESK_NAV.CRM,
+      ...shared,
+      {
+        title: 'Kontrol',
+        items: [
+          { href: '/admin/kullanicilar', name: 'Kullanıcılar', icon: 'Shield' },
+          { href: '/admin/finans', name: 'Komisyon', icon: 'Wallet' },
+          { href: '/admin/sistem', name: 'Sistem', icon: 'Settings' },
+          { href: '/admin/denetim', name: 'Denetim kaydı', icon: 'ScrollText' },
+        ],
+      },
+    ];
+  }
+  return [...(DESK_NAV[desk] || []), ...shared];
+}
 
 export function AdminSidebar({
   userName = 'Yönetici',
   email = 'admin@wedyplan.com',
+  desk = 'SUPER',
+  title = 'Yönetici',
 }: {
   userName?: string;
   email?: string;
+  desk?: OpsDesk;
+  title?: string;
 }) {
   const pathname = usePathname();
+  const groups = groupsForDesk(desk);
   const initials = userName
     .split(' ')
     .filter(Boolean)
@@ -82,6 +129,10 @@ export function AdminSidebar({
             />
           </div>
         </Link>
+        <div className="rounded-2xl bg-[#0071e3]/10 px-3 py-2">
+          <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-[#0071e3]">{desk}</p>
+          <p className="text-[12px] text-[#1d1d1f]">{title}</p>
+        </div>
 
         <nav className="space-y-5">
           {groups.map((group) => (
@@ -91,13 +142,13 @@ export function AdminSidebar({
               </h3>
               <div className="space-y-0.5">
                 {group.items.map((item) => {
-                  const Icon = item.icon;
+                  const Icon = ICONS[item.icon] || LayoutDashboard;
                   const isActive = item.exact
                     ? pathname === item.href
                     : pathname === item.href || Boolean(pathname?.startsWith(`${item.href}/`));
                   return (
                     <Link
-                      key={item.href}
+                      key={`${group.title}-${item.href}-${item.name}`}
                       href={item.href}
                       className={`apple-nav-item ${isActive ? 'apple-nav-item-active' : ''}`}
                     >

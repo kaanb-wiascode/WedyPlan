@@ -15,21 +15,25 @@ import {
   Users,
   Settings,
   LogOut,
-  ChevronRight
+  ChevronRight,
+  FolderCheck,
+  Gem
 } from 'lucide-react';
 import { SidebarPortalSwitcher } from '@/components/shared/layout/SidebarPortalSwitcher';
 
 const menuItems = [
-  { name: 'Genel bakış', href: '/firma/dashboard', icon: LayoutDashboard },
-  { name: 'AI asistan', href: '/firma/ai-asistan', icon: Sparkles, badge: 'AI' },
-  { name: 'Talepler', href: '/firma/talepler', icon: Inbox },
-  { name: 'Takvim', href: '/firma/takvim', icon: Calendar },
-  { name: 'Sözleşmeler', href: '/firma/sozlesmeler', icon: FileText },
-  { name: 'Finans', href: '/firma/finans', icon: Wallet },
-  { name: 'Vitrin', href: '/firma/vitrin', icon: Store },
-  { name: 'Yorumlar', href: '/firma/degerlendirmeler', icon: Star },
-  { name: 'Ekip', href: '/firma/organizasyon', icon: Users },
-  { name: 'Ayarlar', href: '/firma/ayarlar', icon: Settings },
+  { name: 'Genel bakış', href: '/firma/dashboard', icon: LayoutDashboard, feature: null as string | null },
+  { name: 'AI asistan', href: '/firma/ai-asistan', icon: Sparkles, badge: 'AI', feature: 'ai_assistant' },
+  { name: 'Talepler', href: '/firma/talepler', icon: Inbox, feature: 'leads' },
+  { name: 'Takvim', href: '/firma/takvim', icon: Calendar, feature: 'calendar' },
+  { name: 'Sözleşmeler', href: '/firma/sozlesmeler', icon: FileText, feature: 'contracts' },
+  { name: 'Finans', href: '/firma/finans', icon: Wallet, feature: 'finance' },
+  { name: 'Vitrin', href: '/firma/vitrin', icon: Store, feature: 'showcase' },
+  { name: 'Yorumlar', href: '/firma/degerlendirmeler', icon: Star, feature: 'reviews' },
+  { name: 'Ekip', href: '/firma/organizasyon', icon: Users, feature: 'team' },
+  { name: 'Evrak / KYC', href: '/firma/evrak', icon: FolderCheck, feature: null },
+  { name: 'Paketler', href: '/firma/paket', icon: Gem, feature: null },
+  { name: 'Ayarlar', href: '/firma/ayarlar', icon: Settings, feature: null },
 ];
 
 export function VendorSidebar() {
@@ -39,6 +43,8 @@ export function VendorSidebar() {
     companyName: 'Beykoz Secret Garden',
     category: 'Düğün Mekanı',
   });
+
+  const [features, setFeatures] = useState<string[] | null>(null);
 
   useEffect(() => {
     try {
@@ -51,6 +57,15 @@ export function VendorSidebar() {
         });
       }
     } catch (e) {}
+    fetch('/api/firma/entitlements')
+      .then((res) => res.json())
+      .then((payload) => {
+        if (payload?.data?.features) setFeatures(payload.data.features);
+        if (payload?.data?.businessName) {
+          setVendorProfile((current) => ({ ...current, companyName: payload.data.businessName }));
+        }
+      })
+      .catch(() => setFeatures([]));
   }, []);
 
   return (
@@ -71,6 +86,7 @@ export function VendorSidebar() {
         {/* Menü Linkleri */}
         <nav className="space-y-1">
           {menuItems.map((item) => {
+            if (item.feature && features && !features.includes(item.feature)) return null;
             const isActive =
               pathname === item.href ||
               (pathname?.startsWith(`${item.href}/`) && item.href !== '/firma/dashboard');

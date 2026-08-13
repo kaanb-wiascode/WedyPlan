@@ -1,0 +1,387 @@
+enum OpsDesk {
+  SUPER
+  FINANCE
+  SALES
+  REGION
+  CRM
+}
+
+enum OpsTaskPriority {
+  URGENT
+  HIGH
+  MEDIUM
+  LOW
+}
+
+enum OpsTaskStatus {
+  OPEN
+  IN_PROGRESS
+  BLOCKED
+  DONE
+}
+
+model AdminStaff {
+  id            String   @id @default(uuid())
+  userId        String   @unique
+  desk          OpsDesk
+  title         String   @default("Uzman")
+  regionCode    String?
+  managerUserId String?
+  isActive      Boolean  @default(true)
+  extraPerms    String[] @default([])
+  revokedPerms  String[] @default([])
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([desk, isActive])
+  @@index([regionCode])
+}
+
+model VendorPackage {
+  id            String   @id @default(uuid())
+  code          String   @unique
+  name          String
+  tagline       String   @default("")
+  monthlyPrice  Decimal  @db.Decimal(12, 2)
+  yearlyPrice   Decimal  @db.Decimal(12, 2)
+  trialDays     Int      @default(14)
+  leadQuota     Int      @default(20)
+  featuredSlots Int      @default(0)
+  teamSeats     Int      @default(1)
+  commissionPct Decimal  @db.Decimal(5, 2) @default(12)
+  features      String[] @default([])
+  isActive      Boolean  @default(true)
+  isPublic      Boolean  @default(true)
+  sortOrder     Int      @default(0)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  sales VendorPackageSale[]
+}
+
+model VendorPackageSale {
+  id            String         @id @default(uuid())
+  vendorId      String
+  packageId     String
+  billingCycle  String         @default("MONTHLY")
+  amount        Decimal        @db.Decimal(12, 2)
+  status        String         @default("PENDING")
+  soldByUserId  String?
+  regionCode    String?
+  startsAt      DateTime?
+  endsAt        DateTime?
+  notes         String?
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  package       VendorPackage  @relation(fields: [packageId], references: [id])
+
+  @@index([vendorId, status])
+  @@index([packageId])
+}
+
+model VendorLegalProfile {
+  id              String    @id @default(uuid())
+  vendorId        String    @unique
+  companyType     String    @default("SOLE")
+  legalTitle      String    @default("")
+  address         String    @default("")
+  phone           String    @default("")
+  email           String    @default("")
+  authorizedName  String    @default("")
+  taxNumber       String?
+  taxOffice       String?
+  kycStatus       String    @default("NOT_STARTED")
+  reviewNotes     String?
+  submittedAt     DateTime?
+  reviewedAt      DateTime?
+  reviewedByUserId String?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+}
+
+model VendorKycDocument {
+  id              String   @id @default(uuid())
+  vendorId        String
+  docType         String
+  fileName        String
+  mimeType        String
+  contentBase64   String
+  status          String   @default("PENDING")
+  reviewNotes     String?
+  reviewedByUserId String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([vendorId, docType])
+}
+
+model GibInvoice {
+  id              String   @id @default(uuid())
+  number          String   @unique
+  direction       String   @default("OUTGOING")
+  partyName       String
+  partyTaxNo      String?
+  vendorId        String?
+  dealId          String?
+  description     String
+  subTotal        Decimal  @db.Decimal(12, 2)
+  taxTotal        Decimal  @db.Decimal(12, 2)
+  grandTotal      Decimal  @db.Decimal(12, 2)
+  currency        String   @default("TRY")
+  status          String   @default("DRAFT")
+  gibUuid         String?
+  gibStatus       String   @default("NOT_SENT")
+  dueDate         DateTime?
+  issuedAt        DateTime @default(now())
+  createdByUserId String
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([status, issuedAt])
+  @@index([vendorId])
+}
+
+model FinanceLedgerEntry {
+  id          String   @id @default(uuid())
+  accountCode String
+  accountName String
+  vendorId    String?
+  invoiceId   String?
+  debit       Decimal  @db.Decimal(12, 2) @default(0)
+  credit      Decimal  @db.Decimal(12, 2) @default(0)
+  memo        String   @default("")
+  postedAt    DateTime @default(now())
+  createdAt   DateTime @default(now())
+
+  @@index([accountCode, postedAt])
+}
+
+model FinanceDebt {
+  id          String    @id @default(uuid())
+  vendorId    String?
+  partyName   String
+  title       String
+  amount      Decimal   @db.Decimal(12, 2)
+  dueDate     DateTime
+  status      String    @default("OPEN")
+  installment Int       @default(1)
+  notes       String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@index([status, dueDate])
+}
+
+model InventorySku {
+  id        String   @id @default(uuid())
+  sku       String   @unique
+  name      String
+  category  String   @default("GENEL")
+  quantity  Int      @default(0)
+  unit      String   @default("adet")
+  unitCost  Decimal  @db.Decimal(12, 2) @default(0)
+  warehouse String   @default("Merkez")
+  reorderAt Int      @default(5)
+  updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now())
+}
+
+model HrEmployee {
+  id          String    @id @default(uuid())
+  userId      String?
+  fullName    String
+  title       String
+  desk        OpsDesk?
+  department  String
+  salaryGross Decimal   @db.Decimal(12, 2)
+  startDate   DateTime
+  status      String    @default("ACTIVE")
+  regionCode  String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+model PayrollPeriod {
+  id          String   @id @default(uuid())
+  period      String   @unique
+  status      String   @default("DRAFT")
+  employeeCount Int    @default(0)
+  totalGross  Decimal  @db.Decimal(12, 2) @default(0)
+  totalNet    Decimal  @db.Decimal(12, 2) @default(0)
+  notes       String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model CrmParty {
+  id            String   @id @default(uuid())
+  kind          String   @default("PROSPECT")
+  name          String
+  email         String?
+  phone         String?
+  city          String?
+  regionCode    String?
+  vendorId      String?
+  coupleUserId  String?
+  ownerUserId   String?
+  score         Int      @default(40)
+  source        String   @default("MANUAL")
+  notes         String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([kind, regionCode])
+  @@index([ownerUserId])
+  deals CrmDeal[]
+}
+
+model CrmDeal {
+  id                 String    @id @default(uuid())
+  partyId            String
+  title              String
+  amount             Decimal   @db.Decimal(12, 2)
+  stage              String    @default("LEAD")
+  paymentTerms       String    @default("PEŞİN")
+  installmentCount   Int       @default(1)
+  regionCode         String?
+  ownerUserId        String?
+  needsRegionApproval Boolean  @default(true)
+  approvedByUserId   String?
+  lostReason         String?
+  packageId          String?
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+  party              CrmParty  @relation(fields: [partyId], references: [id], onDelete: Cascade)
+
+  @@index([stage, regionCode])
+  @@index([ownerUserId])
+}
+
+model CrmActivity {
+  id          String   @id @default(uuid())
+  partyId     String?
+  dealId      String?
+  type        String   @default("NOTE")
+  body        String
+  at          DateTime @default(now())
+  authorUserId String
+  createdAt   DateTime @default(now())
+
+  @@index([dealId, at])
+}
+
+model VendorOpsRequest {
+  id          String   @id @default(uuid())
+  vendorId    String
+  category    String   @default("SUPPORT")
+  title       String
+  body        String
+  status      String   @default("OPEN")
+  assigneeUserId String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([status, createdAt])
+}
+
+model SupportCase {
+  id            String   @id @default(uuid())
+  source        String   @default("ANONYMOUS")
+  channel       String   @default("FORM")
+  name          String
+  email         String?
+  phone         String?
+  subject       String
+  body          String
+  status        String   @default("OPEN")
+  priority      String   @default("MEDIUM")
+  slaMinutes    Int      @default(240)
+  assigneeUserId String?
+  relatedDesk   OpsDesk  @default(CRM)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  messages      SupportCaseMessage[]
+
+  @@index([status, createdAt])
+  @@index([source, status])
+}
+
+model SupportCaseMessage {
+  id        String      @id @default(uuid())
+  caseId    String
+  author    String
+  body      String
+  createdAt DateTime    @default(now())
+  case      SupportCase @relation(fields: [caseId], references: [id], onDelete: Cascade)
+}
+
+model OpsTask {
+  id             String          @id @default(uuid())
+  title          String
+  details        String          @default("")
+  desk           OpsDesk
+  assigneeUserId String?
+  creatorUserId  String
+  priority       OpsTaskPriority @default(MEDIUM)
+  status         OpsTaskStatus   @default(OPEN)
+  dueAt          DateTime?
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+
+  @@index([assigneeUserId, status])
+  @@index([desk, status])
+}
+
+model OpsChannel {
+  id        String   @id @default(uuid())
+  name      String
+  desk      OpsDesk?
+  isPrivate Boolean  @default(false)
+  createdAt DateTime @default(now())
+  messages  OpsChatMessage[]
+}
+
+model OpsChatMessage {
+  id          String     @id @default(uuid())
+  channelId   String
+  authorUserId String
+  authorName  String
+  body        String
+  createdAt   DateTime   @default(now())
+  channel     OpsChannel @relation(fields: [channelId], references: [id], onDelete: Cascade)
+
+  @@index([channelId, createdAt])
+}
+
+model OpsCalendarEvent {
+  id          String   @id @default(uuid())
+  title       String
+  details     String   @default("")
+  startsAt    DateTime
+  endsAt      DateTime
+  location    String?
+  meetUrl     String?
+  desk        OpsDesk?
+  ownerUserId String
+  attendees   String[] @default([])
+  createdAt   DateTime @default(now())
+}
+
+model OpsPulseEvent {
+  id        String   @id @default(uuid())
+  desk      OpsDesk?
+  category  String
+  title     String
+  actor     String
+  createdAt DateTime @default(now())
+
+  @@index([createdAt])
+}
+
+model IntegrationCredential {
+  key       String   @id
+  label     String
+  value     String   @default("")
+  isEnabled Boolean  @default(false)
+  updatedAt DateTime @updatedAt
+}
