@@ -17,18 +17,19 @@ import {
   LogOut,
   ChevronRight
 } from 'lucide-react';
+import { SidebarPortalSwitcher } from '@/components/shared/layout/SidebarPortalSwitcher';
 
 const menuItems = [
-  { name: 'Genel Bakış', href: '/firma/dashboard', icon: LayoutDashboard },
-  { name: 'WedyAI Firma Copilot', href: '/firma/ai-asistan', icon: Sparkles, badge: 'AI' },
-  { name: 'Talepler & CRM', href: '/firma/talepler', icon: Inbox },
-  { name: 'Takvim & Randevular', href: '/firma/takvim', icon: Calendar },
-  { name: 'Teklif & Sözleşmeler', href: '/firma/sozlesmeler', icon: FileText },
-  { name: 'Finans & Hakedişler', href: '/firma/finans', icon: Wallet },
-  { name: 'Vitrin & Medya', href: '/firma/vitrin', icon: Store },
-  { name: 'Yorumlar & İtibar', href: '/firma/degerlendirmeler', icon: Star },
-  { name: 'Ekip & Operasyon', href: '/firma/organizasyon', icon: Users },
-  { name: 'Firma Ayarları', href: '/firma/ayarlar', icon: Settings },
+  { name: 'Genel bakış', href: '/firma/dashboard', icon: LayoutDashboard },
+  { name: 'AI asistan', href: '/firma/ai-asistan', icon: Sparkles, badge: 'AI' },
+  { name: 'Talepler', href: '/firma/talepler', icon: Inbox },
+  { name: 'Takvim', href: '/firma/takvim', icon: Calendar },
+  { name: 'Sözleşmeler', href: '/firma/sozlesmeler', icon: FileText },
+  { name: 'Finans', href: '/firma/finans', icon: Wallet },
+  { name: 'Vitrin', href: '/firma/vitrin', icon: Store },
+  { name: 'Yorumlar', href: '/firma/degerlendirmeler', icon: Star },
+  { name: 'Ekip', href: '/firma/organizasyon', icon: Users },
+  { name: 'Ayarlar', href: '/firma/ayarlar', icon: Settings },
 ];
 
 export function VendorSidebar() {
@@ -53,8 +54,8 @@ export function VendorSidebar() {
   }, []);
 
   return (
-    <aside className="apple-sidebar sticky top-0 z-40 flex h-screen w-72 shrink-0 flex-col justify-between">
-      <div className="space-y-6 overflow-y-auto p-6 scrollbar-none">
+    <aside className="apple-sidebar sticky top-0 z-40 flex h-screen w-60 shrink-0 flex-col justify-between">
+      <div className="space-y-5 overflow-y-auto p-4 scrollbar-none">
         
         {/* Orijinal WedyPlan Firma Logosu */}
         <Link href="/firma/dashboard" className="block px-1 cursor-pointer">
@@ -79,14 +80,14 @@ export function VendorSidebar() {
               <Link
                 key={item.href}
                 href={item.href}
-                className={`apple-nav-item group cursor-pointer select-none ${isActive ? 'apple-nav-item-active' : 'text-[#6e6e73]'}`}
+                className={`apple-nav-item group cursor-pointer select-none ${isActive ? 'apple-nav-item-active' : ''}`}
               >
                 <div className="flex items-center gap-3">
-                  <Icon className={`h-4 w-4 ${isActive ? 'text-[#0071e3]' : 'text-[#86868b]'}`} />
+                  <Icon className={`h-[18px] w-[18px] ${isActive ? 'text-[#1d1d1f]' : 'text-[#6e6e73]'}`} />
                   <span>{item.name}</span>
                 </div>
                 {item.badge ? (
-                  <span className={`rounded-md px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wider ${isActive ? 'bg-[#0071e3]/10 text-[#0071e3]' : 'bg-black/5 text-[#6e6e73]'}`}>
+                  <span className={`rounded-md px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider ${isActive ? 'bg-black/8 text-[#1d1d1f]' : 'bg-black/5 text-[#6e6e73]'}`}>
                     {item.badge}
                   </span>
                 ) : (
@@ -99,7 +100,8 @@ export function VendorSidebar() {
       </div>
 
       {/* Profil Alt Kutusu */}
-      <div className="apple-glass m-4 space-y-3 rounded-2xl p-4">
+      <div className="apple-panel m-3 space-y-3 rounded-2xl p-3.5">
+        <SidebarPortalSwitcher fallbackPortal="VENDOR" />
         <div className="flex items-center gap-3">
           <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#1d1d1f] text-xs font-semibold text-white">
             {vendorProfile.companyName[0]}

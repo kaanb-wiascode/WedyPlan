@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getSession } from '@/lib/auth/session';
+import { listAllowedPortals } from '@/lib/auth/portals';
 
 export async function GET(request: NextRequest) {
   try {
@@ -12,6 +13,8 @@ export async function GET(request: NextRequest) {
       );
     }
 
+    const allowedPortals = await listAllowedPortals(session.userId, session.role);
+
     return NextResponse.json({
       success: true,
       authenticated: true,
@@ -20,6 +23,7 @@ export async function GET(request: NextRequest) {
         email: session.email,
         role: session.role,
         portalContext: session.portalContext,
+        allowedPortals,
       },
     });
   } catch (error) {

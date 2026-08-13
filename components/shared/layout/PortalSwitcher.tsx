@@ -13,9 +13,9 @@ interface PortalSwitcherProps {
 
 const PORTAL_METADATA: Record<PortalType, { name: string; icon: React.ElementType; color: string; href: string }> = {
   PUBLIC: { name: 'Public Website', icon: Globe, color: 'text-blue-500', href: '/' },
-  COUPLE: { name: 'Çift Komuta Merkezi', icon: Heart, color: 'text-[#E6007E]', href: '/cift' },
-  VENDOR: { name: 'Firma Paneli (WOS)', icon: Store, color: 'text-[#D4AF37]', href: '/firma/talepler' },
-  ADMIN: { name: 'System Admin', icon: ShieldCheck, color: 'text-purple-600', href: '/admin' },
+  COUPLE: { name: 'Çift paneli', icon: Heart, color: 'text-[#E6007E]', href: '/cift/dashboard' },
+  VENDOR: { name: 'Firma paneli', icon: Store, color: 'text-[#D4AF37]', href: '/firma/dashboard' },
+  ADMIN: { name: 'Admin paneli', icon: ShieldCheck, color: 'text-purple-600', href: '/admin' },
 };
 
 export const PortalSwitcher: React.FC<PortalSwitcherProps> = ({ activePortal, allowedPortals }) => {
@@ -25,9 +25,27 @@ export const PortalSwitcher: React.FC<PortalSwitcherProps> = ({ activePortal, al
   const currentInfo = PORTAL_METADATA[activePortal] || PORTAL_METADATA.PUBLIC;
   const ActiveIcon = currentInfo.icon;
 
-  const handleSwitch = (targetPortal: PortalType) => {
+  const handleSwitch = async (targetPortal: PortalType) => {
     setIsOpen(false);
-    router.push(PORTAL_METADATA[targetPortal].href);
+    if (targetPortal === 'PUBLIC') {
+      router.push('/');
+      return;
+    }
+
+    try {
+      const response = await fetch('/api/v1/auth/switch-portal', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ portal: targetPortal }),
+      });
+      const data = await response.json();
+      if (!response.ok || !data.success) {
+        return;
+      }
+      window.location.assign(data.redirectUrl || PORTAL_METADATA[targetPortal].href);
+    } catch {
+      window.location.assign(PORTAL_METADATA[targetPortal].href);
+    }
   };
 
   return (

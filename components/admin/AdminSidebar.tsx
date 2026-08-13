@@ -24,6 +24,7 @@ import {
   BarChart3,
   Search,
 } from 'lucide-react';
+import { SidebarPortalSwitcher } from '@/components/shared/layout/SidebarPortalSwitcher';
 
 export type AdminTab = 
   | 'executive'
@@ -127,14 +128,14 @@ export function AdminSidebar({ activeTab, setActiveTab }: AdminSidebarProps) {
                     <button
                       key={item.id}
                       onClick={() => setActiveTab(item.id)}
-                      className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-2xl text-xs font-medium transition-all group cursor-pointer ${
+                      className={`w-full flex items-center justify-between px-3.5 py-3 rounded-2xl text-[15px] font-medium transition-all group cursor-pointer ${
                         isActive
                           ? 'bg-amber-500/10 text-amber-800 dark:text-amber-400 font-semibold border border-amber-200/80 dark:border-amber-900/40 shadow-xs'
                           : 'text-zinc-600 dark:text-zinc-400 hover:bg-amber-50/50 dark:hover:bg-zinc-900/50 hover:text-zinc-900 dark:hover:text-zinc-100'
                       }`}
                     >
                       <div className="flex items-center gap-2.5">
-                        <Icon className={`w-4 h-4 transition-colors ${isActive ? 'text-amber-600 dark:text-amber-400' : 'text-zinc-400 group-hover:text-amber-500'}`} />
+                        <Icon className={`w-[18px] h-[18px] transition-colors ${isActive ? 'text-amber-600 dark:text-amber-400' : 'text-zinc-400 group-hover:text-amber-500'}`} />
                         <span>{item.name}</span>
                       </div>
                       {item.badge ? (
@@ -154,7 +155,9 @@ export function AdminSidebar({ activeTab, setActiveTab }: AdminSidebarProps) {
       </div>
 
       {/* Admin Oturum Bilgisi */}
-      <div className="p-4 m-4 rounded-2xl bg-gradient-to-b from-amber-50/40 to-white/60 dark:from-zinc-900/60 dark:to-zinc-900/30 border border-amber-100 dark:border-zinc-800/80 backdrop-blur-md flex items-center justify-between shadow-xs">
+      <div className="p-4 m-4 rounded-2xl bg-gradient-to-b from-amber-50/40 to-white/60 dark:from-zinc-900/60 dark:to-zinc-900/30 border border-amber-100 dark:border-zinc-800/80 backdrop-blur-md space-y-3 shadow-xs">
+        <SidebarPortalSwitcher fallbackPortal="ADMIN" />
+        <div className="flex items-center justify-between">
         <div className="flex items-center gap-3 truncate">
           <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-amber-400 to-amber-600 flex items-center justify-center text-white dark:text-zinc-950 font-bold text-xs shadow-xs ring-2 ring-white dark:ring-zinc-800">
             KA
@@ -174,6 +177,7 @@ export function AdminSidebar({ activeTab, setActiveTab }: AdminSidebarProps) {
         >
           <LogOut className="w-4 h-4" />
         </button>
+        </div>
       </div>
     </aside>
   );
