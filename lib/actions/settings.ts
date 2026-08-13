@@ -57,7 +57,7 @@ export async function getCoupleSettings() {
         venueName: couple.venueName || '',
         guestCountGoal: Number(couple.guestCountGoal || 0),
         targetBudget: Number(couple.targetBudget || 350000),
-      } satisfies CoupleProfileData,
+        } as CoupleProfileData,
       preferences: DEFAULT_PREFERENCES,
       cards: [] as SavedPaymentMethod[],
     },
@@ -89,21 +89,30 @@ export async function updateCoupleProfile(data: CoupleProfileData) {
   return getCoupleSettings();
 }
 
+export async function addPaymentMethod(
+  _cardHolder?: string,
+  _cardNumber?: string,
+  _expiry?: string,
+) {
+  return {
+    success: false as const,
+    error: 'Kart saklanmaz. Firma ödeme talepleri /cift/odeme sayfasındadır.',
+    data: [] as SavedPaymentMethod[],
+    message: 'Kart saklanmaz. Ödeme talepleri Ödeme sayfasındadır.',
+  };
+}
+
+export async function deletePaymentMethod(_id?: string) {
+  return { success: true as const, data: [] as SavedPaymentMethod[], message: 'Kart tutulmuyor.' };
+}
+
+export async function setDefaultPaymentMethod(_id?: string) {
+  return { success: true as const, data: [] as SavedPaymentMethod[], message: 'Kart tutulmuyor.' };
+}
+
 export async function updateAppPreferences(_data: AppPreferencesData) {
   revalidatePath('/cift/ayarlar');
-  return { success: true };
-}
-
-export async function addPaymentMethod() {
-  return { success: false, error: 'Kart saklanmaz. Firma ödeme talepleri /cift/odeme sayfasındadır.' };
-}
-
-export async function deletePaymentMethod() {
-  return { success: true, data: [] as SavedPaymentMethod[] };
-}
-
-export async function setDefaultPaymentMethod() {
-  return { success: true };
+  return { success: true as const, message: 'Tercihler kaydedildi.' };
 }
 
 export async function getSessionEmail() {

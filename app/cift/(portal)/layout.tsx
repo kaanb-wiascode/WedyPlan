@@ -1,5 +1,3 @@
-'use client';
-
 import React from 'react';
 import CoupleSidebar from '@/components/couple/layout/CoupleSidebar';
 import { ShadowModeHost } from '@/components/admin/ShadowModeHost';
