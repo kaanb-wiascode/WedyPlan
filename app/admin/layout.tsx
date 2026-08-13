@@ -1,3 +1,4 @@
+import React from 'react';
 import { prisma } from '@/lib/db';
 import { requireAdmin } from '@/lib/admin/require-admin';
 import { AdminSidebar } from '@/components/admin/AdminSidebar';

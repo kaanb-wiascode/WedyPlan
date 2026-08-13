@@ -161,7 +161,7 @@ async function ownerMap(userIds: string[]) {
     where: { id: { in: unique } },
     select: { id: true, email: true, fullName: true, status: true },
   });
-  return new Map(users.map((user) => [user.id, user]));
+  return new Map(users.map((user: { id: string; email: string; fullName: string; status: string }) => [user.id, user]));
 }
 
 function mapVendor(vendor: any, owners: Map<string, CockpitVendor['owner']>): CockpitVendor {
@@ -369,8 +369,8 @@ export async function listVendors(filter?: { status?: string; q?: string }): Pro
     orderBy: { createdAt: 'desc' },
     take: 80,
   });
-  const owners = await ownerMap(vendors.map((vendor) => vendor.userId));
-  return vendors.map((vendor) => mapVendor(vendor, owners));
+  const owners = await ownerMap(vendors.map((vendor: any) => vendor.userId));
+  return vendors.map((vendor: any) => mapVendor(vendor, owners));
 }
 
 export async function getVendorById(id: string) {
@@ -397,8 +397,8 @@ export async function listCouples(filter?: { q?: string }): Promise<CockpitCoupl
     orderBy: { createdAt: 'desc' },
     take: 80,
   });
-  const owners = await ownerMap(couples.map((couple) => couple.userId));
-  return couples.map((couple) => mapCouple(couple, owners));
+  const owners = await ownerMap(couples.map((couple: any) => couple.userId));
+  return couples.map((couple: any) => mapCouple(couple, owners));
 }
 
 export async function getCoupleById(id: string) {
@@ -421,7 +421,7 @@ export async function listLeads(): Promise<CockpitLead[]> {
     orderBy: { createdAt: 'desc' },
     take: 100,
   });
-  return rows.map((row) => ({
+  return rows.map((row: any) => ({
     ...row,
     createdAt: iso(row.createdAt) || new Date().toISOString(),
   }));
@@ -433,12 +433,12 @@ export async function listUsers(): Promise<CockpitUser[]> {
     db.portalProfile.findMany({ select: { userId: true, portal: true } }),
   ]);
   const portalsByUser = new Map<string, string[]>();
-  for (const row of portals) {
+  for (const row of portals as { userId: string; portal: string }[]) {
     const current = portalsByUser.get(row.userId) || [];
     current.push(row.portal);
     portalsByUser.set(row.userId, current);
   }
-  return users.map((user) => ({
+  return users.map((user: any) => ({
     id: user.id,
     email: user.email,
     fullName: user.fullName,
@@ -453,7 +453,7 @@ export async function listAuditLogs(): Promise<CockpitAudit[]> {
     orderBy: { createdAt: 'desc' },
     take: 80,
   });
-  return rows.map((row) => ({
+  return rows.map((row: any) => ({
     id: row.id,
     action: row.action,
     category: row.category,
@@ -467,7 +467,7 @@ export async function listAuditLogs(): Promise<CockpitAudit[]> {
 
 export async function listServices() {
   const vendors = await listVendors();
-  return vendors.map((vendor) => ({
+  return vendors.map((vendor: CockpitVendor) => ({
     id: vendor.id,
     businessName: vendor.businessName,
     businessCategory: vendor.businessCategory,

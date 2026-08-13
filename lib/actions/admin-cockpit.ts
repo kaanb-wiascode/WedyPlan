@@ -316,11 +316,11 @@ export async function sendBroadcastAction(formData: FormData): Promise<void> {
 
   let userIds: string[] = [];
   if (audience === 'VENDOR') {
-    userIds = (await db.vendor.findMany({ select: { userId: true } })).map((row) => row.userId);
+    userIds = (await db.vendor.findMany({ select: { userId: true } })).map((row: { userId: string }) => row.userId);
   } else if (audience === 'COUPLE') {
-    userIds = (await db.couple.findMany({ select: { userId: true } })).map((row) => row.userId);
+    userIds = (await db.couple.findMany({ select: { userId: true } })).map((row: { userId: string }) => row.userId);
   } else {
-    userIds = (await db.identityUser.findMany({ select: { id: true } })).map((row) => row.id);
+    userIds = (await db.identityUser.findMany({ select: { id: true } })).map((row: { id: string }) => row.id);
   }
 
   if (userIds.length > 0) {
