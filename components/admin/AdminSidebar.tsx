@@ -20,7 +20,14 @@ import {
 } from 'lucide-react';
 import { SidebarPortalSwitcher } from '@/components/shared/layout/SidebarPortalSwitcher';
 
-const groups = [
+type NavItem = {
+  href: string;
+  name: string;
+  icon: typeof LayoutDashboard;
+  exact?: boolean;
+};
+
+const groups: { title: string; items: NavItem[] }[] = [
   {
     title: 'Kokpit',
     items: [{ href: '/admin', name: 'Komuta merkezi', icon: LayoutDashboard, exact: true }],
@@ -87,7 +94,7 @@ export function AdminSidebar({
                   const Icon = item.icon;
                   const isActive = item.exact
                     ? pathname === item.href
-                    : pathname === item.href || pathname?.startsWith(`${item.href}/`);
+                    : pathname === item.href || Boolean(pathname?.startsWith(`${item.href}/`));
                   return (
                     <Link
                       key={item.href}
