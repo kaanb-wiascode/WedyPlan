@@ -479,7 +479,21 @@ export async function listServices() {
   }));
 }
 
-export async function getFinanceSnapshot() {
+export async function getFinanceSnapshot(): Promise<{
+  commissionRate: number;
+  payoutHold: boolean;
+  plans: { id: string; name: string; code: string; price: unknown }[];
+  subscriptionCount: number;
+  commissionRules: unknown[];
+  payments: {
+    id: string;
+    userId: string;
+    type: string;
+    status: string;
+    grossAmount: string;
+    createdAt: string | null;
+  }[];
+}> {
   const [plans, subscriptions, commissionRules, payments, settings] = await Promise.all([
     db.subscriptionPlan.findMany({ orderBy: { createdAt: 'desc' } }).catch(() => []),
     db.userSubscription.count().catch(() => 0),
@@ -490,7 +504,7 @@ export async function getFinanceSnapshot() {
   return {
     commissionRate: settings.settings.commissionRate,
     payoutHold: settings.settings.payoutHold,
-    plans,
+    plans: (plans as { id: string; name: string; code: string; price: unknown }[]),
     subscriptionCount: subscriptions,
     commissionRules,
     payments: payments.map((payment: any) => ({

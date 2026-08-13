@@ -61,7 +61,7 @@ export default async function AdminFinancePage() {
         {data.payments.length === 0 ? (
           <p className="text-[13px] text-[#86868b]">Henüz ödeme kaydı yok.</p>
         ) : (
-          data.payments.map((payment) => (
+          data.payments.map((payment: { id: string; type: string; grossAmount: string; status: string; createdAt: string | null }) => (
             <div key={payment.id} className="flex items-center justify-between text-[13px]">
               <span>{payment.type} · ₺{payment.grossAmount}</span>
               <span className="flex items-center gap-2">
