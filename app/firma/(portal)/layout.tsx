@@ -1,6 +1,7 @@
 import React from 'react';
 import { VendorSidebar } from '@/components/vendor/organisms/VendorSidebar';
 import { ShadowModeHost } from '@/components/admin/ShadowModeHost';
+import { PortalShell } from '@/components/shared/layout/PortalShell';
 
 export default function VendorLayout({
   children,
@@ -8,10 +9,11 @@ export default function VendorLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="apple-page flex min-h-screen">
+    <>
       <ShadowModeHost />
-      <VendorSidebar />
-      <main className="min-w-0 flex-1 overflow-y-auto">{children}</main>
-    </div>
+      <PortalShell logoVariant="vendor" sidebar={<VendorSidebar />}>
+        <main className="min-h-dvh overflow-y-auto">{children}</main>
+      </PortalShell>
+    </>
   );
 }

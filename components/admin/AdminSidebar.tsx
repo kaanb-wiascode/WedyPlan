@@ -2,7 +2,6 @@
 
 import React from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import {
   LayoutDashboard,
@@ -36,6 +35,7 @@ import {
   BadgeDollarSign,
 } from 'lucide-react';
 import { SidebarPortalSwitcher } from '@/components/shared/layout/SidebarPortalSwitcher';
+import { BrandLogo } from '@/components/ui/brand-logo';
 import type { OpsDesk } from '@/lib/ops/catalog';
 import { DESK_NAV, SHARED_NAV, SUPER_NAV } from '@/lib/ops/catalog';
 
@@ -119,15 +119,7 @@ export function AdminSidebar({
     <aside className="apple-sidebar sticky top-0 z-30 flex h-screen w-64 shrink-0 flex-col overflow-hidden">
       <div className="min-h-0 flex-1 space-y-6 overflow-y-auto p-4 scrollbar-none">
         <Link href="/admin" className="block px-1">
-          <div className="relative h-10 w-40">
-            <Image
-              src="/assets/branding/logo-admin.svg"
-              alt="WedyPlan Admin"
-              fill
-              className="object-contain object-left"
-              priority
-            />
-          </div>
+          <BrandLogo variant="admin" size="panel" />
         </Link>
         <div className="rounded-2xl bg-[#0071e3]/10 px-3 py-2">
           <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-[#0071e3]">{desk}</p>

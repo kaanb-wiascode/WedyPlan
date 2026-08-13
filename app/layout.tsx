@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import { ConfirmProvider } from "@/context/ConfirmContext";
@@ -9,6 +9,13 @@ const inter = Inter({
   variable: "--font-apple",
   display: "swap",
 });
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 5,
+  viewportFit: "cover",
+};
 
 export const metadata: Metadata = {
   title: "WedyPlan — Düğün Planlama & İşletme Yönetim Platformu",
@@ -23,7 +30,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="tr" className={inter.variable}>
-      <body className="bg-[#f5f5f7] text-[#1d1d1f] antialiased selection:bg-[#0071e3]/15 selection:text-[#1d1d1f]">
+      <body className="overflow-x-hidden bg-[#f5f5f7] text-[#1d1d1f] antialiased selection:bg-[#0071e3]/15 selection:text-[#1d1d1f]">
         <ConfirmProvider>
           {children}
           <SupportWidget />

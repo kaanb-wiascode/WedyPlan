@@ -3,7 +3,6 @@
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import Image from 'next/image';
 import { getCoupleSettings } from '@/lib/actions/settings';
 import {
   LayoutDashboard,
@@ -22,6 +21,7 @@ import {
   Camera
 } from 'lucide-react';
 import { SidebarPortalSwitcher } from '@/components/shared/layout/SidebarPortalSwitcher';
+import { BrandLogo } from '@/components/ui/brand-logo';
 
 const menuItems = [
   { name: 'Genel bakış', href: '/cift/dashboard', icon: LayoutDashboard },
@@ -105,16 +105,8 @@ export function CoupleSidebar() {
     <aside className="apple-sidebar sticky top-0 z-30 flex h-screen w-60 shrink-0 flex-col overflow-hidden">
       <div className="min-h-0 flex-1 space-y-5 overflow-y-auto p-4">
         
-        <Link href="/cift/dashboard" className="block px-2 group">
-          <div className="relative w-40 h-10">
-            <Image
-              src="/assets/branding/logo-couple.svg"
-              alt="WedyPlan Çift Portalı"
-              fill
-              className="object-contain object-left transition-opacity group-hover:opacity-80"
-              priority
-            />
-          </div>
+        <Link href="/cift/dashboard" className="block px-1 group">
+          <BrandLogo variant="couple" size="panel" />
         </Link>
 
         <nav className="space-y-1">

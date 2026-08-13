@@ -36,20 +36,20 @@ export function AuthCardLayout({
       </div>
 
       <header className="apple-glass-nav sticky top-0 z-20">
-        <nav className="mx-auto flex h-12 max-w-5xl items-center justify-between px-5">
+        <nav className="mx-auto flex h-16 max-w-5xl items-center justify-between px-4 sm:h-[72px] sm:px-5">
           <Link href="/" className="flex items-center opacity-90 transition-opacity hover:opacity-100">
-            <BrandLogo variant={logoVariant} width={128} height={28} className="h-7 w-auto" />
+            <BrandLogo variant={logoVariant} size="auth" />
           </Link>
           <Link
             href={navRightHref}
-            className="text-[12px] font-normal text-[#1d1d1f]/80 transition-colors hover:text-[#0071e3]"
+            className="text-[13px] font-medium text-[#1d1d1f]/80 transition-colors hover:text-[#0071e3] sm:text-[14px]"
           >
             {navRightLabel}
           </Link>
         </nav>
       </header>
 
-      <main className="relative z-10 mx-auto flex min-h-[calc(100vh-3rem)] w-full max-w-[420px] flex-col justify-center px-5 py-12">
+      <main className="relative z-10 mx-auto flex min-h-[calc(100dvh-4rem)] w-full max-w-[420px] flex-col justify-center px-4 py-8 sm:px-5 sm:py-12">
         <div className="apple-glass rounded-[28px] px-7 py-9 sm:px-9 sm:py-10">
           <div className="mb-8 text-center">
             <p className="mb-2 text-[12px] font-normal tracking-[0.04em] text-[#86868b]">

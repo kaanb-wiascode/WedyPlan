@@ -21,6 +21,7 @@ import {
   Gem
 } from 'lucide-react';
 import { SidebarPortalSwitcher } from '@/components/shared/layout/SidebarPortalSwitcher';
+import { BrandLogo } from '@/components/ui/brand-logo';
 
 const menuItems = [
   { name: 'Genel bakış', href: '/firma/dashboard', icon: LayoutDashboard, feature: null as string | null },
@@ -76,13 +77,7 @@ export function VendorSidebar() {
         
         {/* Orijinal WedyPlan Firma Logosu */}
         <Link href="/firma/dashboard" className="block px-1 cursor-pointer">
-          <div className="flex items-center gap-3">
-            <img
-              src="/assets/branding/logo-vendor.svg"
-              alt="WedyPlan Firma Portalı"
-              className="h-8 w-auto object-contain dark:invert"
-            />
-          </div>
+          <BrandLogo variant="vendor" size="panel" />
         </Link>
 
         {/* Menü Linkleri */}

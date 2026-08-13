@@ -1,6 +1,7 @@
 import React from 'react';
 import CoupleSidebar from '@/components/couple/layout/CoupleSidebar';
 import { ShadowModeHost } from '@/components/admin/ShadowModeHost';
+import { PortalShell } from '@/components/shared/layout/PortalShell';
 
 export default function CouplePortalLayout({
   children,
@@ -8,12 +9,11 @@ export default function CouplePortalLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="apple-page flex min-h-screen">
+    <>
       <ShadowModeHost />
-      <CoupleSidebar />
-      <div className="flex min-w-0 flex-1 flex-col pt-0">
-        <main className="relative z-10 flex-1">{children}</main>
-      </div>
-    </div>
+      <PortalShell logoVariant="couple" sidebar={<CoupleSidebar />}>
+        <main className="relative z-10 min-h-dvh">{children}</main>
+      </PortalShell>
+    </>
   );
 }
