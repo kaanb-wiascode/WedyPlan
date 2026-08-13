@@ -352,7 +352,7 @@ export async function getCockpitSnapshot(): Promise<CockpitSnapshot> {
   };
 }
 
-export async function listVendors(filter?: { status?: string; q?: string }) {
+export async function listVendors(filter?: { status?: string; q?: string }): Promise<CockpitVendor[]> {
   const vendors = await db.vendor.findMany({
     where: {
       ...(filter?.status && filter.status !== 'ALL' ? { status: filter.status } : {}),
@@ -383,7 +383,7 @@ export async function getVendorById(id: string) {
   return { vendor: mapVendor(vendor, owners), notes };
 }
 
-export async function listCouples(filter?: { q?: string }) {
+export async function listCouples(filter?: { q?: string }): Promise<CockpitCouple[]> {
   const couples = await db.couple.findMany({
     where: filter?.q
       ? {
@@ -416,7 +416,7 @@ export async function getCoupleById(id: string) {
   };
 }
 
-export async function listLeads() {
+export async function listLeads(): Promise<CockpitLead[]> {
   const rows = await db.marketplaceLead.findMany({
     orderBy: { createdAt: 'desc' },
     take: 100,
@@ -427,7 +427,7 @@ export async function listLeads() {
   }));
 }
 
-export async function listUsers() {
+export async function listUsers(): Promise<CockpitUser[]> {
   const [users, portals] = await Promise.all([
     db.identityUser.findMany({ orderBy: { createdAt: 'desc' }, take: 100 }),
     db.portalProfile.findMany({ select: { userId: true, portal: true } }),
@@ -448,7 +448,7 @@ export async function listUsers() {
   }));
 }
 
-export async function listAuditLogs() {
+export async function listAuditLogs(): Promise<CockpitAudit[]> {
   const rows = await db.auditLog.findMany({
     orderBy: { createdAt: 'desc' },
     take: 80,

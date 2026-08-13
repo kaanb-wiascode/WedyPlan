@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { requireAdmin } from '@/lib/admin/require-admin';
-import { listCouples } from '@/lib/admin/cockpit-data';
+import { listCouples, type CockpitCouple } from '@/lib/admin/cockpit-data';
 import { createCoupleAction } from '@/lib/actions/admin-cockpit';
 import { AdminHeader, EmptyState, StatusPill } from '@/components/admin/cockpit/ui';
 import { ImpersonateButton } from '@/components/admin/cockpit/ImpersonateButton';
@@ -43,7 +43,7 @@ export default async function AdminCouplesPage({
         {couples.length === 0 ? (
           <EmptyState text="Çift bulunamadı." />
         ) : (
-          couples.map((couple) => (
+          couples.map((couple: CockpitCouple) => (
             <div key={couple.id} className="apple-panel flex flex-col gap-3 rounded-[20px] p-4 sm:flex-row sm:items-center sm:justify-between">
               <div>
                 <p className="text-[14px] font-semibold">
