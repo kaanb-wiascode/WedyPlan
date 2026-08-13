@@ -25,7 +25,7 @@ function tempPassword() {
   return `Wedy-${Math.random().toString(36).slice(2, 8)}-26`;
 }
 
-export async function updateVendorAction(formData: FormData) {
+export async function updateVendorAction(formData: FormData): Promise<void> {
   const admin = await requireAdmin();
   const id = String(formData.get('id') || '');
   const servicesRaw = String(formData.get('services') || '');
@@ -57,10 +57,10 @@ export async function updateVendorAction(formData: FormData) {
     targetEntityId: id,
   });
   revalidateAdmin();
-  return { success: true };
+  return;
 }
 
-export async function setVendorStatusAction(formData: FormData) {
+export async function setVendorStatusAction(formData: FormData): Promise<void> {
   const admin = await requireAdmin();
   const id = String(formData.get('id') || '');
   const status = String(formData.get('status') || 'PENDING');
@@ -87,14 +87,14 @@ export async function setVendorStatusAction(formData: FormData) {
     targetEntityId: id,
   });
   revalidateAdmin();
-  return { success: true };
+  return;
 }
 
-export async function addVendorNoteAction(formData: FormData) {
+export async function addVendorNoteAction(formData: FormData): Promise<void> {
   const admin = await requireAdmin();
   const vendorId = String(formData.get('vendorId') || '');
   const body = String(formData.get('body') || '').trim();
-  if (!body) return { success: false, error: 'Not boş olamaz.' };
+  if (!body) return;
 
   await db.vendorModerationNote.create({
     data: {
@@ -105,17 +105,17 @@ export async function addVendorNoteAction(formData: FormData) {
     },
   });
   revalidateAdmin();
-  return { success: true };
+  return;
 }
 
-export async function createVendorAction(formData: FormData) {
+export async function createVendorAction(formData: FormData): Promise<void> {
   const admin = await requireAdmin();
   const email = String(formData.get('email') || '').trim().toLowerCase();
   const businessName = String(formData.get('businessName') || '').trim();
-  if (!email || !businessName) return { success: false, error: 'E-posta ve firma adı zorunlu.' };
+  if (!email || !businessName) return;
 
   const existing = await db.identityUser.findUnique({ where: { email } });
-  if (existing) return { success: false, error: 'Bu e-posta zaten kayıtlı.' };
+  if (existing) return;
 
   const password = String(formData.get('password') || '') || tempPassword();
   const user = await db.identityUser.create({
@@ -157,10 +157,10 @@ export async function createVendorAction(formData: FormData) {
     metadata: { email },
   });
   revalidateAdmin();
-  return { success: true, password, vendorId: vendor.id };
+  return;
 }
 
-export async function updateCoupleAction(formData: FormData) {
+export async function updateCoupleAction(formData: FormData): Promise<void> {
   const admin = await requireAdmin();
   const id = String(formData.get('id') || '');
   const weddingDateRaw = String(formData.get('weddingDate') || '');
@@ -184,17 +184,17 @@ export async function updateCoupleAction(formData: FormData) {
     targetEntityId: id,
   });
   revalidateAdmin();
-  return { success: true };
+  return;
 }
 
-export async function createCoupleAction(formData: FormData) {
+export async function createCoupleAction(formData: FormData): Promise<void> {
   const admin = await requireAdmin();
   const email = String(formData.get('email') || '').trim().toLowerCase();
   const partnerOneName = String(formData.get('partnerOneName') || '').trim();
-  if (!email || !partnerOneName) return { success: false, error: 'E-posta ve isim zorunlu.' };
+  if (!email || !partnerOneName) return;
 
   const existing = await db.identityUser.findUnique({ where: { email } });
-  if (existing) return { success: false, error: 'Bu e-posta zaten kayıtlı.' };
+  if (existing) return;
 
   const password = String(formData.get('password') || '') || tempPassword();
   const user = await db.identityUser.create({
@@ -233,10 +233,10 @@ export async function createCoupleAction(formData: FormData) {
     targetEntityId: couple.id,
   });
   revalidateAdmin();
-  return { success: true, password, coupleId: couple.id };
+  return;
 }
 
-export async function setUserStatusAction(formData: FormData) {
+export async function setUserStatusAction(formData: FormData): Promise<void> {
   const admin = await requireAdmin();
   const id = String(formData.get('id') || '');
   const status = String(formData.get('status') || 'ACTIVE') as 'ACTIVE' | 'SUSPENDED' | 'LOCKED' | 'PENDING_VERIFICATION';
@@ -250,19 +250,19 @@ export async function setUserStatusAction(formData: FormData) {
     metadata: { status },
   });
   revalidateAdmin();
-  return { success: true };
+  return;
 }
 
-export async function updateLeadStatusAction(formData: FormData) {
+export async function updateLeadStatusAction(formData: FormData): Promise<void> {
   await requireAdmin();
   const id = String(formData.get('id') || '');
   const status = String(formData.get('status') || 'PENDING');
   await db.marketplaceLead.update({ where: { id }, data: { status } });
   revalidateAdmin();
-  return { success: true };
+  return;
 }
 
-export async function savePlatformSettingAction(formData: FormData) {
+export async function savePlatformSettingAction(formData: FormData): Promise<void> {
   const admin = await requireAdmin();
   const key = String(formData.get('key') || '');
   const raw = String(formData.get('value') || '');
@@ -284,10 +284,10 @@ export async function savePlatformSettingAction(formData: FormData) {
     metadata: { value },
   });
   revalidateAdmin();
-  return { success: true };
+  return;
 }
 
-export async function toggleFeatureFlagAction(formData: FormData) {
+export async function toggleFeatureFlagAction(formData: FormData): Promise<void> {
   const admin = await requireAdmin();
   const key = String(formData.get('key') || '');
   const isEnabled = String(formData.get('isEnabled') || 'false') === 'true';
@@ -301,14 +301,14 @@ export async function toggleFeatureFlagAction(formData: FormData) {
     metadata: { isEnabled },
   });
   revalidateAdmin();
-  return { success: true };
+  return;
 }
 
-export async function sendBroadcastAction(formData: FormData) {
+export async function sendBroadcastAction(formData: FormData): Promise<void> {
   const admin = await requireAdmin();
   const message = String(formData.get('message') || '').trim();
   const audience = String(formData.get('audience') || 'ALL');
-  if (!message) return { success: false, error: 'Mesaj boş olamaz.' };
+  if (!message) return;
 
   await db.adminBroadcast.create({
     data: { message, audience, createdByUserId: admin.userId },
@@ -343,10 +343,10 @@ export async function sendBroadcastAction(formData: FormData) {
     metadata: { audience, recipients: userIds.length },
   });
   revalidateAdmin();
-  return { success: true };
+  return;
 }
 
-export async function saveCommissionAction(formData: FormData) {
+export async function saveCommissionAction(formData: FormData): Promise<void> {
   const admin = await requireAdmin();
   const rate = Number(formData.get('commissionRate') || 12);
   await db.platformSetting.upsert({
@@ -366,15 +366,15 @@ export async function saveCommissionAction(formData: FormData) {
     metadata: { rate },
   });
   revalidateAdmin();
-  return { success: true };
+  return;
 }
 
-export async function upsertSubscriptionPlanAction(formData: FormData) {
+export async function upsertSubscriptionPlanAction(formData: FormData): Promise<void> {
   await requireAdmin();
   const code = String(formData.get('code') || '').trim().toUpperCase().replace(/\s+/g, '_');
   const name = String(formData.get('name') || '').trim();
   const price = Number(formData.get('price') || 0);
-  if (!code || !name) return { success: false, error: 'Kod ve ad zorunlu.' };
+  if (!code || !name) return;
 
   await db.subscriptionPlan.upsert({
     where: { code },
@@ -382,5 +382,5 @@ export async function upsertSubscriptionPlanAction(formData: FormData) {
     create: { code, name, price, billingCycle: String(formData.get('billingCycle') || 'MONTHLY'), isActive: true },
   });
   revalidateAdmin();
-  return { success: true };
+  return;
 }
