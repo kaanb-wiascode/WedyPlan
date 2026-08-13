@@ -23,10 +23,14 @@ model Couple {
   partnerTwoName String?
   weddingDate    DateTime?
   targetBudget   Float     @default(350000)
+  city           String?
+  status         String    @default("ACTIVE")
+  notes          String?
   createdAt      DateTime  @default(now())
   updatedAt      DateTime  @updatedAt
 
   @@index([userId])
+  @@index([status])
 }
 
 model Vendor {
@@ -34,10 +38,21 @@ model Vendor {
   userId           String   @unique
   businessName     String
   businessCategory String   @default("OTHER")
+  city             String?
+  district         String?
+  phone            String?
+  website          String?
+  description      String?
+  status           String   @default("APPROVED")
+  isVerified       Boolean  @default(false)
+  services         String[] @default([])
+  notes            String?
   createdAt        DateTime @default(now())
   updatedAt        DateTime @updatedAt
 
   @@index([userId])
+  @@index([status])
+  @@index([businessCategory])
 }
 
 model BudgetItem {

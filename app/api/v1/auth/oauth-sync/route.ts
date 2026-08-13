@@ -85,7 +85,9 @@ export async function POST(request: NextRequest) {
               userId: newUser.id,
               businessName: fullName,
               businessCategory: "OTHER",
-            },
+              status: "PENDING",
+              isVerified: false,
+            } as any,
           });
         } else if (requestedRole === "COUPLE") {
           await tx.couple.create({

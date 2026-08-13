@@ -1,48 +1,105 @@
-import { NextResponse } from 'next/server';
-import { supabase } from '@/lib/supabase';
+import { NextRequest, NextResponse } from 'next/server';
+import { cookies } from 'next/headers';
+import { prisma } from '@/lib/db';
+import { createToken } from '@/lib/auth/jwt';
+import { getAdminSession, unauthorized } from '@/lib/admin/require-admin';
+import { writeAdminAudit } from '@/lib/admin/audit';
 
-export async function POST(request: Request) {
-  try {
-    const { targetUserId, targetRole } = await request.json();
+const db = prisma as any;
 
-    if (!targetUserId) {
-      return NextResponse.json({ error: 'Hedef kullanıcı ID belirtilmedi' }, { status: 400 });
-    }
+export const runtime = 'nodejs';
+export const dynamic = 'force-dynamic';
 
-    // 1. Hedef Kullanıcı Bilgilerini Supabase'den Çek
-    const { data: user, error } = await supabase
-      .from('couples')
-      .select('*')
-      .eq('id', targetUserId)
-      .single();
+const SESSION_COOKIE = 'wedyplan_session';
+const RETURN_COOKIE = 'wedyplan_admin_return';
+const SHADOW_COOKIE = 'wedyplan_shadow';
 
-    if (error || !user) {
-      return NextResponse.json({ error: 'Kullanıcı bulunamadı' }, { status: 404 });
-    }
+const cookieBase = {
+  path: '/',
+  sameSite: 'lax' as const,
+  secure: process.env.NODE_ENV === 'production',
+  maxAge: 7 * 24 * 60 * 60,
+};
 
-    // 2. Audit Log Kaydı Oluştur (Güvenlik İzlenebilirliği)
-    await supabase.from('audit_logs').insert([
-      {
-        admin_name: 'Super Admin (Kaan Atamer)',
-        action: `Gölge Modu Başlatıldı (Impersonate)`,
-        target: `Kullanıcı: ${user.names} (${targetRole})`,
-        ip_address: '127.0.0.1'
-      }
-    ]);
+export async function POST(request: NextRequest) {
+  const admin = await getAdminSession();
+  if (!admin) return unauthorized();
 
-    // 3. Gölge Modu Session Token'ı Dön
-    return NextResponse.json({
-      success: true,
-      shadowToken: `shadow_${user.id}_${Date.now()}`,
-      redirectUrl: targetRole === 'vendor' ? '/firma/dashboard' : '/cift/dashboard',
-      user: {
-        id: user.id,
-        name: user.names,
-        role: targetRole
-      }
-    });
+  const body = await request.json().catch(() => ({}));
+  const targetUserId = String(body.targetUserId || '');
+  const portal = String(body.portal || body.targetRole || '').toUpperCase();
 
-  } catch (err: any) {
-    return NextResponse.json({ error: err.message }, { status: 500 });
+  if (!targetUserId || (portal !== 'COUPLE' && portal !== 'VENDOR')) {
+    return NextResponse.json({ success: false, error: 'Hedef ve portal gerekli.' }, { status: 400 });
   }
+
+  const user = await db.identityUser.findUnique({
+    where: { id: targetUserId },
+    select: { id: true, email: true, fullName: true, status: true },
+  });
+  if (!user) {
+    return NextResponse.json({ success: false, error: 'Kullanıcı bulunamadı.' }, { status: 404 });
+  }
+
+  const profile = await db.portalProfile.findFirst({
+    where: { userId: user.id, portal: portal as 'COUPLE' | 'VENDOR' },
+  });
+  if (!profile) {
+    await db.portalProfile.create({
+      data: { userId: user.id, portal: portal as 'COUPLE' | 'VENDOR', isPrimary: false },
+    }).catch(() => {});
+  }
+
+  if (portal === 'COUPLE') {
+    const couple = await db.couple.findFirst({ where: { userId: user.id } });
+    if (!couple) {
+      await db.couple.create({
+        data: { userId: user.id, partnerOneName: user.fullName || 'Çift' },
+      });
+    }
+  }
+  if (portal === 'VENDOR') {
+    const vendor = await db.vendor.findFirst({ where: { userId: user.id } });
+    if (!vendor) {
+      await db.vendor.create({
+        data: { userId: user.id, businessName: user.fullName || 'Firma', businessCategory: 'OTHER' },
+      });
+    }
+  }
+
+  const cookieStore = await cookies();
+  const currentSession = cookieStore.get(SESSION_COOKIE)?.value;
+  if (currentSession) {
+    cookieStore.set(RETURN_COOKIE, currentSession, { ...cookieBase, httpOnly: true });
+  }
+
+  const token = await createToken({
+    userId: user.id,
+    email: user.email,
+    role: portal as 'COUPLE' | 'VENDOR',
+    portalContext: portal,
+    impersonatedBy: admin.userId,
+  });
+  cookieStore.set(SESSION_COOKIE, token, { ...cookieBase, httpOnly: true });
+  cookieStore.set(
+    SHADOW_COOKIE,
+    JSON.stringify({ name: user.fullName, role: portal, email: user.email }),
+    { ...cookieBase, httpOnly: false }
+  );
+
+  await writeAdminAudit({
+    actorUserId: admin.userId,
+    action: 'IMPERSONATION_STARTED',
+    category: 'PERMISSION_CHANGE',
+    targetEntity: portal === 'VENDOR' ? 'Vendor' : 'Couple',
+    targetEntityId: user.id,
+    ip: request.headers.get('x-forwarded-for'),
+    userAgent: request.headers.get('user-agent'),
+    metadata: { email: user.email, portal },
+  });
+
+  return NextResponse.json({
+    success: true,
+    redirectUrl: portal === 'VENDOR' ? '/firma/dashboard' : '/cift/dashboard',
+  });
 }

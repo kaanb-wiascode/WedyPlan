@@ -1,0 +1,47 @@
+model PlatformSetting {
+  key       String   @id
+  value     Json
+  updatedAt DateTime @updatedAt
+}
+
+model MarketplaceLead {
+  id            String   @id @default(uuid())
+  vendorId      String?
+  vendorName    String
+  categorySlug  String
+  city          String
+  district      String   @default("")
+  coupleNames   String
+  phone         String
+  email         String?
+  weddingDate   String?
+  guestCount    Int      @default(0)
+  note          String   @default("")
+  status        String   @default("PENDING")
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([status, createdAt])
+  @@index([vendorId])
+}
+
+model AdminBroadcast {
+  id              String   @id @default(uuid())
+  message         String
+  audience        String   @default("ALL")
+  createdByUserId String
+  createdAt       DateTime @default(now())
+
+  @@index([createdAt])
+}
+
+model VendorModerationNote {
+  id              String   @id @default(uuid())
+  vendorId        String
+  body            String
+  severity        String   @default("INFO")
+  createdByUserId String
+  createdAt       DateTime @default(now())
+
+  @@index([vendorId, createdAt])
+}
