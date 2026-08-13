@@ -256,7 +256,7 @@ export async function getVendorEntitlements(userId: string) {
     vendorId: vendor.id,
     businessName: vendor.businessName,
     kycStatus: legal?.kycStatus || vendor.kycStatus || 'NOT_STARTED',
-    features: sale?.package?.features || ['showcase', 'leads'],
+    features: sale?.package?.features || ['showcase', 'leads', 'reviews', 'calendar', 'contracts', 'finance', 'team'],
     packageName: sale?.package?.name || null,
     packageCode: sale?.package?.code || vendor.activePackageCode || null,
     legal,

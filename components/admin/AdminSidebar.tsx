@@ -116,8 +116,8 @@ export function AdminSidebar({
     .join('');
 
   return (
-    <aside className="apple-sidebar sticky top-0 z-30 flex h-screen w-64 shrink-0 flex-col justify-between">
-      <div className="space-y-6 overflow-y-auto p-4 scrollbar-none">
+    <aside className="apple-sidebar sticky top-0 z-30 flex h-screen w-64 shrink-0 flex-col overflow-hidden">
+      <div className="min-h-0 flex-1 space-y-6 overflow-y-auto p-4 scrollbar-none">
         <Link href="/admin" className="block px-1">
           <div className="relative h-10 w-40">
             <Image
@@ -166,7 +166,7 @@ export function AdminSidebar({
         </nav>
       </div>
 
-      <div className="m-3 space-y-3 rounded-[20px] border border-black/6 bg-white/70 p-3">
+      <div className="m-3 shrink-0 space-y-3 rounded-[20px] border border-black/6 bg-white/70 p-3">
         <SidebarPortalSwitcher fallbackPortal="ADMIN" />
         <div className="flex items-center justify-between">
           <div className="flex min-w-0 items-center gap-2.5">

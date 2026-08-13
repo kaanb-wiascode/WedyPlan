@@ -50,12 +50,18 @@ model Vendor {
   companyType      String?
   kycStatus        String    @default("NOT_STARTED")
   activePackageCode String?
+  slug             String?   @unique
+  categorySlug     String?
+  instagram        String?
+  whatsapp         String?
+  address          String?
   createdAt        DateTime @default(now())
   updatedAt        DateTime @updatedAt
 
   @@index([userId])
   @@index([status])
   @@index([businessCategory])
+  @@index([categorySlug, city])
 }
 
 model BudgetItem {

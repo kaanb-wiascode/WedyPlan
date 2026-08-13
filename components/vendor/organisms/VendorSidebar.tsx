@@ -7,6 +7,7 @@ import {
   LayoutDashboard,
   Sparkles,
   Inbox,
+  MessageSquare,
   Calendar,
   FileText,
   Wallet,
@@ -23,14 +24,15 @@ import { SidebarPortalSwitcher } from '@/components/shared/layout/SidebarPortalS
 
 const menuItems = [
   { name: 'Genel bakış', href: '/firma/dashboard', icon: LayoutDashboard, feature: null as string | null },
+  { name: 'Vitrin', href: '/firma/vitrin', icon: Store, feature: null },
+  { name: 'Talepler', href: '/firma/talepler', icon: Inbox, feature: null },
+  { name: 'Mesajlar', href: '/firma/mesajlar', icon: MessageSquare, feature: null },
+  { name: 'Takvim', href: '/firma/takvim', icon: Calendar, feature: null },
+  { name: 'Sözleşmeler', href: '/firma/sozlesmeler', icon: FileText, feature: null },
+  { name: 'Süreç / ekip', href: '/firma/organizasyon', icon: Users, feature: null },
+  { name: 'Finans', href: '/firma/finans', icon: Wallet, feature: null },
+  { name: 'Yorumlar', href: '/firma/degerlendirmeler', icon: Star, feature: null },
   { name: 'AI asistan', href: '/firma/ai-asistan', icon: Sparkles, badge: 'AI', feature: 'ai_assistant' },
-  { name: 'Talepler', href: '/firma/talepler', icon: Inbox, feature: 'leads' },
-  { name: 'Takvim', href: '/firma/takvim', icon: Calendar, feature: 'calendar' },
-  { name: 'Sözleşmeler', href: '/firma/sozlesmeler', icon: FileText, feature: 'contracts' },
-  { name: 'Finans', href: '/firma/finans', icon: Wallet, feature: 'finance' },
-  { name: 'Vitrin', href: '/firma/vitrin', icon: Store, feature: 'showcase' },
-  { name: 'Yorumlar', href: '/firma/degerlendirmeler', icon: Star, feature: 'reviews' },
-  { name: 'Ekip', href: '/firma/organizasyon', icon: Users, feature: 'team' },
   { name: 'Evrak / KYC', href: '/firma/evrak', icon: FolderCheck, feature: null },
   { name: 'Paketler', href: '/firma/paket', icon: Gem, feature: null },
   { name: 'Ayarlar', href: '/firma/ayarlar', icon: Settings, feature: null },
@@ -65,12 +67,12 @@ export function VendorSidebar() {
           setVendorProfile((current) => ({ ...current, companyName: payload.data.businessName }));
         }
       })
-      .catch(() => setFeatures([]));
+      .catch(() => setFeatures(null));
   }, []);
 
   return (
-    <aside className="apple-sidebar sticky top-0 z-40 flex h-screen w-60 shrink-0 flex-col justify-between">
-      <div className="space-y-5 overflow-y-auto p-4 scrollbar-none">
+    <aside className="apple-sidebar sticky top-0 z-40 flex h-screen w-60 shrink-0 flex-col overflow-hidden">
+      <div className="min-h-0 flex-1 space-y-5 overflow-y-auto p-4 scrollbar-none">
         
         {/* Orijinal WedyPlan Firma Logosu */}
         <Link href="/firma/dashboard" className="block px-1 cursor-pointer">
@@ -116,7 +118,7 @@ export function VendorSidebar() {
       </div>
 
       {/* Profil Alt Kutusu */}
-      <div className="apple-panel m-3 space-y-3 rounded-2xl p-3.5">
+      <div className="apple-panel m-3 shrink-0 space-y-3 rounded-2xl p-3.5">
         <SidebarPortalSwitcher fallbackPortal="VENDOR" />
         <div className="flex items-center gap-3">
           <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#1d1d1f] text-xs font-semibold text-white">

@@ -18,11 +18,14 @@ model MarketplaceLead {
   guestCount    Int      @default(0)
   note          String   @default("")
   status        String   @default("PENDING")
+  coupleUserId  String?
+  quoteAmount   Float?
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 
   @@index([status, createdAt])
   @@index([vendorId])
+  @@index([coupleUserId])
 }
 
 model AdminBroadcast {

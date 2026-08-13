@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
+import { getSession } from '@/lib/auth/session';
 
 const db = prisma as any;
 
@@ -16,6 +17,8 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ success: false, error: 'İsim, telefon ve firma adı zorunlu.' }, { status: 400 });
   }
 
+  const session = await getSession().catch(() => null);
+
   const lead = await db.marketplaceLead.create({
     data: {
       vendorId: body.vendorId ? String(body.vendorId) : null,
@@ -30,8 +33,18 @@ export async function POST(request: NextRequest) {
       guestCount: Number(body.guestCount || 0) || 0,
       note: String(body.note || ''),
       status: 'PENDING',
+      coupleUserId: session?.role === 'COUPLE' ? session.userId : null,
     },
   });
+
+  await db.opsPulseEvent.create({
+    data: {
+      desk: 'SALES',
+      category: 'LEAD',
+      title: `Yeni teklif talebi: ${vendorName}`,
+      actor: coupleNames,
+    },
+  }).catch(() => null);
 
   return NextResponse.json({ success: true, id: lead.id });
 }

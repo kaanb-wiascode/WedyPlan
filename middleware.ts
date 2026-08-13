@@ -38,6 +38,7 @@ function isProtectedPath(pathname: string) {
       "evrak",
       "paket",
       "ai-asistan",
+      "mesajlar",
     ]);
     return portalSegments.has(first);
   }

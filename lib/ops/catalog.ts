@@ -160,6 +160,7 @@ export const DESK_NAV: Record<OpsDesk, { title: string; items: { href: string; n
         { href: '/admin/crm', name: 'Hizmet kokpiti', icon: 'Headphones' },
         { href: '/admin/crm/talepler', name: 'Destek kuyruğu', icon: 'Ticket' },
         { href: '/admin/crm/sohbet', name: 'Sohbet / chatbot', icon: 'MessageCircle' },
+        { href: '/admin/mesaj-denetim', name: 'Firma mesajları', icon: 'MessagesSquare' },
       ],
     },
   ],
@@ -185,8 +186,8 @@ export const SUPER_NAV = [
   {
     title: 'Operasyon',
     items: [
-      { href: '/admin/onaylar', name: 'Firma onayları', icon: 'ClipboardCheck' },
-      { href: '/admin/firmalar', name: 'Firmalar', icon: 'Store' },
+        { href: '/admin/onaylar', name: 'Firma onayları', icon: 'ClipboardCheck' },
+        { href: '/admin/firmalar', name: 'Firmalar', icon: 'Store' },
       { href: '/admin/ciftler', name: 'Çiftler', icon: 'Users' },
       { href: '/admin/hizmetler', name: 'Hizmet denetimi', icon: 'ListChecks' },
       { href: '/admin/talepler', name: 'Katalog talepleri', icon: 'Inbox' },

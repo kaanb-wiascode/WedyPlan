@@ -1,0 +1,209 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model VendorShowcase {
+  id                String   @id @default(uuid())
+  vendorId          String   @unique
+  slug              String   @unique
+  categorySlug      String   @default("dugun-mekanlari")
+  tagline           String   @default("")
+  story             String   @default("")
+  contactName       String   @default("")
+  contactTitle      String   @default("")
+  contactPhone      String   @default("")
+  contactEmail      String   @default("")
+  instagram         String   @default("")
+  website           String   @default("")
+  youtube           String   @default("")
+  linkedin          String   @default("")
+  whatsapp          String   @default("")
+  address           String   @default("")
+  city              String   @default("")
+  district          String   @default("")
+  citySlug          String   @default("istanbul")
+  lat               String   @default("41.0082")
+  lng               String   @default("28.9784")
+  transportNotes    String   @default("")
+  seatedCapacity    Int      @default(0)
+  cocktailCapacity  Int      @default(0)
+  parking           Int      @default(0)
+  priceFrom         Int      @default(0)
+  priceType         String   @default("PACKAGE")
+  features          String[] @default([])
+  usps              String[] @default([])
+  published         Boolean  @default(false)
+  moderationStatus  String   @default("DRAFT")
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  @@index([published, moderationStatus])
+  @@index([categorySlug, citySlug])
+}
+
+model VendorGalleryItem {
+  id        String   @id @default(uuid())
+  vendorId  String
+  url       String
+  caption   String   @default("")
+  isCover   Boolean  @default(false)
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+
+  @@index([vendorId, sortOrder])
+}
+
+model VendorServiceOffer {
+  id            String   @id @default(uuid())
+  vendorId      String
+  kind          String   @default("PACKAGE")
+  name          String
+  description   String   @default("")
+  weekdayPrice  Int      @default(0)
+  weekendPrice  Int      @default(0)
+  includes      String[] @default([])
+  isActive      Boolean  @default(true)
+  sortOrder     Int      @default(0)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([vendorId, kind])
+}
+
+model VendorCampaign {
+  id        String    @id @default(uuid())
+  vendorId  String
+  title     String
+  discount  String    @default("")
+  expiry    DateTime?
+  isActive  Boolean   @default(true)
+  createdAt DateTime  @default(now())
+
+  @@index([vendorId])
+}
+
+model VendorFaqItem {
+  id        String   @id @default(uuid())
+  vendorId  String
+  question  String
+  answer    String
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+
+  @@index([vendorId])
+}
+
+model VendorStaffMember {
+  id             String   @id @default(uuid())
+  vendorId       String
+  name           String
+  role           String   @default("Ekip")
+  phone          String   @default("")
+  email          String   @default("")
+  assignedEvent  String   @default("")
+  createdAt      DateTime @default(now())
+
+  @@index([vendorId])
+}
+
+model VendorCoupleThread {
+  id             String   @id @default(uuid())
+  vendorId       String
+  coupleUserId   String
+  conversationId String   @unique
+  coupleNames    String
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@unique([vendorId, coupleUserId])
+  @@index([coupleUserId])
+}
+
+model VendorDeal {
+  id             String    @id @default(uuid())
+  vendorId       String
+  coupleUserId   String?
+  coupleNames    String
+  title          String
+  totalAmount    Int       @default(0)
+  depositAmount  Int       @default(0)
+  status         String    @default("DRAFT")
+  weddingDate    String?
+  guestCount     Int       @default(0)
+  notes          String    @default("")
+  leadId         String?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  milestones     VendorDealMilestone[]
+
+  @@index([vendorId, status])
+  @@index([coupleUserId])
+}
+
+model VendorDealMilestone {
+  id        String    @id @default(uuid())
+  dealId    String
+  title     String
+  dueAt     DateTime?
+  isDone    Boolean   @default(false)
+  sortOrder Int       @default(0)
+  deal      VendorDeal @relation(fields: [dealId], references: [id], onDelete: Cascade)
+
+  @@index([dealId])
+}
+
+model VendorReviewRecord {
+  id           String   @id @default(uuid())
+  vendorId     String
+  coupleUserId String?
+  authorName   String
+  rating       Int      @default(5)
+  comment      String
+  vendorReply  String?
+  isPublished  Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([vendorId, isPublished])
+}
+
+model VendorCalendarItem {
+  id           String   @id @default(uuid())
+  vendorId     String
+  coupleUserId String?
+  dealId       String?
+  title        String
+  coupleNames  String   @default("")
+  startsAt     DateTime
+  endsAt       DateTime?
+  kind         String   @default("MEETING")
+  status       String   @default("CONFIRMED")
+  note         String   @default("")
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([vendorId, startsAt])
+}
+
+model VendorPaymentRequest {
+  id          String   @id @default(uuid())
+  vendorId    String
+  dealId      String?
+  coupleUserId String?
+  coupleNames String
+  description String
+  amount      Int
+  status      String   @default("PENDING")
+  paymentUrl  String   @default("")
+  dueDate     String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([vendorId, status])
+  @@index([coupleUserId])
+}

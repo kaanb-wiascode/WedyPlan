@@ -7,7 +7,7 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
     // 1. weddingDate parametresi eklendi
-    const { fullName, email, password, weddingDate, role = 'COUPLE' } = body;
+    const { fullName, email, password, weddingDate, role = 'COUPLE', businessName, categorySlug, city, phone } = body;
 
     // 1. Validasyon
     if (!fullName || !email || !password) {
@@ -109,13 +109,28 @@ export async function POST(request: NextRequest) {
           },
         });
       } else if (userRole === 'VENDOR') {
+        const slugBase = String(name)
+              .toLocaleLowerCase('tr-TR')
+              .replaceAll('ı', 'i')
+              .replaceAll('ğ', 'g')
+              .replaceAll('ü', 'u')
+              .replaceAll('ş', 's')
+              .replaceAll('ö', 'o')
+              .replaceAll('ç', 'c')
+              .replace(/[^a-z0-9]+/g, '-')
+              .replace(/^-|-$/g, '')
+              .slice(0, 48);
         await tx.vendor.create({
           data: {
             userId: newUser.id,
-            businessName: fullName,
-            businessCategory: 'OTHER',
+            businessName: name,
+            businessCategory: categorySlug || 'OTHER',
+            categorySlug: categorySlug || 'dugun-mekanlari',
+            city: city || null,
+            phone: phone || null,
             status: 'PENDING',
             isVerified: false,
+            slug: `${slugBase || 'firma'}-${newUser.id.slice(0, 8)}`,
           } as any,
         });
       }
@@ -149,7 +164,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(
       {
         success: true,
-        redirectUrl: userRole === 'VENDOR' ? '/firma/dashboard' : userRole === 'ADMIN' ? '/admin' : '/cift/onboarding',
+        redirectUrl: userRole === 'VENDOR' ? '/firma/vitrin' : userRole === 'ADMIN' ? '/admin' : '/cift/onboarding',
         user: {
           id: user.id,
           email: user.email,
