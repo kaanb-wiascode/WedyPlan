@@ -31,6 +31,7 @@ import {
   Sliders,
   Check
 } from 'lucide-react';
+import { AccountSecurityCard } from '@/components/shared/account/AccountSecurityCard';
 
 export default function CoupleSettingsPage() {
   const router = useRouter();
@@ -445,20 +446,12 @@ export default function CoupleSettingsPage() {
           </div>
 
           <div className="space-y-4 text-xs">
-            <div className="p-4 rounded-2xl bg-zinc-50/80 dark:bg-zinc-800/40 border border-zinc-200/60 dark:border-zinc-700/50 flex items-center justify-between">
-              <div>
-                <h4 className="font-bold text-zinc-900 dark:text-white">Hesap Şifresi</h4>
-                <p className="text-[11px] text-zinc-400">En son 30 gün önce değiştirildi.</p>
-              </div>
-              <button className="px-4 py-2 rounded-xl border border-zinc-200 dark:border-zinc-700 text-xs font-semibold hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors cursor-pointer">
-                Şifreyi Değiştir
-              </button>
-            </div>
+            <AccountSecurityCard />
 
             <div className="p-4 rounded-2xl bg-zinc-50/80 dark:bg-zinc-800/40 border border-zinc-200/60 dark:border-zinc-700/50 flex items-center justify-between">
               <div>
-                <h4 className="font-bold text-zinc-900 dark:text-white">Aktif Cihaz Oturumu</h4>
-                <p className="text-[11px] text-zinc-400">MacBook Air • İstanbul, Türkiye (Bu cihaz)</p>
+                <h4 className="font-bold text-zinc-900 dark:text-white">Aktif cihaz oturumu</h4>
+                <p className="text-[11px] text-zinc-400">Bu tarayıcıdaki oturumunuz açık.</p>
               </div>
               <span className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 flex items-center gap-1"><Check className="w-3.5 h-3.5" /> Aktif</span>
             </div>

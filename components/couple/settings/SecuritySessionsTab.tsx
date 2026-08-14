@@ -34,6 +34,8 @@ export default function SecuritySessionsTab({ userId }: { userId: string }) {
       setCurrentPassword("");
       setNewPassword("");
       setConfirmPassword("");
+    } else {
+      alert(res.error || "Şifre güncellenemedi.");
     }
   };
 

@@ -2,6 +2,7 @@ import { redirect } from 'next/navigation';
 import { getVendorWorkspace } from '@/lib/vendor/workspace';
 import { VendorPageHeader } from '@/components/vendor/portal/VendorPageHeader';
 import { saveVendorSettingsAction } from '@/lib/actions/vendor-workspace';
+import { AccountSecurityCard } from '@/components/shared/account/AccountSecurityCard';
 
 export const dynamic = 'force-dynamic';
 
@@ -28,6 +29,12 @@ export default async function VendorSettingsPage() {
         <p className="text-[12px] text-[#86868b]">KYC: {data.vendor.kycStatus || 'NOT_STARTED'} · Paket: {data.vendor.activePackageCode || 'yok'}</p>
         <button className="apple-btn">Kaydet</button>
       </form>
+
+      <div className="apple-panel space-y-3 rounded-[24px] p-5">
+        <h2 className="text-[15px] font-semibold text-[#1d1d1f]">Giriş bilgileri</h2>
+        <p className="text-[12px] text-[#86868b]">Firma paneline giriş e-postası ve şifresi.</p>
+        <AccountSecurityCard />
+      </div>
     </div>
   );
 }

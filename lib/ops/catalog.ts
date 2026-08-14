@@ -171,6 +171,7 @@ export const SHARED_NAV = [
   { href: '/admin/mesajlar', name: 'Ekip sohbeti', icon: 'MessagesSquare' },
   { href: '/admin/takvim', name: 'Takvim ve toplantı', icon: 'Calendar' },
   { href: '/admin/raporlar', name: 'Raporlar', icon: 'FileBarChart' },
+  { href: '/admin/hesap', name: 'Hesabım', icon: 'Settings' },
 ];
 
 export const SUPER_NAV = [

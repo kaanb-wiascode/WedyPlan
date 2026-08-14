@@ -3,8 +3,8 @@
 import { revalidatePath } from 'next/cache';
 import { getSession } from '@/lib/auth/session';
 import { prisma } from '@/lib/db';
-import { hashPassword, validatePassword, verifyPassword } from '@/lib/auth/password';
 import { auditCouple, coupleSlugify, requireCoupleContext } from '@/lib/couple/workspace';
+import { changeAccountEmailAction, changeAccountPasswordAction } from '@/lib/actions/account';
 
 const db = prisma as any;
 
@@ -173,43 +173,14 @@ export async function exportUserDataAction(userId?: string) {
 }
 
 export async function updateSecurityPasswordAction(
-  userId: string,
+  _userId: string,
   data: { currentPassword: string; newPassword: string; confirmPassword: string },
 ) {
-  const session = await getSession();
-  if (!session?.userId || session.userId !== userId) {
-    return { success: false as const, error: 'Oturum açılmalı.' };
-  }
-  if (data.newPassword !== data.confirmPassword) {
-    return { success: false as const, error: 'Yeni şifreler eşleşmiyor.' };
-  }
-  const check = validatePassword(data.newPassword);
-  if (!check.isValid) {
-    return { success: false as const, error: check.errors[0] || 'Şifre geçersiz.' };
-  }
-  const user = await db.identityUser.findUnique({ where: { id: session.userId } }).catch(() => null);
-  if (!user?.passwordHash) {
-    return { success: false as const, error: 'Hesap bulunamadı.' };
-  }
-  const ok = await verifyPassword(data.currentPassword, user.passwordHash);
-  if (!ok) {
-    return { success: false as const, error: 'Mevcut şifre hatalı.' };
-  }
-  await db.identityUser
-    .update({
-      where: { id: session.userId },
-      data: { passwordHash: await hashPassword(data.newPassword) },
-    })
-    .catch(() => null);
-  await auditCouple('COUPLE_PASSWORD_UPDATED', {
-    actorUserId: session.userId,
-    targetEntityId: session.userId,
-  });
-  return { success: true as const, message: 'Şifreniz güncellendi.' };
+  return changeAccountPasswordAction(data);
 }
 
 export async function updateUserProfileSettingAction(
-  userId: string,
+  _userId: string,
   data: {
     fullName: string;
     email: string;
@@ -220,23 +191,21 @@ export async function updateUserProfileSettingAction(
   },
 ) {
   const session = await getSession();
-  if (!session?.userId || session.userId !== userId) {
+  if (!session?.userId) {
     return { success: false as const, error: 'Oturum açılmalı.' };
-  }
-  const email = String(data.email || '').trim().toLowerCase();
-  if (!email) {
-    return { success: false as const, error: 'E-posta gerekli.' };
   }
   await db.identityUser
     .update({
       where: { id: session.userId },
       data: {
         fullName: data.fullName,
-        email,
         phoneNumber: data.phone || null,
       },
     })
     .catch(() => null);
+  if (data.email && data.email.toLowerCase() !== session.email?.toLowerCase()) {
+    return changeAccountEmailAction({ newEmail: data.email });
+  }
   const couple = await db.couple.findFirst({ where: { userId: session.userId } }).catch(() => null);
   if (couple && data.fullName) {
     await db.couple
