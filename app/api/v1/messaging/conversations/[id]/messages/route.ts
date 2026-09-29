@@ -1,34 +1,58 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { getSession } from '@/lib/auth/session';
 import { EnterpriseMessagingService } from '@/lib/messaging/application/enterprise-messaging.service';
 
 export async function GET(
-  req: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  _req: NextRequest,
+  { params }: { params: Promise<{ id: string }> },
 ) {
-  const resolvedParams = await params;
-  const messages = await EnterpriseMessagingService.getMessages(resolvedParams.id);
+  try {
+    const session = await getSession();
+    if (!session?.userId) {
+      return NextResponse.json({ error: 'Oturum açmanız gerekiyor.' }, { status: 401 });
+    }
 
-  return NextResponse.json({ conversationId: resolvedParams.id, count: messages.length, messages });
+    const resolvedParams = await params;
+    const messages = await EnterpriseMessagingService.getMessages(
+      resolvedParams.id,
+      session.userId,
+    );
+
+    return NextResponse.json({
+      conversationId: resolvedParams.id,
+      count: messages.length,
+      messages,
+    });
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : 'Mesajlar alınamadı.';
+    return NextResponse.json({ error: message }, { status: 403 });
+  }
 }
 
 export async function POST(
   req: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ id: string }> },
 ) {
   try {
+    const session = await getSession();
+    if (!session?.userId) {
+      return NextResponse.json({ error: 'Oturum açmanız gerekiyor.' }, { status: 401 });
+    }
+
     const resolvedParams = await params;
     const body = await req.json();
 
     const message = await EnterpriseMessagingService.sendMessage({
       conversationId: resolvedParams.id,
-      senderUserId: body.senderUserId || 'usr_couple_1',
+      senderUserId: session.userId,
       type: body.type || 'TEXT',
       bodyText: body.bodyText,
-      attachments: body.attachments
+      attachments: body.attachments,
     });
 
     return NextResponse.json(message);
-  } catch (err: any) {
-    return NextResponse.json({ error: err.message || 'Failed to send message' }, { status: 400 });
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : 'Mesaj gönderilemedi.';
+    return NextResponse.json({ error: message }, { status: 400 });
   }
 }
