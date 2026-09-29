@@ -4,6 +4,7 @@ import { createSession } from "@/lib/auth/session";
 import { dashboardPathForRole } from "@/lib/auth/redirects";
 
 type AppRole = "COUPLE" | "VENDOR" | "ADMIN";
+type SelfServiceRole = "COUPLE" | "VENDOR";
 
 async function verifyFirebaseIdToken(idToken: string) {
   const res = await fetch(
@@ -33,8 +34,8 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
     const idToken = String(body.idToken || "");
-    const requestedRole: AppRole =
-      body.role === "VENDOR" || body.role === "ADMIN" ? body.role : "COUPLE";
+    const requestedRole: SelfServiceRole =
+      body.role === "VENDOR" ? "VENDOR" : "COUPLE";
 
     if (!idToken) {
       return NextResponse.json(
