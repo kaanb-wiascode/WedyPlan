@@ -144,7 +144,7 @@ export async function getVendorWorkspace() {
       openLeads: leads.filter((row) => row.status === 'PENDING' || row.status === 'OFFER_SENT').length,
       deals: deals.length,
       signed: dealsWithSteps.filter((row) => ['SIGNED', 'ACTIVE', 'COMPLETED'].includes(row.status)).length,
-      pipeline: dealsWithSteps.filter((row) => !['COMPLETED', 'CANCELLED'].includes(row.status)).reduce((sum: number, row: any) => sum + Number(row.totalAmount || 0), 0),
+      pipeline: dealsWithSteps.filter((row) => !['COMPLETED', 'CANCELLED'].includes(row.status)).reduce((sum, row) => sum + Number(row.totalAmount || 0), 0),
       messages: threads.length,
       events: events.length,
       rating: reviews.length
@@ -218,11 +218,7 @@ export async function loadLiveCatalogVendorById(id: string) {
   const showcase = await prisma.vendorShowcase.findFirst({
     where: { vendorId: id, published: true, moderationStatus: 'APPROVED' },
   }).catch(() => null);
-  if (showcase) return hydrateCatalogVendor(showcase);
-  const vendor = await prisma.vendor.findUnique({ where: { id } }).catch(() => null);
-  if (!vendor) return null;
-  const created = await prisma.vendorShowcase.findUnique({ where: { vendorId: vendor.id } }).catch(() => null);
-  return created ? hydrateCatalogVendor(created) : null;
+  return showcase ? hydrateCatalogVendor(showcase) : null;
 }
 
 async function hydrateCatalogVendor(showcase: VendorShowcase): Promise<CatalogVendor | null> {
@@ -251,7 +247,7 @@ async function hydrateCatalogVendor(showcase: VendorShowcase): Promise<CatalogVe
     id: row.id,
     authorName: row.authorName,
     weddingDate: '',
-    rating: Number(row.rating || 5),
+    rating: Number(row.rating),
     comment: row.comment,
   }));
   const avg = catalogReviews.length
