@@ -55,6 +55,10 @@ import {
         throw new Error('Conversation not found');
       }
   
+      if (!conversation.participantUserIds.includes(dto.senderUserId)) {
+        throw new Error('Bu konuşmaya mesaj gönderme yetkiniz yok.');
+      }
+
       const spamEvaluation = SpamModerationEngine.evaluateSpam(dto.bodyText);
   
       const messageId = `msg_${Date.now()}`;
@@ -86,8 +90,20 @@ import {
     /**
      * Fetches messages for a conversation
      */
-    static async getMessages(conversationId: string): Promise<MessageDTO[]> {
+    static async getMessages(conversationId: string, userId?: string): Promise<MessageDTO[]> {
+      const conversation = conversationsStore.get(conversationId);
+      if (!conversation) return [];
+
+      if (userId && !conversation.participantUserIds.includes(userId)) {
+        throw new Error('Bu konuşmayı görüntüleme yetkiniz yok.');
+      }
+
       return messagesStore.get(conversationId) || [];
+    }
+
+    static async isParticipant(conversationId: string, userId: string): Promise<boolean> {
+      const conversation = conversationsStore.get(conversationId);
+      return Boolean(conversation?.participantUserIds?.includes(userId));
     }
   
     /**
