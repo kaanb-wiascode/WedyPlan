@@ -8,12 +8,13 @@
     "start": "next start",
     "lint": "eslint .",
     "prisma:merge": "node scripts/merge-prisma.js",
+    "prisma:merge:strict": "STRICT_PRISMA_MERGE=1 node scripts/merge-prisma.js",
     "prisma:generate": "npm run prisma:merge && npx prisma generate",
     "prisma:db-push": "npm run prisma:merge && npx prisma db push",
     "db:seed": "prisma db seed",
     "typecheck": "tsc --noEmit",
     "test": "tsx --test tests/**/*.test.ts",
-    "quality": "npm run prisma:generate && npm run lint && npm run typecheck && npm test"
+    "quality": "npm run prisma:merge:strict && npx prisma generate && npm run lint && npm run typecheck && npm test"
   },
   "dependencies": {
     "@ai-sdk/google": "^4.0.30",
