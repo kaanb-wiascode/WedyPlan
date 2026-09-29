@@ -1,3 +1,4 @@
+import { prisma } from '@/lib/db';
 import {
     AccessEvaluationRequest,
     AccessEvaluationResult,
@@ -98,22 +99,59 @@ import {
       const compiledPermissions = new Set<string>();
       const deniedPermissions = new Set<string>();
   
-      // Mock permissions compiler simulation (In production, loaded via Prisma JOINs)
-      inheritedRoles.forEach((role) => {
-        if (role === 'VENDOR_OWNER') {
-          compiledPermissions.add('vendor:leads:manage');
-          compiledPermissions.add('vendor:offers:create');
-          compiledPermissions.add('vendor:finance:view');
-        }
-        if (role === 'COUPLE') {
-          compiledPermissions.add('couple:budget:view');
-          compiledPermissions.add('couple:budget:update');
-          compiledPermissions.add('couple:guests:manage');
-        }
-        if (role === 'VISITOR') {
-          compiledPermissions.add('public:vendors:view');
-        }
+      const profile = await prisma.portalProfile.findUnique({
+        where: {
+          userId_portal: {
+            userId: request.userId,
+            portal: request.portalContext,
+          },
+        },
+        include: {
+          roles: {
+            include: {
+              permissions: {
+                include: {
+                  permission: { select: { code: true } },
+                },
+              },
+            },
+          },
+        },
       });
+
+      for (const role of profile?.roles || []) {
+        for (const rolePermission of role.permissions) {
+          compiledPermissions.add(rolePermission.permission.code);
+        }
+      }
+
+      const directPermissions = await prisma.userDirectPermission.findMany({
+        where: {
+          userId: request.userId,
+          OR: [{ expiresAt: null }, { expiresAt: { gt: new Date() } }],
+        },
+        include: { permission: { select: { code: true } } },
+      });
+
+      for (const directPermission of directPermissions) {
+        const code = directPermission.permission.code;
+        if (directPermission.isGranted) {
+          compiledPermissions.add(code);
+          deniedPermissions.delete(code);
+        } else {
+          deniedPermissions.add(code);
+          compiledPermissions.delete(code);
+        }
+      }
+
+      const tierPermissions = await prisma.subscriptionTierPermission.findMany({
+        where: { tier: request.subscriptionTier || 'FREE' },
+        include: { permission: { select: { code: true } } },
+      });
+
+      for (const tierPermission of tierPermissions) {
+        compiledPermissions.add(tierPermission.permission.code);
+      }
   
       return {
         userId: request.userId,
