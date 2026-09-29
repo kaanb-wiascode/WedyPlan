@@ -37,6 +37,19 @@ export async function ensureSuperAdmin(options: {
         },
       });
 
+  const superRole = await prisma.role.upsert({
+    where: { code: 'SUPER_ADMINISTRATOR' },
+    create: {
+      code: 'SUPER_ADMINISTRATOR',
+      name: 'Super Administrator',
+      description: 'Platform-wide administrative role',
+      isSystem: true,
+    },
+    update: {
+      isSystem: true,
+    },
+  });
+
   for (const portal of SUPER_ADMIN_PORTALS) {
     await prisma.portalProfile.upsert({
       where: {
@@ -46,9 +59,11 @@ export async function ensureSuperAdmin(options: {
         userId: user.id,
         portal,
         isPrimary: portal === 'ADMIN',
+        ...(portal === 'ADMIN' ? { roles: { connect: { id: superRole.id } } } : {}),
       },
       update: {
         isPrimary: portal === 'ADMIN',
+        ...(portal === 'ADMIN' ? { roles: { connect: { id: superRole.id } } } : {}),
       },
     });
   }
