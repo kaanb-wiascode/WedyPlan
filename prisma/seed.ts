@@ -4,8 +4,8 @@ import bcrypt from 'bcryptjs';
 const prisma = new PrismaClient();
 
 async function main() {
-  const adminEmail = 'kaanatamer@wiascorp.com';
-  const rawPassword = 'Sk.258008';
+  const adminEmail = process.env.SUPER_ADMIN_EMAIL;
+  const rawPassword = process.env.SUPER_ADMIN_PASSWORD;
 
   console.log('⏳ Admin kullanıcısı kontrol ediliyor ve kuruluyor...');
 
