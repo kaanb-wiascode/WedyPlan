@@ -12,12 +12,12 @@ export async function ensureSuperAdmin(options: {
   const fullName = options.fullName?.trim() || 'WedyPlan Super Admin';
   const passwordHash = await hashPassword(options.password);
 
-  const existing = await (prisma as any).identityUser.findUnique({
+  const existing = await prisma.identityUser.findUnique({
     where: { email },
   });
 
   const user = existing
-    ? await (prisma as any).identityUser.update({
+    ? await prisma.identityUser.update({
         where: { id: existing.id },
         data: {
           passwordHash,
@@ -26,7 +26,7 @@ export async function ensureSuperAdmin(options: {
           isEmailVerified: true,
         },
       })
-    : await (prisma as any).identityUser.create({
+    : await prisma.identityUser.create({
         data: {
           email,
           passwordHash,
@@ -38,7 +38,7 @@ export async function ensureSuperAdmin(options: {
       });
 
   for (const portal of SUPER_ADMIN_PORTALS) {
-    await (prisma as any).portalProfile.upsert({
+    await prisma.portalProfile.upsert({
       where: {
         userId_portal: { userId: user.id, portal },
       },
@@ -53,7 +53,7 @@ export async function ensureSuperAdmin(options: {
     });
   }
 
-  await (prisma as any).couple.upsert({
+  await prisma.couple.upsert({
     where: { userId: user.id },
     create: {
       userId: user.id,
@@ -63,7 +63,7 @@ export async function ensureSuperAdmin(options: {
     update: {},
   });
 
-  await (prisma as any).vendor.upsert({
+  await prisma.vendor.upsert({
     where: { userId: user.id },
     create: {
       userId: user.id,
