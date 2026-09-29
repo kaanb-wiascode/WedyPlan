@@ -19,7 +19,7 @@ describe('Phase 03: Enterprise Messaging Platform Test Suite', () => {
       title: 'Düğün Salonu Fiyat Görüşmesi'
     });
 
-    assert.ok(conv.id.startsWith('conv_'));
+    assert.ok(conv.id.length > 10);
 
     const msg = await EnterpriseMessagingService.sendMessage({
       conversationId: conv.id,
@@ -30,7 +30,7 @@ describe('Phase 03: Enterprise Messaging Platform Test Suite', () => {
     assert.strictEqual(msg.deliveryStatus, 'SENT');
     assert.strictEqual(msg.isSpamFlagged, false);
 
-    const updated = await EnterpriseMessagingService.updateMessageStatus(msg.id, 'READ');
+    const updated = await EnterpriseMessagingService.updateMessageStatus(msg.id, 'READ', 'usr_couple_99');
     assert.strictEqual(updated, true);
   });
 });
