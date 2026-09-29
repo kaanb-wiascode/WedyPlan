@@ -1,9 +1,5 @@
-import React from "react";
-import { requireVendorId } from "@/lib/auth/require-ids";
-import VendorTeamClient from "@/components/vendor/team/VendorTeamClient";
+import { redirect } from 'next/navigation';
 
-export default async function VendorTeamPage() {
-  const vendorId = await requireVendorId();
-
-  return <VendorTeamClient vendorId={vendorId} />;
+export default function LegacyVendorPage() {
+  redirect('/firma/organizasyon');
 }
