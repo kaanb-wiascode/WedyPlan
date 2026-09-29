@@ -39,7 +39,7 @@ model SearchIndexRegistry {
   documentTitle    String
   documentContent  String
   keywords         String[]
-  vectorEmbedding  Float[]            // OpenAI text-embedding-3 1536 dimension
+  vectorEmbedding  Float[]            // Google gemini-embedding-001 3072 dimension
   syncStatus       IndexSyncStatus    @default(PENDING)
   popularityScore  Float              @default(1.0)
   organizationId   String?
