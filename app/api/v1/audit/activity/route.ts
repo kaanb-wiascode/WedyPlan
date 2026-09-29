@@ -1,20 +1,27 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { getSession } from '@/lib/auth/session';
 import { EnterpriseAuditService } from '@/lib/audit/application/audit-activity.service';
 
 export async function POST(req: NextRequest) {
   try {
+    const session = await getSession();
+    if (!session?.userId) {
+      return NextResponse.json({ error: 'Oturum açmanız gerekiyor.' }, { status: 401 });
+    }
+
     const body = await req.json();
 
     const activity = await EnterpriseAuditService.recordActivity({
-      userId: body.userId || 'usr_couple_1',
-      portalContext: body.portalContext || 'COUPLE',
+      userId: session.userId,
+      portalContext: session.portalContext || session.role,
       action: body.action,
       summary: body.summary,
-      targetEntityId: body.targetEntityId
+      targetEntityId: body.targetEntityId,
     });
 
     return NextResponse.json(activity);
-  } catch (err: any) {
-    return NextResponse.json({ error: err.message || 'Activity recording failed' }, { status: 400 });
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : 'Aktivite kaydedilemedi.';
+    return NextResponse.json({ error: message }, { status: 400 });
   }
 }
