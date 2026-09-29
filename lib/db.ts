@@ -5,9 +5,15 @@ const globalForPrisma = globalThis as unknown as {
   prisma: PrismaClient | undefined;
 };
 
+const configuredConnectionString =
+  process.env.DATABASE_URL || process.env.DIRECT_URL;
+
+if (!configuredConnectionString && process.env.NODE_ENV === 'production') {
+  throw new Error('DATABASE_URL veya DIRECT_URL production ortamında zorunludur.');
+}
+
 const connectionString =
-  process.env.DATABASE_URL ||
-  process.env.DIRECT_URL ||
+  configuredConnectionString ||
   'postgresql://postgres:postgres@localhost:5432/wedyplan';
 
 function createPrismaClient(): PrismaClient {
