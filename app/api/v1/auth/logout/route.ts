@@ -14,7 +14,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Audit log kaydet
-    await (prisma as any).auditLog.create({
+    await prisma.auditLog.create({
       data: {
         correlationId: crypto.randomUUID(),
         category: 'AUTHENTICATION',
