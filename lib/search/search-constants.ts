@@ -3,7 +3,7 @@ import { SearchDomain } from '@/types/search-engine';
 export const SEARCH_CONFIG = {
   DEFAULT_PAGE_SIZE: 20,
   MAX_PAGE_SIZE: 100,
-  VECTOR_EMBEDDING_DIMENSIONS: 1536, // OpenAI text-embedding-3-small dimension
+  VECTOR_EMBEDDING_DIMENSIONS: 3072, // Google gemini-embedding-001 default dimension
   MAX_SUGGESTIONS_LIMIT: 8,
   
   DOMAIN_WEIGHTS: {
