@@ -7,7 +7,7 @@ generator client {
   provider = "prisma-client-js"
 }
 
-enum NotificationChannel {
+enum LegacyLegacyNotificationChannel {
   IN_APP
   EMAIL
   SMS
@@ -16,14 +16,14 @@ enum NotificationChannel {
   BROWSER
 }
 
-enum NotificationPriority {
+enum LegacyLegacyNotificationPriority {
   LOW
   NORMAL
   HIGH
   URGENT
 }
 
-enum NotificationCategory {
+enum LegacyLegacyNotificationCategory {
   TRANSACTIONAL
   MARKETING
   SYSTEM
@@ -32,7 +32,7 @@ enum NotificationCategory {
   SECURITY
 }
 
-enum DeliveryStatus {
+enum LegacyLegacyDeliveryStatus {
   PENDING
   QUEUED
   SENT
@@ -44,8 +44,8 @@ enum DeliveryStatus {
 model NotificationTemplate {
   id          String              @id @default(uuid())
   code        String              @unique // e.g. "OFFER_RECEIVED_COUPLE"
-  category    NotificationCategory
-  channel     NotificationChannel
+  category    LegacyNotificationCategory
+  channel     LegacyNotificationChannel
   subject     String?             // For Email / Push titles
   bodyTemplate String             // Template with placeholders {{coupleName}}, {{vendorName}}
   isActive    Boolean             @default(true)
@@ -58,8 +58,8 @@ model NotificationTemplate {
 model NotificationPreference {
   id          String              @id @default(uuid())
   userId      String
-  category    NotificationCategory
-  channel     NotificationChannel
+  category    LegacyNotificationCategory
+  channel     LegacyNotificationChannel
   isEnabled   Boolean             @default(true)
   updatedAt   DateTime            @updatedAt
 
@@ -72,8 +72,8 @@ model InAppNotification {
   userId      String
   title       String
   message     String
-  category    NotificationCategory
-  priority    NotificationPriority @default(NORMAL)
+  category    LegacyNotificationCategory
+  priority    LegacyNotificationPriority @default(NORMAL)
   actionUrl   String?
   isRead      Boolean              @default(false)
   readAt      DateTime?
@@ -87,10 +87,10 @@ model NotificationLog {
   id             String              @id @default(uuid())
   userId         String
   templateCode   String
-  channel        NotificationChannel
-  priority       NotificationPriority
+  channel        LegacyNotificationChannel
+  priority       LegacyNotificationPriority
   recipientTarget String             // Email, Phone, Device Token
-  status         DeliveryStatus      @default(PENDING)
+  status         LegacyDeliveryStatus      @default(PENDING)
   attemptCount   Int                 @default(0)
   errorMessage   String?
   deliveredAt    DateTime?
