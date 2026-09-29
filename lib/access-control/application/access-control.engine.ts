@@ -95,7 +95,6 @@ import {
     private static async buildUserPermissionContext(
       request: AccessEvaluationRequest
     ): Promise<UserPermissionContext> {
-      const inheritedRoles = RoleHierarchyEngine.resolveInheritedRoles(request.roles);
       const compiledPermissions = new Set<string>();
       const deniedPermissions = new Set<string>();
   
@@ -118,6 +117,14 @@ import {
           },
         },
       });
+
+      const dbRoles = (profile?.roles || [])
+        .map((role) => role.code)
+        .filter((role): role is SystemRoleCode =>
+          ['VISITOR','REGISTERED_USER','COUPLE','VENDOR_EMPLOYEE','VENDOR_MANAGER','VENDOR_OWNER','SUPPORT_AGENT','MODERATOR','FINANCE','CONTENT_MANAGER','ADMINISTRATOR','SUPER_ADMINISTRATOR','DEVELOPER','SYSTEM'].includes(role as SystemRoleCode),
+        );
+      const assignedRoles = Array.from(new Set<SystemRoleCode>([...request.roles, ...dbRoles]));
+      const inheritedRoles = RoleHierarchyEngine.resolveInheritedRoles(assignedRoles);
 
       for (const role of profile?.roles || []) {
         for (const rolePermission of role.permissions) {
@@ -155,7 +162,7 @@ import {
   
       return {
         userId: request.userId,
-        roles: request.roles,
+        roles: assignedRoles,
         inheritedRoles,
         compiledPermissions,
         deniedPermissions,
