@@ -6,6 +6,8 @@ import { saveCatalogLead } from "@/lib/catalog/quotes";
 
 export function HomepageLeadWidget() {
   const [submitted, setSubmitted] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState("");
   const [phone, setPhone] = useState("");
   const [name, setName] = useState("");
   const [city, setCity] = useState("İstanbul");
@@ -14,9 +16,13 @@ export function HomepageLeadWidget() {
   const category = CATALOG_CATEGORIES.find((item) => item.slug === categorySlug);
   const topCategories = CATALOG_CATEGORIES.filter((item) => !item.parentSlug);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    saveCatalogLead({
+    setIsSubmitting(true);
+    setSubmitError("");
+
+    try {
+      await saveCatalogLead({
       vendorId: null,
       vendorName: category?.name ?? "WedyPlan keşif",
       categorySlug,
@@ -27,8 +33,15 @@ export function HomepageLeadWidget() {
       weddingDate: "",
       guestCount: 0,
       note: `${city} / ${category?.name} için ana sayfa hızlı teklif.`,
-    });
-    setSubmitted(true);
+      });
+      setSubmitted(true);
+    } catch (error: unknown) {
+      setSubmitError(
+        error instanceof Error ? error.message : "Teklif talebi gönderilemedi.",
+      );
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -78,13 +91,20 @@ export function HomepageLeadWidget() {
                   placeholder="05xx xxx xx xx"
                   className="apple-input"
                 />
-                <button type="submit" className="apple-btn apple-btn-compact shrink-0">
-                  Gönder
+                <button
+                  type="submit"
+                  disabled={isSubmitting}
+                  className="apple-btn apple-btn-compact shrink-0 disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  {isSubmitting ? "Gönderiliyor..." : "Gönder"}
                 </button>
               </div>
             </div>
           ) : null}
         </div>
+        {submitError ? (
+          <p className="mt-4 text-[13px] text-rose-600">{submitError}</p>
+        ) : null}
       </form>
     </section>
   );
