@@ -1,15 +1,26 @@
 import { SignJWT, jwtVerify } from 'jose';
 import { JwtAccessTokenPayload, JwtRefreshTokenPayload } from '../domain/enums';
 
-function secret(name: 'secret('JWT_ACCESS_SECRET')' | 'secret('JWT_REFRESH_SECRET')'): Uint8Array {
+type JwtSecretName = 'JWT_ACCESS_SECRET' | 'JWT_REFRESH_SECRET';
+
+function secret(name: JwtSecretName): Uint8Array {
   const value = process.env[name]?.trim();
-  if (value) return new TextEncoder().encode(value);
-  if (process.env.NODE_ENV === 'production') throw new Error(`${name} is required in production`);
+
+  if (value) {
+    return new TextEncoder().encode(value);
+  }
+
+  if (process.env.NODE_ENV === 'production') {
+    throw new Error(`${name} is required in production`);
+  }
+
   return new TextEncoder().encode(`dev-${name.toLowerCase()}`);
 }
 
 export class JwtTokenProvider {
-  static async signAccessToken(payload: Omit<JwtAccessTokenPayload, 'iat' | 'exp'>): Promise<string> {
+  static async signAccessToken(
+    payload: Omit<JwtAccessTokenPayload, 'iat' | 'exp'>,
+  ): Promise<string> {
     return new SignJWT({ ...payload })
       .setProtectedHeader({ alg: 'HS256', typ: 'JWT' })
       .setIssuedAt()
@@ -17,7 +28,9 @@ export class JwtTokenProvider {
       .sign(secret('JWT_ACCESS_SECRET'));
   }
 
-  static async signRefreshToken(payload: Omit<JwtRefreshTokenPayload, 'iat' | 'exp'>): Promise<string> {
+  static async signRefreshToken(
+    payload: Omit<JwtRefreshTokenPayload, 'iat' | 'exp'>,
+  ): Promise<string> {
     return new SignJWT({ ...payload })
       .setProtectedHeader({ alg: 'HS256', typ: 'JWT' })
       .setIssuedAt()
@@ -25,18 +38,28 @@ export class JwtTokenProvider {
       .sign(secret('JWT_REFRESH_SECRET'));
   }
 
-  static async verifyAccessToken(token: string): Promise<JwtAccessTokenPayload | null> {
+  static async verifyAccessToken(
+    token: string,
+  ): Promise<JwtAccessTokenPayload | null> {
     try {
-      const { payload } = await jwtVerify(token, secret('JWT_ACCESS_SECRET'));
+      const { payload } = await jwtVerify(
+        token,
+        secret('JWT_ACCESS_SECRET'),
+      );
       return payload as unknown as JwtAccessTokenPayload;
     } catch {
       return null;
     }
   }
 
-  static async verifyRefreshToken(token: string): Promise<JwtRefreshTokenPayload | null> {
+  static async verifyRefreshToken(
+    token: string,
+  ): Promise<JwtRefreshTokenPayload | null> {
     try {
-      const { payload } = await jwtVerify(token, secret('JWT_REFRESH_SECRET'));
+      const { payload } = await jwtVerify(
+        token,
+        secret('JWT_REFRESH_SECRET'),
+      );
       return payload as unknown as JwtRefreshTokenPayload;
     } catch {
       return null;
