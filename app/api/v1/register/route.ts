@@ -39,7 +39,7 @@ export async function POST(request: NextRequest) {
     }
 
     // 4. E-posta zaten kullanılıyor mu?
-    const existingUser = await (prisma as any).identityUser.findUnique({
+    const existingUser = await prisma.identityUser.findUnique({
       where: { email: email.toLowerCase() },
     });
 
@@ -63,7 +63,7 @@ export async function POST(request: NextRequest) {
     const portalType = userRole;
 
     // 7. Ana Kullanıcı Hesabını Oluştur (Temel Kayıt)
-    const user = await (prisma as any).identityUser.create({
+    const user = await prisma.identityUser.create({
       data: {
         email: email.toLowerCase(),
         passwordHash,
@@ -78,7 +78,7 @@ export async function POST(request: NextRequest) {
 
     // 8. Portal Profili Oluştur (İkincil Tablo - Hata Verirse Kaydı Engellemez)
     try {
-      await (prisma as any).portalProfile.create({
+      await prisma.portalProfile.create({
         data: {
           userId: user.id,
           portal: portalType,
@@ -93,7 +93,7 @@ export async function POST(request: NextRequest) {
     if (userRole === 'COUPLE') {
       const [partnerOne, partnerTwo] = fullName.split(' & ').map((n: string) => n.trim());
       try {
-        await (prisma as any).couple.create({
+        await prisma.couple.create({
           data: {
             userId: user.id,
             partnerOneName: partnerOne || fullName,
@@ -106,7 +106,7 @@ export async function POST(request: NextRequest) {
       }
     } else if (userRole === 'VENDOR') {
       try {
-        await (prisma as any).vendor.create({
+        await prisma.vendor.create({
           data: {
             userId: user.id,
             businessName: fullName,
@@ -128,7 +128,7 @@ export async function POST(request: NextRequest) {
 
     // 11. Audit Log Kaydı
     try {
-      await (prisma as any).auditLog.create({
+      await prisma.auditLog.create({
         data: {
           correlationId: crypto.randomUUID(),
           category: 'AUTHENTICATION',
@@ -157,10 +157,10 @@ export async function POST(request: NextRequest) {
       },
       { status: 201 }
     );
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Registration error:', error);
 
-    const errorMessage = error?.message || String(error);
+    const errorMessage = error instanceof Error ? error.message : String(error);
 
     if (errorMessage.includes('Unique constraint failed')) {
       return NextResponse.json(
