@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import PublicNavbar from "@/components/public/PublicNavbar";
@@ -17,24 +17,37 @@ import {
   categoriesInGroup,
 } from "@/lib/catalog/taxonomy";
 import { categoryCover, cityCover } from "@/lib/catalog/media";
-import { getCatalogListings } from "@/lib/catalog/listings";
+import type { CatalogVendor } from "@/lib/catalog/listings";
 
 export default function HomePage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [city, setCity] = useState("Tüm Şehirler");
   const [categorySlug, setCategorySlug] = useState("dugun-mekanlari");
-  const featured = useMemo(
-    () => getCatalogListings({ category: "dugun-mekanlari", city: "istanbul", limit: 3 }),
-    []
-  );
+  const [featured, setFeatured] = useState<CatalogVendor[]>([]);
+
+  useEffect(() => {
+    fetch('/api/public/catalog/featured', { cache: 'no-store' })
+      .then((response) => response.json())
+      .then((payload: { vendors?: CatalogVendor[] }) => {
+        setFeatured(Array.isArray(payload.vendors) ? payload.vendors : []);
+      })
+      .catch(() => setFeatured([]));
+  }, []);
   const topCategories = CATALOG_CATEGORIES.filter((item) => !item.parentSlug).slice(0, 8);
   const majorCities = CATALOG_CITIES.filter((item) => MAJOR_CITY_SLUGS.includes(item.slug));
 
   const searchHref = () => {
+    const params = new URLSearchParams();
     const q = searchQuery.trim();
-    const citySlug = CATALOG_CITIES.find((item) => item.name === city)?.slug;
-    if (q) return `/arama?q=${encodeURIComponent(q)}${citySlug ? `&city=${citySlug}` : ""}`;
-    return catalogHref(categorySlug, citySlug);
+    const categoryName = CATALOG_CATEGORIES.find(
+      (item) => item.slug === categorySlug,
+    )?.name;
+
+    if (q) params.set('q', q);
+    if (city !== 'Tüm Şehirler') params.set('city', city);
+    if (categoryName) params.set('category', categoryName);
+
+    return `/ai-arama?${params.toString()}`;
   };
 
   return (
@@ -128,7 +141,7 @@ export default function HomePage() {
               Nereden başlamak istersiniz?
             </h2>
           </div>
-          <Link href="/dugun-mekanlari" className="apple-link hidden text-[15px] sm:inline-flex">
+          <Link href={catalogHref("dugun-mekanlari")} className="apple-link hidden text-[15px] sm:inline-flex">
             Tüm kategoriler
           </Link>
         </div>
@@ -146,7 +159,7 @@ export default function HomePage() {
                 <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/15 to-transparent" />
                 <div className="absolute inset-x-0 bottom-0 p-3 text-left text-white">
                   <h3 className="text-[13px] font-semibold leading-tight md:text-[14px]">{cat.name}</h3>
-                  <p className="mt-0.5 text-[11px] text-white/75">{cat.vendorCount.toLocaleString("tr-TR")}</p>
+                  <p className="mt-0.5 text-[11px] text-white/75">Canlı kataloğu görüntüle</p>
                 </div>
               </div>
             </Link>
@@ -177,14 +190,20 @@ export default function HomePage() {
             <p className="apple-kicker">Öne çıkanlar</p>
             <h2 className="mt-2 text-3xl font-semibold tracking-tight text-[#1d1d1f]">İstanbul düğün mekanları</h2>
           </div>
-          <Link href="/dugun-mekanlari/istanbul" className="apple-link text-[15px]">
+          <Link href={catalogHref("dugun-mekanlari", "istanbul")} className="apple-link text-[15px]">
             Tümünü gör
           </Link>
         </div>
         <div className="space-y-4">
-          {featured.map((vendor) => (
-            <CatalogCard key={vendor.id} vendor={vendor} layout="list" />
-          ))}
+          {featured.length > 0 ? (
+            featured.map((vendor) => (
+              <CatalogCard key={vendor.id} vendor={vendor} layout="list" />
+            ))
+          ) : (
+            <div className="apple-panel rounded-[24px] p-6 text-[14px] text-[#86868b]">
+              İstanbul için yayında olan mekanlar katalog onayından sonra burada listelenir.
+            </div>
+          )}
         </div>
       </section>
 
