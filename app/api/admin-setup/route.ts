@@ -4,7 +4,7 @@ import { ensureSuperAdmin } from '@/lib/auth/ensure-super-admin';
 export const dynamic = 'force-dynamic';
 
 function setupSecret() {
-  return process.env.ADMIN_SETUP_SECRET || process.env.JWT_SECRET || '';
+  return process.env.ADMIN_SETUP_SECRET || '';
 }
 
 function isAuthorized(request: NextRequest) {
