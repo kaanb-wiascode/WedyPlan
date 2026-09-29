@@ -90,10 +90,10 @@ import {
     /**
      * Soft deletes asset (Moves to Recycle Bin)
      */
-    static async softDeleteAsset(assetId: string): Promise<boolean> {
+    static async softDeleteAsset(assetId: string, ownerId: string): Promise<boolean> {
       const asset = mediaAssetsStore.get(assetId);
-      if (!asset) return false;
-  
+      if (!asset || asset.ownerId !== ownerId) return false;
+
       asset.isDeleted = true;
       asset.deletedAt = new Date().toISOString();
       return true;
@@ -102,10 +102,10 @@ import {
     /**
      * Restores asset from Recycle Bin
      */
-    static async restoreAsset(assetId: string): Promise<boolean> {
+    static async restoreAsset(assetId: string, ownerId: string): Promise<boolean> {
       const asset = mediaAssetsStore.get(assetId);
-      if (!asset) return false;
-  
+      if (!asset || asset.ownerId !== ownerId) return false;
+
       asset.isDeleted = false;
       asset.deletedAt = undefined;
       return true;
@@ -114,7 +114,10 @@ import {
     /**
      * Fetches asset metadata
      */
-    static async getAssetById(assetId: string): Promise<MediaAssetDTO | null> {
-      return mediaAssetsStore.get(assetId) || null;
+    static async getAssetById(assetId: string, ownerId?: string): Promise<MediaAssetDTO | null> {
+      const asset = mediaAssetsStore.get(assetId);
+      if (!asset) return null;
+      if (ownerId && asset.ownerId !== ownerId) return null;
+      return asset;
     }
   }
