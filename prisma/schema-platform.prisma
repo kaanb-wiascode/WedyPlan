@@ -28,6 +28,21 @@ model MarketplaceLead {
   @@index([coupleUserId])
 }
 
+model VendorQuote {
+  id          String   @id @default(uuid())
+  coupleId    String
+  vendorId    String
+  quotedPrice Float
+  notes       String?
+  status      String   @default("QUOTED")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([coupleId, vendorId])
+  @@index([vendorId, status])
+  @@index([coupleId, status])
+}
+
 model AdminBroadcast {
   id              String   @id @default(uuid())
   message         String
