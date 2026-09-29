@@ -1,4 +1,6 @@
-import { VectorSearchInput } from "@/lib/validations/ai-vector-platform";
+import { prisma } from '@/lib/db';
+import { SemanticSearchEngine } from '@/lib/search/semantic-search-engine';
+import type { VectorSearchInput } from '@/lib/validations/ai-vector-platform';
 
 export interface VectorSearchResultPayload {
   queryText: string;
@@ -8,42 +10,101 @@ export interface VectorSearchResultPayload {
     sourceId: string;
     content: string;
     similarityScore: number;
-    metadata: Record<string, any>;
+    metadata: Record<string, unknown>;
   }>;
   latencyMs: number;
   totalCandidatesScanned: number;
 }
 
-export async function executeSemanticVectorSearch(input: VectorSearchInput): Promise<VectorSearchResultPayload> {
+const SOURCE_TYPE_MAP = {
+  DOCUMENT: 'DOCUMENT',
+  CONTRACT: 'CONTRACT',
+  PORTFOLIO: 'DOCUMENT',
+  KNOWLEDGE_BASE: 'AI_KNOWLEDGE_BASE',
+  BLOG: 'ARTICLE',
+  VENDOR_PROFILE: 'VENDOR',
+} as const;
+
+function cosineSimilarity(a: number[], b: number[]) {
+  if (!a.length || a.length !== b.length) return null;
+
+  let dot = 0;
+  let normA = 0;
+  let normB = 0;
+
+  for (let index = 0; index < a.length; index += 1) {
+    const left = a[index] ?? 0;
+    const right = b[index] ?? 0;
+    dot += left * right;
+    normA += left * left;
+    normB += right * right;
+  }
+
+  if (normA === 0 || normB === 0) return null;
+  return dot / (Math.sqrt(normA) * Math.sqrt(normB));
+}
+
+function metadataRecord(value: unknown): Record<string, unknown> {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return {};
+  return value as Record<string, unknown>;
+}
+
+export async function executeSemanticVectorSearch(
+  input: VectorSearchInput,
+): Promise<VectorSearchResultPayload> {
   const startTime = Date.now();
-  console.log("Vector Platform Executing Similarity Search for Query:", input.queryText);
+  const queryVector = await SemanticSearchEngine.generateEmbedding(input.queryText);
+  const entityType = input.sourceType
+    ? SOURCE_TYPE_MAP[input.sourceType]
+    : undefined;
 
-  // Simüle Edilmiş HNSW Cosine Similarity Arama Sonuçları
-  const mockResults = [
-    {
-      chunkId: "chk_101",
-      sourceType: input.sourceType || "VENDOR_PROFILE",
-      sourceId: "vnd_bodrum_luxury",
-      content: "Bodrum Sunset Beach Hotel: 250 kişilik deniz kenarı kır düğün alanı, özel iskele ve lüks gelin odası imkanı sunar.",
-      similarityScore: 0.94,
-      metadata: { city: "Bodrum", category: "Düğün Mekanı", priceTier: "LUXURY" },
+  const rows = await prisma.searchIndexRegistry.findMany({
+    where: {
+      syncStatus: 'INDEXED',
+      ...(entityType ? { entityType } : {}),
     },
-    {
-      chunkId: "chk_102",
-      sourceType: input.sourceType || "CONTRACT",
-      sourceId: "cnt_standard_v2",
-      content: "Madde 4.2: Düğün tarihine 30 günden az kala yapılan iptallerde %50 kapora iade edilemez escrow tevkifatı uygulanır.",
-      similarityScore: 0.88,
-      metadata: { legalCategory: "İptal Şartları", contractVersion: "v2.1" },
+    orderBy: {
+      popularityScore: 'desc',
     },
-  ];
+    take: 1000,
+  });
 
-  const duration = Date.now() - startTime + Math.floor(Math.random() * 8 + 4);
+  const matchedChunks = rows
+    .map((row) => {
+      const similarityScore = cosineSimilarity(
+        queryVector,
+        row.vectorEmbedding,
+      );
+
+      if (
+        similarityScore === null ||
+        similarityScore < input.minSimilarityScore
+      ) {
+        return null;
+      }
+
+      return {
+        chunkId: row.id,
+        sourceType: row.entityType,
+        sourceId: row.entityId,
+        content: row.documentContent,
+        similarityScore,
+        metadata: metadataRecord(row.metadata),
+      };
+    })
+    .filter(
+      (
+        value,
+      ): value is VectorSearchResultPayload['matchedChunks'][number] =>
+        value !== null,
+    )
+    .sort((left, right) => right.similarityScore - left.similarityScore)
+    .slice(0, input.topK);
 
   return {
     queryText: input.queryText,
-    matchedChunks: mockResults.filter((r) => r.similarityScore >= input.minSimilarityScore),
-    latencyMs: duration,
-    totalCandidatesScanned: 14200,
+    matchedChunks,
+    latencyMs: Date.now() - startTime,
+    totalCandidatesScanned: rows.length,
   };
 }
