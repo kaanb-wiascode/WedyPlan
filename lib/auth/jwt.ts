@@ -1,8 +1,20 @@
 import { jwtVerify, SignJWT, decodeJwt } from 'jose';
 
-const secret = new TextEncoder().encode(
-  process.env.JWT_SECRET || 'your-super-secret-key-change-in-production'
-);
+const DEVELOPMENT_JWT_SECRET = 'wedyplan-development-secret-change-before-production';
+
+function getJwtSecret(): Uint8Array {
+  const configuredSecret = process.env.JWT_SECRET?.trim();
+
+  if (configuredSecret) {
+    return new TextEncoder().encode(configuredSecret);
+  }
+
+  if (process.env.NODE_ENV === 'production') {
+    throw new Error('JWT_SECRET production ortamında zorunludur.');
+  }
+
+  return new TextEncoder().encode(DEVELOPMENT_JWT_SECRET);
+}
 
 /**
  * Custom JWT Payload type (renamed to avoid conflict with jose)
@@ -23,7 +35,7 @@ export async function createToken(payload: WedyJWTPayload): Promise<string> {
     .setProtectedHeader({ alg: 'HS256' })
     .setIssuedAt()
     .setExpirationTime('7d')
-    .sign(secret);
+    .sign(getJwtSecret());
 
   return token;
 }
@@ -33,7 +45,7 @@ export async function createToken(payload: WedyJWTPayload): Promise<string> {
  */
 export async function verifyToken(token: string): Promise<WedyJWTPayload | null> {
   try {
-    const verified = await jwtVerify(token, secret);
+    const verified = await jwtVerify(token, getJwtSecret());
     return verified.payload as unknown as WedyJWTPayload;
   } catch {
     return null;
