@@ -54,10 +54,9 @@ export async function POST(request: NextRequest) {
     const passwordHash = await hashPassword(password);
 
     // 6. Role ve Portal eşleme
-    const validRoles: Record<string, 'COUPLE' | 'VENDOR' | 'ADMIN'> = {
+    const validRoles: Record<string, 'COUPLE' | 'VENDOR'> = {
       COUPLE: 'COUPLE',
       VENDOR: 'VENDOR',
-      ADMIN: 'ADMIN',
     };
 
     const userRole = validRoles[role] || 'COUPLE';
