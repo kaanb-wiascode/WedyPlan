@@ -4,52 +4,82 @@ import bcrypt from 'bcryptjs';
 const prisma = new PrismaClient();
 
 async function main() {
-  const adminEmail = process.env.SUPER_ADMIN_EMAIL;
-  const rawPassword = process.env.SUPER_ADMIN_PASSWORD;
+  const email = process.env.SUPER_ADMIN_EMAIL?.trim().toLowerCase();
+  const password = process.env.SUPER_ADMIN_PASSWORD;
+  const fullName =
+    process.env.SUPER_ADMIN_NAME?.trim() || 'WedyPlan Super Admin';
 
-  console.log('⏳ Admin kullanıcısı kontrol ediliyor ve kuruluyor...');
-
-  const hashedPassword = await bcrypt.hash(rawPassword, 10);
-
-  // User modelini arar, yoksa portalProfile veya ilgili kullanıcı tablosuna yazar
-  const userModel = (prisma as any).user || (prisma as any).account || (prisma as any).portalProfile;
-
-  if (!userModel) {
-    console.error('❌ Kullanıcı modeli Prisma şemasında bulunamadı.');
+  if (!email || !password) {
+    console.log(
+      'SUPER_ADMIN_EMAIL / SUPER_ADMIN_PASSWORD tanımlı değil; admin seed atlandı.',
+    );
     return;
   }
 
-  const existingUser = await userModel.findFirst({
-    where: { email: adminEmail },
+  const passwordHash = await bcrypt.hash(password, 10);
+
+  const user = await prisma.identityUser.upsert({
+    where: { email },
+    create: {
+      email,
+      passwordHash,
+      fullName,
+      status: 'ACTIVE',
+      isEmailVerified: true,
+      emailVerifiedAt: new Date(),
+      securityProfile: { create: {} },
+    },
+    update: {
+      passwordHash,
+      fullName,
+      status: 'ACTIVE',
+      isEmailVerified: true,
+      emailVerifiedAt: new Date(),
+    },
   });
 
-  if (existingUser) {
-    await userModel.update({
-      where: { id: existingUser.id },
-      data: {
-        role: 'ADMIN',
-        password: hashedPassword,
-        isEmailVerified: true,
+  const role = await prisma.role.upsert({
+    where: { code: 'SUPER_ADMINISTRATOR' },
+    create: {
+      code: 'SUPER_ADMINISTRATOR',
+      name: 'Super Administrator',
+      description: 'Platform-wide administrative role',
+      isSystem: true,
+    },
+    update: {
+      isSystem: true,
+    },
+  });
+
+  await prisma.portalProfile.upsert({
+    where: {
+      userId_portal: {
+        userId: user.id,
+        portal: 'ADMIN',
       },
-    });
-    console.log('✅ Mevcut kullanıcı "ADMIN" yetkisiyle güncellendi.');
-  } else {
-    await userModel.create({
-      data: {
-        email: adminEmail,
-        fullName: 'Kaan Atamer (Süper Admin)',
-        password: hashedPassword,
-        role: 'ADMIN',
-        isEmailVerified: true,
+    },
+    create: {
+      userId: user.id,
+      portal: 'ADMIN',
+      isPrimary: true,
+      roles: {
+        connect: { id: role.id },
       },
-    });
-    console.log('🎉 İlk Admin kullanıcısı başarıyla oluşturuldu!');
-  }
+    },
+    update: {
+      isPrimary: true,
+      roles: {
+        connect: { id: role.id },
+      },
+    },
+  });
+
+  console.log(`Super admin hazır: ${user.email}`);
 }
 
 main()
-  .catch((e) => {
-    console.error('❌ Seed sırasında hata oluştu:', e);
+  .catch((error: unknown) => {
+    console.error('Seed sırasında hata oluştu:', error);
     process.exit(1);
   })
   .finally(async () => {
