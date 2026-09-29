@@ -11,36 +11,52 @@ export async function POST(request: NextRequest) {
     if (!session || session.role !== 'VENDOR') {
       return NextResponse.json(
         { success: false, error: 'Sadece satıcılar teklif gönderebilir.' },
-        { status: 403 }
+        { status: 403 },
       );
     }
 
     const body = await request.json();
-    const { coupleId, vendorId, price, notes } = body;
+    const coupleId = String(body.coupleId || '').trim();
+    const vendorId = String(body.vendorId || '').trim();
+    const notes =
+      typeof body.notes === 'string' && body.notes.trim()
+        ? body.notes.trim().slice(0, 2000)
+        : null;
+    const price = Number(body.price);
 
-    // Validation
-    if (!coupleId || !vendorId || !price) {
+    if (!coupleId || !vendorId || !Number.isFinite(price) || price <= 0) {
       return NextResponse.json(
-        { success: false, error: 'Eksik bilgi.' },
-        { status: 400 }
+        { success: false, error: 'Geçerli çift, satıcı ve fiyat bilgisi gereklidir.' },
+        { status: 400 },
       );
     }
 
-    // Vendor ownership check
-    const vendor = await (prisma as any).vendor.findUnique({
-      where: { id: vendorId },
-      select: { userId: true, businessName: true },
-    });
+    const [vendor, couple] = await Promise.all([
+      prisma.vendor.findUnique({
+        where: { id: vendorId },
+        select: { userId: true, businessName: true },
+      }),
+      prisma.couple.findUnique({
+        where: { id: coupleId },
+        select: { id: true, userId: true },
+      }),
+    ]);
 
-    if (vendor?.userId !== session.userId) {
+    if (!vendor || vendor.userId !== session.userId) {
       return NextResponse.json(
         { success: false, error: 'Bu satıcıyı yönetme yetkiniz yok.' },
-        { status: 403 }
+        { status: 403 },
       );
     }
 
-    // Create or update quote
-    const quote = await (prisma as any).coupleVendorRelation.upsert({
+    if (!couple) {
+      return NextResponse.json(
+        { success: false, error: 'Hedef çift bulunamadı.' },
+        { status: 404 },
+      );
+    }
+
+    const quote = await prisma.vendorQuote.upsert({
       where: {
         coupleId_vendorId: {
           coupleId,
@@ -51,7 +67,6 @@ export async function POST(request: NextRequest) {
         status: 'QUOTED',
         quotedPrice: price,
         notes,
-        updatedAt: new Date(),
       },
       create: {
         coupleId,
@@ -62,24 +77,22 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    // 🚀 Real-time notification via SSE
-    sendSSEEvent(coupleId, 'vendor:quote:received', {
+    sendSSEEvent(couple.userId, 'vendor:quote:received', {
       quoteId: quote.id,
       vendorName: vendor.businessName,
       price: quote.quotedPrice,
       notes: quote.notes,
-      timestamp: new Date(),
+      timestamp: new Date().toISOString(),
     });
 
-    // Audit log
-    await (prisma as any).auditLog.create({
+    await prisma.auditLog.create({
       data: {
         correlationId: crypto.randomUUID(),
-        category: 'PAYMENT',
+        category: 'CONTRACT',
         action: 'QUOTE_SENT',
         actorUserId: session.userId,
         actorRole: session.role,
-        targetEntity: 'Quote',
+        targetEntity: 'VendorQuote',
         targetEntityId: quote.id,
         severity: 'INFO',
         metadata: { coupleId, vendorId, price },
@@ -90,11 +103,11 @@ export async function POST(request: NextRequest) {
       success: true,
       data: quote,
     });
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Send quote error:', error);
     return NextResponse.json(
       { success: false, error: 'Teklif gönderilemedi.' },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
