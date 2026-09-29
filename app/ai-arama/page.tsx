@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, Suspense } from 'react';
+import React, { useCallback, useEffect, useState, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { PublicNavbar } from '@/components/public/PublicNavbar';
 import { PublicFooter } from '@/components/public/homepage/PublicFooter';
@@ -12,119 +12,142 @@ import { AiSearchResultCard } from '@/components/public/ai-search/AiSearchResult
 import { AiSearchLoadingSkeleton } from '@/components/public/ai-search/AiSearchLoadingSkeleton';
 import { AiSearchEmptyState } from '@/components/public/ai-search/AiSearchEmptyState';
 import { AiSearchFaq } from '@/components/public/ai-search/AiSearchFaq';
-import { MOCK_AI_SEARCH_VENDORS } from '@/lib/data/ai-search-data';
-import { AiSearchVendor, AiSearchFilterState } from '@/types/ai-search';
+import type { AiSearchVendor, AiSearchFilterState } from '@/types/ai-search';
+
+const EMPTY_FILTERS: AiSearchFilterState = {
+  prompt: '',
+  category: '',
+  city: '',
+  maxBudget: 0,
+  minCapacity: 0,
+  verifiedOnly: false,
+  minRating: 0,
+};
 
 function AiSearchContent() {
   const searchParams = useSearchParams();
   const initialQuery = searchParams.get('q') || '';
 
   const [prompt, setPrompt] = useState(initialQuery);
-  const [isProcessing, setIsProcessing] = useState(false);
-  const [vendors, setVendors] = useState<AiSearchVendor[]>(MOCK_AI_SEARCH_VENDORS);
-
+  const [isProcessing, setIsProcessing] = useState(true);
+  const [vendors, setVendors] = useState<AiSearchVendor[]>([]);
   const [filters, setFilters] = useState<AiSearchFilterState>({
+    ...EMPTY_FILTERS,
     prompt: initialQuery,
-    category: '',
-    city: '',
-    maxBudget: 0,
-    minCapacity: 0,
-    verifiedOnly: false,
-    minRating: 0
   });
 
-  const handleRunSearch = (queryOverride?: string) => {
-    const activePrompt = queryOverride !== undefined ? queryOverride : prompt;
-    setIsProcessing(true);
+  const fetchVendors = useCallback(
+    async (activePrompt: string, activeFilters: AiSearchFilterState) => {
+      setIsProcessing(true);
 
-    setTimeout(() => {
-      setFilters((prev) => ({ ...prev, prompt: activePrompt }));
-      setIsProcessing(false);
-    }, 450);
+      try {
+        const params = new URLSearchParams();
+        if (activePrompt.trim()) params.set('q', activePrompt.trim());
+        if (activeFilters.category) params.set('category', activeFilters.category);
+        if (activeFilters.city) params.set('city', activeFilters.city);
+        if (activeFilters.maxBudget > 0) {
+          params.set('maxBudget', String(activeFilters.maxBudget));
+        }
+        if (activeFilters.minCapacity > 0) {
+          params.set('minCapacity', String(activeFilters.minCapacity));
+        }
+        if (activeFilters.minRating > 0) {
+          params.set('minRating', String(activeFilters.minRating));
+        }
+        if (activeFilters.verifiedOnly) params.set('verifiedOnly', 'true');
+
+        const response = await fetch(`/api/public/ai-search?${params.toString()}`, {
+          cache: 'no-store',
+        });
+        const payload = (await response.json()) as {
+          vendors?: AiSearchVendor[];
+        };
+
+        setVendors(response.ok && Array.isArray(payload.vendors) ? payload.vendors : []);
+      } catch {
+        setVendors([]);
+      } finally {
+        setIsProcessing(false);
+      }
+    },
+    [],
+  );
+
+  useEffect(() => {
+    const initialFilters = { ...EMPTY_FILTERS, prompt: initialQuery };
+    void fetchVendors(initialQuery, initialFilters);
+  }, [fetchVendors, initialQuery]);
+
+  const handleRunSearch = (queryOverride?: string) => {
+    const activePrompt =
+      queryOverride !== undefined ? queryOverride : prompt;
+    const nextFilters = { ...filters, prompt: activePrompt };
+
+    setPrompt(activePrompt);
+    setFilters(nextFilters);
+    void fetchVendors(activePrompt, nextFilters);
+  };
+
+  const handleFilterChange = (updated: Partial<AiSearchFilterState>) => {
+    const nextFilters = { ...filters, ...updated };
+    setFilters(nextFilters);
+    void fetchVendors(nextFilters.prompt, nextFilters);
   };
 
   const handleResetFilters = () => {
     setPrompt('');
-    setFilters({
-      prompt: '',
-      category: '',
-      city: '',
-      maxBudget: 0,
-      minCapacity: 0,
-      verifiedOnly: false,
-      minRating: 0
-    });
+    setFilters(EMPTY_FILTERS);
+    void fetchVendors('', EMPTY_FILTERS);
   };
-
-  const filteredVendors = vendors.filter((v) => {
-    if (filters.category && v.category !== filters.category) return false;
-    if (filters.city && v.city !== filters.city) return false;
-    if (filters.maxBudget > 0 && v.startingPrice > filters.maxBudget) return false;
-    if (filters.verifiedOnly && !v.isVerified) return false;
-    return true;
-  });
 
   return (
     <div className="min-h-screen bg-[#f5f5f7] text-[#1D1D1F] selection:bg-[#0071e3] selection:text-white pb-12 overflow-hidden relative">
       <PublicNavbar />
 
       <main className="space-y-10">
-        {/* 1. Hero & Natural Language Input */}
         <AiSearchHero
           prompt={prompt}
-          onPromptChange={(val) => setPrompt(val)}
+          onPromptChange={setPrompt}
           onSearch={() => handleRunSearch()}
           onReset={handleResetFilters}
           isProcessing={isProcessing}
         />
 
-        {/* 2. Suggested Prompts */}
         <SuggestedPrompts
-          onSelectPrompt={(selectedText) => {
-            setPrompt(selectedText);
-            handleRunSearch(selectedText);
-          }}
+          onSelectPrompt={(selectedText) => handleRunSearch(selectedText)}
         />
 
-        {/* Main Content Layout */}
         <div className="max-w-7xl mx-auto px-4 sm:px-8 pt-4">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-            
-            {/* Left Filter Panel */}
             <div className="lg:col-span-4">
               <AiFilterPanel
                 filters={filters}
-                onChangeFilter={(updated) => setFilters((prev) => ({ ...prev, ...updated }))}
+                onChangeFilter={handleFilterChange}
                 onResetFilters={handleResetFilters}
               />
             </div>
 
-            {/* Right Results & AI Insight */}
             <div className="lg:col-span-8 space-y-6">
-              {/* 3. AI Recommendation Insight Card */}
               <AiRecommendationCard
                 queryPrompt={filters.prompt}
-                resultCount={filteredVendors.length}
+                resultCount={vendors.length}
               />
 
-              {/* 4. Results List / Skeleton / Empty State */}
               {isProcessing ? (
                 <AiSearchLoadingSkeleton />
-              ) : filteredVendors.length === 0 ? (
+              ) : vendors.length === 0 ? (
                 <AiSearchEmptyState onReset={handleResetFilters} />
               ) : (
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                  {filteredVendors.map((vendor) => (
+                  {vendors.map((vendor) => (
                     <AiSearchResultCard key={vendor.id} vendor={vendor} />
                   ))}
                 </div>
               )}
             </div>
-
           </div>
         </div>
 
-        {/* 5. AI Search FAQ */}
         <AiSearchFaq />
       </main>
 
