@@ -5,8 +5,6 @@ import { createToken } from '@/lib/auth/jwt';
 import { getAdminSession, unauthorized } from '@/lib/admin/require-admin';
 import { writeAdminAudit } from '@/lib/admin/audit';
 
-const db = prisma as any;
-
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
@@ -33,37 +31,50 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ success: false, error: 'Hedef ve portal gerekli.' }, { status: 400 });
   }
 
-  const user = await db.identityUser.findUnique({
+  const user = await prisma.identityUser.findUnique({
     where: { id: targetUserId },
     select: { id: true, email: true, fullName: true, status: true },
   });
   if (!user) {
     return NextResponse.json({ success: false, error: 'Kullanıcı bulunamadı.' }, { status: 404 });
   }
+  if (user.status !== 'ACTIVE') {
+    return NextResponse.json({ success: false, error: 'Aktif olmayan hesap taklit edilemez.' }, { status: 409 });
+  }
 
-  const profile = await db.portalProfile.findFirst({
+  const profile = await prisma.portalProfile.findFirst({
     where: { userId: user.id, portal: portal as 'COUPLE' | 'VENDOR' },
   });
   if (!profile) {
-    await db.portalProfile.create({
-      data: { userId: user.id, portal: portal as 'COUPLE' | 'VENDOR', isPrimary: false },
-    }).catch(() => {});
+    return NextResponse.json(
+      { success: false, error: 'Hedef kullanıcının bu portala erişimi yok.' },
+      { status: 409 },
+    );
   }
 
   if (portal === 'COUPLE') {
-    const couple = await db.couple.findFirst({ where: { userId: user.id } });
+    const couple = await prisma.couple.findFirst({
+      where: { userId: user.id },
+      select: { id: true },
+    });
     if (!couple) {
-      await db.couple.create({
-        data: { userId: user.id, partnerOneName: user.fullName || 'Çift' },
-      });
+      return NextResponse.json(
+        { success: false, error: 'Hedef kullanıcının çift profili bulunamadı.' },
+        { status: 409 },
+      );
     }
   }
+
   if (portal === 'VENDOR') {
-    const vendor = await db.vendor.findFirst({ where: { userId: user.id } });
+    const vendor = await prisma.vendor.findFirst({
+      where: { userId: user.id },
+      select: { id: true },
+    });
     if (!vendor) {
-      await db.vendor.create({
-        data: { userId: user.id, businessName: user.fullName || 'Firma', businessCategory: 'OTHER' },
-      });
+      return NextResponse.json(
+        { success: false, error: 'Hedef kullanıcının satıcı profili bulunamadı.' },
+        { status: 409 },
+      );
     }
   }
 
