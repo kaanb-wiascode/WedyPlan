@@ -5,8 +5,6 @@ import type { WedyJWTPayload } from '@/lib/auth/jwt';
 import type { OpsDesk } from '@/lib/ops/catalog';
 import { deskHome } from '@/lib/ops/catalog';
 
-const db = prisma as any;
-
 export type StaffContext = WedyJWTPayload & {
   desk: OpsDesk;
   staffId: string;
@@ -18,59 +16,114 @@ export type StaffContext = WedyJWTPayload & {
   fullName: string;
 };
 
-export async function ensureStaffForAdmin(userId: string): Promise<StaffContext['desk']> {
-  const existing = await db.adminStaff.findUnique({ where: { userId } }).catch(() => null);
-  if (existing) return existing.desk as OpsDesk;
-  await db.adminStaff.create({
-    data: { userId, desk: 'SUPER', title: 'Süper Admin', isActive: true },
-  }).catch(() => null);
-  return 'SUPER';
+async function hasSuperAdminRole(userId: string): Promise<boolean> {
+  const profile = await prisma.portalProfile.findUnique({
+    where: {
+      userId_portal: {
+        userId,
+        portal: 'ADMIN',
+      },
+    },
+    include: {
+      roles: {
+        select: { code: true },
+      },
+    },
+  });
+
+  return Boolean(
+    profile?.roles.some((role) => role.code === 'SUPER_ADMINISTRATOR'),
+  );
 }
 
-export async function requireStaff(allowed?: OpsDesk[]): Promise<StaffContext> {
+export async function ensureStaffForAdmin(
+  userId: string,
+): Promise<StaffContext['desk']> {
+  const existing = await prisma.adminStaff.findUnique({
+    where: { userId },
+  });
+
+  if (existing) {
+    return existing.desk as OpsDesk;
+  }
+
+  if (!(await hasSuperAdminRole(userId))) {
+    throw new Error('Bu yönetici için operasyon personeli yetkisi tanımlı değil.');
+  }
+
+  const created = await prisma.adminStaff.create({
+    data: {
+      userId,
+      desk: 'SUPER',
+      title: 'Süper Admin',
+      isActive: true,
+    },
+  });
+
+  return created.desk as OpsDesk;
+}
+
+export async function requireStaff(
+  allowed?: OpsDesk[],
+): Promise<StaffContext> {
   const session = await requireAdmin();
-  let row = await db.adminStaff.findUnique({ where: { userId: session.userId } }).catch(() => null);
+
+  let row = await prisma.adminStaff.findUnique({
+    where: { userId: session.userId },
+  });
+
   if (!row) {
     await ensureStaffForAdmin(session.userId);
-    row = await db.adminStaff.findUnique({ where: { userId: session.userId } }).catch(() => null);
+    row = await prisma.adminStaff.findUnique({
+      where: { userId: session.userId },
+    });
   }
-  const user = await db.identityUser.findUnique({
+
+  if (!row || row.isActive === false) {
+    redirect('/giris');
+  }
+
+  const user = await prisma.identityUser.findUnique({
     where: { id: session.userId },
     select: { fullName: true },
-  }).catch(() => null);
+  });
 
-  const desk = (row?.desk || 'SUPER') as OpsDesk;
+  const desk = row.desk as OpsDesk;
   const ctx: StaffContext = {
     ...session,
     desk,
-    staffId: row?.id || session.userId,
-    title: row?.title || 'Yönetici',
-    regionCode: row?.regionCode || null,
-    managerUserId: row?.managerUserId || null,
-    extraPerms: row?.extraPerms || [],
-    revokedPerms: row?.revokedPerms || [],
+    staffId: row.id,
+    title: row.title,
+    regionCode: row.regionCode,
+    managerUserId: row.managerUserId,
+    extraPerms: row.extraPerms,
+    revokedPerms: row.revokedPerms,
     fullName: user?.fullName || session.email,
   };
 
   if (desk === 'SUPER') return ctx;
+
   if (allowed && allowed.length > 0 && !allowed.includes(desk)) {
     redirect(deskHome(desk));
   }
-  if (row && row.isActive === false) redirect('/giris');
+
   return ctx;
 }
 
 export function canWriteFinance(staff: StaffContext) {
-  if (staff.desk === 'SUPER') return true;
-  if (staff.desk === 'FINANCE') return true;
-  return false;
+  return staff.desk === 'SUPER' || staff.desk === 'FINANCE';
 }
 
 export function canApproveDeals(staff: StaffContext) {
   return staff.desk === 'SUPER' || staff.desk === 'REGION';
 }
 
-export function salesScopeUserIds(staff: StaffContext, teamIds: string[]) {
-  if (staff.desk === 'SUPER' || staff.desk === 'REGION') return teamIds;
+export function salesScopeUserIds(
+  staff: StaffContext,
+  teamIds: string[],
+) {
+  if (staff.desk === 'SUPER' || staff.desk === 'REGION') {
+    return teamIds;
+  }
   return [staff.userId];
 }
