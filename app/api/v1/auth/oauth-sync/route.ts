@@ -55,12 +55,12 @@ export async function POST(request: NextRequest) {
     const email = identity.email.toLowerCase();
     const fullName = identity.name || email.split("@")[0];
 
-    let user = await (prisma as any).identityUser.findUnique({
+    let user = await prisma.identityUser.findUnique({
       where: { email },
     });
 
     if (!user) {
-      user = await (prisma as any).$transaction(async (tx: any) => {
+      user = await prisma.$transaction(async (tx) => {
         const newUser = await tx.identityUser.create({
           data: {
             email,
@@ -88,7 +88,7 @@ export async function POST(request: NextRequest) {
               businessCategory: "OTHER",
               status: "PENDING",
               isVerified: false,
-            } as any,
+            },
           });
         } else if (requestedRole === "COUPLE") {
           await tx.couple.create({
@@ -103,7 +103,7 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    let profile = await (prisma as any).portalProfile.findFirst({
+    let profile = await prisma.portalProfile.findFirst({
       where: { userId: user.id, isPrimary: true },
     });
 
