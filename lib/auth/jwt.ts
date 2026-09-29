@@ -60,7 +60,7 @@ export async function createRefreshToken(userId: string): Promise<string> {
     .setProtectedHeader({ alg: 'HS256' })
     .setIssuedAt()
     .setExpirationTime('30d')
-    .sign(secret);
+    .sign(getJwtSecret());
 
   return token;
 }
