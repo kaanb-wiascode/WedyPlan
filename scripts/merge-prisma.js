@@ -34,6 +34,8 @@ generator client {
 
   const definedModels = new Set();
   const definedEnums = new Set();
+  const duplicateModels = new Set();
+  const duplicateEnums = new Set();
   let modelsCount = 0;
 
   schemaFiles.forEach((file) => {
@@ -50,6 +52,7 @@ generator client {
     // 3. Mükerrer Enum'ları Ayıkla
     content = content.replace(/enum\s+(\w+)\s*\{[\s\S]*?\}/g, (match, enumName) => {
       if (definedEnums.has(enumName)) {
+        duplicateEnums.add(enumName);
         return `// [Atlandı - Çift Tanım] enum ${enumName}`;
       }
       definedEnums.add(enumName);
@@ -59,6 +62,7 @@ generator client {
     // 4. Mükerrer Model'leri Ayıkla
     content = content.replace(/model\s+(\w+)\s*\{[\s\S]*?\}/g, (match, modelName) => {
       if (definedModels.has(modelName)) {
+        duplicateModels.add(modelName);
         return `// [Atlandı - Çift Tanım] model ${modelName}`;
       }
       definedModels.add(modelName);
@@ -82,6 +86,14 @@ generator client {
   mergedContent = mergedContent.replace(/\s+auditLogs\s+AuditLog\[\]/g, '');
 
   fs.writeFileSync(OUTPUT_FILE, mergedContent, 'utf8');
+
+  if (duplicateModels.size || duplicateEnums.size) {
+    console.warn('⚠️ Prisma duplicate tanımları bulundu.');
+    if (duplicateModels.size) console.warn('Modeller:', [...duplicateModels].sort().join(', '));
+    if (duplicateEnums.size) console.warn('Enumlar:', [...duplicateEnums].sort().join(', '));
+    if (process.env.STRICT_PRISMA_MERGE === '1') process.exit(1);
+  }
+
   console.log(`✅ ${modelsCount} adet Prisma şeması ilişki düzeltmeleriyle 'prisma/schema.prisma' dosyasında birleştirildi!`);
 }
 
