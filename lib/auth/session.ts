@@ -78,10 +78,6 @@ export async function updateSession(
  * @returns Aktif couple ID veya otomatik oluşturulan couple ID
  */
 export async function getActiveCoupleId(coupleId?: string): Promise<string> {
-  if (coupleId) {
-    return coupleId;
-  }
-
   const session = await getSession();
 
   if (!session || !session.userId) {
@@ -93,15 +89,26 @@ export async function getActiveCoupleId(coupleId?: string): Promise<string> {
   }
 
   try {
-    // 1. Veritabanından mevcut çift profilini ara
-    let couple = await (prisma as any).couple.findFirst({
+    if (coupleId) {
+      const ownedCouple = await prisma.couple.findFirst({
+        where: { id: coupleId, userId: session.userId },
+        select: { id: true },
+      });
+
+      if (!ownedCouple) {
+        throw new Error('Bu çift kaydına erişim yetkiniz yok.');
+      }
+
+      return ownedCouple.id;
+    }
+
+    let couple = await prisma.couple.findFirst({
       where: { userId: session.userId },
       select: { id: true },
     });
 
-    // 2. Profil yoksa çökme! Arka planda anında oluştur (Self-Healing)
     if (!couple) {
-      couple = await (prisma as any).couple.create({
+      couple = await prisma.couple.create({
         data: {
           userId: session.userId,
           partnerOneName: 'Çift',
@@ -121,10 +128,6 @@ export async function getActiveCoupleId(coupleId?: string): Promise<string> {
  * Aktif Vendor ID'sini al (Sessiz Onarımlı Yapı)
  */
 export async function getActiveVendorId(vendorId?: string): Promise<string> {
-  if (vendorId) {
-    return vendorId;
-  }
-
   const session = await getSession();
 
   if (!session || !session.userId) {
@@ -136,14 +139,26 @@ export async function getActiveVendorId(vendorId?: string): Promise<string> {
   }
 
   try {
-    let vendor = await (prisma as any).vendor.findFirst({
+    if (vendorId) {
+      const ownedVendor = await prisma.vendor.findFirst({
+        where: { id: vendorId, userId: session.userId },
+        select: { id: true },
+      });
+
+      if (!ownedVendor) {
+        throw new Error('Bu satıcı kaydına erişim yetkiniz yok.');
+      }
+
+      return ownedVendor.id;
+    }
+
+    let vendor = await prisma.vendor.findFirst({
       where: { userId: session.userId },
       select: { id: true },
     });
 
-    // Profil yoksa arka planda oluştur
     if (!vendor) {
-      vendor = await (prisma as any).vendor.create({
+      vendor = await prisma.vendor.create({
         data: {
           userId: session.userId,
           businessName: 'Satıcı Hizmeti',
