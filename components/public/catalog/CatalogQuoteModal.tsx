@@ -22,6 +22,8 @@ export function CatalogQuoteModal({
   onClose,
 }: CatalogQuoteModalProps) {
   const [submitted, setSubmitted] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState("");
   const [form, setForm] = useState({
     coupleNames: "",
     phone: "",
@@ -31,9 +33,13 @@ export function CatalogQuoteModal({
     note: "",
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    saveCatalogLead({
+    setIsSubmitting(true);
+    setSubmitError("");
+
+    try {
+      await saveCatalogLead({
       vendorId,
       vendorName,
       categorySlug,
@@ -45,8 +51,15 @@ export function CatalogQuoteModal({
       weddingDate: form.weddingDate,
       guestCount: Number(form.guestCount) || 0,
       note: form.note || `${vendorName} için ücretsiz teklif talebi.`,
-    });
-    setSubmitted(true);
+      });
+      setSubmitted(true);
+    } catch (error: unknown) {
+      setSubmitError(
+        error instanceof Error ? error.message : "Teklif talebi gönderilemedi.",
+      );
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -131,8 +144,15 @@ export function CatalogQuoteModal({
                 onChange={(e) => setForm({ ...form, note: e.target.value })}
                 className="apple-input min-h-[88px] resize-none"
               />
-              <button type="submit" className="apple-btn">
-                Teklif talebini gönder
+              {submitError ? (
+                <p className="text-[12px] text-rose-600">{submitError}</p>
+              ) : null}
+              <button
+                type="submit"
+                disabled={isSubmitting}
+                className="apple-btn disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                {isSubmitting ? "Gönderiliyor..." : "Teklif talebini gönder"}
               </button>
             </form>
           </>
