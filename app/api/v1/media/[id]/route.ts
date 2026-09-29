@@ -1,30 +1,47 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { getSession } from '@/lib/auth/session';
 import { EnterpriseMediaService } from '@/lib/media/application/enterprise-media.service';
 
 export async function GET(
-  req: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  _req: NextRequest,
+  { params }: { params: Promise<{ id: string }> },
 ) {
+  const session = await getSession();
+  if (!session?.userId) {
+    return NextResponse.json({ error: 'Oturum açmanız gerekiyor.' }, { status: 401 });
+  }
+
   const resolvedParams = await params;
-  const asset = await EnterpriseMediaService.getAssetById(resolvedParams.id);
+  const asset = await EnterpriseMediaService.getAssetById(
+    resolvedParams.id,
+    session.userId,
+  );
 
   if (!asset) {
-    return NextResponse.json({ error: 'Media asset not found' }, { status: 404 });
+    return NextResponse.json({ error: 'Dosya bulunamadı.' }, { status: 404 });
   }
 
   return NextResponse.json(asset);
 }
 
 export async function DELETE(
-  req: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  _req: NextRequest,
+  { params }: { params: Promise<{ id: string }> },
 ) {
-  const resolvedParams = await params;
-  const success = await EnterpriseMediaService.softDeleteAsset(resolvedParams.id);
-
-  if (!success) {
-    return NextResponse.json({ error: 'Asset not found or already deleted' }, { status: 404 });
+  const session = await getSession();
+  if (!session?.userId) {
+    return NextResponse.json({ error: 'Oturum açmanız gerekiyor.' }, { status: 401 });
   }
 
-  return NextResponse.json({ success: true, message: 'Asset moved to recycle bin' });
+  const resolvedParams = await params;
+  const success = await EnterpriseMediaService.softDeleteAsset(
+    resolvedParams.id,
+    session.userId,
+  );
+
+  if (!success) {
+    return NextResponse.json({ error: 'Dosya bulunamadı veya bu işlem için yetkiniz yok.' }, { status: 404 });
+  }
+
+  return NextResponse.json({ success: true, message: 'Dosya geri dönüşüm alanına taşındı.' });
 }
