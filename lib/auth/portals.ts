@@ -13,15 +13,15 @@ export async function listAllowedPortals(
   userId: string,
   sessionRole?: string | null
 ): Promise<PortalType[]> {
-  const profiles = await (prisma as any).portalProfile.findMany({
+  const profiles = await prisma.portalProfile.findMany({
     where: { userId },
     select: { portal: true },
   });
 
   const portals = new Set<PortalType>(
     profiles
-      .map((profile: { portal: PortalType }) => profile.portal)
-      .filter((portal: PortalType) => portal !== 'PUBLIC')
+      .map((profile) => profile.portal as PortalType)
+      .filter((portal) => portal !== 'PUBLIC')
   );
 
   if (sessionRole === 'ADMIN' || portals.has('ADMIN')) {
