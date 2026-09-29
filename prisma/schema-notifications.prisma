@@ -7,7 +7,7 @@ generator client {
   provider = "prisma-client-js"
 }
 
-enum LegacyLegacyNotificationChannel {
+enum LegacyNotificationChannel {
   IN_APP
   EMAIL
   SMS
@@ -16,14 +16,14 @@ enum LegacyLegacyNotificationChannel {
   BROWSER
 }
 
-enum LegacyLegacyNotificationPriority {
+enum LegacyNotificationPriority {
   LOW
   NORMAL
   HIGH
   URGENT
 }
 
-enum LegacyLegacyNotificationCategory {
+enum LegacyNotificationCategory {
   TRANSACTIONAL
   MARKETING
   SYSTEM
@@ -32,7 +32,7 @@ enum LegacyLegacyNotificationCategory {
   SECURITY
 }
 
-enum LegacyLegacyDeliveryStatus {
+enum LegacyDeliveryStatus {
   PENDING
   QUEUED
   SENT
