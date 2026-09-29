@@ -23,6 +23,31 @@ export async function POST(request: NextRequest) {
   const admin = await getAdminSession();
   if (!admin) return unauthorized();
 
+  const adminProfile = await prisma.portalProfile.findUnique({
+    where: {
+      userId_portal: {
+        userId: admin.userId,
+        portal: 'ADMIN',
+      },
+    },
+    include: {
+      roles: {
+        select: { code: true },
+      },
+    },
+  });
+
+  const canImpersonate = Boolean(
+    adminProfile?.roles.some((role) => role.code === 'SUPER_ADMINISTRATOR'),
+  );
+
+  if (!canImpersonate) {
+    return NextResponse.json(
+      { success: false, error: 'Kullanıcı taklidi için süper yönetici yetkisi gerekir.' },
+      { status: 403 },
+    );
+  }
+
   const body = await request.json().catch(() => ({}));
   const targetUserId = String(body.targetUserId || '');
   const portal = String(body.portal || body.targetRole || '').toUpperCase();
