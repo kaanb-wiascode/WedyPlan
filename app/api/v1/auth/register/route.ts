@@ -40,7 +40,7 @@ export async function POST(request: NextRequest) {
     }
 
     // 4. E-posta zaten kullanılıyor mu?
-    const existingUser = await (prisma as any).identityUser.findUnique({
+    const existingUser = await prisma.identityUser.findUnique({
       where: { email: email.toLowerCase() },
     });
 
@@ -55,25 +55,23 @@ export async function POST(request: NextRequest) {
     const passwordHash = await hashPassword(password);
 
     // 6. Role validasyonu
-    const validRoles: Record<string, 'COUPLE' | 'VENDOR' | 'ADMIN'> = {
+    const validRoles: Record<string, 'COUPLE' | 'VENDOR'> = {
       COUPLE: 'COUPLE',
       VENDOR: 'VENDOR',
-      ADMIN: 'ADMIN',
     };
 
     const userRole = validRoles[role] || 'COUPLE';
 
     // 7. Portaltype mapping
-    const portalTypeMap: Record<string, 'COUPLE' | 'VENDOR' | 'ADMIN'> = {
+    const portalTypeMap: Record<string, 'COUPLE' | 'VENDOR'> = {
       COUPLE: 'COUPLE',
       VENDOR: 'VENDOR',
-      ADMIN: 'ADMIN',
     };
 
     const portalType = portalTypeMap[userRole];
 
     // 8, 9, 10. Atomik Veritabanı İşlemleri (Transaction)
-    const user = await (prisma as any).$transaction(async (tx: any) => {
+    const user = await prisma.$transaction(async (tx) => {
       // User oluştur
       const newUser = await tx.identityUser.create({
         data: {
@@ -109,7 +107,8 @@ export async function POST(request: NextRequest) {
           },
         });
       } else if (userRole === 'VENDOR') {
-        const slugBase = String(name)
+        const vendorName = businessName || fullName;
+        const slugBase = String(vendorName)
               .toLocaleLowerCase('tr-TR')
               .replaceAll('ı', 'i')
               .replaceAll('ğ', 'g')
@@ -123,7 +122,7 @@ export async function POST(request: NextRequest) {
         await tx.vendor.create({
           data: {
             userId: newUser.id,
-            businessName: name,
+            businessName: vendorName,
             businessCategory: categorySlug || 'OTHER',
             categorySlug: categorySlug || 'dugun-mekanlari',
             city: city || null,
@@ -131,7 +130,7 @@ export async function POST(request: NextRequest) {
             status: 'PENDING',
             isVerified: false,
             slug: `${slugBase || 'firma'}-${newUser.id.slice(0, 8)}`,
-          } as any,
+          },
         });
       }
 
@@ -147,7 +146,7 @@ export async function POST(request: NextRequest) {
     });
 
     // 12. Registration audit log
-    await (prisma as any).auditLog.create({
+    await prisma.auditLog.create({
       data: {
         correlationId: crypto.randomUUID(),
         category: 'AUTHENTICATION',
@@ -164,7 +163,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(
       {
         success: true,
-        redirectUrl: userRole === 'VENDOR' ? '/firma/vitrin' : userRole === 'ADMIN' ? '/admin' : '/cift/onboarding',
+        redirectUrl: userRole === 'VENDOR' ? '/firma/vitrin' : '/cift/onboarding',
         user: {
           id: user.id,
           email: user.email,
