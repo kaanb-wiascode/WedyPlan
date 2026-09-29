@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
-import { hashPassword, verifyPassword, validatePassword } from '@/lib/auth/password';
+import { verifyPassword } from '@/lib/auth/password';
 import { createSession } from '@/lib/auth/session';
 import { InvalidCredentialsError, UserNotFoundError } from '@/lib/auth/errors';
 
@@ -27,7 +27,7 @@ export async function POST(request: NextRequest) {
     }
 
     // 3. Veritabanından user'ı bul
-    const user = await (prisma as any).identityUser.findUnique({
+    const user = await prisma.identityUser.findUnique({
       where: { email: email.toLowerCase() },
     });
 
@@ -57,14 +57,14 @@ export async function POST(request: NextRequest) {
 
     const isPasswordValid = await verifyPassword(password, user.passwordHash);
     if (!isPasswordValid) {
-      const securityProfile = await (prisma as any).userSecurityProfile.findUnique({
+      const securityProfile = await prisma.userSecurityProfile.findUnique({
         where: { userId: user.id },
       });
 
       const failedAttempts = (securityProfile?.failedLoginAttempts || 0) + 1;
       const isLocked = failedAttempts >= 5;
 
-      await (prisma as any).userSecurityProfile.upsert({
+      await prisma.userSecurityProfile.upsert({
         where: { userId: user.id },
         update: {
           failedLoginAttempts: failedAttempts,
@@ -88,21 +88,21 @@ export async function POST(request: NextRequest) {
     }
 
     // 6. Failed attempts reset et
-    await (prisma as any).userSecurityProfile.upsert({
+    await prisma.userSecurityProfile.upsert({
       where: { userId: user.id },
       update: { failedLoginAttempts: 0, lockedUntil: null },
       create: { userId: user.id },
     });
 
     // 7. User portal'ını al (GÜVENLİ & OTOMATİK ONARIMLI YAPILANDIRMA)
-    let profile = await (prisma as any).portalProfile.findFirst({
+    let profile = await prisma.portalProfile.findFirst({
       where: { userId: user.id, isPrimary: true },
     });
 
     // Profil yoksa arka planda sessizce oluştur (Self-Healing)
     if (!profile) {
       try {
-        profile = await (prisma as any).portalProfile.create({
+        profile = await prisma.portalProfile.create({
           data: {
             userId: user.id,
             portal: 'COUPLE',
@@ -118,12 +118,12 @@ export async function POST(request: NextRequest) {
     const portalContext = profile?.portal || 'COUPLE';
     if (portalContext === 'COUPLE') {
       try {
-        const existingCouple = await (prisma as any).couple.findFirst({
+        const existingCouple = await prisma.couple.findFirst({
           where: { userId: user.id },
         });
 
         if (!existingCouple) {
-          await (prisma as any).couple.create({
+          await prisma.couple.create({
             data: {
               userId: user.id,
               partnerOneName: user.fullName || 'Çift',
@@ -155,7 +155,7 @@ export async function POST(request: NextRequest) {
 
     // 9. Login audit log kaydet (Güvenli adım)
     try {
-      await (prisma as any).auditLog.create({
+      await prisma.auditLog.create({
         data: {
           correlationId: crypto.randomUUID(),
           category: 'AUTHENTICATION',
