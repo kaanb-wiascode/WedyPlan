@@ -36,6 +36,7 @@ model IdentityUser {
   securityProfile     UserSecurityProfile?
   sessions            UserSession[]
   oauthAccounts       OAuthIdentity[]
+  profiles            PortalProfile[]
 
   createdAt           DateTime          @default(now())
   updatedAt           DateTime          @updatedAt
