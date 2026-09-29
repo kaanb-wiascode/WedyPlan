@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-import { Star, MapPin, Sparkles, Heart, ArrowRight, ShieldCheck } from 'lucide-react';
+import { Star, MapPin, Sparkles, Heart, ArrowRight } from 'lucide-react';
 import { AiSearchVendor } from '@/types/ai-search';
 
 interface AiSearchResultCardProps {
@@ -60,7 +60,7 @@ export const AiSearchResultCard: React.FC<AiSearchResultCardProps> = ({ vendor }
             )}
           </div>
 
-          <Link href={`/firmalar/${vendor.id}`}>
+          <Link href={`/firma/${vendor.id}`}>
             <h3 className="font-serif font-bold text-[20px] text-[#1D1D1F] group-hover:text-[#0071e3] transition-colors line-clamp-1">
               {vendor.name}
             </h3>
@@ -90,7 +90,7 @@ export const AiSearchResultCard: React.FC<AiSearchResultCardProps> = ({ vendor }
         </div>
 
         <Link
-          href={`/firmalar/${vendor.id}`}
+          href={`/firma/${vendor.id}`}
           className="bg-[#1D1D1F] hover:bg-black text-white text-[12px] font-bold px-5 py-2.5 rounded-2xl transition flex items-center gap-1 cursor-pointer"
         >
           <span>İncele</span>
