@@ -1,9 +1,5 @@
-import React from "react";
-import { requireVendorId } from "@/lib/auth/require-ids";
-import VendorSecurityClient from "@/components/vendor/security/VendorSecurityClient";
+import { redirect } from 'next/navigation';
 
-export default async function VendorSecurityPage() {
-  const vendorId = await requireVendorId();
-
-  return <VendorSecurityClient vendorId={vendorId} />;
+export default function LegacyVendorPage() {
+  redirect('/firma/ayarlar');
 }
