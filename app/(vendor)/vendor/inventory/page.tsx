@@ -1,9 +1,5 @@
-import React from "react";
-import { requireVendorId } from "@/lib/auth/require-ids";
-import VendorInventoryClient from "@/components/vendor/inventory/VendorInventoryClient";
+import { redirect } from 'next/navigation';
 
-export default async function VendorInventoryPage() {
-  const vendorId = await requireVendorId();
-
-  return <VendorInventoryClient vendorId={vendorId} />;
+export default function LegacyVendorPage() {
+  redirect('/firma/organizasyon');
 }
