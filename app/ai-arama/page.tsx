@@ -27,6 +27,8 @@ const EMPTY_FILTERS: AiSearchFilterState = {
 function AiSearchContent() {
   const searchParams = useSearchParams();
   const initialQuery = searchParams.get('q') || '';
+  const initialCategory = searchParams.get('category') || '';
+  const initialCity = searchParams.get('city') || '';
 
   const [prompt, setPrompt] = useState(initialQuery);
   const [isProcessing, setIsProcessing] = useState(true);
@@ -34,6 +36,8 @@ function AiSearchContent() {
   const [filters, setFilters] = useState<AiSearchFilterState>({
     ...EMPTY_FILTERS,
     prompt: initialQuery,
+    category: initialCategory,
+    city: initialCity,
   });
 
   const fetchVendors = useCallback(
@@ -74,9 +78,14 @@ function AiSearchContent() {
   );
 
   useEffect(() => {
-    const initialFilters = { ...EMPTY_FILTERS, prompt: initialQuery };
+    const initialFilters = {
+      ...EMPTY_FILTERS,
+      prompt: initialQuery,
+      category: initialCategory,
+      city: initialCity,
+    };
     void fetchVendors(initialQuery, initialFilters);
-  }, [fetchVendors, initialQuery]);
+  }, [fetchVendors, initialCategory, initialCity, initialQuery]);
 
   const handleRunSearch = (queryOverride?: string) => {
     const activePrompt =
