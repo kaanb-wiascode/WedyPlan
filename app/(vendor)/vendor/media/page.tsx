@@ -1,9 +1,5 @@
-import React from "react";
-import { requireVendorId } from "@/lib/auth/require-ids";
-import VendorMediaClient from "@/components/vendor/media/VendorMediaClient";
+import { redirect } from 'next/navigation';
 
-export default async function VendorMediaPage() {
-  const vendorId = await requireVendorId();
-
-  return <VendorMediaClient vendorId={vendorId} />;
+export default function LegacyVendorPage() {
+  redirect('/firma/vitrin');
 }
