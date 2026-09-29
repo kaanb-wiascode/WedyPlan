@@ -48,10 +48,10 @@ describe('Phase 03: Enterprise File & Media Platform Test Suite', () => {
     assert.strictEqual(registered.type, 'DOCUMENT');
     assert.strictEqual(registered.scanStatus, 'CLEAN');
 
-    const deleted = await EnterpriseMediaService.softDeleteAsset(registered.id);
+    const deleted = await EnterpriseMediaService.softDeleteAsset(registered.id, 'usr_test_102');
     assert.strictEqual(deleted, true);
 
-    const restored = await EnterpriseMediaService.restoreAsset(registered.id);
+    const restored = await EnterpriseMediaService.restoreAsset(registered.id, 'usr_test_102');
     assert.strictEqual(restored, true);
   });
 });
