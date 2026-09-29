@@ -1,9 +1,5 @@
-import React from "react";
-import { requireUserId } from "@/lib/auth/require-ids";
-import BudgetClient from "@/components/couple/budget/BudgetClient";
+import { redirect } from 'next/navigation';
 
-export default async function CoupleBudgetPage() {
-  const userId = await requireUserId();
-
-  return <BudgetClient userId={userId} />;
+export default function LegacyCoupleBudgetPage() {
+  redirect('/cift/butce');
 }
