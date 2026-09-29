@@ -91,18 +91,24 @@ export class EnterprisePaymentService {
       const gateway = PaymentProviderFactory.getGateway(dto.provider);
       const providerResult = await gateway.initializePayment(dto);
 
+      const providerMetadata: Record<string, string | number | string[]> = {
+        itemCount: dto.items.length,
+        itemIds: dto.items.map((item) => item.id),
+      };
+      if (providerResult.checkoutFormContent) {
+        providerMetadata.checkoutFormContent = providerResult.checkoutFormContent;
+      }
+      if (providerResult.clientSecret) {
+        providerMetadata.clientSecret = providerResult.clientSecret;
+      }
+
       const updated = await prisma.paymentTransaction.update({
         where: { id: transaction.id },
         data: {
           providerTransactionId: providerResult.providerTransactionId,
           status: providerResult.status,
           failureReason: providerResult.errorMessage,
-          metadata: {
-            itemCount: dto.items.length,
-            itemIds: dto.items.map((item) => item.id),
-            checkoutFormContent: providerResult.checkoutFormContent,
-            clientSecret: providerResult.clientSecret,
-          },
+          metadata: providerMetadata,
         },
       });
 
