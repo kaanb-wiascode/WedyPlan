@@ -42,7 +42,7 @@ export function unregisterSSEClient(
 export function sendSSEEvent(
   userId: string,
   event: string,
-  data: any
+  data: unknown
 ): void {
   const clients = sseClients.get(userId);
 
@@ -73,7 +73,7 @@ export function sendSSEEvent(
 /**
  * Tüm clients'larına event gönder (broadcast)
  */
-export function broadcastSSEEvent(event: string, data: any): void {
+export function broadcastSSEEvent(event: string, data: unknown): void {
   sseClients.forEach((clients, userId) => {
     sendSSEEvent(userId, event, data);
   });
@@ -85,9 +85,9 @@ export function broadcastSSEEvent(event: string, data: any): void {
 export async function broadcastToRole(
   role: 'COUPLE' | 'VENDOR' | 'ADMIN',
   event: string,
-  data: any
+  data: unknown
 ): Promise<void> {
-  const users = await (prisma as any).identityUser.findMany({
+  const users = await prisma.identityUser.findMany({
     where: {
       profiles: {
         some: {
@@ -98,7 +98,7 @@ export async function broadcastToRole(
     select: { id: true },
   });
 
-  users.forEach((user: { id: string }) => {
+  users.forEach((user) => {
     sendSSEEvent(user.id, event, data);
   });
 }
