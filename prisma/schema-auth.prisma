@@ -22,7 +22,8 @@ model PortalProfile {
   portal       PortalType
   isPrimary    Boolean    @default(false)
 
-  roles        Role[]     @relation("ProfileRoles")
+  user         IdentityUser @relation(fields: [userId], references: [id], onDelete: Cascade)
+  roles        Role[]       @relation("ProfileRoles")
 
   createdAt    DateTime   @default(now())
 
