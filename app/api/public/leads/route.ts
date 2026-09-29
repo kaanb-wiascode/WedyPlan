@@ -53,24 +53,26 @@ export async function POST(request: NextRequest) {
         published: true,
         moderationStatus: 'APPROVED',
       },
-      include: {
-        vendor: {
+    });
+
+    const vendor = showcase
+      ? await prisma.vendor.findUnique({
+          where: { id: vendorId },
           select: {
             businessName: true,
             status: true,
           },
-        },
-      },
-    });
+        })
+      : null;
 
-    if (!showcase || showcase.vendor.status !== 'ACTIVE') {
+    if (!showcase || !vendor || vendor.status !== 'ACTIVE') {
       return NextResponse.json(
         { success: false, error: 'Firma şu anda teklif kabul etmiyor.' },
         { status: 404 },
       );
     }
 
-    vendorName = showcase.vendor.businessName;
+    vendorName = vendor.businessName;
     categorySlug = showcase.categorySlug;
     city = showcase.city;
     district = showcase.district;
