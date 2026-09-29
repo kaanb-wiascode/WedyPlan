@@ -1,9 +1,5 @@
-import React from "react";
-import { requireUserId } from "@/lib/auth/require-ids";
-import SettingsClient from "@/components/couple/settings/SettingsClient";
+import { redirect } from 'next/navigation';
 
-export default async function CoupleSettingsPage() {
-  const userId = await requireUserId();
-
-  return <SettingsClient userId={userId} />;
+export default function LegacyCoupleSettingsPage() {
+  redirect('/cift/ayarlar');
 }
