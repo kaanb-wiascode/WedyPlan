@@ -1,3 +1,4 @@
+import { SearchDomainSource } from '@prisma/client';
 import { prisma } from '@/lib/db';
 import type {
   SearchDomain,
@@ -12,7 +13,7 @@ import { SemanticSearchEngine } from './semantic-search-engine';
 import { SearchAnalyticsService } from './search-analytics-service';
 import { SEARCH_CONFIG } from './search-constants';
 
-const DOMAIN_SOURCES: Record<SearchDomain, string[]> = {
+const DOMAIN_SOURCES: Record<SearchDomain, SearchDomainSource[]> = {
   GLOBAL: [],
   VENDOR: ['VENDOR', 'REVIEW', 'CATEGORY'],
   WEDDING: ['COUPLE'],
@@ -233,11 +234,17 @@ export class UniversalSearchService {
       .filter((token) => token.length >= 2)
       .slice(0, 12);
 
+    const page = Math.max(1, searchQuery.page || 1);
+    const limit = Math.min(
+      SEARCH_CONFIG.MAX_PAGE_SIZE,
+      Math.max(1, searchQuery.limit || SEARCH_CONFIG.DEFAULT_PAGE_SIZE),
+    );
+
     const rows = await prisma.searchIndexRegistry.findMany({
       where: {
         syncStatus: 'INDEXED',
         ...(sources.length
-          ? { entityType: { in: sources as never[] } }
+          ? { entityType: { in: sources } }
           : {}),
         OR: [
           { documentTitle: { contains: queryText, mode: 'insensitive' } },
@@ -258,20 +265,11 @@ export class UniversalSearchService {
       orderBy: {
         popularityScore: 'desc',
       },
-      take: Math.min(
-        SEARCH_CONFIG.MAX_PAGE_SIZE,
-        Math.max(searchQuery.limit || SEARCH_CONFIG.DEFAULT_PAGE_SIZE, 20),
-      ),
+      skip: (page - 1) * limit,
+      take: limit,
     });
 
-    const page = Math.max(1, searchQuery.page || 1);
-    const limit = Math.min(
-      SEARCH_CONFIG.MAX_PAGE_SIZE,
-      Math.max(1, searchQuery.limit || SEARCH_CONFIG.DEFAULT_PAGE_SIZE),
-    );
-    const start = (page - 1) * limit;
-
-    return rows.slice(start, start + limit).map((row) => {
+    return rows.map((row) => {
       const metadata = metadataRecord(row.metadata);
       const domain = SOURCE_DOMAIN[row.entityType] || 'GLOBAL';
 
